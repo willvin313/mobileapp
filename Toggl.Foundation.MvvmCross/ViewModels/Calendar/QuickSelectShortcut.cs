@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reactive.Subjects;
-using MvvmCross.ViewModels;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Multivac;
@@ -18,6 +17,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public IObservable<bool> Selected { get; }
 
+        public DateRangeParameter DateRange => getDateRange(timeService.CurrentDateTime);
+
         private QuickSelectShortcut(ITimeService timeService, string title, Func<DateTimeOffset, DateRangeParameter> getDateRange)
         {
             Ensure.Argument.IsNotNull(title, nameof(title));
@@ -32,7 +33,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public void OnDateRangeChanged(DateRangeParameter dateRange)
         {
-            var internalDateRange = getDateRange(timeService.CurrentDateTime);
+            var internalDateRange = DateRange;
 
             isSelectedSubject.OnNext(
                 dateRange.StartDate.Date == internalDateRange.StartDate.Date
