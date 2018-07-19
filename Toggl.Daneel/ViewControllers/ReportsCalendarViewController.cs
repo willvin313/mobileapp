@@ -1,25 +1,24 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Reactive.Linq;
+using CoreGraphics;
 using MvvmCross.Binding.BindingContext;
-using MvvmCross.Platforms.Ios.Views;
-using Toggl.Daneel.Converters;
 using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Presentation.Attributes;
-using Toggl.Daneel.Views.Reports;
 using Toggl.Daneel.ViewSources;
-using Toggl.Foundation;
-using Toggl.Foundation.MvvmCross.Converters;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using UIKit;
 
 namespace Toggl.Daneel.ViewControllers
 {
     [NestedPresentation]
-    public partial class ReportsCalendarViewController : MvxViewController<ReportsCalendarViewModel>, IUICollectionViewDelegate
+    public partial class ReportsCalendarViewController : ReactiveViewController<ReportsCalendarViewModel>, IUICollectionViewDelegate
     {
         private bool calendarInitialized;
 
         public ReportsCalendarViewController()
-            : base(nameof(ReportsCalendarViewController), null)
+            : base(nameof(ReportsCalendarViewController))
         {
         }
 
@@ -27,58 +26,59 @@ namespace Toggl.Daneel.ViewControllers
         {
             base.ViewDidLoad();
 
-            var calendarCollectionViewSource = new ReportsCalendarCollectionViewSource(CalendarCollectionView);
+            var calendarCollectionViewSource = new ReportsCalendarCollectionViewSource(CalendarCollectionView, ViewModel.CalendarDayTapped);
             var calendarCollectionViewLayout = new ReportsCalendarCollectionViewLayout();
+
             CalendarCollectionView.DataSource = calendarCollectionViewSource;
             CalendarCollectionView.CollectionViewLayout = calendarCollectionViewLayout;
 
-            var quickSelectCollectionViewSource = new ReportsCalendarQuickSelectCollectionViewSource(QuickSelectCollectionView);
+            var quickSelectCollectionViewSource = new ReportsCalendarQuickSelectCollectionViewSource(QuickSelectCollectionView, ViewModel.QuickSelect);
             QuickSelectCollectionView.Source = quickSelectCollectionViewSource;
 
-            setupDayHeaders();
-
-            var bindingSet = this.CreateBindingSet<ReportsCalendarViewController, ReportsCalendarViewModel>();
+            //Updates
+            this.Bind(ViewModel.ReloadCalendar, range =>
+            {
+                CalendarCollectionView.ReloadData();
+                QuickSelectCollectionView.ReloadData();
+            });
 
             //Calendar collection view
-            bindingSet.Bind(calendarCollectionViewSource).To(vm => vm.Months);
-            bindingSet.Bind(calendarCollectionViewSource)
-                      .For(v => v.CellTappedCommand)
-                      .To(vm => vm.CalendarDayTappedCommand);
+            this.Bind(ViewModel.Months, calendarCollectionViewSource.BindMonths());
 
             //Quick select collection view
-            bindingSet.Bind(quickSelectCollectionViewSource).To(vm => vm.QuickSelectShortcuts);
-            bindingSet.Bind(quickSelectCollectionViewSource)
-                      .For(v => v.SelectionChangedCommand)
-                      .To(vm => vm.QuickSelectCommand);
+            this.Bind(ViewModel.QuickSelectShortcuts, quickSelectCollectionViewSource.BindShortcuts());
 
             //Text
-            bindingSet.Bind(CurrentYearLabel).To(vm => vm.CurrentMonth.Year);
-            bindingSet.Bind(CurrentMonthLabel)
-                      .To(vm => vm.CurrentMonth.Month)
-                      .WithConversion(new IntToMonthNameValueConverter());
+            this.Bind(ViewModel.DayHeaders, setHeaders);
+            this.Bind(ViewModel.CurrentYear, CurrentYearLabel.BindText());
+            this.Bind(ViewModel.CurrentMonthName, CurrentMonthLabel.BindText());
+        }
 
-            bindingSet.Apply();
+        private void setHeaders(IImmutableList<string> headers)
+        {
+            DayHeader0.Text = headers[0];
+            DayHeader1.Text = headers[1];
+            DayHeader2.Text = headers[2];
+            DayHeader3.Text = headers[3];
+            DayHeader4.Text = headers[4];
+            DayHeader5.Text = headers[5];
+            DayHeader6.Text = headers[6];
         }
 
         public override void DidMoveToParentViewController(UIViewController parent)
         {
             base.DidMoveToParentViewController(parent);
 
-            var rowCountConverter = new CalendarRowCountToCalendarHeightConverter(
-                ReportsCalendarCollectionViewLayout.CellHeight,
-                View.Bounds.Height - CalendarCollectionView.Bounds.Height
-            );
             //The constraint isn't available before DidMoveToParentViewController
-            var heightConstraint = View
-                .Superview
-                .Constraints
+            var heightConstraint = View.Superview.Constraints
                 .Single(c => c.FirstAttribute == NSLayoutAttribute.Height);
 
-            this.CreateBinding(heightConstraint)
-                .For(v => v.BindAnimatedConstant())
-                .To<ReportsCalendarViewModel>(vm => vm.RowsInCurrentMonth)
-                .WithConversion(rowCountConverter, null)
-                .Apply();
+            var additionalHeight = View.Bounds.Height - CalendarCollectionView.Bounds.Height;
+
+            this.Bind(ViewModel.RowsInCurrentMonth.Select(contraintHeight), heightConstraint.BindAnimatedConstant());
+
+            nfloat contraintHeight(int rowCount)
+                => rowCount * ReportsCalendarCollectionViewLayout.CellHeight + additionalHeight;
         }
 
         public override void ViewDidLayoutSubviews()
@@ -88,23 +88,9 @@ namespace Toggl.Daneel.ViewControllers
             if (calendarInitialized) return;
 
             //This binding needs the calendar to be in it's final size to work properly
-            this.CreateBinding(CalendarCollectionView)
-                .For(v => v.BindCurrentPage())
-                .To<ReportsCalendarViewModel>(vm => vm.CurrentPage)
-                .Apply();
-
+            this.Bind(ViewModel.CurrentPage, CalendarCollectionView.BindCurrentPage());
+            this.Bind(CalendarCollectionView.CurrentPage(), ViewModel.OnCurrentPageChanged);
             calendarInitialized = true;
-        }
-
-        private void setupDayHeaders()
-        {
-            DayHeader0.Text = ViewModel.DayHeaderFor(0);
-            DayHeader1.Text = ViewModel.DayHeaderFor(1);
-            DayHeader2.Text = ViewModel.DayHeaderFor(2);
-            DayHeader3.Text = ViewModel.DayHeaderFor(3);
-            DayHeader4.Text = ViewModel.DayHeaderFor(4);
-            DayHeader5.Text = ViewModel.DayHeaderFor(5);
-            DayHeader6.Text = ViewModel.DayHeaderFor(6);
         }
     }
 }
