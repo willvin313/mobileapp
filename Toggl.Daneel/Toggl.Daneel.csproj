@@ -560,8 +560,6 @@
     <InterfaceDefinition Include="Views\EntityCreation\SelectableTagViewCell.xib" />
     <InterfaceDefinition Include="Views\EntityCreation\WorkspaceViewCell.xib" />
     <InterfaceDefinition Include="ViewControllers\ReportsCalendarViewController.xib" />
-    <InterfaceDefinition Include="Views\Reports\ReportsCalendarViewCell.xib" />
-    <InterfaceDefinition Include="Views\Reports\ReportsCalendarQuickSelectViewCell.xib" />
     <InterfaceDefinition Include="Views\Reports\ReportsLegendViewCell.xib" />
     <InterfaceDefinition Include="Views\Reports\ReportsHeaderView.xib" />
     <InterfaceDefinition Include="Views\StartTimeEntry\NoEntityInfoViewCell.xib" />
@@ -586,6 +584,8 @@
     <InterfaceDefinition Include="Cells\SyncFailures\SyncFailureCell.xib" />
     <InterfaceDefinition Include="Cells\Settings\LicensesHeaderViewCell.xib" />
     <InterfaceDefinition Include="Cells\Settings\LicensesViewCell.xib" />
+    <InterfaceDefinition Include="Cells\Reports\ReportsCalendarQuickSelectViewCell.xib" />
+    <InterfaceDefinition Include="Cells\Reports\ReportsCalendarViewCell.xib" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -817,20 +817,8 @@
     </Compile>
     <Compile Include="ViewSources\ReportsCalendarCollectionViewSource.cs" />
     <Compile Include="ReportsCalendarCollectionViewLayout.cs" />
-    <Compile Include="Binding\ScrollViewCurrentPageTargetBinding.cs" />
-    <Compile Include="Binding\LayoutConstraintAnimatedConstantTargetBinding.cs" />
-    <Compile Include="Converters\CalendarRowCountToCalendarHeightConverter.cs" />
-    <Compile Include="Views\Reports\ReportsCalendarViewCell.cs" />
-    <Compile Include="Views\Reports\ReportsCalendarViewCell.designer.cs">
-      <DependentUpon>ReportsCalendarViewCell.cs</DependentUpon>
-    </Compile>
     <Compile Include="ViewSources\ReportsCalendarQuickSelectCollectionViewSource.cs" />
-    <Compile Include="Views\Reports\ReportsCalendarQuickSelectViewCell.cs" />
-    <Compile Include="Views\Reports\ReportsCalendarQuickSelectViewCell.designer.cs">
-      <DependentUpon>ReportsCalendarQuickSelectViewCell.cs</DependentUpon>
-    </Compile>
     <Compile Include="Views\RoundedView.cs" />
-    <Compile Include="Combiners\CalendarCellTextColorValueCombiner.cs" />
     <Compile Include="Views\Reports\PieChartView.cs" />
     <Compile Include="Converters\ReportTimeSpanLabelValueConverter.cs" />
     <Compile Include="Converters\ReportPercentageLabelValueConverter.cs" />
@@ -985,6 +973,16 @@
     <Compile Include="Autocomplete\EmptyInputDelegate.cs" />
     <Compile Include="Extensions\UIKitRxExtensions\UITextFieldRxExtensions.cs" />
     <Compile Include="Binding\TextViewWithPlaceholderDidBecomeFirstResponderTargetBinding.cs" />
+    <Compile Include="Cells\Reports\ReportsCalendarQuickSelectViewCell.cs" />
+    <Compile Include="Cells\Reports\ReportsCalendarQuickSelectViewCell.designer.cs">
+      <DependentUpon>ReportsCalendarQuickSelectViewCell.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Cells\BaseCollectionViewCell.cs" />
+    <Compile Include="Cells\Reports\ReportsCalendarViewCell.cs" />
+    <Compile Include="Cells\Reports\ReportsCalendarViewCell.designer.cs">
+      <DependentUpon>ReportsCalendarViewCell.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Extensions\UIKitRxExtensions\UIScrollViewRxExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Toggl.Foundation.MvvmCross\Toggl.Foundation.MvvmCross.csproj">

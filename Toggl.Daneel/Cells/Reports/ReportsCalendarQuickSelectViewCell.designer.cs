@@ -7,7 +7,7 @@
 using Foundation;
 using System.CodeDom.Compiler;
 
-namespace Toggl.Daneel.Views.Reports
+namespace Toggl.Daneel.Cells.Reports
 {
 	[Register ("ReportsCalendarQuickSelectViewCell")]
 	partial class ReportsCalendarQuickSelectViewCell
