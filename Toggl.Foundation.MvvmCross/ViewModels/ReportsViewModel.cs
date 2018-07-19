@@ -217,7 +217,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private void hideCalendar()
         {
             navigationService.ChangePresentation(new ToggleCalendarVisibilityHint(forceHide: true));
-            calendarViewModel.OnHideCalendar();
+            calendarViewModel.OnToggleCalendar();
         }
 
         private void changeDateRange(DateRangeParameter dateRange)
