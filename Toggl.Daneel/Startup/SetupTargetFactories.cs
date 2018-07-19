@@ -43,11 +43,6 @@ namespace Toggl.Daneel
             );
 
             registry.RegisterCustomBindingFactory<NSLayoutConstraint>(
-                LayoutConstraintAnimatedConstantTargetBinding.BindingName,
-                view => new LayoutConstraintAnimatedConstantTargetBinding(view)
-            );
-
-            registry.RegisterCustomBindingFactory<NSLayoutConstraint>(
                 LayoutConstraintConstantTargetBinding.BindingName,
                 view => new LayoutConstraintConstantTargetBinding(view)
             );
@@ -65,11 +60,6 @@ namespace Toggl.Daneel
             registry.RegisterCustomBindingFactory<UIScrollView>(
                 ScrollViewAnimatedCurrentPageTargetBinding.BindingName,
                 view => new ScrollViewAnimatedCurrentPageTargetBinding(view)
-            );
-
-            registry.RegisterCustomBindingFactory<UIScrollView>(
-                ScrollViewCurrentPageTargetBinding.BindingName,
-                view => new ScrollViewCurrentPageTargetBinding(view)
             );
 
             registry.RegisterCustomBindingFactory<SpiderOnARopeView>(

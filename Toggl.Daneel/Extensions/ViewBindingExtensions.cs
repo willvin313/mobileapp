@@ -27,9 +27,6 @@ namespace Toggl.Daneel.Extensions
         public static string BindAnimatedImage(this UIImageView self)
             => ImageViewAnimatedImageTargetBinding.BindingName;
 
-        public static string BindAnimatedConstant(this NSLayoutConstraint self)
-            => LayoutConstraintAnimatedConstantTargetBinding.BindingName;
-
         public static string BindConstant(this NSLayoutConstraint self)
             => LayoutConstraintConstantTargetBinding.BindingName;
 
@@ -41,9 +38,6 @@ namespace Toggl.Daneel.Extensions
 
         public static string BindAnimatedCurrentPage(this UIScrollView self)
             => ScrollViewAnimatedCurrentPageTargetBinding.BindingName;
-
-        public static string BindCurrentPage(this UIScrollView self)
-            => ScrollViewCurrentPageTargetBinding.BindingName;
 
         public static string BindSpiderVisibility(this SpiderOnARopeView self)
             => SpiderOnARopeViewIsVisibleTargetBinding.BindingName;
