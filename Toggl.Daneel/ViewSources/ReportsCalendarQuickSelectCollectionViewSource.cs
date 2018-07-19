@@ -1,54 +1,66 @@
 ﻿using System;
+using System.Collections.Immutable;
 using CoreGraphics;
 using Foundation;
-using MvvmCross.Binding.Extensions;
-using MvvmCross.Platforms.Ios.Binding.Views;
-using Toggl.Daneel.Views.Reports;
+using Toggl.Daneel.Cells.Reports;
+using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Multivac;
 using UIKit;
 
 namespace Toggl.Daneel.ViewSources
 {
-    public sealed class ReportsCalendarQuickSelectCollectionViewSource
-        : MvxCollectionViewSource, IUICollectionViewDelegateFlowLayout
+    public sealed class ReportsCalendarQuickSelectCollectionViewSource : UICollectionViewSource, IUICollectionViewDelegateFlowLayout
     {
         private const int cellWidth = 96;
         private const int cellHeight = 32;
         private const string cellIdentifier = nameof(ReportsCalendarQuickSelectViewCell);
 
-        public ReportsCalendarQuickSelectCollectionViewSource(
-            UICollectionView collectionView) : base(collectionView)
+        private readonly UICollectionView collectionView;
+        private readonly Action<QuickSelectShortcut> shortcutTapped;
+
+        private IImmutableList<QuickSelectShortcut> shortcuts = ImmutableList<QuickSelectShortcut>.Empty;
+        public IImmutableList<QuickSelectShortcut> Shortcuts
+        {
+            get => shortcuts;
+            set 
+            {
+                shortcuts = value ?? ImmutableList<QuickSelectShortcut>.Empty;
+                collectionView.ReloadData();
+            }
+        }
+
+        public ReportsCalendarQuickSelectCollectionViewSource(UICollectionView collectionView, Action<QuickSelectShortcut> shortcutTapped) 
         {
             Ensure.Argument.IsNotNull(collectionView, nameof(collectionView));
+
+            this.collectionView = collectionView;
+            this.shortcutTapped = shortcutTapped;
 
             collectionView.RegisterNibForCell(ReportsCalendarQuickSelectViewCell.Nib, cellIdentifier);
         }
 
-        protected override UICollectionViewCell GetOrCreateCellFor(UICollectionView collectionView, NSIndexPath indexPath, object item)
-            => collectionView.DequeueReusableCell(cellIdentifier, indexPath) as UICollectionViewCell;
+        public Action<IImmutableList<QuickSelectShortcut>> BindShortcuts()
+            => shortcuts => Shortcuts = shortcuts;
 
         public override UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath)
         {
-            var item = GetItemAt(indexPath);
-            var cell = GetOrCreateCellFor(collectionView, indexPath, item);
-            if (cell is IMvxBindable bindable)
-                bindable.DataContext = item;
-
+            var cell = collectionView.DequeueReusableCell(cellIdentifier, indexPath) as ReportsCalendarQuickSelectViewCell;
+            cell.Item = shortcuts[indexPath.Row];
             return cell;
         }
 
-        public override nint NumberOfSections(UICollectionView collectionView) => 1;
+        public override void ItemSelected(UICollectionView collectionView, NSIndexPath indexPath)
+        {
+            shortcutTapped?.Invoke(shortcuts[indexPath.Row]);
+        }
 
         public override nint GetItemsCount(UICollectionView collectionView, nint section)
-            => ItemsSource.Count();
+            => shortcuts.Count;
 
-        protected override object GetItemAt(NSIndexPath indexPath)
-            => ItemsSource.ElementAt((int)indexPath.Item);
+        public override nint NumberOfSections(UICollectionView collectionView) => 1;
 
         [Export("collectionView:layout:sizeForItemAtIndexPath:")]
         public CGSize GetSizeForItem(UICollectionView collectionView, UICollectionViewLayout layout, NSIndexPath indexPath)
-        {
-            return new CGSize(cellWidth, cellHeight);
-        }
+            => new CGSize(cellWidth, cellHeight);
     }
 }
