@@ -8,7 +8,7 @@ namespace Toggl.Giskard.ViewHolders
 {
     public abstract class BaseRecyclerViewHolder<T> : RecyclerView.ViewHolder
     {
-        public Func<T, Task> Tapped { get; set; }
+        public Action<T> Tapped { get; set; }
 
         private T item;
         public T Item 

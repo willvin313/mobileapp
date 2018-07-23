@@ -10,7 +10,7 @@ using Toggl.Giskard.Adapters;
 namespace Toggl.Giskard.Views
 {
     [Register("toggl.giskard.views.CalendarRecyclerView")]
-    public sealed class CalendarRecyclerView : MvxRecyclerView
+    public sealed class CalendarRecyclerView : RecyclerView
     {
         public CalendarRecyclerView(IntPtr javaReference, JniHandleOwnership transfer)
             : base(javaReference, transfer)
@@ -28,7 +28,7 @@ namespace Toggl.Giskard.Views
         }
 
         public CalendarRecyclerView(Context context, IAttributeSet attrs, int defStyle)
-            : base(context, attrs, defStyle, new CalendarRecyclerAdapter())
+            : base(context, attrs, defStyle)
         {
             SetLayoutManager(new CalendarLayoutManager(context));
         }
@@ -45,7 +45,7 @@ namespace Toggl.Giskard.Views
         private class CalendarLayoutManager : GridLayoutManager
         {
             public CalendarLayoutManager(Context context)
-                : base(context, 7, LinearLayoutManager.Vertical, false)
+                : base(context, 7, Vertical, false)
             {
             }
 

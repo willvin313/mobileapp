@@ -365,8 +365,6 @@
     <Compile Include="Views\CalendarRecyclerView.cs" />
     <Compile Include="TemplateSelectors\CalendarTemplateSelector.cs" />
     <Compile Include="Adapters\CalendarPagerAdapter.cs" />
-    <Compile Include="Bindings\ViewPagerCurrentPageTargetBinding.cs" />
-    <Compile Include="TemplateSelectors\CalendarShortcutsTemplateSelector.cs" />
     <Compile Include="Activities\OutdatedAppActivity.cs" />
     <Compile Include="Activities\TokenResetActivity.cs" />
     <Compile Include="Tiles\ReportsTileService.cs" />
@@ -389,10 +387,9 @@
     <Compile Include="Fragments\TermsOfServiceFragment.cs" />
     <Compile Include="Views\TogglDroidTimePicker.cs" />
     <Compile Include="Activities\ReactiveActivity.cs" />
-    <Compile Include="Extensions\UIExtensions.cs" />
     <Compile Include="Adapters\BaseRecyclerAdapter.cs" />
     <Compile Include="ViewHolders\BaseRecyclerViewHolder.cs" />
-    <Compile Include="ViewHolders\WorkspaceSelectionViewHolder.cs" />
+    <Compile Include="ViewHolders\QuickSelectShortcutViewHolder.cs" />
     <Compile Include="Adapters\SimpleAdapter.cs" />
     <Compile Include="Activities\AboutActivity.cs" />
     <Compile Include="Services\RatingService.cs" />
@@ -411,7 +408,19 @@
     </Compile>
     <Compile Include="Views\AutocompleteEditText.cs" />
     <Compile Include="Views\NonSwipingViewPager.cs" />
-    <Compile Include="Activities\MainActivity.ViewBinds.cs" />
+    </Compile>
+    <Compile Include="Activities\MainActivity.ViewBinds.cs">
+      <DependentUpon>MainActivity.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Fragments\ReportsCalendarFragment.ViewBinds.cs" />
+    <Compile Include="Fragments\ReactiveFragment.cs" />
+    <Compile Include="ViewHolders\WorkspaceSelectionViewHolder.cs" />
+    <Compile Include="ViewHolders\CalendarRecylerViewHolder.cs" />
+    <Compile Include="Extensions\RxExtensions\CompoundButtonExtensions.cs" />
+    <Compile Include="Extensions\RxExtensions\ViewExtensions.cs" />
+    <Compile Include="Extensions\RxExtensions\TextViewExtensions.cs" />
+    <Compile Include="Extensions\RxExtensions\RecyclerExtensions.cs" />
+    <Compile Include="Extensions\RxExtensions\PagerExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\AndroidManifest.xml" />
@@ -824,6 +833,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Presenters\" />
+    <Folder Include="Extensions\RxExtensions\" />
   </ItemGroup>
   <ItemGroup>
     <ProguardConfiguration Include="ProGuard.cfg" />

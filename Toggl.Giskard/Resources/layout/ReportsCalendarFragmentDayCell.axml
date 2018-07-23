@@ -1,9 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<toggl.giskard.views.CalendarDayView
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:local="http://schemas.android.com/apk/res-auto"
+<?xml version="1.0" encoding="utf-8"?>
+<toggl.giskard.views.CalendarDayView xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    local:MvxBind="Text Day; TextColor CalendarDayColor(IsInCurrentMonth); RoundLeft IsStartOfSelectedPeriod; RoundRight IsEndOfSelectedPeriod; IsSelected Selected; IsToday IsToday"
+    android:id="@+id/ReportsCalendarDayView"
     tools:text="5"
     android:textSize="16sp"
     android:gravity="center"

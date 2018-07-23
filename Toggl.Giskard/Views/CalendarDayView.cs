@@ -19,49 +19,13 @@ namespace Toggl.Giskard.Views
         private readonly Paint selectedPaint;
         private readonly int verticalPadding;
 
-        private bool isToday;
-        public bool IsToday
-        {
-            get => isToday;
-            set
-            {
-                isToday = value;
-                PostInvalidate();
-            }
-        }
+        public bool IsToday { get; set; }
 
-        private bool isSelected;
-        public bool IsSelected
-        {
-            get => isSelected;
-            set
-            {
-                isSelected = value;
-                PostInvalidate();
-            }
-        }
+        public bool IsSelected { get; set; }
 
-        private bool roundLeft;
-        public bool RoundLeft
-        {
-            get => roundLeft;
-            set
-            {
-                roundLeft = value;
-                PostInvalidate();
-            }
-        }
+        public bool RoundLeft { get; set; }
 
-        private bool roundRight;
-        public bool RoundRight
-        {
-            get => roundRight;
-            set
-            {
-                roundRight = value;
-                PostInvalidate();
-            }
-        }
+        public bool RoundRight { get; set; }
 
         public CalendarDayView(IntPtr javaReference, JniHandleOwnership transfer)
             : base(javaReference, transfer)

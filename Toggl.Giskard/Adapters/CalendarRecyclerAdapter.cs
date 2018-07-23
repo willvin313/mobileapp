@@ -7,10 +7,12 @@ using Android.Views;
 using MvvmCross;
 using MvvmCross.Droid.Support.V7.RecyclerView;
 using MvvmCross.Platforms.Android;
+using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
+using Toggl.Giskard.ViewHolders;
 
 namespace Toggl.Giskard.Adapters
 {
-    public sealed class CalendarRecyclerAdapter : MvxRecyclerAdapter
+    public sealed class CalendarRecyclerAdapter : BaseRecyclerAdapter<CalendarDayViewModel>
     {
         private static readonly int itemWidth;
 
@@ -34,9 +36,6 @@ namespace Toggl.Giskard.Adapters
         {
         }
 
-        public override int ItemCount 
-            => base.ItemCount;
-
         public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
         {
             base.OnBindViewHolder(holder, position);
@@ -44,6 +43,12 @@ namespace Toggl.Giskard.Adapters
             var layoutParams = holder.ItemView.LayoutParameters;
             layoutParams.Width = itemWidth;
             holder.ItemView.LayoutParameters = layoutParams;
+        }
+
+        protected override BaseRecyclerViewHolder<CalendarDayViewModel> CreateViewHolder(ViewGroup parent, LayoutInflater inflater)
+        {
+            var itemView = inflater.Inflate(Resource.Layout.ReportsCalendarFragmentDayCell, parent, false);
+            return new CalendarRecylerViewHolder(itemView);
         }
     }
 }
