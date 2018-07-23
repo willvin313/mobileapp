@@ -66,12 +66,6 @@ namespace Toggl.Giskard.Converters
         public CalendarDayColorValueConverter() : base(Color.White, Reports.DayNotInMonth.ToNativeColor()) { }
     }
 
-    public sealed class CalendarShortcutBackgroundColorValueConverter : BoolToConstantValueConverter<Color>
-    {
-        public CalendarShortcutBackgroundColorValueConverter()
-            : base(Color.ParseColor("#328fff"), Color.ParseColor("#3e3e3e")) { }
-    }
-
     public sealed class SelectedTabAlphaValueConverter : BoolToConstantValueConverter<float>
     {
         public SelectedTabAlphaValueConverter() : base(1, 0.7f) { }
