@@ -53,8 +53,8 @@ namespace Toggl.Daneel.Cells.Reports
             Text.Text = Item.Day.ToString();
 
             //Color
-            Text.TextColor = Item.TextColor.ToNativeColor();
-            BackgroundView.BackgroundColor = Item.BackgroundColor.ToNativeColor();
+            Text.TextColor = calculateTextColor(Item.Selected, Item.IsInCurrentMonth);
+            BackgroundView.BackgroundColor = calculateBackgroundColor(Item.Selected);
 
             //Rounding 
             BackgroundView.RoundRight = Item.IsEndOfSelectedPeriod;
@@ -75,5 +75,20 @@ namespace Toggl.Daneel.Cells.Reports
             TodayBackgroundView.RoundRight = true;
             TodayBackgroundView.BackgroundColor = Color.Calendar.Today.ToNativeColor();
         }
+
+        private UIColor calculateTextColor(bool selected, bool isInCurrentMonth)
+        {
+            if (selected)
+                return Color.Calendar.CellTextColorSelected.ToNativeColor();
+
+            return isInCurrentMonth
+                ? Color.Calendar.CellTextColorInCurrentMonth.ToNativeColor()
+                : Color.Calendar.CellTextColorOutOfCurrentMonth.ToNativeColor();
+        }
+
+        private UIColor calculateBackgroundColor(bool selected)
+            => selected
+            ? Color.Calendar.SelectedDayBackgoundColor.ToNativeColor()
+            : Color.Common.Transparent.ToNativeColor();
     }
 }

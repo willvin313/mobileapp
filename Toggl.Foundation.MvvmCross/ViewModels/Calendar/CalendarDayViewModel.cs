@@ -1,6 +1,4 @@
 ﻿using System;
-using MvvmCross.UI;
-using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Multivac;
 
@@ -9,11 +7,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
     [Preserve(AllMembers = true)]
     public sealed class CalendarDayViewModel
     {
-        private readonly bool isInCurrentMonth;
-
         public int Day { get; }
 
         public bool IsToday { get; }
+
+        public bool IsInCurrentMonth { get; }
 
         public CalendarMonth CalendarMonth { get; }
 
@@ -21,27 +19,21 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
         
         public bool Selected { get; private set; }
         
-        public MvxColor TextColor { get; private set; }
-
-        public MvxColor BackgroundColor { get; private set; }
-        
         public bool IsEndOfSelectedPeriod { get; private set; }
         
         public bool IsStartOfSelectedPeriod { get; private set; }
 
         public CalendarDayViewModel(int day, CalendarMonth month, bool isInCurrentMonth, DateTimeOffset today)
         {
-            this.isInCurrentMonth = isInCurrentMonth;
-
             Day = day;
             CalendarMonth = month;
+            IsInCurrentMonth = isInCurrentMonth;
             DateTime = new DateTimeOffset(month.Year, month.Month, Day, 0, 0, 0, TimeSpan.Zero);
+            IsToday = today.Date == DateTime.Date;
 
             Selected = false;
             IsEndOfSelectedPeriod = false;
             IsStartOfSelectedPeriod = false;
-            TextColor = calculateTextColor(Selected);
-            BackgroundColor = calculateBackgroundColor(Selected);
         }
 
         public void OnSelectedRangeChanged(DateRangeParameter selectedRange)
@@ -53,24 +45,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
             Selected = isSelected;
             IsEndOfSelectedPeriod = isSelected && selectedRange.EndDate.Date == DateTime.Date;
             IsStartOfSelectedPeriod = isSelected && selectedRange.StartDate.Date == DateTime.Date;
-
-            TextColor = calculateTextColor(Selected);
-            BackgroundColor = calculateBackgroundColor(Selected);
         }
-
-        private MvxColor calculateTextColor(bool selected)
-        {
-            if (selected)
-                return Color.Calendar.CellTextColorSelected;
-
-            return isInCurrentMonth
-                ? Color.Calendar.CellTextColorInCurrentMonth
-                : Color.Calendar.CellTextColorOutOfCurrentMonth;
-        }
-
-        private MvxColor calculateBackgroundColor(bool selected)
-            => selected
-            ? Color.Calendar.SelectedDayBackgoundColor
-            : Color.Common.Transparent;
     }
 }
