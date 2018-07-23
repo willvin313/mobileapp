@@ -36,7 +36,7 @@ namespace Toggl.Giskard.Activities
                 Resource.Layout.SettingsActivityWorkspaceCell,
                 WorkspaceSelectionViewHolder.Create
             );
-            adapter.OnItemTapped = ViewModel.SelectDefaultWorkspace;
+            adapter.OnItemTapped = async workspace => await ViewModel.SelectDefaultWorkspace(workspace);
             workspacesRecyclerView.SetAdapter(adapter);
             workspacesRecyclerView.SetLayoutManager(new LinearLayoutManager(this));
 

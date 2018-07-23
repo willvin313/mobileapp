@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using MvvmCross.Binding.Bindings.Target;
+using System.Collections.Immutable;
 using Toggl.Multivac;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
 {
     public sealed class CalendarPageViewModel
     {
-        private readonly BeginningOfWeek beginningOfWeek;
         private readonly DateTimeOffset today;
+        private readonly BeginningOfWeek beginningOfWeek;
 
-        public List<CalendarDayViewModel> Days { get; }
-            = new List<CalendarDayViewModel>();
+        public IImmutableList<CalendarDayViewModel> Days { get; }
 
         public CalendarMonth CalendarMonth { get; }
 
@@ -25,35 +24,51 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
 
             CalendarMonth = calendarMonth;
 
-            addDaysFromPreviousMonth();
-            addDaysFromCurrentMonth();
-            addDaysFromNextMonth();
+            Days = calculateDays().ToImmutableList();
 
             RowCount = Days.Count / 7;
         }
 
-        private void addDaysFromPreviousMonth()
+        private IEnumerable<CalendarDayViewModel> calculateDays()
+        {
+            foreach (var day in calculateDaysFromPreviousMonth())
+            {
+                yield return day;
+            }
+
+            foreach (var day in calculateDaysFromCurrentMonth())
+            {
+                yield return day;
+            }
+
+            foreach (var day in calculateDaysFromNextMonth())
+            {
+                yield return day;
+            }
+        }
+
+        private IEnumerable<CalendarDayViewModel> calculateDaysFromPreviousMonth()
         {
             var firstDayOfMonth = CalendarMonth.DayOfWeek(1);
-
-            if (firstDayOfMonth == beginningOfWeek.ToDayOfWeekEnum()) return;
+            if (firstDayOfMonth == beginningOfWeek.ToDayOfWeekEnum())
+                yield break;
 
             var previousMonth = CalendarMonth.Previous();
             var daysInPreviousMonth = previousMonth.DaysInMonth;
             var daysToAdd = ((int)firstDayOfMonth - (int)beginningOfWeek.ToDayOfWeekEnum() + 7) % 7;
 
             for (int i = daysToAdd - 1; i >= 0; i--)
-                addDay(daysInPreviousMonth - i, previousMonth, false);
+                yield return createDay(daysInPreviousMonth - i, previousMonth, false);
         }
 
-        private void addDaysFromCurrentMonth()
+        private IEnumerable<CalendarDayViewModel> calculateDaysFromCurrentMonth()
         {
             var daysInMonth = CalendarMonth.DaysInMonth;
             for (int i = 0; i < daysInMonth; i++)
-                addDay(i + 1, CalendarMonth, true);
+                yield return createDay(i + 1, CalendarMonth, true);
         }
 
-        private void addDaysFromNextMonth()
+        private IEnumerable<CalendarDayViewModel> calculateDaysFromNextMonth()
         {
             var lastDayOfWeekInTargetMonth = (int)CalendarMonth
                 .DayOfWeek(CalendarMonth.DaysInMonth);
@@ -63,12 +78,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
             var daysToAdd = (lastDayOfWeek - lastDayOfWeekInTargetMonth + 7) % 7;
 
             for (int i = 0; i < daysToAdd; i++)
-                addDay(i + 1, nextMonth, false);
+                yield return createDay(i + 1, nextMonth, false);
         }
 
-        private void addDay(int day, CalendarMonth month, bool isCurrentMonth)
-        {
-            Days.Add(new CalendarDayViewModel(day, month, isCurrentMonth, today));
-        }
+        private CalendarDayViewModel createDay(int day, CalendarMonth month, bool isCurrentMonth)
+            => new CalendarDayViewModel(day, month, isCurrentMonth, today);
     }
 }

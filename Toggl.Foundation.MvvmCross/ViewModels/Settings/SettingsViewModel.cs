@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -27,7 +28,7 @@ using static Toggl.Multivac.Extensions.CommonFunctions;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels
 {
-    using WorkspaceToSelectableWorkspaceLambda = Func<IEnumerable<IThreadSafeWorkspace>, IList<SelectableWorkspaceViewModel>>;
+    using WorkspaceToSelectableWorkspaceLambda = Func<IEnumerable<IThreadSafeWorkspace>, IImmutableList<SelectableWorkspaceViewModel>>;
 
     [Preserve(AllMembers = true)]
     public sealed class SettingsViewModel : MvxViewModel
@@ -80,7 +81,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public IObservable<bool> UseTwentyFourHourFormat { get; }
 
-        public IObservable<IList<SelectableWorkspaceViewModel>> Workspaces { get; }
+        public IObservable<IImmutableList<SelectableWorkspaceViewModel>> Workspaces { get; }
 
         public string Version => $"{userAgent.Version} ({platformConstants.BuildNumber})";
 
@@ -351,6 +352,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             => workspaces 
                 => workspaces
                     .Select(workspace => new SelectableWorkspaceViewModel(workspace, user.DefaultWorkspaceId == workspace.Id))
-                    .ToList();
+                    .ToImmutableList();
     }
 }

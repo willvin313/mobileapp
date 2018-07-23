@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Collections.Immutable;
 using Android.Runtime;
 using Android.Support.V7.Widget;
 using Android.Views;
@@ -10,13 +9,13 @@ namespace Toggl.Giskard.Adapters
 {
     public abstract class BaseRecyclerAdapter<T> : RecyclerView.Adapter
     {
-        public Func<T, Task> OnItemTapped { get; set; }
+        public Action<T> OnItemTapped { get; set; }
 
-        private IList<T> items = new List<T>();
-        public virtual IList<T> Items
+        private IImmutableList<T> items = ImmutableList<T>.Empty;
+        public IImmutableList<T> Items
         {
             get => items;
-            set => SetItems(value ?? new List<T>());
+            set => SetItems(value ?? ImmutableList<T>.Empty);
         }
 
         protected BaseRecyclerAdapter()
@@ -51,7 +50,7 @@ namespace Toggl.Giskard.Adapters
         public virtual T GetItem(int viewPosition)
             => items[viewPosition];
 
-        protected virtual void SetItems(IList<T> items)
+        protected virtual void SetItems(IImmutableList<T> items)
         {
             this.items = items;
 
