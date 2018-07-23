@@ -31,11 +31,7 @@ namespace Toggl.Giskard.Views
             {
                 calendarContainer = value;
 
-                value.Post(() =>
-                {
-                    negativeContainerHeight = -calendarContainer.Height;
-                    animateCalendar(true, true);
-                });
+                RecalculateCalendarHeight();
             }
         }
 
@@ -69,9 +65,9 @@ namespace Toggl.Giskard.Views
 
         internal void RecalculateCalendarHeight()
         {
-            Post(() =>
+            CalendarContainer.Post(() =>
             {
-                negativeContainerHeight = -calendarContainer.Height;
+                negativeContainerHeight = -CalendarContainer.Height;
 
                 var marginParams = CalendarContainer.LayoutParameters as MarginLayoutParams;
                 var calendarIsTotallyVisible = marginParams.TopMargin == 0;
