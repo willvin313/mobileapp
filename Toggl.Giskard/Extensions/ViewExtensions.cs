@@ -7,7 +7,7 @@ using Android.Views.InputMethods;
 
 namespace Toggl.Giskard.Extensions
 {
-    public static class ViewExtensions
+    public static partial class ViewExtensions
     {
         public static IEnumerable<View> GetChildren(this ViewGroup view)
         {
