@@ -9,11 +9,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
     [Preserve(AllMembers = true)]
     public sealed class CalendarDayViewModel
     {
+        private readonly bool isInCurrentMonth;
+
         public int Day { get; }
 
         public bool IsToday { get; }
-
-        public bool IsInCurrentMonth { get; }
 
         public CalendarMonth CalendarMonth { get; }
 
@@ -31,9 +31,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
 
         public CalendarDayViewModel(int day, CalendarMonth month, bool isInCurrentMonth, DateTimeOffset today)
         {
+            this.isInCurrentMonth = isInCurrentMonth;
+
             Day = day;
             CalendarMonth = month;
-            IsInCurrentMonth = isInCurrentMonth;
             DateTime = new DateTimeOffset(month.Year, month.Month, Day, 0, 0, 0, TimeSpan.Zero);
 
             Selected = false;
@@ -62,7 +63,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
             if (selected)
                 return Color.Calendar.CellTextColorSelected;
 
-            return IsInCurrentMonth
+            return isInCurrentMonth
                 ? Color.Calendar.CellTextColorInCurrentMonth
                 : Color.Calendar.CellTextColorOutOfCurrentMonth;
         }
