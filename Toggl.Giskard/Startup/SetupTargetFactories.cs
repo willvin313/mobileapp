@@ -75,11 +75,6 @@ namespace Toggl.Giskard
                 view => new ViewMarginTargetBinding(view)
             );
 
-            registry.RegisterCustomBindingFactory<ViewPager>(
-                ViewPagerCurrentPageTargetBinding.BindingName,
-                view => new ViewPagerCurrentPageTargetBinding(view)
-            );
-
             registry.RegisterCustomBindingFactory<View>(
                 ViewUpsideDownTargetBinding.BindingName,
                 view => new ViewUpsideDownTargetBinding(view)
