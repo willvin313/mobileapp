@@ -408,11 +408,12 @@
     </Compile>
     <Compile Include="Views\AutocompleteEditText.cs" />
     <Compile Include="Views\NonSwipingViewPager.cs" />
-    </Compile>
     <Compile Include="Activities\MainActivity.ViewBinds.cs">
       <DependentUpon>MainActivity.cs</DependentUpon>
     </Compile>
-    <Compile Include="Fragments\ReportsCalendarFragment.ViewBinds.cs" />
+    <Compile Include="Fragments\ReportsCalendarFragment.ViewBinds.cs">
+      <DependentUpon>ReportsCalendarFragment.cs</DependentUpon>
+    </Compile>
     <Compile Include="Fragments\ReactiveFragment.cs" />
     <Compile Include="ViewHolders\WorkspaceSelectionViewHolder.cs" />
     <Compile Include="ViewHolders\CalendarRecylerViewHolder.cs" />
