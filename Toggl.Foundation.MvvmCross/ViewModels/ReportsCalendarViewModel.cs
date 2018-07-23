@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
@@ -72,7 +73,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             this.dataSource = dataSource;
 
             var currentDate = timeService.CurrentDateTime;
-            initialMonth = new CalendarMonth(currentDate.Year, currentDate.Month);
+            initialMonth = new CalendarMonth(currentDate.Year, currentDate.Month).AddMonths(-monthsToShow + 1);
 
             var beginningOfWeekObservable =
                 dataSource.User.Current
@@ -97,7 +98,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .SelectUnit();
 
             CurrentMonthName = currentMonthInfoObservable
-                .Select(month => CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month.Month));
+                .Select(month => month.Month)
+                .Select(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName);
 
             CurrentYear = currentMonthInfoObservable
                 .Select(month => month.Year.ToString());
@@ -113,7 +115,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .Share();
 
             RowsInCurrentMonth = CurrentPage
-                .CombineLatest(Months, (currentPage, months) => months[currentPage].RowCount);
+                .CombineLatest(Months, (currentPage, months) => months[currentPage].RowCount)
+                .DistinctUntilChanged();
 
             IImmutableList<string> headers(BeginningOfWeek beginningOfWeek)
                 => Enumerable.Range(0, 7)
@@ -123,16 +126,15 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IImmutableList<CalendarPageViewModel> calendarPages(BeginningOfWeek beginningOfWeek)
             {
                 var now = timeService.CurrentDateTime;
-                var negativeMonthOffset = -(monthsToShow - 1);
 
-                return Enumerable.Range(negativeMonthOffset, 12)
+                return Enumerable.Range(0, monthsToShow)
                     .Select(initialMonth.AddMonths)
                     .Select(calendarMonth => new CalendarPageViewModel(calendarMonth, beginningOfWeek, now))
                     .ToImmutableList();
             }
 
-            IImmutableList<QuickSelectShortcut> createQuickSelectShortcuts(BeginningOfWeek beginningOfWeek)
-                => ImmutableList.Create(
+            IImmutableList<QuickSelectShortcut> createQuickSelectShortcuts(BeginningOfWeek beginningOfWeek) 
+                => ImmutableList.Create<QuickSelectShortcut>(
                     QuickSelectShortcut.ForToday(timeService),
                     QuickSelectShortcut.ForYesterday(timeService),
                     weeklyQuickSelectShortcut = QuickSelectShortcut.ForThisWeek(timeService, beginningOfWeek),
@@ -161,7 +163,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         }
 
         public void QuickSelect(QuickSelectShortcut quickSelectShortCut)
-            => changeDateRange(quickSelectShortCut.DateRange);
+        {
+            changeDateRange(quickSelectShortCut.DateRange);
+            //currentPageSubject.OnNext(quickSelectShortCut.Page);
+        }
 
         public void CalendarDayTapped(CalendarDayViewModel tappedDay)
         {
