@@ -162,7 +162,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public void QuickSelect(QuickSelectShortcut quickSelectShortCut)
         {
             changeDateRange(quickSelectShortCut.DateRange);
-            //currentPageSubject.OnNext(quickSelectShortCut.Page);
+            currentPageSubject.OnNext(monthsToShow - 1 - quickSelectShortCut.PageOffset);
         }
 
         public void CalendarDayTapped(CalendarDayViewModel tappedDay)

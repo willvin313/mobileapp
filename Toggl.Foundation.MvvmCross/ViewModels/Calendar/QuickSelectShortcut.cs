@@ -12,8 +12,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
     {
         private readonly ITimeService timeService;
         private readonly Func<DateTimeOffset, DateRangeParameter> getDateRange;
-
+        
         public string Title { get; }
+
+        public int PageOffset { get; }
 
         public bool Selected { get; private set; }
 
@@ -23,7 +25,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public DateRangeParameter DateRange => getDateRange(timeService.CurrentDateTime);
 
-        private QuickSelectShortcut(ITimeService timeService, string title, Func<DateTimeOffset, DateRangeParameter> getDateRange)
+        private QuickSelectShortcut(ITimeService timeService, string title, int pageOffset, Func<DateTimeOffset, DateRangeParameter> getDateRange)
         {
             Ensure.Argument.IsNotNull(title, nameof(title));
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
@@ -33,6 +35,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             this.getDateRange = getDateRange;
 
             Title = title;
+            PageOffset = pageOffset;
             TitleColor = calculateTitleColor(false);
             BackgroundColor = calculateBackgroundColor(false);
         }
@@ -61,7 +64,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         internal static QuickSelectShortcut ForLastMonth(ITimeService timeService)
         {
-            return new QuickSelectShortcut(timeService, Resources.LastMonth, now => 
+            return new QuickSelectShortcut(timeService, Resources.LastMonth, 1, now => 
             {
                 var lastMonth = now.Date.AddMonths(-1);
                 var start = new DateTimeOffset(lastMonth.Year, lastMonth.Month, 1, 0, 0, 0, TimeSpan.Zero);
@@ -74,7 +77,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         internal static QuickSelectShortcut ForLastWeek(ITimeService timeService, BeginningOfWeek beginningOfWeek)
         {
-            return new QuickSelectShortcut(timeService, Resources.LastWeek, currentDate =>
+            return new QuickSelectShortcut(timeService, Resources.LastWeek, 0, currentDate =>
             {
                 var now = currentDate.Date;
                 var difference = (now.DayOfWeek - beginningOfWeek.ToDayOfWeekEnum() + 7) % 7;
@@ -88,7 +91,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         internal static QuickSelectShortcut ForThisMonth(ITimeService timeService)
         {
-            return new QuickSelectShortcut(timeService, Resources.ThisMonth, currentDate =>
+            return new QuickSelectShortcut(timeService, Resources.ThisMonth, 0, currentDate =>
             {
                 var now = currentDate.Date;
                 var start = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
@@ -101,7 +104,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         internal static QuickSelectShortcut ForThisWeek(ITimeService timeService, BeginningOfWeek beginningOfWeek)
         {
-            return new QuickSelectShortcut(timeService, Resources.ThisWeek, currentDate =>
+            return new QuickSelectShortcut(timeService, Resources.ThisWeek, 0, currentDate =>
             {
                 var now = currentDate.Date;
                 var difference = (now.DayOfWeek - beginningOfWeek.ToDayOfWeekEnum() + 7) % 7;
@@ -115,7 +118,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         internal static QuickSelectShortcut ForThisYear(ITimeService timeService)
         {
-            return new QuickSelectShortcut(timeService, Resources.ThisYear, now =>
+            return new QuickSelectShortcut(timeService, Resources.ThisYear, 0, now =>
             {
                 var thisYear = now.Year;
                 var start = new DateTimeOffset(thisYear, 1, 1, 0, 0, 0, TimeSpan.Zero);
@@ -128,7 +131,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         internal static QuickSelectShortcut ForToday(ITimeService timeService)
         {
-            return new QuickSelectShortcut(timeService, Resources.Today, now =>
+            return new QuickSelectShortcut(timeService, Resources.Today, 0, now =>
             {
                 var today = now.Date;
                 return DateRangeParameter
@@ -139,7 +142,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         internal static QuickSelectShortcut ForYesterday(ITimeService timeService)
         {
-            return new QuickSelectShortcut(timeService, Resources.Yesterday, now =>
+            return new QuickSelectShortcut(timeService, Resources.Yesterday, 0, now =>
             {
                 var yesterday = now.Date.AddDays(-1);
                 return DateRangeParameter
