@@ -59,7 +59,7 @@ namespace Toggl.Giskard.Fragments
             this.BindVoid(ViewModel.ReloadCalendar, () =>
             {   
                 shortcutAdapter.NotifyDataSetChanged();
-                calendarAdapter.RefreshPage(pager.CurrentItem);
+                calendarAdapter.NotifyDataSetChanged();
             });
 
             return view;
