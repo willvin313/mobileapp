@@ -71,9 +71,12 @@ namespace Toggl.Giskard.Adapters
         public override bool IsViewFromObject(View view, Object @object)
             => view == @object;
 
-        public void RefreshPage(int page)
+        public override void NotifyDataSetChanged()
         {
-             adapters[page]?.NotifyDataSetChanged();
+            foreach (var adapter in adapters.Values)
+            {
+                adapter?.NotifyDataSetChanged();
+            }
         }
     }
 }

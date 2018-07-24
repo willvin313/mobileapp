@@ -51,10 +51,10 @@ namespace Toggl.Giskard.Fragments
             this.Bind(ViewModel.QuickSelectShortcuts, shortcutAdapter.BindItems());
 
             // Calendar
-            this.Bind(ViewModel.Months, months => calendarAdapter.Months = months);
             this.Bind(ViewModel.CurrentPage, pager.BindCurrentPage());
             this.Bind(pager.CurrentPage(), ViewModel.OnCurrentPageChanged);
             this.Bind(ViewModel.RowsInCurrentMonth, recalculatePagerHeight);
+            this.Bind(ViewModel.Months, months => calendarAdapter.Months = months);
 
             this.BindVoid(ViewModel.ReloadCalendar, () =>
             {   

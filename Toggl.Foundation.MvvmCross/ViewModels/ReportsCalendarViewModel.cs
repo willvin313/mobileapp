@@ -78,7 +78,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             var beginningOfWeekObservable =
                 dataSource.User.Current
                     .Select(user => user.BeginningOfWeek)
-                    .DistinctUntilChanged();
+                    .DistinctUntilChanged()
+                    .ConnectedReplay();
 
             DayHeaders = beginningOfWeekObservable.Select(headers);
 
@@ -90,8 +91,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .DistinctUntilChanged();
 
             var currentMonthInfoObservable = CurrentPage
-                .Select(initialMonth.AddMonths)
-                .Share();
+                .Select(initialMonth.AddMonths);
 
             ReloadCalendar = SelectedDateRangeObservable
                 .Merge(highlitDateRangeSubject.AsObservable())
@@ -106,16 +106,15 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             QuickSelectShortcuts = beginningOfWeekObservable
                 .Select(createQuickSelectShortcuts)
-                .Do(subscribeToSelectedDateRange)
-                .Share();
+                .Do(subscribeToSelectedDateRange);
 
             Months = beginningOfWeekObservable
                 .Select(calendarPages)
-                .Do(subscribeToSelectedDateRange)
-                .Share();
+                .Do(subscribeToSelectedDateRange);
 
             RowsInCurrentMonth = CurrentPage
-                .CombineLatest(Months, (currentPage, months) => months[currentPage].RowCount)
+                .CombineLatest(Months, 
+                    (currentPage, months) => months[currentPage].RowCount)
                 .DistinctUntilChanged();
 
             IImmutableList<string> headers(BeginningOfWeek beginningOfWeek)
