@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -11,18 +10,16 @@ using Toggl.Foundation.Analytics;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
-using Toggl.Foundation.MvvmCross.ViewModels.Calendar.QuickSelectShortcuts;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Multivac;
-using Toggl.PrimeRadiant.Models;
 using Xunit;
+using System.Globalization;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 {
     public sealed class ReportsCalendarViewModelTests
     {
-        public abstract class ReportsCalendarViewModelTest
-            : BaseViewModelTests<ReportsCalendarViewModel>
+        public abstract class ReportsCalendarViewModelTest : BaseViewModelTests<ReportsCalendarViewModel>
         {
             protected override ReportsCalendarViewModel CreateViewModel()
                 => new ReportsCalendarViewModel(TimeService, DataSource);
@@ -43,83 +40,51 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
             }
-        }
 
-        public sealed class ThePrepareMethod
-            : ReportsCalendarViewModelTest
-        {
             [Property]
-            public void InitializesCurrentMonthPropertyToCurrentDateTimeOfTimeService(
-                DateTimeOffset now)
+            public void InitializesCurrentMonthPropertyToCurrentDateTimeOfTimeService(DateTimeOffset now)
             {
                 TimeService.CurrentDateTime.Returns(now);
 
-                ViewModel.Prepare();
+                var viewModel = CreateViewModel();
 
-                ViewModel.CurrentMonth.Year.Should().Be(now.Year);
-                ViewModel.CurrentMonth.Month.Should().Be(now.Month);
+                var currentYear = viewModel.CurrentYear.FirstAsync().GetAwaiter().GetResult();
+                var currentMonth = viewModel.CurrentMonthName.FirstAsync().GetAwaiter().GetResult();
+
+                currentYear.Should().Be(now.Year.ToString());
+                currentMonth.Should().Be(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(now.Month));
             }
-        }
 
-        public sealed class TheInitializeMethod : ReportsCalendarViewModelTest
-        {
             [Fact, LogIfTooSlow]
             public async Task InitializesTheMonthsPropertyToLast12Months()
             {
                 var now = new DateTimeOffset(2020, 4, 2, 1, 1, 1, TimeSpan.Zero);
                 TimeService.CurrentDateTime.Returns(now);
-                ViewModel.Prepare();
 
-                await ViewModel.Initialize();
+                var months = await ViewModel.Months.FirstAsync();
 
-                ViewModel.Months.Should().HaveCount(12);
+                months.Should().HaveCount(12);
                 var firstDateTime = now.AddMonths(-11);
-                var month = new CalendarMonth(
-                    firstDateTime.Year, firstDateTime.Month);
+                var month = new CalendarMonth(firstDateTime.Year, firstDateTime.Month);
+
                 for (int i = 0; i < 12; i++, month = month.Next())
                 {
-                    ViewModel.Months[i].CalendarMonth.Should().Be(month);
+                    months[i].CalendarMonth.Should().Be(month);
                 }
             }
 
             [Fact, LogIfTooSlow]
             public async Task FillsQuickSelectShortcutlist()
             {
-                var expectedShortCuts = new List<Type>
-                {
-                    typeof(CalendarTodayQuickSelectShortcut),
-                    typeof(CalendarYesterdayQuickSelectShortcut),
-                    typeof(CalendarThisWeekQuickSelectShortcut),
-                    typeof(CalendarLastWeekQuickSelectShortcut),
-                    typeof(CalendarThisMonthQuickSelectShortcut),
-                    typeof(CalendarLastMonthQuickSelectShortcut),
-                    typeof(CalendarThisYearQuickSelectShortcut)
-                };
                 var now = new DateTimeOffset(2020, 4, 2, 1, 1, 1, TimeSpan.Zero);
                 TimeService.CurrentDateTime.Returns(now);
-                ViewModel.Prepare();
 
-                await ViewModel.Initialize();
-
-                for (int i = 0; i < ViewModel.QuickSelectShortcuts.Count; i++)
-                    ViewModel.QuickSelectShortcuts[i].GetType().Should().Be(expectedShortCuts[i]);
-            }
-
-            [Property]
-            public void InitializesTheBeginningOfWeekProperty(BeginningOfWeek beginningOfWeek)
-            {
-                var user = Substitute.For<IThreadSafeUser>();
-                user.BeginningOfWeek.Returns(beginningOfWeek);
-                DataSource.User.Current.Returns(Observable.Return(user));
-                TimeService.CurrentDateTime.Returns(new DateTimeOffset(2018, 4, 20, 16, 20, 0, TimeSpan.Zero));
-                ViewModel.Prepare();
-                ViewModel.Initialize().Wait();
-
-                ViewModel.BeginningOfWeek.Should().Be(beginningOfWeek);
+                var shortcuts = await ViewModel.QuickSelectShortcuts.FirstAsync();
+                shortcuts.Should().HaveCount(7);
             }
 
             [Fact, LogIfTooSlow]
-            public void InitializesTheDateRangeWithTheCurrentWeek()
+            public async Task InitializesTheDateRangeWithTheCurrentWeek()
             {
                 var user = Substitute.For<IThreadSafeUser>();
                 user.BeginningOfWeek.Returns(BeginningOfWeek.Sunday);
@@ -128,14 +93,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = Substitute.For<IObserver<DateRangeParameter>>();
                 TimeService.CurrentDateTime.Returns(now);
                 ViewModel.SelectedDateRangeObservable.Subscribe(observer);
-                ViewModel.Prepare();
-                ViewModel.Initialize().Wait();
+
+                var months = await ViewModel.Months.FirstAsync();
 
                 observer.Received().OnNext(Arg.Is<DateRangeParameter>(
                     dateRange => ensureDateRangeIsCorrect(
                         dateRange,
-                        ViewModel.Months[11].Days[0],
-                        ViewModel.Months[11].Days[6]
+                        months[11].Days[0],
+                        months[11].Days[6]
                     )));
             }
         }
@@ -148,7 +113,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [InlineData(2017, 5, 11, 2017, 5)]
             [InlineData(2017, 5, 6, 2016, 12)]
             [InlineData(2017, 5, 7, 2017, 1)]
-            public void RepresentsTheCurrentPage(
+            public async Task RepresentsTheCurrentPage(
                 int currentYear,
                 int currentMonth,
                 int currentPage,
@@ -158,10 +123,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var now = new DateTimeOffset(currentYear, currentMonth, 1, 0, 0, 0, TimeSpan.Zero);
                 TimeService.CurrentDateTime.Returns(now);
                 ViewModel.Prepare();
-                ViewModel.CurrentPage = currentPage;
+                ViewModel.OnCurrentPageChanged(currentPage);
 
-                ViewModel.CurrentMonth.Year.Should().Be(expectedYear);
-                ViewModel.CurrentMonth.Month.Should().Be(expectedMonth);
+                var year = await ViewModel.CurrentYear.FirstAsync();
+                var month = await ViewModel.CurrentMonthName.FirstAsync();
+
+                year.Should().Be(expectedYear.ToString());
+                month.Should().Be(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(expectedMonth));
             }
         }
 
@@ -192,11 +160,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var user = Substitute.For<IThreadSafeUser>();
                 user.BeginningOfWeek.Returns(beginningOfWeek);
                 DataSource.User.Current.Returns(Observable.Return(user));
-                ViewModel.Prepare();
-                await ViewModel.Initialize();
-                ViewModel.CurrentPage = currentPage;
+                ViewModel.OnCurrentPageChanged(currentPage);
 
-                ViewModel.RowsInCurrentMonth.Should().Be(expectedRowCount);
+                var rowsInCurrentMonth = await ViewModel.RowsInCurrentMonth;
+
+                rowsInCurrentMonth.Should().Be(expectedRowCount);
             }
         }
 
@@ -205,7 +173,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Theory, LogIfTooSlow]
             [InlineData(0, 0, 3, 3)]
             [InlineData(5, 23, 9, 0)]
-            public void EmitsNewElementWheneverDateRangeIsChangedByTappingTwoCells(
+            public async Task EmitsNewElementWheneverDateRangeIsChangedByTappingTwoCells(
                 int startPageIndex,
                 int startCellIndex,
                 int endPageIndex,
@@ -215,14 +183,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = Substitute.For<IObserver<DateRangeParameter>>();
                 TimeService.CurrentDateTime.Returns(now);
                 ViewModel.SelectedDateRangeObservable.Subscribe(observer);
-                ViewModel.Prepare();
-                ViewModel.Initialize().Wait();
-                var startMonth = ViewModel.Months[startPageIndex];
+
+                var months = await ViewModel.Months;
+                var startMonth = months[startPageIndex];
                 var firstTappedCellViewModel = startMonth.Days[startCellIndex];
-                var endMonth = ViewModel.Months[endPageIndex];
+                var endMonth = months[endPageIndex];
                 var secondTappedCellViewModel = endMonth.Days[endCellIndex];
-                ViewModel.CalendarDayTappedCommand.Execute(firstTappedCellViewModel);
-                ViewModel.CalendarDayTappedCommand.Execute(secondTappedCellViewModel);
+                ViewModel.CalendarDayTapped(firstTappedCellViewModel);
+                ViewModel.CalendarDayTapped(secondTappedCellViewModel);
 
                 observer.Received().OnNext(Arg.Is<DateRangeParameter>(
                     dateRange => ensureDateRangeIsCorrect(
@@ -253,43 +221,43 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.Initialize().Wait();
             }
 
-            protected CalendarDayViewModel FindDayViewModel(int monthIndex, int dayIndex)
-                => ViewModel.Months[monthIndex].Days[dayIndex];
+            protected async Task<CalendarDayViewModel> FindDayViewModel(int monthIndex, int dayIndex)
+                => (await ViewModel.Months)[monthIndex].Days[dayIndex];
 
             public sealed class AfterTappingOneCell : TheCalendarDayTappedCommand
             {
                 [Theory, LogIfTooSlow]
                 [InlineData(5, 8)]
-                public void MarksTheFirstTappedCellAsSelected(
+                public async Task MarksTheFirstTappedCellAsSelected(
                 int monthIndex, int dayIndex)
                 {
-                    var dayViewModel = FindDayViewModel(monthIndex, dayIndex);
+                    var dayViewModel = await FindDayViewModel(monthIndex, dayIndex);
 
-                    ViewModel.CalendarDayTappedCommand.Execute(dayViewModel);
+                    ViewModel.CalendarDayTapped(dayViewModel);
 
                     dayViewModel.Selected.Should().BeTrue();
                 }
 
                 [Theory, LogIfTooSlow]
                 [InlineData(11, 0)]
-                public void MarksTheFirstTappedCellAsStartOfSelection(
+                public async Task MarksTheFirstTappedCellAsStartOfSelection(
                     int monthIndex, int dayIndex)
                 {
-                    var dayViewModel = FindDayViewModel(monthIndex, dayIndex);
+                    var dayViewModel = await FindDayViewModel(monthIndex, dayIndex);
 
-                    ViewModel.CalendarDayTappedCommand.Execute(dayViewModel);
+                    ViewModel.CalendarDayTapped(dayViewModel);
 
                     dayViewModel.IsStartOfSelectedPeriod.Should().BeTrue();
                 }
 
                 [Theory, LogIfTooSlow]
                 [InlineData(3, 20)]
-                public void MarksTheFirstTappedCellAsEndOfSelection(
+                public async Task MarksTheFirstTappedCellAsEndOfSelection(
                     int monthIndex, int dayIndex)
                 {
-                    var dayViewModel = FindDayViewModel(monthIndex, dayIndex);
+                    var dayViewModel = await FindDayViewModel(monthIndex, dayIndex);
 
-                    ViewModel.CalendarDayTappedCommand.Execute(dayViewModel);
+                    ViewModel.CalendarDayTapped(dayViewModel);
 
                     dayViewModel.IsEndOfSelectedPeriod.Should().BeTrue();
                 }
@@ -299,72 +267,74 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 [Theory, LogIfTooSlow]
                 [InlineData(0, 0, 5, 8)]
-                public void MarksTheFirstTappedCellAsNotEndOfSelection(
+                public async Task MarksTheFirstTappedCellAsNotEndOfSelection(
                     int firstMonthIndex,
                     int firstDayindex,
                     int secondMonthIndex,
                     int secondDayIndex)
                 {
-                    var firstDayViewModel = FindDayViewModel(firstMonthIndex, firstDayindex);
-                    var secondDayViewModel = FindDayViewModel(secondMonthIndex, secondDayIndex);
+                    var firstDayViewModel = await FindDayViewModel(firstMonthIndex, firstDayindex);
+                    var secondDayViewModel = await FindDayViewModel(secondMonthIndex, secondDayIndex);
 
-                    ViewModel.CalendarDayTappedCommand.Execute(firstDayViewModel);
-                    ViewModel.CalendarDayTappedCommand.Execute(secondDayViewModel);
+                    ViewModel.CalendarDayTapped(firstDayViewModel);
+                    ViewModel.CalendarDayTapped(secondDayViewModel);
 
                     firstDayViewModel.IsEndOfSelectedPeriod.Should().BeFalse();
                 }
 
                 [Theory, LogIfTooSlow]
                 [InlineData(1, 1, 9, 9)]
-                public void MarksTheSecondTappedCellAsEndOfSelection(
+                public async Task MarksTheSecondTappedCellAsEndOfSelection(
                     int firstMonthIndex,
                     int firstDayindex,
                     int secondMonthIndex,
                     int secondDayIndex)
                 {
-                    var firstDayViewModel = FindDayViewModel(firstMonthIndex, firstDayindex);
-                    var secondDayViewModel = FindDayViewModel(secondMonthIndex, secondDayIndex);
+                    var firstDayViewModel = await FindDayViewModel(firstMonthIndex, firstDayindex);
+                    var secondDayViewModel = await FindDayViewModel(secondMonthIndex, secondDayIndex);
 
-                    ViewModel.CalendarDayTappedCommand.Execute(firstDayViewModel);
-                    ViewModel.CalendarDayTappedCommand.Execute(secondDayViewModel);
+                    ViewModel.CalendarDayTapped(firstDayViewModel);
+                    ViewModel.CalendarDayTapped(secondDayViewModel);
 
                     secondDayViewModel.IsEndOfSelectedPeriod.Should().BeTrue();
                 }
 
                 [Theory, LogIfTooSlow]
                 [InlineData(1, 2, 3, 4)]
-                public void MarksTheSecondTappedCellAsNotStartOfSelection(
+                public async Task MarksTheSecondTappedCellAsNotStartOfSelection(
                     int firstMonthIndex,
                     int firstDayindex,
                     int secondMonthIndex,
                     int secondDayIndex)
                 {
-                    var firstDayViewModel = FindDayViewModel(firstMonthIndex, firstDayindex);
-                    var secondDayViewModel = FindDayViewModel(secondMonthIndex, secondDayIndex);
+                    var firstDayViewModel = await FindDayViewModel(firstMonthIndex, firstDayindex);
+                    var secondDayViewModel = await FindDayViewModel(secondMonthIndex, secondDayIndex);
 
-                    ViewModel.CalendarDayTappedCommand.Execute(firstDayViewModel);
-                    ViewModel.CalendarDayTappedCommand.Execute(secondDayViewModel);
+                    ViewModel.CalendarDayTapped(firstDayViewModel);
+                    ViewModel.CalendarDayTapped(secondDayViewModel);
 
                     secondDayViewModel.IsStartOfSelectedPeriod.Should().BeFalse();
                 }
 
                 [Theory, LogIfTooSlow]
                 [InlineData(2, 15, 7, 20)]
-                public void MarksTheWholeIntervalAsSelected(
+                public async Task MarksTheWholeIntervalAsSelected(
                     int firstMonthIndex,
                     int firstDayindex,
                     int secondMonthIndex,
                     int secondDayIndex)
                 {
-                    var firstDayViewModel = FindDayViewModel(firstMonthIndex, firstDayindex);
-                    var secondDayViewModel = FindDayViewModel(secondMonthIndex, secondDayIndex);
+                    var firstDayViewModel = await FindDayViewModel(firstMonthIndex, firstDayindex);
+                    var secondDayViewModel = await FindDayViewModel(secondMonthIndex, secondDayIndex);
 
-                    ViewModel.CalendarDayTappedCommand.Execute(firstDayViewModel);
-                    ViewModel.CalendarDayTappedCommand.Execute(secondDayViewModel);
+                    ViewModel.CalendarDayTapped(firstDayViewModel);
+                    ViewModel.CalendarDayTapped(secondDayViewModel);
+
+                    var months = await ViewModel.Months;
 
                     for (int monthIndex = firstMonthIndex; monthIndex <= secondMonthIndex; monthIndex++)
                     {
-                        var month = ViewModel.Months[monthIndex];
+                        var month = months[monthIndex];
                         var startIndex = monthIndex == firstMonthIndex
                             ? firstDayindex
                             : 0;
@@ -390,15 +360,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public void UsingAnyOfTheShortcutsDoesNotThrowAnyTimeOfTheYear(DateTimeOffset now)
             {
                 TimeService.CurrentDateTime.Returns(now);
+
                 // in this property test it is not possible to use the default ViewModel,
                 // because we have to reset it in each iteration of the test
                 var viewModel = CreateViewModel();
-                viewModel.Prepare();
-                viewModel.Initialize().Wait();
 
-                foreach (var shortcut in viewModel.QuickSelectShortcuts)
+                foreach (var shortcut in viewModel.QuickSelectShortcuts.GetAwaiter().GetResult())
                 {
-                    Action usingShortcut = () => viewModel.QuickSelectCommand.Execute(shortcut);
+                    Action usingShortcut = () => viewModel.QuickSelect(shortcut);
                     usingShortcut.Should().NotThrow();
                 }
             }
@@ -413,7 +382,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var end = dates[2];
                 TimeService.CurrentDateTime.Returns(now);
                 var selectedRange = DateRangeParameter.WithDates(start, end).WithSource(ReportsSource.Calendar);
-                var customShortcut = new CustomShortcut(selectedRange, TimeService);
+                var customShortcut = Substitute.ForPartsOf<QuickSelectShortcut>();
+                customShortcut.DateRange.Returns(selectedRange);
 
                 // in this property test it is not possible to use the default ViewModel,
                 // because we have to reset it in each iteration of the test
@@ -421,22 +391,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 viewModel.Prepare();
                 viewModel.Initialize().Wait();
 
-                Action usingShortcut = () => viewModel.QuickSelectCommand.Execute(customShortcut);
+                Action usingShortcut = () => viewModel.QuickSelect(customShortcut);
 
                 usingShortcut.Should().NotThrow();
-            }
-
-            private sealed class CustomShortcut : CalendarBaseQuickSelectShortcut
-            {
-                private DateRangeParameter range;
-
-                public CustomShortcut(DateRangeParameter range, ITimeService timeService) : base(timeService, "")
-                {
-                    this.range = range;
-                }
-
-                public override DateRangeParameter GetDateRange()
-                    => range;
             }
         }
     }

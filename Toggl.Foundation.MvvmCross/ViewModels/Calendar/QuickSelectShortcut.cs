@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using MvvmCross.UI;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.MvvmCross.Helper;
@@ -16,6 +14,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly Func<DateTimeOffset, DateRangeParameter> getDateRange;
 
         public string Title { get; }
+
+        public bool Selected { get; private set; }
 
         public MvxColor TitleColor { get; private set; }
 
@@ -41,12 +41,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             var internalDateRange = DateRange;
 
-            var isSelected =
+            Selected =
                 dateRange.StartDate.Date == internalDateRange.StartDate.Date
                 && dateRange.EndDate.Date == internalDateRange.EndDate.Date;
 
-            TitleColor = calculateTitleColor(isSelected);
-            BackgroundColor = calculateBackgroundColor(isSelected);
+            TitleColor = calculateTitleColor(Selected);
+            BackgroundColor = calculateBackgroundColor(Selected);
         }
 
         private MvxColor calculateTitleColor(bool isSelected)
