@@ -9,6 +9,7 @@ using System.Reactive.Subjects;
 using MvvmCross.ViewModels;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
+using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
 using Toggl.Multivac;
@@ -79,41 +80,52 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     .DistinctUntilChanged()
                     .ConnectedReplay();
 
-            DayHeaders = beginningOfWeekObservable.Select(headers);
+            DayHeaders = beginningOfWeekObservable
+                .Select(headers)
+                .AsDriver();
 
-            SelectedDateRangeObservable = selectedDateRangeSubject.AsObservable();
+            SelectedDateRangeObservable = selectedDateRangeSubject
+                .AsObservable()
+                .AsDriver();
 
             CurrentPage = currentPageSubject
                 .StartWith(monthsToShow - 1)
                 .AsObservable()
-                .DistinctUntilChanged();
+                .DistinctUntilChanged()
+                .AsDriver();
 
             var currentMonthInfoObservable = CurrentPage
                 .Select(initialMonth.AddMonths);
 
             ReloadCalendar = SelectedDateRangeObservable
                 .Merge(highlitDateRangeSubject.AsObservable())
-                .SelectUnit();
+                .SelectUnit()
+                .AsDriver();
 
             CurrentMonthName = currentMonthInfoObservable
                 .Select(month => month.Month)
-                .Select(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName);
+                .Select(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName)
+                .AsDriver();
 
             CurrentYear = currentMonthInfoObservable
-                .Select(month => month.Year.ToString());
+                .Select(month => month.Year.ToString())
+                .AsDriver();
 
             QuickSelectShortcuts = beginningOfWeekObservable
                 .Select(createQuickSelectShortcuts)
-                .Do(subscribeToSelectedDateRange);
+                .Do(subscribeToSelectedDateRange)
+                .AsDriver();
 
             Months = beginningOfWeekObservable
                 .Select(calendarPages)
-                .Do(subscribeToSelectedDateRange);
+                .Do(subscribeToSelectedDateRange)
+                .AsDriver();
 
             RowsInCurrentMonth = CurrentPage
                 .CombineLatest(Months, 
                     (currentPage, months) => months[currentPage].RowCount)
-                .DistinctUntilChanged();
+                .DistinctUntilChanged()
+                .AsDriver();
 
             IImmutableList<string> headers(BeginningOfWeek beginningOfWeek)
                 => Enumerable.Range(0, 7)
