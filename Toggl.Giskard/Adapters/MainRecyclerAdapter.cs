@@ -58,7 +58,6 @@ namespace Toggl.Giskard.Adapters
             switch (viewType)
             {
                 case MainTemplateSelector.TimeEntry:
-                case MainTemplateSelector.TimeEntryDescriptionOnly:
                     return new MainRecyclerViewLogViewHolder(inflatedView, itemBindingContext)
                     {
                         Click = TimeEntriesLogViewModel.EditCommand,

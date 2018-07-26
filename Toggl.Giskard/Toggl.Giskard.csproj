@@ -803,7 +803,6 @@
     <AndroidResource Include="Resources\anim\abc_slide_out_left.xml" />
     <AndroidResource Include="Resources\anim\abc_slide_in_left.xml" />
     <AndroidResource Include="Resources\anim\abc_slide_out_right.xml" />
-    <AndroidResource Include="Resources\layout\MainLogCellDescriptionOnly.axml" />
     <AndroidResource Include="Resources\layout\MainSuggestionsCardDescriptionOnly.axml" />
   </ItemGroup>
   <ItemGroup>

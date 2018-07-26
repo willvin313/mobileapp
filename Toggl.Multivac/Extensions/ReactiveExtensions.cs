@@ -79,7 +79,7 @@ namespace Toggl.Multivac.Extensions
 
         public static IObservable<T> AsDriver<T>(this IObservable<T> observable, T onErrorJustReturn)
             => observable
-                .Share()
+                .Replay(1).RefCount()
                 .Catch(Observable.Return(onErrorJustReturn))
                 .ObserveOn(SynchronizationContext.Current);
 

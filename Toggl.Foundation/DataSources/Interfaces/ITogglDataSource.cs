@@ -18,7 +18,7 @@ namespace Toggl.Foundation.DataSources
         IClientsSource Clients { get; }
         IProjectsSource Projects { get; }
         ITimeEntriesSource TimeEntries { get; }
-        IDataSource<IThreadSafeWorkspace, IDatabaseWorkspace> Workspaces { get; }
+        IWorkspacesSource Workspaces { get; }
         IDataSource<IThreadSafeWorkspaceFeatureCollection, IDatabaseWorkspaceFeatureCollection> WorkspaceFeatures { get; }
 
         ISyncManager SyncManager { get; }

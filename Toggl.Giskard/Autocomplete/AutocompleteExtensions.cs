@@ -22,7 +22,9 @@ namespace Toggl.Giskard.Extensions
         private static IEnumerable<ISpan> AsSpans(this ICharSequence text, int cursorPosition)
         {
             var spannable = text as SpannableStringBuilder;
-            var tokenSpans = spannable.GetSpans(0, spannable.Length(), Class.FromType(typeof(TokenSpan)));
+            var tokenSpans = spannable
+                .GetSpans(0, spannable.Length(), Class.FromType(typeof(TokenSpan)))
+                .OrderBy(spannable.GetSpanStart);
 
             var currentPosition = 0;
             var length = spannable.Length();
@@ -124,8 +126,8 @@ namespace Toggl.Giskard.Extensions
         {
             /* HACK: This unbreakable space is needed because of a bug in
              * the way android handles ReplacementSpans. It makes sure that
-             * all token boundaries can't be changed by the soft input once 
-             * they are set. */ 
+             * all token boundaries can't be changed by the soft input once
+             * they are set. */
             var start = spannable.Length();
             spannable.Append(projectSpan.ProjectName);
             spannable.Append(unbreakableSpace);
@@ -145,7 +147,7 @@ namespace Toggl.Giskard.Extensions
         {
             /* HACK: This unbreakable space is needed because of a bug in
              * the way android handles ReplacementSpans. It makes sure that
-             * all token boundaries can't be changed by the soft input once 
+             * all token boundaries can't be changed by the soft input once
              * they are set. */
             var start = spannable.Length();
             spannable.Append(tagSpan.TagName);

@@ -281,10 +281,26 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             if (!shouldBevisible) return;
 
-            if (onboardingStorage.RatingViewOutcome().HasValue) return;
+            var wasShownMoreThanOnce = onboardingStorage.NumberOfTimesRatingViewWasShown() > 1;
+            if (wasShownMoreThanOnce) return;
+
+            var lastOutcome = onboardingStorage.RatingViewOutcome();
+            if (lastOutcome != null)
+            {
+                var thereIsInteractionFormLastTime = lastOutcome != RatingViewOutcome.NoInteraction;
+                if (thereIsInteractionFormLastTime) return;
+            }
+
+            var lastOutcomeTime = onboardingStorage.RatingViewOutcomeTime();
+            if (lastOutcomeTime != null)
+            {
+                var oneDayHasNotPassedSinceLastTime = lastOutcomeTime + TimeSpan.FromHours(24) > timeService.CurrentDateTime;
+                if (oneDayHasNotPassedSinceLastTime && !wasShownMoreThanOnce) return;
+            }
 
             navigationService.ChangePresentation(new ToggleRatingViewVisibilityHint());
             analyticsService.RatingViewWasShown.Track();
+            onboardingStorage.SetDidShowRatingView();
             onboardingStorage.SetRatingViewOutcome(RatingViewOutcome.NoInteraction, timeService.CurrentDateTime);
             timeService.RunAfterDelay(ratingViewTimeout, () =>
             {

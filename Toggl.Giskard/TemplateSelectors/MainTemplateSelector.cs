@@ -8,9 +8,8 @@ namespace Toggl.Giskard.TemplateSelectors
     {
         public const int Header = 0;
         public const int TimeEntry = 1;
-        public const int TimeEntryDescriptionOnly = 2;
-        public const int Footer = 3;
-        public const int Suggestions = 4;
+        public const int Footer = 2;
+        public const int Suggestions = 3;
 
         public int ItemTemplateId { get; set; }
 
@@ -25,9 +24,6 @@ namespace Toggl.Giskard.TemplateSelectors
             if (fromViewType == TimeEntry)
                 return Resource.Layout.MainLogCell;
 
-            if (fromViewType == TimeEntryDescriptionOnly)
-                return Resource.Layout.MainLogCellDescriptionOnly;
-
             return Resource.Layout.MainSuggestions;
         }
 
@@ -41,9 +37,6 @@ namespace Toggl.Giskard.TemplateSelectors
 
             if (forItemObject is SuggestionsViewModel)
                 return Suggestions;
-
-            if (forItemObject is TimeEntryViewModel timeEntry && !timeEntry.HasProject)
-                return TimeEntryDescriptionOnly;
 
             return TimeEntry;
         }
