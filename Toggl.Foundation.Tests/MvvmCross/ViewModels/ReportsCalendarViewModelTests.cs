@@ -28,7 +28,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheConstructor : ReportsCalendarViewModelTest
         {
             [Theory, LogIfTooSlow]
-            [ClassData(typeof(TwoParameterConstructorTestData))]
+            [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(bool useTimeService, bool useDataSource)
             {
                 var timeService = useTimeService ? TimeService : null;
@@ -90,13 +90,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 user.BeginningOfWeek.Returns(BeginningOfWeek.Sunday);
                 DataSource.User.Current.Returns(Observable.Return(user));
                 var now = new DateTimeOffset(2018, 7, 1, 1, 1, 1, TimeSpan.Zero);
-                var observer = Substitute.For<IObserver<DateRangeParameter>>();
+                var observer = Substitute.For<IObserver<ReportsDateRangeParameter>>();
                 TimeService.CurrentDateTime.Returns(now);
                 ViewModel.SelectedDateRangeObservable.Subscribe(observer);
 
                 var months = await ViewModel.Months.FirstAsync();
 
-                observer.Received().OnNext(Arg.Is<DateRangeParameter>(
+                observer.Received().OnNext(Arg.Is<ReportsDateRangeParameter>(
                     dateRange => ensureDateRangeIsCorrect(
                         dateRange,
                         months[11].Days[0],
@@ -180,7 +180,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 int endCellIndex)
             {
                 var now = new DateTimeOffset(2017, 12, 19, 1, 2, 3, TimeSpan.Zero);
-                var observer = Substitute.For<IObserver<DateRangeParameter>>();
+                var observer = Substitute.For<IObserver<ReportsDateRangeParameter>>();
                 TimeService.CurrentDateTime.Returns(now);
                 ViewModel.SelectedDateRangeObservable.Subscribe(observer);
 
@@ -192,7 +192,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.CalendarDayTapped(firstTappedCellViewModel);
                 ViewModel.CalendarDayTapped(secondTappedCellViewModel);
 
-                observer.Received().OnNext(Arg.Is<DateRangeParameter>(
+                observer.Received().OnNext(Arg.Is<ReportsDateRangeParameter>(
                     dateRange => ensureDateRangeIsCorrect(
                         dateRange,
                         firstTappedCellViewModel,
@@ -201,7 +201,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         }
 
         private static bool ensureDateRangeIsCorrect(
-            DateRangeParameter dateRange,
+            ReportsDateRangeParameter dateRange,
             CalendarDayViewModel expectedStart,
             CalendarDayViewModel expectedEnd)
             => dateRange.StartDate.Year == expectedStart.CalendarMonth.Year
@@ -381,7 +381,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var now = dates[1];
                 var end = dates[2];
                 TimeService.CurrentDateTime.Returns(now);
-                var selectedRange = DateRangeParameter.WithDates(start, end).WithSource(ReportsSource.Calendar);
+                var selectedRange = ReportsDateRangeParameter.WithDates(start, end).WithSource(ReportsSource.Calendar);
                 var customShortcut = Substitute.ForPartsOf<QuickSelectShortcut>();
                 customShortcut.DateRange.Returns(selectedRange);
 

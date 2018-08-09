@@ -44,6 +44,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly IMvxNavigationService navigationService;
         private readonly IAnalyticsService analyticsService;
         private readonly IAutocompleteProvider autocompleteProvider;
+        private readonly ISchedulerProvider schedulerProvider;
 
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
         private readonly ISubject<TextFieldInfo> uiSubject = new Subject<TextFieldInfo>();
@@ -112,8 +113,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public string CurrentQuery { get; private set; }
 
-        public bool IsEditingTime { get; private set; }
-
         public bool IsSuggestingTags { get; private set; }
 
         public bool IsSuggestingProjects { get; private set; }
@@ -139,6 +138,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 RaisePropertyChanged();
             }
         }
+
+        public DurationFormat DisplayedTimeFormat { get; } = DurationFormat.Improved;
 
         public bool IsBillable { get; private set; } = false;
 
@@ -200,7 +201,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IInteractorFactory interactorFactory,
             IMvxNavigationService navigationService,
             IAnalyticsService analyticsService,
-            IAutocompleteProvider autocompleteProvider
+            IAutocompleteProvider autocompleteProvider,
+            ISchedulerProvider schedulerProvider
         )
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
@@ -212,6 +214,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
             Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(autocompleteProvider, nameof(autocompleteProvider));
+            Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
 
             this.dataSource = dataSource;
             this.timeService = timeService;
@@ -221,10 +224,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             this.interactorFactory = interactorFactory;
             this.analyticsService = analyticsService;
             this.autocompleteProvider = autocompleteProvider;
+            this.schedulerProvider = schedulerProvider;
 
             OnboardingStorage = onboardingStorage;
 
-            TextFieldInfoObservable = uiSubject.AsObservable();
+            TextFieldInfoObservable = uiSubject.AsDriver(this.schedulerProvider);
 
             BackCommand = new MvxAsyncCommand(back);
             DoneCommand = new MvxAsyncCommand(done);
@@ -311,7 +315,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             switch (suggestion)
             {
                 case QuerySymbolSuggestion querySymbolSuggestion:
-                    
+
                     if (querySymbolSuggestion.Symbol == QuerySymbols.ProjectsString)
                     {
                         analyticsService.StartViewTapped.Track(StartViewTapSource.PickEmptyStateProjectSuggestion);
@@ -503,8 +507,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             if (getTapSourceFromBindingParameter(origin) is StartViewTapSource tapSource)
                 analyticsService.StartViewTapped.Track(tapSource);
 
-            IsEditingTime = true;
-
             var stopTime = Duration.HasValue ? (DateTimeOffset?)StartTime + Duration.Value : null;
 
             var preferences = await dataSource.Preferences.Current.FirstAsync();
@@ -525,15 +527,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             {
                 Duration = result.Stop - result.Start;
             }
-
-            IsEditingTime = false;
         }
 
         private async Task changeTime()
         {
             analyticsService.StartViewTapped.Track(StartViewTapSource.StartTime);
-
-            IsEditingTime = true;
 
             var currentDuration = DurationParameter.WithStartAndDuration(StartTime, Duration);
 
@@ -543,8 +541,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             StartTime = selectedDuration.Start;
             Duration = selectedDuration.Duration ?? Duration;
-
-            IsEditingTime = false;
         }
 
         private async Task setStartDate()
@@ -623,7 +619,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             if (textFieldInfo.HasProject && !IsSuggestingProjects && !IsSuggestingTags)
             {
                 var projectId = textFieldInfo.Spans.OfType<ProjectSpan>().Single().ProjectId;
-                
+
                 return suggestions.OfType<TimeEntrySuggestion>()
                     .Where(suggestion => suggestion.ProjectId == projectId);
             }

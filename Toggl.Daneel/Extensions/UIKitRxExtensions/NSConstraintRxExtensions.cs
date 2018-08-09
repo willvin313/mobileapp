@@ -18,5 +18,8 @@ namespace Toggl.Daneel.Extensions
                 () => ((UIView)constraint.FirstItem).Superview.LayoutSubviews()
             );
         };
+
+        public static Action<bool> BindActive(this NSLayoutConstraint constraint)
+            => isActive => constraint.Active = isActive;
     }
 }

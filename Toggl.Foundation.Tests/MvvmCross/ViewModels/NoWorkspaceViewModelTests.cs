@@ -17,8 +17,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
     {
         public abstract class NoWorkspaceViewModelTest : BaseViewModelTests<NoWorkspaceViewModel>
         {
-            protected TestScheduler TestScheduler { get; } = new TestScheduler();
-
             protected override NoWorkspaceViewModel CreateViewModel()
                 => new NoWorkspaceViewModel(NavigationService, DataSource);
         }
@@ -26,7 +24,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheConstructor : NoWorkspaceViewModelTest
         {
             [Theory, LogIfTooSlow]
-            [ClassData(typeof(TwoParameterConstructorTestData))]
+            [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(bool useNavigationService, bool useDataSource)
             {
                 var navigationService = useNavigationService ? NavigationService : null;
@@ -94,7 +92,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 await ViewModel.CreateWorkspaceWithDefaultName();
 
-                workspacesDataSource.Received().Create(Arg.Is($"{name}'s Workspace"));
+                await workspacesDataSource.Received().Create(Arg.Is($"{name}'s Workspace"));
             }
 
             [Fact, LogIfTooSlow]

@@ -35,12 +35,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         protected ISuggestionProviderContainer SuggestionProviderContainer { get; } = Substitute.For<ISuggestionProviderContainer>();
         protected IAutocompleteProvider AutocompleteProvider { get; } = Substitute.For<IAutocompleteProvider>();
 
-        protected TestScheduler TestScheduler { get; } = new TestScheduler();
+        protected TestScheduler TestScheduler { get; }
 
         protected TViewModel ViewModel { get; private set; }
 
         protected BaseViewModelTests()
         {
+            TestScheduler = SchedulerProvider.TestScheduler;
             Setup();
         }
 

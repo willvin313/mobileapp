@@ -444,5 +444,62 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections
                 CollectionAssert.AreEqual(collection, expected);
             }
         }
+
+        public sealed class TheTotalCountProperty
+        {
+            [Fact, LogIfTooSlow]
+            public void GetsTheTotalNumberOfItems()
+            {
+                var intCollection = new GroupedOrderedCollection<int>(i => i, i => i, i => i.ToString().Length);
+                List<int> list = new List<int> { 40, 70, 8, 3, 1, 2 };
+                intCollection.ReplaceWith(list);
+
+                intCollection.TotalCount.Should().Be(6);
+                intCollection.Count.Should().Be(2);
+            }
+        }
+
+        public sealed class TheUpdateItemMethod
+        {
+            private GroupedOrderedCollection<int> intCollection;
+
+            public TheUpdateItemMethod()
+            {
+                intCollection = new GroupedOrderedCollection<int>(i => i, i => i, i => i.ToString().Length);
+            }
+
+            [Fact]
+            public void IgnoresUpdatesWhenTheKeyDoesNotExist()
+            {
+                intCollection.InsertItem(1);
+
+                intCollection.UpdateItem(2, 3);
+                var indexOfItemThree = intCollection.IndexOf(3);
+
+                indexOfItemThree.Should().BeNull();
+            }
+
+            [Fact]
+            public void RemovesTheOldItem()
+            {
+                intCollection.InsertItem(1);
+
+                intCollection.UpdateItem(1, 2);
+                var indexOfOldIndex = intCollection.IndexOf(1);
+
+                indexOfOldIndex.Should().BeNull();
+            }
+
+            [Fact]
+            public void AddsTheNewItem()
+            {
+                intCollection.InsertItem(1);
+
+                intCollection.UpdateItem(1, 2);
+                var indexOfOldIndex = intCollection.IndexOf(2);
+
+                indexOfOldIndex.Should().NotBeNull();
+            }
+        }
     }
 }

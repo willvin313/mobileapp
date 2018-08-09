@@ -62,7 +62,7 @@
             local:layout_constraintTop_toBottomOf="@id/TopGuideline"
             local:layout_constraintBottom_toTopOf="@+id/AddDescriptionLabel"
             android:layout_marginTop="8dp"
-            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <TextView
@@ -108,7 +108,7 @@
             android:fontFamily="sans-serif-medium"
             local:layout_constraintRight_toLeftOf="@+id/TimeEntryLogCellClientLabel"
             local:layout_constraintLeft_toRightOf="@id/TimeEntriesLogCellProjectLabel"
-            local:layout_constraintBaseline_toBaselineOf="@id/TimeEntriesLogCellProjectLabel"
+            local:layout_constraintTop_toBottomOf="@id/AddDescriptionLabel"
             android:layout_marginBottom="16dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
@@ -121,7 +121,7 @@
             android:fontFamily="sans-serif"
             android:textColor="@color/clientName"
             local:layout_constraintLeft_toRightOf="@id/TimeEntriesLogCellTaskLabel"
-            local:layout_constraintBaseline_toBaselineOf="@id/TimeEntriesLogCellProjectLabel"
+            local:layout_constraintTop_toBottomOf="@id/AddDescriptionLabel"
             android:layout_marginLeft="4dp"
             android:layout_marginBottom="16dp"
             android:layout_width="wrap_content"

@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FsCheck;
-using FsCheck.Xunit;
 using Microsoft.Reactive.Testing;
 using NSubstitute;
+using NUnit.Framework;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Exceptions;
@@ -14,7 +15,6 @@ using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Tests.Generators;
-using Toggl.Foundation.Tests.TestExtensions;
 using Toggl.Multivac;
 using Toggl.PrimeRadiant.Settings;
 using Toggl.Ultrawave.Exceptions;
@@ -33,8 +33,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             protected Password ValidPassword { get; } = Password.From("T0t4lly s4afe p4$$");
             protected Password InvalidPassword { get; } = Password.From("123");
 
-            protected TestScheduler TestScheduler { get; } = new TestScheduler();
-
             protected ILastTimeUsageStorage LastTimeUsageStorage { get; } = Substitute.For<ILastTimeUsageStorage>();
 
             protected override LoginViewModel CreateViewModel()
@@ -46,13 +44,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     PasswordManagerService,
                     ErrorHandlingService,
                     LastTimeUsageStorage,
-                    TimeService);
+                    TimeService,
+                    SchedulerProvider);
         }
 
         public sealed class TheConstructor : LoginViewModelTest
         {
-            [Theory, LogIfTooSlow]
-            [ClassData(typeof(EightParameterConstructorTestData))]
+            [Xunit.Theory, LogIfTooSlow]
+            [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(
                 bool userLoginManager,
                 bool useAnalyticsService,
@@ -61,7 +60,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 bool usePasswordManagerService,
                 bool useApiErrorHandlingService,
                 bool useLastTimeUsageStorage,
-                bool useTimeService)
+                bool useTimeService,
+                bool useSchedulerProvider)
             {
                 var loginManager = userLoginManager ? LoginManager : null;
                 var analyticsSerivce = useAnalyticsService ? AnalyticsService : null;
@@ -71,6 +71,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var apiErrorHandlingService = useApiErrorHandlingService ? ErrorHandlingService : null;
                 var lastTimeUsageStorage = useLastTimeUsageStorage ? LastTimeUsageStorage : null;
                 var timeService = useTimeService ? TimeService : null;
+                var schedulerProvider = useSchedulerProvider ? SchedulerProvider : null;
 
                 Action tryingToConstructWithEmptyParameters =
                     () => new LoginViewModel(loginManager,
@@ -80,7 +81,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                                              passwordManagerService,
                                              apiErrorHandlingService,
                                              lastTimeUsageStorage,
-                                             timeService);
+                                             timeService,
+                                             schedulerProvider);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
@@ -89,44 +91,50 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
         public sealed class TheLoginEnabledObservable : LoginViewModelTest
         {
-            [Theory]
+            [Xunit.Theory]
             [InlineData("invalid email address", "123")]
             [InlineData("invalid email address", "T0tally s4afe p4a$$")]
             [InlineData("person@company.com", "123")]
             public void ReturnsFalseWhenEmailOrPasswordIsInvalid(string email, string password)
             {
-                var observer = Substitute.For<IObserver<bool>>();
+                var observer = TestScheduler.CreateObserver<bool>();
                 ViewModel.LoginEnabled.Subscribe(observer);
                 ViewModel.SetEmail(Email.From(email));
                 ViewModel.SetPassword(Password.From(password));
 
-                observer.Received(1).OnNext(false);
+                TestScheduler.Start();
+                observer.Messages.AssertEqual(
+                    ReactiveTest.OnNext(2, false)
+                );
             }
 
-            [Theory]
+            [Xunit.Theory]
             [InlineData("invalid email address", "123")]
             [InlineData("invalid email address", "T0tally s4afe p4a$$")]
             [InlineData("person@company.com", "123")]
-            [InlineData("person@company.com", "T0tally s4afe p4a$$")]
-            public void ReturnsFalseWhenIsLoading(string email, string password)
+            public async Task ReturnsFalseWhenIsLoading(string email, string password)
             {
-                var observer = Substitute.For<IObserver<bool>>();
+                var observer = TestScheduler.CreateObserver<bool>();
+                ViewModel.LoginEnabled.Subscribe(observer);
+
                 ViewModel.SetEmail(Email.From(email));
                 ViewModel.SetPassword(Password.From(password));
                 //Make sure isloading is true
                 LoginManager
                     .Login(Arg.Any<Email>(), Arg.Any<Password>())
                     .Returns(Observable.Never<ITogglDataSource>());
-                ViewModel.LoginEnabled.Subscribe(observer);
                 ViewModel.Login();
 
-                observer.Received(1).OnNext(false);
+                TestScheduler.Start();
+                observer.Messages.AssertEqual(
+                    ReactiveTest.OnNext(2, false)
+                );
             }
         }
 
         public sealed class TheIsPasswordManagerAvailableProperty : LoginViewModelTest
         {
-            [Property]
+            [FsCheck.Xunit.Property]
             public void ReturnsWhetherThePasswordManagerIsAvailable(bool isAvailable)
             {
                 PasswordManagerService.IsAvailable.Returns(isAvailable);
@@ -198,7 +206,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     ViewModel.Login();
 
-                    observer.Messages.Last().Value.Value.Should().BeFalse();
+                    TestScheduler.Start();
+                    observer.Messages.AssertEqual(
+                        ReactiveTest.OnNext(1, false),
+                        ReactiveTest.OnNext(2, true),
+                        ReactiveTest.OnNext(3, false)
+                    );
                 }
 
                 [Fact, LogIfTooSlow]
@@ -217,7 +230,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     AnalyticsService.Received().Login.Track(AuthenticationMethod.EmailAndPassword);
                 }
 
-                [Property]
+                [FsCheck.Xunit.Property]
                 public void SavesTheTimeOfLastLogin(DateTimeOffset now)
                 {
                     TimeService.CurrentDateTime.Returns(now);
@@ -246,7 +259,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     ViewModel.Login();
 
-                    observer.Messages.Last().Value.Value.Should().BeFalse();
+                    TestScheduler.Start();
+                    observer.Messages.AssertEqual(
+                        ReactiveTest.OnNext(1, false),
+                        ReactiveTest.OnNext(2, true),
+                        ReactiveTest.OnNext(3, false)
+                    );
                 }
 
                 [Fact, LogIfTooSlow]
@@ -272,7 +290,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     ViewModel.Login();
 
-                    observer.Messages.Last().Value.Value.Should().Be(Resources.IncorrectEmailOrPassword);
+                    TestScheduler.Start();
+                    observer.Messages.AssertEqual(
+                        ReactiveTest.OnNext(1, ""),
+                        ReactiveTest.OnNext(2, Resources.IncorrectEmailOrPassword)
+                    );
                 }
 
                 [Fact, LogIfTooSlow]
@@ -286,7 +308,10 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     ViewModel.Login();
 
-                    observer.Messages.Last().Value.Value.Should().BeEmpty();
+                    TestScheduler.Start();
+                    observer.Messages.AssertEqual(
+                        ReactiveTest.OnNext(1, "")
+                    );
                 }
 
                 [Fact, LogIfTooSlow]
@@ -300,7 +325,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     ViewModel.Login();
 
-                    observer.Messages.Last().Value.Value.Should().Be(Resources.GenericLoginError);
+                    TestScheduler.Start();
+                    observer.Messages.AssertEqual(
+                        ReactiveTest.OnNext(1, ""),
+                        ReactiveTest.OnNext(2, Resources.GenericLoginError)
+                    );
                 }
 
                 [Fact, LogIfTooSlow]
@@ -316,7 +345,10 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     ViewModel.Login();
 
-                    observer.Messages.Last().Value.Value.Should().BeEmpty();
+                    TestScheduler.Start();
+                    observer.Messages.AssertEqual(
+                        ReactiveTest.OnNext(1, "")
+                    );
                 }
             }
         }
@@ -364,7 +396,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 ViewModel.GoogleLogin();
 
-                observer.Messages.Last().Value.Value.Should().BeFalse();
+                TestScheduler.Start();
+                observer.Messages.AssertEqual(
+                    ReactiveTest.OnNext(1, false),
+                    ReactiveTest.OnNext(2, true),
+                    ReactiveTest.OnNext(3, false)
+                );
             }
 
             [Fact, LogIfTooSlow]
@@ -388,7 +425,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 ViewModel.GoogleLogin();
 
-                observer.Messages.Last().Value.Value.Should().BeFalse();
+                TestScheduler.Start();
+                observer.Messages.AssertEqual(
+                    ReactiveTest.OnNext(1, false),
+                    ReactiveTest.OnNext(2, true),
+                    ReactiveTest.OnNext(3, false)
+                );
             }
 
             [Fact, LogIfTooSlow]
@@ -405,17 +447,20 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public void DoesNotDisplayAnErrormessageWhenTheUserCancelsTheRequestOnTheGoogleService()
             {
-                var observer = TestScheduler.CreateObserver<string>();
+                var observer = SchedulerProvider.TestScheduler.CreateObserver<string>();
                 ViewModel.ErrorMessage.Subscribe(observer);
                 LoginManager.LoginWithGoogle()
                     .Returns(Observable.Throw<ITogglDataSource>(new GoogleLoginException(true)));
 
                 ViewModel.GoogleLogin();
 
-                observer.Messages.Last().Value.Value.Should().BeEmpty();
+                SchedulerProvider.TestScheduler.Start();
+                observer.Messages.AssertEqual(
+                    ReactiveTest.OnNext(1, "")
+                );
             }
 
-            [Property]
+            [FsCheck.Xunit.Property]
             public void SavesTheTimeOfLastLogin(DateTimeOffset now)
             {
                 TimeService.CurrentDateTime.Returns(now);
@@ -433,32 +478,34 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public void SetsTheIsPasswordMaskedToFalseWhenItIsTrue()
             {
-                var observer = Substitute.For<IObserver<bool>>();
+                var observer = TestScheduler.CreateObserver<bool>();
+
                 ViewModel.IsPasswordMasked.Subscribe(observer);
                 ViewModel.TogglePasswordVisibility();
 
-                Received.InOrder(() =>
-                {
-                    observer.OnNext(true);
-                    observer.OnNext(false);
-                });
+                TestScheduler.Start();
+                observer.Messages.AssertEqual(
+                    ReactiveTest.OnNext(1, true),
+                    ReactiveTest.OnNext(2, false)
+                );
             }
 
             [Fact, LogIfTooSlow]
             public void SetsTheIsPasswordMaskedToTrueWhenItIsFalse()
             {
-                var observer = Substitute.For<IObserver<bool>>();
+                var observer = TestScheduler.CreateObserver<bool>();
+
                 ViewModel.IsPasswordMasked.Subscribe(observer);
                 ViewModel.TogglePasswordVisibility();
 
                 ViewModel.TogglePasswordVisibility();
 
-                Received.InOrder(() =>
-                {
-                    observer.OnNext(true);
-                    observer.OnNext(false);
-                    observer.OnNext(true);
-                });
+                TestScheduler.Start();
+                observer.Messages.AssertEqual(
+                    ReactiveTest.OnNext(1, true),
+                    ReactiveTest.OnNext(2, false),
+                    ReactiveTest.OnNext(3, true)
+                );
             }
         }
 
@@ -491,126 +538,96 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public void CallsTheLoginCommandWhenValidCredentialsAreProvided()
+            public async Task CallsTheLoginCommandWhenValidCredentialsAreProvided()
             {
                 var scheduler = new TestScheduler();
                 var observable = arrangeCallToPasswordManagerWithValidCredentials();
 
-                scheduler.Schedule(TimeSpan.FromTicks(20), async () => await ViewModel.StartPasswordManager());
+                await ViewModel.StartPasswordManager();
 
-                scheduler.Start(
-                    () => observable,
-                    created: 0,
-                    subscribed: 10,
-                    disposed: 100
-                );
-
-                LoginManager.Received().Login(Arg.Any<Email>(), Arg.Any<Password>());
+                await LoginManager.Received().Login(Arg.Any<Email>(), Arg.Any<Password>());
             }
 
             [Fact, LogIfTooSlow]
-            public void SetsTheEmailFieldWhenValidCredentialsAreProvided()
+            public async Task SetsTheEmailFieldWhenValidCredentialsAreProvided()
             {
                 var scheduler = new TestScheduler();
                 var observable = arrangeCallToPasswordManagerWithValidCredentials();
-                var observer = Substitute.For<IObserver<string>>();
-                ViewModel.Password.Subscribe(observer);
-
-                scheduler.Schedule(TimeSpan.FromTicks(20), async () => await ViewModel.StartPasswordManager());
-
-                scheduler.Start(
-                    () => observable,
-                    created: 0,
-                    subscribed: 10,
-                    disposed: 100
-                );
-
-                observer.Received(1).OnNext(ValidPassword.ToString());
-            }
-
-            [Fact, LogIfTooSlow]
-            public void SetsTheEmailFieldWhenInvalidCredentialsAreProvided()
-            {
-                var scheduler = new TestScheduler();
-                var observable = arrangeCallToPasswordManagerWithInvalidCredentials();
-                var observer = Substitute.For<IObserver<string>>();
+                var observer = TestScheduler.CreateObserver<string>();
                 ViewModel.Email.Subscribe(observer);
 
-                scheduler.Schedule(TimeSpan.FromTicks(20), async () => await ViewModel.StartPasswordManager());
+                await ViewModel.StartPasswordManager();
 
-                scheduler.Start(
-                    () => observable,
-                    created: 0,
-                    subscribed: 10,
-                    disposed: 100
+                TestScheduler.Start();
+                observer.Messages.AssertEqual(
+                    ReactiveTest.OnNext(1, Email.Empty.ToString()),
+                    ReactiveTest.OnNext(2, ValidEmail.ToString())
                 );
-
-                observer.Received(1).OnNext(InvalidEmail.ToString());
             }
 
             [Fact, LogIfTooSlow]
-            public void SetsThePasswordFieldWhenValidCredentialsAreProvided()
+            public async Task SetsTheEmailFieldWhenInvalidCredentialsAreProvided()
             {
-                var scheduler = new TestScheduler();
-                var observable = arrangeCallToPasswordManagerWithValidCredentials();
-                var observer = Substitute.For<IObserver<string>>();
+                arrangeCallToPasswordManagerWithInvalidCredentials();
+                var observer = TestScheduler.CreateObserver<string>();
+                ViewModel.Email.Subscribe(observer);
+
+                await ViewModel.StartPasswordManager();
+
+                TestScheduler.Start();
+                observer.Messages.AssertEqual(
+                    ReactiveTest.OnNext(1, Email.Empty.ToString()),
+                    ReactiveTest.OnNext(2, InvalidEmail.ToString())
+                );
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task SetsThePasswordFieldWhenValidCredentialsAreProvided()
+            {
+                arrangeCallToPasswordManagerWithValidCredentials();
+                var observer = TestScheduler.CreateObserver<string>();
                 ViewModel.Password.Subscribe(observer);
 
-                scheduler.Schedule(TimeSpan.FromTicks(20), async () => await ViewModel.StartPasswordManager());
+                await ViewModel.StartPasswordManager();
 
-                scheduler.Start(
-                    () => observable,
-                    created: 0,
-                    subscribed: 10,
-                    disposed: 100
+                TestScheduler.Start();
+                observer.Messages.AssertEqual(
+                    ReactiveTest.OnNext(1, Password.Empty.ToString()),
+                    ReactiveTest.OnNext(2, ValidPassword.ToString())
                 );
-
-                observer.Received(1).OnNext(ValidPassword.ToString());
             }
 
             [Fact, LogIfTooSlow]
-            public void DoesNotSetThePasswordFieldWhenInvalidCredentialsAreProvided()
+            public async Task DoesNotSetThePasswordFieldWhenInvalidCredentialsAreProvided()
+            {
+                arrangeCallToPasswordManagerWithInvalidCredentials();
+                var observer = TestScheduler.CreateObserver<string>();
+                ViewModel.Password.Subscribe(observer);
+
+                await ViewModel.StartPasswordManager();
+
+                TestScheduler.Start();
+                observer.Messages.AssertEqual(
+                    ReactiveTest.OnNext(1, Password.Empty.ToString())
+                );
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task DoesNothingWhenValidCredentialsAreNotProvided()
             {
                 var scheduler = new TestScheduler();
                 var observable = arrangeCallToPasswordManagerWithInvalidCredentials();
-                var observer = Substitute.For<IObserver<string>>();
-                ViewModel.Password.Subscribe(observer);
 
-                scheduler.Schedule(TimeSpan.FromTicks(20), async () => await ViewModel.StartPasswordManager());
+                await ViewModel.StartPasswordManager();
 
-                scheduler.Start(
-                    () => observable,
-                    created: 0,
-                    subscribed: 10,
-                    disposed: 100
-                );
-
-                observer.Received(1).OnNext(Password.Empty.ToString());
-            }
-
-            [Fact, LogIfTooSlow]
-            public void DoesNothingWhenValidCredentialsAreNotProvided()
-            {
-                var scheduler = new TestScheduler();
-                var observable = arrangeCallToPasswordManagerWithInvalidCredentials();
-
-                scheduler.Schedule(TimeSpan.FromTicks(20), async () => await ViewModel.StartPasswordManager());
-
-                scheduler.Start(
-                    () => observable,
-                    created: 0,
-                    subscribed: 10,
-                    disposed: 100
-                );
-
-                LoginManager.DidNotReceive().Login(Arg.Any<Email>(), Arg.Any<Password>());
+                await LoginManager.DidNotReceive().Login(Arg.Any<Email>(), Arg.Any<Password>());
             }
 
             [Fact, LogIfTooSlow]
             public async Task TracksThePasswordManagerButtonClicked()
             {
                 PasswordManagerService.IsAvailable.Returns(true);
-                arrangeCallToPasswordManagerWithInvalidCredentials();
+                var observable = arrangeCallToPasswordManagerWithInvalidCredentials();
 
                 await ViewModel.StartPasswordManager();
 
@@ -638,7 +655,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task TracksThePasswordManagerContainsValidPassword()
             {
                 PasswordManagerService.IsAvailable.Returns(true);
-                arrangeCallToPasswordManagerWithValidCredentials();
+                var observable = arrangeCallToPasswordManagerWithValidCredentials();
 
                 await ViewModel.StartPasswordManager();
 
@@ -668,7 +685,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
         public sealed class TheSignupCommand : LoginViewModelTest
         {
-            [Property]
+            [FsCheck.Xunit.Property]
             public void NavigatesToTheSignupViewModel(
                 NonEmptyString emailString, NonEmptyString passwordString)
             {
@@ -692,32 +709,41 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
         public sealed class ThePrepareMethod : LoginViewModelTest
         {
-            [Property]
+            //Todo: fix flaky test
+            //[FsCheck.Xunit.Property(Replay = "1149693933,296482725")]
+            //[FsCheck.Xunit.Property(Replay = "1503434587,296482728")]
+            [FsCheck.Xunit.Property]
             public void SetsTheEmail(NonEmptyString emailString)
             {
+                var viewModel = CreateViewModel();
                 var email = Email.From(emailString.Get);
                 var password = Password.Empty;
                 var parameter = CredentialsParameter.With(email, password);
-                var observer = Substitute.For<IObserver<string>>();
-                ViewModel.Email.Subscribe(observer);
+                var expectedValues = new[] { Email.Empty.ToString(),  email.TrimmedEnd().ToString() };
+                var actualValues = new List<string>();
+                viewModel.Email.Subscribe(actualValues.Add);
 
-                ViewModel.Prepare(parameter);
+                viewModel.Prepare(parameter);
 
-                observer.Received(1).OnNext(email.TrimmedEnd().ToString());
+                TestScheduler.Start();
+                CollectionAssert.AreEqual(expectedValues, actualValues);
             }
 
-            [Property]
+            [FsCheck.Xunit.Property]
             public void SetsThePassword(NonEmptyString passwordString)
             {
+                var viewModel = CreateViewModel();
                 var email = Email.Empty;
                 var password = Password.From(passwordString.Get);
                 var parameter = CredentialsParameter.With(email, password);
-                var observer = Substitute.For<IObserver<string>>();
-                ViewModel.Password.Subscribe(observer);
+                var expectedValues = new[] { Password.Empty.ToString(),  password.ToString() };
+                var actualValues = new List<string>();
+                viewModel.Password.Subscribe(actualValues.Add);
 
-                ViewModel.Prepare(parameter);
+                viewModel.Prepare(parameter);
 
-                observer.Received(1).OnNext(password.ToString());
+                TestScheduler.Start();
+                CollectionAssert.AreEqual(expectedValues, actualValues);
             }
         }
     }

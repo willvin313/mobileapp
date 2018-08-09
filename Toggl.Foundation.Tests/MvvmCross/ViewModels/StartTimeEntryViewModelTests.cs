@@ -78,14 +78,15 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     InteractorFactory,
                     NavigationService,
                     AnalyticsService,
-                    AutocompleteProvider
+                    AutocompleteProvider,
+                    SchedulerProvider
             );
         }
 
         public sealed class TheConstructor : StartTimeEntryViewModelTest
         {
             [Theory, LogIfTooSlow]
-            [ClassData(typeof(NineParameterConstructorTestData))]
+            [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(
                 bool useDataSource,
                 bool useTimeService,
@@ -95,7 +96,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 bool useOnboardingStorage,
                 bool useNavigationService,
                 bool useAnalyticsService,
-                bool useAutocompleteProvider)
+                bool useAutocompleteProvider,
+                bool useSchedulerProvider)
             {
                 var dataSource = useDataSource ? DataSource : null;
                 var timeService = useTimeService ? TimeService : null;
@@ -106,6 +108,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var navigationService = useNavigationService ? NavigationService : null;
                 var analyticsService = useAnalyticsService ? AnalyticsService : null;
                 var autocompleteProvider = useAutocompleteProvider ? AutocompleteProvider : null;
+                var schedulerProvider = useSchedulerProvider ? SchedulerProvider : null;
 
                 Action tryingToConstructWithEmptyParameters =
                     () => new StartTimeEntryViewModel(
@@ -117,7 +120,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         interactorFactory,
                         navigationService,
                         analyticsService,
-                        autocompleteProvider);
+                        autocompleteProvider,
+                        schedulerProvider);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
@@ -433,7 +437,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     await ViewModel.CreateCommand.ExecuteAsync();
 
-                    var projectSpan = Observer.GetLatestInfo().GetProjectSpan();
+                    var projectSpan = Observer.GetLatestInfo(TestScheduler).GetProjectSpan();
                     projectSpan.ProjectName.Should().Be(currentQuery);
                 }
             }
@@ -503,7 +507,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 [Fact, LogIfTooSlow]
                 public async Task SelectsTheCreatedTag()
                 {
-                    TestScheduler.CreateObserver<TextFieldInfo>();
                     DataSource.Tags.Create(Arg.Any<string>(), Arg.Any<long>())
                         .Returns(callInfo =>
                         {
@@ -514,8 +517,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     await ViewModel.CreateCommand.ExecuteAsync();
 
-
-                    var tags = Observer.GetLatestInfo().Spans.OfType<TagSpan>();
+                    var tags = Observer.GetLatestInfo(TestScheduler).Spans.OfType<TagSpan>();
                     tags.Should().Contain(tag => tag.TagName == currentQuery);
                 }
             }
@@ -723,7 +725,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 ViewModel.ToggleProjectSuggestionsCommand.Execute();
 
-                var querySpan = Observer.GetLatestInfo().GetQuerySpan();
+                var querySpan = Observer.GetLatestInfo(TestScheduler).GetQuerySpan();
                 querySpan.Text.Should().Be(expected);
             }
 
@@ -764,7 +766,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 ViewModel.ToggleProjectSuggestionsCommand.Execute();
 
-                var querySpan = Observer.GetLatestInfo().GetQuerySpan();
+                var querySpan = Observer.GetLatestInfo(TestScheduler).GetQuerySpan();
                 querySpan.Text.Should().Be(expected);
             }
 
@@ -828,7 +830,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 ViewModel.ToggleTagSuggestionsCommand.Execute();
 
-                var querySpan = Observer.GetLatestInfo().GetQuerySpan();
+                var querySpan = Observer.GetLatestInfo(TestScheduler).GetQuerySpan();
                 querySpan.Text.Should().Be(expected);
             }
 
@@ -863,16 +865,19 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task RemovesTheHashtagSymbolFromTheDescriptionTextIfAlreadyInTagSuggestionMode(
                 string description, string expected)
             {
-                ViewModel.Prepare();
-                ViewModel.Prepare(DefaultParameter);
-                await ViewModel.OnTextFieldInfoFromView(
+                var viewModel = CreateViewModel();
+                var observer = TestScheduler.CreateObserver<TextFieldInfo>();
+                viewModel.TextFieldInfoObservable.Subscribe(observer);
+                viewModel.Prepare();
+                viewModel.Prepare(DefaultParameter);
+                await viewModel.OnTextFieldInfoFromView(
                     new ProjectSpan(ProjectId, ProjectName, ProjectColor),
                     new QueryTextSpan(description, description.Length)
                 );
 
-                ViewModel.ToggleTagSuggestionsCommand.Execute();
+                viewModel.ToggleTagSuggestionsCommand.Execute();
 
-                var querySpan = Observer.GetLatestInfo().GetQuerySpan();
+                var querySpan = observer.GetLatestInfo(TestScheduler).GetQuerySpan();
                 querySpan.Text.Should().Be(expected);
             }
 
@@ -921,26 +926,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task SetsTheIsEditingDurationDateToTrueWhileTheViewDoesNotReturnAndThenSetsItBackToFalse()
-            {
-                var now = DateTimeOffset.UtcNow;
-                var parameter = new StartTimeEntryParameters(now, "", null);
-                var parameterToReturn = DurationParameter.WithStartAndDuration(now.AddHours(-2), null);
-                var tcs = new TaskCompletionSource<DurationParameter>();
-                NavigationService
-                    .Navigate<EditDurationViewModel, EditDurationParameters, DurationParameter>(Arg.Any<EditDurationParameters>())
-                    .Returns(tcs.Task);
-                ViewModel.Prepare(parameter);
-
-                var toWait = ViewModel.ChangeTimeCommand.ExecuteAsync();
-                ViewModel.IsEditingTime.Should().BeTrue();
-                tcs.SetResult(parameterToReturn);
-                await toWait;
-
-                ViewModel.IsEditingTime.Should().BeFalse();
-            }
-
-            [Fact, LogIfTooSlow]
             public async Task SetsTheStopDateToTheValueReturnedByTheEditDurationViewModelIfUserStoppsTheTimeEntry()
             {
                 var now = DateTimeOffset.UtcNow;
@@ -957,11 +942,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.Prepare(parameter);
 
                 var toWait = ViewModel.ChangeTimeCommand.ExecuteAsync();
-                ViewModel.IsEditingTime.Should().BeTrue();
                 tcs.SetResult(parameterToReturn);
                 await toWait;
 
-                ViewModel.IsEditingTime.Should().BeFalse();
                 ViewModel.DisplayedTime.Should().Be(parameterToReturn.Duration.Value);
 
                 currentTimeSubject.OnNext(now.AddHours(10));
@@ -1388,7 +1371,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     await ViewModel.SelectSuggestionCommand.ExecuteAsync(Suggestion);
 
-                    var projectSpan = Observer.GetLatestInfo().GetProjectSpan();
+                    var projectSpan = Observer.GetLatestInfo(TestScheduler).GetProjectSpan();
                     projectSpan.ProjectId.Should().Be(ProjectId);
                 }
 
@@ -1397,7 +1380,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     await ViewModel.SelectSuggestionCommand.ExecuteAsync(Suggestion);
 
-                    var projectSpan = Observer.GetLatestInfo().GetProjectSpan();
+                    var projectSpan = Observer.GetLatestInfo(TestScheduler).GetProjectSpan();
                     projectSpan.ProjectName.Should().Be(ProjectName);
                 }
 
@@ -1406,7 +1389,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     await ViewModel.SelectSuggestionCommand.ExecuteAsync(Suggestion);
 
-                    var projectSpan = Observer.GetLatestInfo().GetProjectSpan();
+                    var projectSpan = Observer.GetLatestInfo(TestScheduler).GetProjectSpan();
                     projectSpan.ProjectColor.Should().Be(ProjectColor);
                 }
 
@@ -1463,7 +1446,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     await ViewModel.SelectSuggestionCommand.ExecuteAsync(Suggestion);
 
-                    var querySpan = Observer.GetLatestInfo().FirstTextSpan();
+                    var querySpan = Observer.GetLatestInfo(TestScheduler).FirstTextSpan();
                     querySpan.Text.Should().Be("Something ");
                 }
 
@@ -1526,7 +1509,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     await ViewModel.SelectSuggestionCommand.ExecuteAsync(Suggestion);
 
-                    var tags = Observer.GetLatestInfo().Spans.OfType<TagSpan>();
+                    var tags = Observer.GetLatestInfo(TestScheduler).Spans.OfType<TagSpan>();
                     tags.Should().BeEmpty();
                 }
             }
@@ -1545,7 +1528,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     await ViewModel.SelectSuggestionCommand.ExecuteAsync(Suggestion);
 
-                    var querySpan = Observer.GetLatestInfo().FirstTextSpan();
+                    var querySpan = Observer.GetLatestInfo(TestScheduler).FirstTextSpan();
                     querySpan.Text.Should().Be(Description);
                 }
 
@@ -1566,7 +1549,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     await ViewModel.SelectSuggestionCommand.ExecuteAsync(newSuggestion);
 
-                    Observer.GetLatestInfo().WorkspaceId.Should().Be(expectedWorkspaceId);
+                    Observer.GetLatestInfo(TestScheduler).WorkspaceId.Should().Be(expectedWorkspaceId);
                 }
             }
 
@@ -1584,7 +1567,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     await ViewModel.SelectSuggestionCommand.ExecuteAsync(Suggestion);
 
-                    var projectSpan = Observer.GetLatestInfo().GetProjectSpan();
+                    var projectSpan = Observer.GetLatestInfo(TestScheduler).GetProjectSpan();
                     projectSpan.TaskId.Should().Be(TaskId);
                 }
 
@@ -1611,7 +1594,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     await ViewModel.SelectSuggestionCommand.ExecuteAsync(Suggestion);
 
-                    var projectSpan = Observer.GetLatestInfo().GetProjectSpan();
+                    var projectSpan = Observer.GetLatestInfo(TestScheduler).GetProjectSpan();
                     projectSpan.TaskId.Should().BeNull();
                 }
 
@@ -1663,7 +1646,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     await ViewModel.SelectSuggestionCommand.ExecuteAsync(Suggestion);
 
-                    var querySpan = Observer.GetLatestInfo().Spans.OfType<TextSpan>().First();
+                    var querySpan = Observer.GetLatestInfo(TestScheduler).Spans.OfType<TextSpan>().First();
                     querySpan.Text.Should().Be("Something ");
                 }
 
@@ -1672,7 +1655,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     await ViewModel.SelectSuggestionCommand.ExecuteAsync(Suggestion);
 
-                    var tags = Observer.GetLatestInfo().Spans.OfType<TagSpan>();
+                    var tags = Observer.GetLatestInfo(TestScheduler).Spans.OfType<TagSpan>();
                     tags.Should().Contain(t => t.TagId == Suggestion.TagId);
                 }
 
@@ -1694,7 +1677,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     await ViewModel.SelectSuggestionCommand.ExecuteAsync(Suggestion);
 
-                    var querySpan = Observer.GetLatestInfo().FirstTextSpan();
+                    var querySpan = Observer.GetLatestInfo(TestScheduler).FirstTextSpan();
                     querySpan.Text.Should().Be(Suggestion.Symbol);
                 }
             }
@@ -1710,22 +1693,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 NavigationService
                     .Navigate<SelectTimeViewModel, SelectTimeParameters, SelectTimeResultsParameters>(Arg.Any<SelectTimeParameters>())
                     .Returns(tcs.Task);
-            }
-
-            [Fact, LogIfTooSlow]
-            public void SetsIsEditingTimeToTrueWhenItStarts()
-            {
-                ViewModel.SelectTimeCommand.ExecuteAsync(origin);
-
-                ViewModel.IsEditingTime.Should().BeTrue();
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task SetsIsEditingTimeToFalseWhenItEnds()
-            {
-                await callCommandCorrectly();
-
-                ViewModel.IsEditingTime.Should().BeFalse();
             }
 
             [Fact, LogIfTooSlow]
@@ -2093,8 +2060,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public static Task OnTextFieldInfoFromView(this StartTimeEntryViewModel viewModel, params ISpan[] spans)
             => viewModel.OnTextFieldInfoFromView(spans.ToImmutableList());
 
-        public static TextFieldInfo GetLatestInfo(this ITestableObserver<TextFieldInfo> observer)
-            => observer.Messages.Last().Value.Value;
+        public static TextFieldInfo GetLatestInfo(this ITestableObserver<TextFieldInfo> observer, TestScheduler testScheduler)
+        {
+            testScheduler.Start();
+            return observer.Messages.Last().Value.Value;
+        }
 
         public static QueryTextSpan GetQuerySpan(this TextFieldInfo textFieldInfo)
             => textFieldInfo.Spans.OfType<QueryTextSpan>().Single();

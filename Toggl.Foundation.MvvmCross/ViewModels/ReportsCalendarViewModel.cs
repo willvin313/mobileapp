@@ -21,6 +21,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
     public sealed class ReportsCalendarViewModel : MvxViewModel
     {
         private const int monthsToShow = 12;
+
         private static readonly string[] dayHeaders =
         {
             Resources.SundayInitial,
@@ -37,8 +38,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private readonly CalendarMonth initialMonth;
         private readonly ISubject<int> currentPageSubject = new Subject<int>();
-        private readonly ISubject<DateRangeParameter> highlitDateRangeSubject = new Subject<DateRangeParameter>();
-        private readonly ISubject<DateRangeParameter> selectedDateRangeSubject = new Subject<DateRangeParameter>();
+        private readonly ISubject<ReportsDateRangeParameter> highlitDateRangeSubject = new Subject<ReportsDateRangeParameter>();
+        private readonly ISubject<ReportsDateRangeParameter> selectedDateRangeSubject = new Subject<ReportsDateRangeParameter>();
 
         private CalendarDayViewModel startOfSelection;
         private QuickSelectShortcut weeklyQuickSelectShortcut;
@@ -59,11 +60,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public IObservable<IImmutableList<CalendarPageViewModel>> Months { get; }
 
-        public IObservable<DateRangeParameter> SelectedDateRangeObservable { get; }
+        public IObservable<ReportsDateRangeParameter> SelectedDateRangeObservable { get; }
 
         public IObservable<IImmutableList<QuickSelectShortcut>> QuickSelectShortcuts { get; }
 
-        public ReportsCalendarViewModel(ITimeService timeService, ITogglDataSource dataSource)
+        public ReportsCalendarViewModel(ITimeService timeService, ITogglDataSource dataSource, ISchedulerProvider schedulerProvider)
         {
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
@@ -82,17 +83,17 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             DayHeaders = beginningOfWeekObservable
                 .Select(headers)
-                .AsDriver();
+                .AsDriver(schedulerProvider);
 
             SelectedDateRangeObservable = selectedDateRangeSubject
                 .AsObservable()
-                .AsDriver();
+                .AsDriver(schedulerProvider);
 
             CurrentPage = currentPageSubject
                 .StartWith(monthsToShow - 1)
                 .AsObservable()
                 .DistinctUntilChanged()
-                .AsDriver();
+                .AsDriver(schedulerProvider);
 
             var currentMonthInfoObservable = CurrentPage
                 .Select(initialMonth.AddMonths);
@@ -100,32 +101,32 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             ReloadCalendar = SelectedDateRangeObservable
                 .Merge(highlitDateRangeSubject.AsObservable())
                 .SelectUnit()
-                .AsDriver();
+                .AsDriver(schedulerProvider);
 
             CurrentMonthName = currentMonthInfoObservable
                 .Select(month => month.Month)
                 .Select(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName)
-                .AsDriver();
+                .AsDriver(schedulerProvider);
 
             CurrentYear = currentMonthInfoObservable
                 .Select(month => month.Year.ToString())
-                .AsDriver();
+                .AsDriver(schedulerProvider);
 
             QuickSelectShortcuts = beginningOfWeekObservable
                 .Select(createQuickSelectShortcuts)
                 .Do(subscribeToSelectedDateRange)
-                .AsDriver();
+                .AsDriver(schedulerProvider);
 
             Months = beginningOfWeekObservable
                 .Select(calendarPages)
                 .Do(subscribeToSelectedDateRange)
-                .AsDriver();
+                .AsDriver(schedulerProvider);
 
             RowsInCurrentMonth = CurrentPage
                 .CombineLatest(Months, 
                     (currentPage, months) => months[currentPage].RowCount)
                 .DistinctUntilChanged()
-                .AsDriver();
+                .AsDriver(schedulerProvider);
 
             IImmutableList<string> headers(BeginningOfWeek beginningOfWeek)
                 => Enumerable.Range(0, 7)
@@ -164,7 +165,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             if (startOfSelection == null) return;
 
             var date = startOfSelection.DateTime;
-            var dateRange = DateRangeParameter
+            var dateRange = ReportsDateRangeParameter
                 .WithDates(date, date)
                 .WithSource(ReportsSource.Calendar);
             
@@ -183,7 +184,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             {
                 var date = tappedDay.DateTime;
 
-                var dateRange = DateRangeParameter
+                var dateRange = ReportsDateRangeParameter
                     .WithDates(date, date)
                     .WithSource(ReportsSource.Calendar);
                 startOfSelection = tappedDay;
@@ -194,7 +195,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 var startDate = startOfSelection.DateTime;
                 var endDate = tappedDay.DateTime;
 
-                var dateRange = DateRangeParameter
+                var dateRange = ReportsDateRangeParameter
                     .WithDates(startDate, endDate)
                     .WithSource(ReportsSource.Calendar);
                 startOfSelection = null;
@@ -239,7 +240,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             changeDateRange(weeklyQuickSelectShortcut.DateRange);
         }
 
-        private void changeDateRange(DateRangeParameter newDateRange)
+        private void changeDateRange(ReportsDateRangeParameter newDateRange)
         {
             startOfSelection = null;
             selectedDateRangeSubject.OnNext(newDateRange);

@@ -63,6 +63,19 @@ namespace Toggl.Giskard.Fragments
             });
 
             return view;
+<<<<<<< HEAD
+=======
+        }
+
+        private void onDateRangeChanged(ReportsDateRangeParameter dateRange)
+        {
+            var anyShortcutIsSelected = ViewModel.QuickSelectShortcuts.Any(shortcut => shortcut.Selected);
+            if (!anyShortcutIsSelected) return;
+
+            var dateRangeStartDate = dateRange.StartDate;
+            var monthToScroll = ViewModel.Months.IndexOf(month => month.CalendarMonth.Month == dateRangeStartDate.Month);
+            if (monthToScroll == pager.CurrentItem) return;
+>>>>>>> develop
 
             string formatMonthAndYear(string month, string year)
                 => $"{month} {year}";

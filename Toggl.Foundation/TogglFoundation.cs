@@ -27,6 +27,7 @@ namespace Toggl.Foundation
         public ILicenseProvider LicenseProvider { get; }
         public IAnalyticsService AnalyticsService { get; }
         public IBackgroundService BackgroundService { get; }
+        public ISchedulerProvider SchedulerProvider { get; }
         public IPlatformConstants PlatformConstants { get; }
         public IRemoteConfigService RemoteConfigService { get; }
         public IApplicationShortcutCreator ShortcutCreator { get; }
@@ -54,6 +55,7 @@ namespace Toggl.Foundation
             AnalyticsService = builder.AnalyticsService;
             PlatformConstants = builder.PlatformConstants;
             BackgroundService = builder.BackgroundService;
+            SchedulerProvider = builder.SchedulerProvider;
             RemoteConfigService = builder.RemoteConfigService;
             SuggestionProviderContainer = builder.SuggestionProviderContainer;
         }
@@ -73,6 +75,7 @@ namespace Toggl.Foundation
 
             public ILicenseProvider LicenseProvider { get; internal set; }
             public IAnalyticsService AnalyticsService { get; internal set; }
+            public ISchedulerProvider SchedulerProvider { get; internal set; }
             public IRemoteConfigService RemoteConfigService { get; internal set; }
             public IApplicationShortcutCreator ShortcutCreator { get; internal set; }
             public IBackgroundService BackgroundService { get; internal set; }
@@ -88,6 +91,12 @@ namespace Toggl.Foundation
             public Builder WithScheduler(IScheduler scheduler)
             {
                 Scheduler = scheduler;
+                return this;
+            }
+
+            public Builder WithSchedulerProvider(ISchedulerProvider schedulerProvider)
+            {
+                SchedulerProvider = schedulerProvider;
                 return this;
             }
 
@@ -245,6 +254,7 @@ namespace Toggl.Foundation
                 Ensure.Argument.IsNotNull(ShortcutCreator, nameof(ShortcutCreator));
                 Ensure.Argument.IsNotNull(AnalyticsService, nameof(AnalyticsService));
                 Ensure.Argument.IsNotNull(BackgroundService, nameof(BackgroundService));
+                Ensure.Argument.IsNotNull(SchedulerProvider, nameof(SchedulerProvider));
                 Ensure.Argument.IsNotNull(PlatformConstants, nameof(PlatformConstants));
                 Ensure.Argument.IsNotNull(RemoteConfigService, nameof(RemoteConfigService));
                 Ensure.Argument.IsNotNull(SuggestionProviderContainer, nameof(SuggestionProviderContainer));

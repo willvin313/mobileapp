@@ -67,7 +67,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheConstructor : SettingsViewModelTest
         {
             [Theory, LogIfTooSlow]
-            [ClassData(typeof(ElevenParameterConstructorTestData))]
+            [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(
                 bool useUserAgent,
                 bool useDataSource,
@@ -85,8 +85,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var dataSource = useDataSource ? DataSource : null;
                 var mailService = useMailService ? MailService : null;
                 var dialogService = useDialogService ? DialogService : null;
-                var feedbackService = useFeedbackService ? FeedbackService : null;
                 var userPreferences = useUserPreferences ? UserPreferences : null;
+                var feedbackService = useFeedbackService ? FeedbackService : null;
                 var analyticsService = useAnalyticsService ? AnalyticsService : null;
                 var onboardingStorage = useOnboardingStorage ? OnboardingStorage : null;
                 var navigationService = useNavigationService ? NavigationService : null;
@@ -484,17 +484,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
         }
 
-        public sealed class TheSubmitFeedbackMethod : SettingsViewModelTest
-        {
-            [Fact, LogIfTooSlow]
-            public async Task CallsTheFeedbackService()
-            {
-                await ViewModel.SubmitFeedback();
-
-                await FeedbackService.Received().SubmitFeedback();
-            }
-        }
-
         public sealed class TheVersionProperty : SettingsViewModelTest
         {
             [Fact, LogIfTooSlow]
@@ -771,6 +760,30 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 await ViewModel.OpenAboutView();
 
                 await NavigationService.Received().Navigate<AboutViewModel>();
+            }
+        }
+
+        public sealed class TheIsFeedBackSuccessViewShowingProperty : SettingsViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public void EmitsTrueWhenTapOnTheView()
+            {
+                var observer = TestScheduler.CreateObserver<bool>();
+                var viewModel = CreateViewModel();
+
+                viewModel.IsFeedbackSuccessViewShowing.StartWith(true).Subscribe(observer);
+                viewModel.CloseFeedbackSuccessView();
+                observer.Messages.Last().Value.Value.Should().BeFalse();
+            }
+        }
+
+        public sealed class TheSubmitFeedbackUsingEmailMethod : SettingsViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public async Task CallsTheFeedbackService()
+            {
+                await ViewModel.SubmitFeedbackUsingEmail();
+                await FeedbackService.Received().SubmitFeedback();
             }
         }
     }

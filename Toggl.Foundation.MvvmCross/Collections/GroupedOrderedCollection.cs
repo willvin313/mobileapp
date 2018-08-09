@@ -17,8 +17,11 @@ namespace Toggl.Foundation.MvvmCross.Collections
         public bool IsEmpty
             => sections.Count == 0;
 
-        public int Count
+        public int TotalCount
             => sections.Sum(section => section.Count);
+
+        public int Count
+            => sections.Count;
 
         public GroupedOrderedCollection(
             Func<TItem, IComparable> indexKey,
@@ -106,9 +109,9 @@ namespace Toggl.Foundation.MvvmCross.Collections
             }
         }
 
-        public SectionedIndex? UpdateItem(TItem item)
+        public SectionedIndex? UpdateItem(IComparable key, TItem item)
         {
-            var oldIndex = IndexOf(indexKey(item));
+            var oldIndex = IndexOf(key);
 
             if (!oldIndex.HasValue)
                 return null;

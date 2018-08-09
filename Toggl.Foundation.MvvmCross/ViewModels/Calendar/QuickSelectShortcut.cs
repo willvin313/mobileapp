@@ -11,7 +11,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
     public sealed class QuickSelectShortcut
     {
         private readonly ITimeService timeService;
-        private readonly Func<DateTimeOffset, DateRangeParameter> getDateRange;
+        private readonly Func<DateTimeOffset, ReportsDateRangeParameter> getDateRange;
         
         public string Title { get; }
 
@@ -23,9 +23,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public MvxColor BackgroundColor { get; private set;  }
 
-        public DateRangeParameter DateRange => getDateRange(timeService.CurrentDateTime);
+        public ReportsDateRangeParameter DateRange => getDateRange(timeService.CurrentDateTime);
 
-        private QuickSelectShortcut(ITimeService timeService, string title, int pageOffset, Func<DateTimeOffset, DateRangeParameter> getDateRange)
+        private QuickSelectShortcut(ITimeService timeService, string title, int pageOffset, Func<DateTimeOffset, ReportsDateRangeParameter> getDateRange)
         {
             Ensure.Argument.IsNotNull(title, nameof(title));
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
@@ -40,7 +40,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             BackgroundColor = calculateBackgroundColor(false);
         }
 
-        public void OnDateRangeChanged(DateRangeParameter dateRange)
+        public void OnDateRangeChanged(ReportsDateRangeParameter dateRange)
         {
             var internalDateRange = DateRange;
 
@@ -69,7 +69,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 var lastMonth = now.Date.AddMonths(-1);
                 var start = new DateTimeOffset(lastMonth.Year, lastMonth.Month, 1, 0, 0, 0, TimeSpan.Zero);
                 var end = start.AddMonths(1).AddDays(-1);
-                return DateRangeParameter
+                return ReportsDateRangeParameter
                     .WithDates(start, end)
                     .WithSource(ReportsSource.ShortcutLastMonth);
             });
@@ -83,7 +83,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 var difference = (now.DayOfWeek - beginningOfWeek.ToDayOfWeekEnum() + 7) % 7;
                 var start = now.AddDays(-(difference + 7));
                 var end = start.AddDays(6);
-                return DateRangeParameter
+                return ReportsDateRangeParameter
                     .WithDates(start, end)
                     .WithSource(ReportsSource.ShortcutLastWeek);
             });
@@ -96,7 +96,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 var now = currentDate.Date;
                 var start = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
                 var end = start.AddMonths(1).AddDays(-1);
-                return DateRangeParameter
+                return ReportsDateRangeParameter
                     .WithDates(start, end)
                     .WithSource(ReportsSource.ShortcutThisMonth);
             });
@@ -110,7 +110,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 var difference = (now.DayOfWeek - beginningOfWeek.ToDayOfWeekEnum() + 7) % 7;
                 var start = now.AddDays(-difference);
                 var end = start.AddDays(6);
-                return DateRangeParameter
+                return ReportsDateRangeParameter
                     .WithDates(start, end)
                     .WithSource(ReportsSource.ShortcutThisWeek);
             });
@@ -123,7 +123,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 var thisYear = now.Year;
                 var start = new DateTimeOffset(thisYear, 1, 1, 0, 0, 0, TimeSpan.Zero);
                 var end = start.AddYears(1).AddDays(-1);
-                return DateRangeParameter
+                return ReportsDateRangeParameter
                     .WithDates(start, end)
                     .WithSource(ReportsSource.ShortcutThisYear);
             });
@@ -134,7 +134,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             return new QuickSelectShortcut(timeService, Resources.Today, 0, now =>
             {
                 var today = now.Date;
-                return DateRangeParameter
+                return ReportsDateRangeParameter
                     .WithDates(today, today)
                     .WithSource(ReportsSource.ShortcutToday);
             });
@@ -145,7 +145,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             return new QuickSelectShortcut(timeService, Resources.Yesterday, 0, now =>
             {
                 var yesterday = now.Date.AddDays(-1);
-                return DateRangeParameter
+                return ReportsDateRangeParameter
                     .WithDates(yesterday, yesterday)
                     .WithSource(ReportsSource.ShortcutYesterday);
             });

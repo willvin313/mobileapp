@@ -10,5 +10,10 @@
             Section = section;
             Row = row;
         }
+
+        public override string ToString()
+        {
+            return $"{Section}-{Row}";
+        }
     }
 }

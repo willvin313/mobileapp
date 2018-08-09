@@ -5,7 +5,7 @@ using MvvmCross.Platforms.Ios.Binding.Views;
 using System.Collections.Generic;
 
 namespace Toggl.Daneel.Extensions
-{  
+{
     public static class ViewBindingExtensions
     {
 
@@ -30,6 +30,9 @@ namespace Toggl.Daneel.Extensions
         public static string BindConstant(this NSLayoutConstraint self)
             => LayoutConstraintConstantTargetBinding.BindingName;
 
+        public static string BindActive(this NSLayoutConstraint self)
+            => LayoutConstraintActiveTargetBinding.BindingName;
+
         public static string BindFirstResponder(this LoginTextField self)
             => LoginTextFieldFirstResponderTargetBinding.BindingName;
 
@@ -38,7 +41,7 @@ namespace Toggl.Daneel.Extensions
 
         public static string BindAnimatedCurrentPage(this UIScrollView self)
             => ScrollViewAnimatedCurrentPageTargetBinding.BindingName;
-
+            
         public static string BindSpiderVisibility(this SpiderOnARopeView self)
             => SpiderOnARopeViewIsVisibleTargetBinding.BindingName;
 

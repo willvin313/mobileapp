@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -57,6 +58,12 @@ namespace Toggl.Giskard.Services
             });
         }
 
+        public IObservable<T> Select<T>(string title, IDictionary<string, T> options)
+            where T : class
+        {
+            throw new NotImplementedException("This feature has not been implemented in Giskard yet.");
+        }
+
         public IObservable<Unit> Alert(string title, string message, string buttonTitle)
             => Confirm(title, message, buttonTitle, null).Select(_ => Unit.Default);
 
@@ -70,6 +77,8 @@ namespace Toggl.Giskard.Services
                     return Confirm(null, Resources.DiscardEditingChanges, Resources.Discard, Resources.ContinueEditing);
                 case ActionType.DeleteExistingTimeEntry:
                     return Confirm(null, Resources.DeleteThisTimeEntry, Resources.Delete, Resources.Cancel);
+                case ActionType.DiscardFeedback:
+                    return Confirm(null, Resources.Discard, Resources.Discard, Resources.ContinueEditing);
             }
 
             throw new ArgumentOutOfRangeException(nameof(type));

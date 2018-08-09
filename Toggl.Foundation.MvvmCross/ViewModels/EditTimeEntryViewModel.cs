@@ -295,11 +295,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 await interactorFactory.DeleteTimeEntry(Id).Execute();
 
                 analyticsService.DeleteTimeEntry.Track();
-                dataSource.SyncManager.PushSync();
+                dataSource.SyncManager.InitiatePushSync();
                 await navigationService.Close(this);
             }
-            catch (Exception exception)
+            catch
             {
+                // Intentionally left blank
             }
         }
 
@@ -333,7 +334,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             confirmDisposable = dataSource.TimeEntries
                                           .Update(dto)
-                                          .Do(_ => dataSource.SyncManager.PushSync())
+                                          .Do(dataSource.SyncManager.InitiatePushSync)
                                           .Subscribe((Exception ex) => close(), () => close());
         }
 

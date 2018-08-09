@@ -53,14 +53,6 @@ namespace Toggl.Daneel
             return Runtime.GetNSObject<RatingView>(arr.ValueAt(0));
         }
 
-        public override void AwakeFromNib()
-        {
-            base.AwakeFromNib();
-
-            heightConstraint = HeightAnchor.ConstraintEqualTo(1);
-            heightConstraint.Active = true;
-        }
-
         private void updateBindings()
         {
             this.Bind(DataContext.CtaTitle, CtaTitle.BindText());
@@ -77,18 +69,34 @@ namespace Toggl.Daneel
                     .Select(impression => impression.HasValue)
                     .Select(Invert),
                 QuestionView.BindIsVisibleWithFade());
+
+            this.Bind(
+                DataContext
+                    .Impression
+                    .Select(impression => impression.HasValue),
+                CtaViewBottomConstraint.BindActive());
+
             this.Bind(
                 DataContext
                     .Impression
                     .Select(impression => impression.HasValue)
-                    .Select(gotImpression => (nfloat)(gotImpression ? 289 : 262)),
-                heightConstraint.BindConstant());
+                    .Select(Invert),
+                QuestionViewBottomConstraint.BindActive());
 
             this.BindVoid(YesView.Tapped(), () => DataContext.RegisterImpression(true));
             this.BindVoid(NotReallyView.Tapped(), () => DataContext.RegisterImpression(false));
             this.Bind(CtaButton.Tapped(), DataContext.PerformMainAction);
             this.BindVoid(CtaButton.Tapped(), DataContext.Dismiss);
             this.BindVoid(DismissButton.Tapped(), DataContext.Dismiss);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            if (!disposing) return;
+
+            DisposeBag.Dispose();
         }
 
         public override void LayoutSubviews()
@@ -118,5 +126,6 @@ namespace Toggl.Daneel
             view.Layer.ShadowOffset = new CGSize(0, 2);
             view.Layer.ShadowColor = UIColor.Black.CGColor;
         }
+
     }
 }

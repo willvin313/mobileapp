@@ -116,6 +116,12 @@ namespace Toggl.Foundation.MvvmCross.Helper
             public static readonly MvxColor Cursor = lightishGreen;
         }
 
+        public static class NoWorkspace
+        {
+            public static readonly MvxColor ActivityIndicator = lightishGreen;
+            public static readonly MvxColor DisabledCreateWorkspaceButton = new MvxColor(255, 255, 255, 122);
+        }
+
         internal static MvxColor FromHSV(float hue, float saturation, float value)
         {
             int r = 0, g = 0, b = 0;
@@ -233,6 +239,12 @@ namespace Toggl.Foundation.MvvmCross.Helper
             public static readonly MvxColor SyncStatusText = new MvxColor(144, 146, 147);
         }
 
+        public static class Feedback
+        {
+            public static readonly MvxColor Cursor = lightishGreen;
+            public static readonly MvxColor ActivityIndicator = lightishGreen;
+        }
+
         public static class Common
         {
             public static readonly MvxColor PlaceholderText = pinkishGrey;
@@ -288,7 +300,7 @@ namespace Toggl.Foundation.MvvmCross.Helper
         {
             public static readonly MvxColor Border = new MvxColor(232, 232, 232);
         }
-      
+
         public static readonly MvxColor[] DefaultProjectColors =
             Toggl.Foundation.Helper.Color.DefaultProjectColors.Select(MvxColor.ParseHexString).ToArray();
     }

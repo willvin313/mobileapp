@@ -29,7 +29,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheConstructor : ForgotPasswordViewModelTest
         {
             [Theory, LogIfTooSlow]
-            [ClassData(typeof(FourParameterConstructorTestData))]
+            [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(
                 bool useTimeService,
                 bool useLoginManager,
@@ -138,6 +138,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.ResetCommand.CanExecute().Should().BeFalse();
             }
 
+            [Fact, LogIfTooSlow]
             public void CannotExecuteIfIsLoading()
             {
                 ViewModel.Email = ValidEmail;

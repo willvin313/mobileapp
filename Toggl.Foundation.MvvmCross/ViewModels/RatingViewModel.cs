@@ -7,10 +7,12 @@ using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
+using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.MvvmCross.ViewModels.Hints;
 using Toggl.Foundation.Services;
 using Toggl.Multivac;
+using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant;
 using Toggl.PrimeRadiant.Settings;
 
@@ -22,12 +24,13 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly ITimeService timeService;
         private readonly ITogglDataSource dataSource;
         private readonly IRatingService ratingService;
-        private readonly IFeedbackService feedbackService;
         private readonly IAnalyticsService analyticsService;
         private readonly IOnboardingStorage onboardingStorage;
         private readonly IMvxNavigationService navigationService;
+        private readonly ISchedulerProvider schedulerProvider;
 
         private readonly BehaviorSubject<bool?> impressionSubject = new BehaviorSubject<bool?>(null);
+        private readonly ISubject<bool> isFeedbackSuccessViewShowing = new Subject<bool>();
 
         public IObservable<bool?> Impression { get; }
 
@@ -37,35 +40,53 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public IObservable<string> CtaButtonTitle { get; }
 
+        public IObservable<bool> IsFeedbackSuccessViewShowing { get; }
+
         public RatingViewModel(
             ITimeService timeService,
             ITogglDataSource dataSource,
             IRatingService ratingService,
-            IFeedbackService feedbackService,
             IAnalyticsService analyticsService,
             IOnboardingStorage onboardingStorage,
-            IMvxNavigationService navigationService)
+            IMvxNavigationService navigationService,
+            ISchedulerProvider schedulerProvider)
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
             Ensure.Argument.IsNotNull(ratingService, nameof(ratingService));
-            Ensure.Argument.IsNotNull(feedbackService, nameof(feedbackService));
             Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(onboardingStorage, nameof(onboardingStorage));
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
+            Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
 
             this.dataSource = dataSource;
             this.timeService = timeService;
             this.ratingService = ratingService;
-            this.feedbackService = feedbackService;
             this.analyticsService = analyticsService;
             this.onboardingStorage = onboardingStorage;
             this.navigationService = navigationService;
+            this.schedulerProvider = schedulerProvider;
 
-            Impression = impressionSubject.AsObservable();
-            CtaTitle = Impression.Select(ctaTitle);
-            CtaDescription = Impression.Select(ctaDescription);
-            CtaButtonTitle = Impression.Select(ctaButtonTitle);
+            Impression = impressionSubject.AsDriver(this.schedulerProvider);
+
+            CtaTitle = impressionSubject
+                .Select(ctaTitle)
+                .AsDriver(this.schedulerProvider);
+
+            CtaDescription = impressionSubject
+                .Select(ctaDescription)
+                .AsDriver(this.schedulerProvider);
+
+            CtaButtonTitle = impressionSubject
+                .Select(ctaButtonTitle)
+                .AsDriver(this.schedulerProvider);
+
+            IsFeedbackSuccessViewShowing = isFeedbackSuccessViewShowing.AsDriver(this.schedulerProvider);
+        }
+
+        public void CloseFeedbackSuccessView()
+        {
+            isFeedbackSuccessViewShowing.OnNext(false);
         }
 
         public void RegisterImpression(bool isPositive)
@@ -83,7 +104,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             if (impressionIsPositive == null)
                 return string.Empty;
-                
+
             return impressionIsPositive.Value
                    ? Resources.RatingViewPositiveCTATitle
                    : Resources.RatingViewNegativeCTATitle;
@@ -125,7 +146,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             }
             else
             {
-                await feedbackService.SubmitFeedback();
+                var sendFeedbackSucceed = await navigationService.Navigate<SendFeedbackViewModel, bool>();
+                isFeedbackSuccessViewShowing.OnNext(sendFeedbackSucceed);
                 analyticsService.UserFinishedRatingViewSecondStep.Track(RatingViewSecondStepOutcome.FeedbackWasLeft);
                 onboardingStorage.SetRatingViewOutcome(RatingViewOutcome.FeedbackWasLeft, timeService.CurrentDateTime);
             }

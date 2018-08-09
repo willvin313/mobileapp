@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using ColorPlugin = MvvmCross.Plugin.Color.Platforms.Ios.Plugin;
 using VisibilityPlugin = MvvmCross.Plugin.Visibility.Platforms.Ios.Plugin;
+using Toggl.Multivac.Extensions;
 
 namespace Toggl.Daneel
 {
@@ -87,6 +88,7 @@ namespace Toggl.Daneel
             var userAgent = new UserAgent(clientName, version);
             var keyValueStorage = new UserDefaultsStorage();
             var settingsStorage = new SettingsStorage(Version.Parse(version), keyValueStorage);
+            var schedulerProvider = new IOSSchedulerProvider();
 
             var foundation =
                 TogglFoundation
@@ -100,6 +102,7 @@ namespace Toggl.Daneel
                     .WithRatingService<RatingService>()
                     .WithLicenseProvider<LicenseProvider>()
                     .WithAnalyticsService(analyticsService)
+                    .WithSchedulerProvider(schedulerProvider)
                     .WithPlatformConstants(platformConstants)
                     .WithRemoteConfigService<RemoteConfigService>()
                     .WithApiFactory(new ApiFactory(environment, userAgent))

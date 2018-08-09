@@ -75,7 +75,7 @@ namespace Toggl.Foundation.Tests.DataSources
         public sealed class TheConstructor : TimeEntryDataSourceTest
         {
             [Theory, LogIfTooSlow]
-            [ClassData(typeof(ThreeParameterConstructorTestData))]
+            [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(
                 bool useRepository,
                 bool useTimeService,
@@ -148,7 +148,7 @@ namespace Toggl.Foundation.Tests.DataSources
 
                 await TimeEntriesSource.Create(timeEntry);
 
-                Repository.Received().BatchUpdate(
+                await Repository.Received().BatchUpdate(
                     Arg.Any<IEnumerable<(long, IDatabaseTimeEntry)>>(),
                     Arg.Is<Func<IDatabaseTimeEntry, IDatabaseTimeEntry, ConflictResolutionMode>>(conflictResolution => conflictResolution != null),
                     Arg.Is<IRivalsResolver<IDatabaseTimeEntry>>(resolver => resolver != null));

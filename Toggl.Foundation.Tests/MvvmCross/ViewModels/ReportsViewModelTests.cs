@@ -14,9 +14,9 @@ using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Reports;
 using Toggl.Foundation.Tests.Generators;
+using Toggl.Foundation.Tests.Mocks;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
-using Toggl.PrimeRadiant.Models;
 using Xunit;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
@@ -29,10 +29,16 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
             protected IReportsProvider ReportsProvider { get; } = Substitute.For<IReportsProvider>();
 
+            public ReportsViewModelTest()
+            {
+                var workspaceObservable = Observable.Return(new MockWorkspace { Id = WorkspaceId });
+                InteractorFactory.GetDefaultWorkspace().Execute().Returns(workspaceObservable);
+            }
+
             protected override ReportsViewModel CreateViewModel()
             {
                 DataSource.ReportsProvider.Returns(ReportsProvider);
-                return new ReportsViewModel(DataSource, TimeService, NavigationService, InteractorFactory, AnalyticsService);
+                return new ReportsViewModel(DataSource, TimeService, NavigationService, InteractorFactory, AnalyticsService, DialogService);
             }
 
             protected async Task Initialize()
@@ -49,7 +55,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                             block.Set();
                         });
 
-                    ViewModel.Prepare(WorkspaceId);
                     await ViewModel.Initialize();
                     ViewModel.ViewAppeared();
 
@@ -61,21 +66,23 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheConstructor : ReportsViewModelTest
         {
             [Theory, LogIfTooSlow]
-            [ClassData(typeof(FiveParameterConstructorTestData))]
+            [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(bool useDataSource,
                                                         bool useTimeService,
                                                         bool useNavigationService,
                                                         bool useAnalyticsService,
-                                                        bool useInteractorFactory)
+                                                        bool useInteractorFactory,
+                                                        bool useDialogService)
             {
                 var timeService = useTimeService ? TimeService : null;
                 var reportsProvider = useDataSource ? DataSource : null;
                 var navigationService = useNavigationService ? NavigationService : null;
                 var interactorFactory = useInteractorFactory ? InteractorFactory : null;
                 var analyticsService = useAnalyticsService ? AnalyticsService : null;
+                var dialogService = useDialogService ? DialogService : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new ReportsViewModel(reportsProvider, timeService, navigationService, interactorFactory, analyticsService);
+                    () => new ReportsViewModel(reportsProvider, timeService, navigationService, interactorFactory, analyticsService, dialogService);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
@@ -110,7 +117,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 await Initialize();
                 ViewModel.ChangeDateRangeCommand.Execute(
-                    DateRangeParameter.WithDates(start, end));
+                    ReportsDateRangeParameter.WithDates(start, end));
 
                 await delayed;
                 ViewModel.Segments.Count.Should().Be(segments.Length);
@@ -178,7 +185,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ReportsProvider.GetProjectSummary(
                     WorkspaceId, expectedStartDate, expectedStartDate.AddDays(6))
                         .Returns(Observable.Return(new ProjectSummaryReport(new ChartSegment[0], projectsNotSyncedCount)));
-                ViewModel.Prepare(WorkspaceId);
 
                 ViewModel.Initialize().Wait();
 
@@ -191,7 +197,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task IsSetToTrueWhenTheViewIsInitializedBeforeAnyLoadingOfReportsStarts()
             {
-                ViewModel.Prepare(WorkspaceId);
                 await ViewModel.Initialize();
 
                 ViewModel.IsLoading.Should().BeTrue();
@@ -201,7 +206,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task IsSetToTrueWhenAReportIsLoading()
             {
                 var now = DateTimeOffset.Now;
-                var projectsNotSyncedCount = 0;
                 TimeService.CurrentDateTime.Returns(now);
                 ReportsProvider.GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
                     .Returns(Observable.Never<ProjectSummaryReport>());
@@ -231,7 +235,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task IsInitializedToEmptyOrNull()
             {
-                ViewModel.Prepare(WorkspaceId);
                 await ViewModel.Initialize();
 
                 ViewModel.CurrentDateRangeString.Should().BeNullOrEmpty();
@@ -268,7 +271,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var end = new DateTimeOffset(endYear, endMonth, endDay, 0, 0, 0, TimeSpan.Zero);
                 TimeService.CurrentDateTime.Returns(currentDate);
                 ViewModel.ChangeDateRangeCommand.Execute(
-                    DateRangeParameter.WithDates(start, end).WithSource(ReportsSource.Calendar));
+                    ReportsDateRangeParameter.WithDates(start, end).WithSource(ReportsSource.Calendar));
 
                 ViewModel.CurrentDateRangeString.Should().Be($"{Resources.ThisWeek} ▾");
             }
@@ -286,12 +289,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 preferences.DateFormat.Returns(dateFormat);
                 var preferencesSubject = new Subject<IThreadSafePreferences>();
                 DataSource.Preferences.Current.Returns(preferencesSubject.AsObservable());
-                ViewModel.Prepare(0);
                 await ViewModel.Initialize();
                 preferencesSubject.OnNext(preferences);
 
                 ViewModel.ChangeDateRangeCommand.Execute(
-                    DateRangeParameter.WithDates(start, end).WithSource(ReportsSource.Calendar));
+                    ReportsDateRangeParameter.WithDates(start, end).WithSource(ReportsSource.Calendar));
 
                 ViewModel.CurrentDateRangeString.Should().Be(expectedResult);
             }
@@ -485,6 +487,63 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Where(project => project.ProjectName != "Project 1")
                     .Select(segment => segment.Percentage)
                     .ForEach(percentage => percentage.Should().BeGreaterOrEqualTo(5));
+            }
+        }
+
+        public sealed class TheSelectWorkspaceCommand : ReportsViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public async Task ShouldTriggerAReportReload()
+            {
+                await ViewModel.Initialize();
+                var mockWorkspace = new MockWorkspace { Id = WorkspaceId + 1 };
+                DialogService.Select(Arg.Any<string>(), Arg.Any<IDictionary<string, IThreadSafeWorkspace>>())
+                    .Returns(Observable.Return(mockWorkspace));
+
+                await ViewModel.SelectWorkspace.ExecuteAsync();
+
+                await ReportsProvider.Received().GetProjectSummary(Arg.Is(mockWorkspace.Id), Arg.Any<DateTimeOffset>(),
+                    Arg.Any<DateTimeOffset>());
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task ShouldChangeCurrentWorkspaceName()
+            {
+                await ViewModel.Initialize();
+                var mockWorkspace = new MockWorkspace { Id = WorkspaceId + 1, Name = "Selected workspace" };
+                DialogService.Select(Arg.Any<string>(), Arg.Any<IDictionary<string, IThreadSafeWorkspace>>())
+                    .Returns(Observable.Return(mockWorkspace));
+
+                await ViewModel.SelectWorkspace.ExecuteAsync();
+
+                ViewModel.WorkspaceName.Should().Be(mockWorkspace.Name);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task ShouldNotTriggerAReportReloadWhenSelectionIsCancelled()
+            {
+                await ViewModel.Initialize();
+                DialogService.Select(Arg.Any<string>(), Arg.Any<IDictionary<string, IThreadSafeWorkspace>>())
+                    .Returns(Observable.Return<IThreadSafeWorkspace>(null));
+
+                await ViewModel.SelectWorkspace.ExecuteAsync();
+
+                await ReportsProvider.DidNotReceive().GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(),
+                    Arg.Any<DateTimeOffset>());
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task ShouldNotTriggerAReportReloadWhenTheSameWorkspaceIsSelected()
+            {
+                await ViewModel.Initialize();
+                var mockWorkspace = new MockWorkspace { Id = WorkspaceId };
+                DialogService.Select(Arg.Any<string>(), Arg.Any<IDictionary<string, IThreadSafeWorkspace>>())
+                    .Returns(Observable.Return<IThreadSafeWorkspace>(mockWorkspace));
+
+                await ViewModel.SelectWorkspace.ExecuteAsync();
+
+                await ReportsProvider.DidNotReceive().GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(),
+                    Arg.Any<DateTimeOffset>());
             }
         }
     }

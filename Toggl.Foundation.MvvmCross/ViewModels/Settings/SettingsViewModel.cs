@@ -6,13 +6,13 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Text;
 using System.Threading.Tasks;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.DTOs;
+using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Parameters;
@@ -33,9 +33,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
     [Preserve(AllMembers = true)]
     public sealed class SettingsViewModel : MvxViewModel
     {
-        private const string feedbackRecipient = "support@toggl.com";
-
         private readonly ISubject<Unit> loggingOutSubject = new Subject<Unit>();
+        private readonly ISubject<bool> isFeedbackSuccessViewShowing = new Subject<bool>();
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
 
         private readonly UserAgent userAgent;
@@ -66,22 +65,24 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public IObservable<Unit> LoggingOut { get; }
 
         public IObservable<byte[]> UserAvatar { get; }
-        
+
         public IObservable<string> DateFormat { get; }
-        
+
         public IObservable<bool> IsRunningSync { get; }
 
         public IObservable<string> WorkspaceName { get; }
-        
+
         public IObservable<string> DurationFormat { get; }
 
         public IObservable<string> BeginningOfWeek { get; }
-        
+
         public IObservable<bool> IsManualModeEnabled { get; }
 
         public IObservable<bool> UseTwentyFourHourFormat { get; }
 
         public IObservable<IImmutableList<SelectableWorkspaceViewModel>> Workspaces { get; }
+
+        public IObservable<bool> IsFeedbackSuccessViewShowing { get; }
 
         public string Version => $"{userAgent.Version} ({platformConstants.BuildNumber})";
 
@@ -197,6 +198,13 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IsRunningSync
                 .Subscribe(isSyncing => this.isSyncing = isSyncing)
                 .DisposedBy(disposeBag);
+
+            IsFeedbackSuccessViewShowing = isFeedbackSuccessViewShowing.AsObservable();
+        }
+
+        public void CloseFeedbackSuccessView()
+        {
+            isFeedbackSuccessViewShowing.OnNext(false);
         }
 
         public Task GoBack() => navigationService.Close(this);
@@ -204,7 +212,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public Task OpenAboutView()
             => navigationService.Navigate<AboutViewModel>();
 
-        public Task OpenHelpView() => 
+        public Task OpenHelpView() =>
             navigationService.Navigate<BrowserViewModel, BrowserParameters>(
                 BrowserParameters.WithUrlAndTitle(platformConstants.HelpUrl, Resources.Help)
             );
@@ -220,8 +228,16 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             await changeDefaultWorkspace(selectedWorkspaceId);
         }
 
-        public Task SubmitFeedback()
-            => feedbackService.SubmitFeedback();
+        public async Task SubmitFeedback()
+        {
+            var sendFeedbackSucceed = await navigationService.Navigate<SendFeedbackViewModel, bool>();
+            isFeedbackSuccessViewShowing.OnNext(sendFeedbackSucceed);
+        }
+
+        public async Task SubmitFeedbackUsingEmail()
+        {
+            feedbackService.SubmitFeedback();
+        }
 
         public Task SelectDefaultWorkspace(SelectableWorkspaceViewModel workspace)
             => changeDefaultWorkspace(workspace.WorkspaceId);
@@ -286,7 +302,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 return;
 
             await dataSource.User.Update(new EditUserDTO { BeginningOfWeek = newBeginningOfWeek });
-            dataSource.SyncManager.PushSync();
+            dataSource.SyncManager.InitiatePushSync();
         }
 
         public async Task SelectDurationFormat()
@@ -325,8 +341,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             => isLoggingOut == false && progress == SyncProgress.Syncing;
 
         private async Task updatePreferences(
-            New<DurationFormat> durationFormat = default(New<DurationFormat>), 
-            New<DateFormat> dateFormat = default(New<DateFormat>), 
+            New<DurationFormat> durationFormat = default(New<DurationFormat>),
+            New<DateFormat> dateFormat = default(New<DateFormat>),
             New<TimeFormat> timeFormat = default(New<TimeFormat>))
         {
             var preferencesDto = new EditPreferencesDTO
@@ -337,7 +353,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             };
 
             await dataSource.Preferences.Update(preferencesDto);
-            dataSource.SyncManager.PushSync();
+            dataSource.SyncManager.InitiatePushSync();
         }
 
         private async Task changeDefaultWorkspace(long selectedWorkspaceId)
@@ -345,11 +361,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             if (selectedWorkspaceId == currentUser.DefaultWorkspaceId) return;
 
             await dataSource.User.UpdateWorkspace(selectedWorkspaceId);
-            dataSource.SyncManager.PushSync();
+            dataSource.SyncManager.InitiatePushSync();
         }
 
         private WorkspaceToSelectableWorkspaceLambda selectableWorkspacesFromWorkspaces(IThreadSafeUser user)
-            => workspaces 
+            => workspaces
                 => workspaces
                     .Select(workspace => new SelectableWorkspaceViewModel(workspace, user.DefaultWorkspaceId == workspace.Id))
                     .ToImmutableList();

@@ -35,8 +35,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
             protected IThreadSafeTimeEntry TheTimeEntry;
 
-            protected IAnalyticsService AnalyticsService { get; } = Substitute.For<IAnalyticsService>();
-
             protected void ConfigureEditedTimeEntry(DateTimeOffset now, bool isRunning = false)
             {
                 var te = TimeEntry.Builder.Create(Id)
@@ -66,7 +64,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheConstructor : EditTimeEntryViewModelTest
         {
             [Theory, LogIfTooSlow]
-            [ClassData(typeof(SevenParameterConstructorTestData))]
+            [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(
                 bool useDataSource,
                 bool useNavigationService,
@@ -290,7 +288,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     await ViewModel.DeleteCommand.ExecuteAsync();
 
                     InteractorFactory.Received().DeleteTimeEntry(Arg.Any<long>());
-                    InteractorFactory.DeleteTimeEntry(Arg.Any<long>()).Received().Execute();
+                    await InteractorFactory.DeleteTimeEntry(Arg.Any<long>()).Received().Execute();
                 }
 
                 [Fact, LogIfTooSlow]

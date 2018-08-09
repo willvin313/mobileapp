@@ -36,7 +36,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
             IsStartOfSelectedPeriod = false;
         }
 
-        public void OnSelectedRangeChanged(DateRangeParameter selectedRange)
+        public void OnSelectedRangeChanged(ReportsDateRangeParameter selectedRange)
         {
             var isSelected = selectedRange != null
                 && selectedRange.StartDate.Date <= DateTime.Date
