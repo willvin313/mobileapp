@@ -66,8 +66,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public ReportsCalendarViewModel(ITimeService timeService, ITogglDataSource dataSource, ISchedulerProvider schedulerProvider)
         {
-            Ensure.Argument.IsNotNull(timeService, nameof(timeService));
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
+            Ensure.Argument.IsNotNull(timeService, nameof(timeService));
+            Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
 
             this.timeService = timeService;
             this.dataSource = dataSource;

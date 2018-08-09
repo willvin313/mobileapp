@@ -139,7 +139,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public void IsInitializedTo11()
             {
-                ViewModel.CurrentPage.Should().Be(11);
+                ViewModel.CurrentPage.FirstAsync().Should().Be(11);
             }
         }
 
