@@ -425,7 +425,6 @@
     <Compile Include="Extensions\RxExtensions\TextViewExtensions.cs" />
     <Compile Include="Extensions\RxExtensions\RecyclerExtensions.cs" />
     <Compile Include="Extensions\RxExtensions\PagerExtensions.cs" />
-    <Compile Include="Activities\MainActivity.ViewBinds.cs" />
     <Compile Include="Startup\HandlerScheduler.cs" />
   </ItemGroup>
   <ItemGroup>

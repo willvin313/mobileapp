@@ -20,7 +20,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
     [Preserve(AllMembers = true)]
     public sealed class ReportsCalendarViewModel : MvxViewModel
     {
-        private const int monthsToShow = 12;
+        public const int MonthsToShow = 12;
 
         private static readonly string[] dayHeaders =
         {
@@ -73,7 +73,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             this.dataSource = dataSource;
 
             var currentDate = timeService.CurrentDateTime;
-            initialMonth = new CalendarMonth(currentDate.Year, currentDate.Month).AddMonths(-monthsToShow + 1);
+            initialMonth = new CalendarMonth(currentDate.Year, currentDate.Month).AddMonths(-MonthsToShow + 1);
 
             var beginningOfWeekObservable =
                 dataSource.User.Current
@@ -90,7 +90,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .AsDriver(schedulerProvider);
 
             CurrentPage = currentPageSubject
-                .StartWith(monthsToShow - 1)
+                .StartWith(MonthsToShow - 1)
                 .AsObservable()
                 .DistinctUntilChanged()
                 .AsDriver(schedulerProvider);
@@ -137,7 +137,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             {
                 var now = timeService.CurrentDateTime;
 
-                return Enumerable.Range(0, monthsToShow)
+                return Enumerable.Range(0, MonthsToShow)
                     .Select(initialMonth.AddMonths)
                     .Select(calendarMonth => new CalendarPageViewModel(calendarMonth, beginningOfWeek, now))
                     .ToImmutableList();
@@ -175,7 +175,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public void QuickSelect(QuickSelectShortcut quickSelectShortCut)
         {
             changeDateRange(quickSelectShortCut.DateRange);
-            currentPageSubject.OnNext(monthsToShow - 1 - quickSelectShortCut.PageOffset);
+            currentPageSubject.OnNext(MonthsToShow - 1 - quickSelectShortCut.PageOffset);
         }
 
         public void CalendarDayTapped(CalendarDayViewModel tappedDay)

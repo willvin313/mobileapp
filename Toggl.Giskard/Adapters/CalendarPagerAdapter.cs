@@ -73,6 +73,8 @@ namespace Toggl.Giskard.Adapters
 
         public override void NotifyDataSetChanged()
         {
+            base.NotifyDataSetChanged();
+
             foreach (var adapter in adapters.Values)
             {
                 adapter?.NotifyDataSetChanged();

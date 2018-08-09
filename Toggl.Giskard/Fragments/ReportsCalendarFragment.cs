@@ -18,14 +18,12 @@ namespace Toggl.Giskard.Fragments
     [MvxFragmentPresentation(typeof(ReportsViewModel), Resource.Id.ReportsCalendarContainer, AddToBackStack = false)]
     public sealed partial class ReportsCalendarFragment : ReactiveFragment<ReportsCalendarViewModel>
     {
-        private int rowHeight;
-
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             base.OnCreateView(inflater, container, savedInstanceState);
             var view = InflateAndInitializeViews(Resource.Layout.ReportsCalendarFragment);
 
-            rowHeight = Activity.Resources.DisplayMetrics.WidthPixels / 7;
+            var rowHeight = Activity.Resources.DisplayMetrics.WidthPixels / 7;
 
             var currentMonthObservable = ViewModel.CurrentMonthName.CombineLatest(ViewModel.CurrentYear, formatMonthAndYear);
 
@@ -62,20 +60,9 @@ namespace Toggl.Giskard.Fragments
                 calendarAdapter.NotifyDataSetChanged();
             });
 
+            pager.CurrentItem = ReportsCalendarViewModel.MonthsToShow;
+
             return view;
-<<<<<<< HEAD
-=======
-        }
-
-        private void onDateRangeChanged(ReportsDateRangeParameter dateRange)
-        {
-            var anyShortcutIsSelected = ViewModel.QuickSelectShortcuts.Any(shortcut => shortcut.Selected);
-            if (!anyShortcutIsSelected) return;
-
-            var dateRangeStartDate = dateRange.StartDate;
-            var monthToScroll = ViewModel.Months.IndexOf(month => month.CalendarMonth.Month == dateRangeStartDate.Month);
-            if (monthToScroll == pager.CurrentItem) return;
->>>>>>> develop
 
             string formatMonthAndYear(string month, string year)
                 => $"{month} {year}";

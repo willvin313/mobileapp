@@ -5,14 +5,9 @@ using Android.Runtime;
 using Android.Support.V7.Widget;
 using Android.Views;
 using MvvmCross;
-using MvvmCross.Droid.Support.V7.RecyclerView;
 using MvvmCross.Platforms.Android;
-<<<<<<< HEAD
 using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
 using Toggl.Giskard.ViewHolders;
-=======
-using MvvmCross.Platforms.Android.Binding.BindingContext;
->>>>>>> develop
 
 namespace Toggl.Giskard.Adapters
 {
