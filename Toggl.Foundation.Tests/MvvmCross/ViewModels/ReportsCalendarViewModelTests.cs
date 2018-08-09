@@ -22,20 +22,21 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public abstract class ReportsCalendarViewModelTest : BaseViewModelTests<ReportsCalendarViewModel>
         {
             protected override ReportsCalendarViewModel CreateViewModel()
-                => new ReportsCalendarViewModel(TimeService, DataSource);
+                => new ReportsCalendarViewModel(TimeService, DataSource, SchedulerProvider);
         }
 
         public sealed class TheConstructor : ReportsCalendarViewModelTest
         {
             [Theory, LogIfTooSlow]
             [ConstructorData]
-            public void ThrowsIfAnyOfTheArgumentsIsNull(bool useTimeService, bool useDataSource)
+            public void ThrowsIfAnyOfTheArgumentsIsNull(bool useTimeService, bool useDataSource, bool useSchedulerProvider)
             {
-                var timeService = useTimeService ? TimeService : null;
                 var dataSource = useDataSource ? DataSource : null;
+                var timeService = useTimeService ? TimeService : null;
+                var schedulerProvider = useSchedulerProvider ? SchedulerProvider : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new ReportsCalendarViewModel(timeService, dataSource);
+                    () => new ReportsCalendarViewModel(timeService, dataSource, schedulerProvider);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
@@ -213,7 +214,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
         public abstract class TheCalendarDayTappedCommand : ReportsCalendarViewModelTest
         {
-            public TheCalendarDayTappedCommand()
+            protected TheCalendarDayTappedCommand()
             {
                 var now = new DateTimeOffset(2017, 12, 19, 1, 2, 3, TimeSpan.Zero);
                 TimeService.CurrentDateTime.Returns(now);

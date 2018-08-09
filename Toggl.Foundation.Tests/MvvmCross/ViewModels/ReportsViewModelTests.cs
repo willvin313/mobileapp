@@ -29,7 +29,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
             protected IReportsProvider ReportsProvider { get; } = Substitute.For<IReportsProvider>();
 
-            public ReportsViewModelTest()
+            protected ReportsViewModelTest()
             {
                 var workspaceObservable = Observable.Return(new MockWorkspace { Id = WorkspaceId });
                 InteractorFactory.GetDefaultWorkspace().Execute().Returns(workspaceObservable);
@@ -38,7 +38,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             protected override ReportsViewModel CreateViewModel()
             {
                 DataSource.ReportsProvider.Returns(ReportsProvider);
-                return new ReportsViewModel(DataSource, TimeService, NavigationService, InteractorFactory, AnalyticsService, DialogService);
+                return new ReportsViewModel(DataSource, TimeService, NavigationService, InteractorFactory, AnalyticsService, DialogService, SchedulerProvider);
             }
 
             protected async Task Initialize()
@@ -72,17 +72,19 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                                                         bool useNavigationService,
                                                         bool useAnalyticsService,
                                                         bool useInteractorFactory,
-                                                        bool useDialogService)
+                                                        bool useDialogService,
+                                                        bool useSchedulerProvider)
             {
                 var timeService = useTimeService ? TimeService : null;
                 var reportsProvider = useDataSource ? DataSource : null;
+                var dialogService = useDialogService ? DialogService : null;
+                var analyticsService = useAnalyticsService ? AnalyticsService : null;
                 var navigationService = useNavigationService ? NavigationService : null;
                 var interactorFactory = useInteractorFactory ? InteractorFactory : null;
-                var analyticsService = useAnalyticsService ? AnalyticsService : null;
-                var dialogService = useDialogService ? DialogService : null;
+                var schedulerProvider = useSchedulerProvider ? SchedulerProvider : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new ReportsViewModel(reportsProvider, timeService, navigationService, interactorFactory, analyticsService, dialogService);
+                    () => new ReportsViewModel(reportsProvider, timeService, navigationService, interactorFactory, analyticsService, dialogService, schedulerProvider);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
@@ -338,7 +340,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
         public sealed class TheSegmentsProperty : ReportsViewModelTest
         {
-            private readonly int projectsNotSyncedCount = 0;
+            private const int projectsNotSyncedCount = 0;
 
             [Fact]
             public async Task DoesNotGroupProjectSegmentsWithPercentageGreaterThanOrEqualFivePercent()
