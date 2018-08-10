@@ -47,7 +47,7 @@ namespace Toggl.Giskard.Adapters
         protected override BaseRecyclerViewHolder<CalendarDayViewModel> CreateViewHolder(ViewGroup parent, LayoutInflater inflater)
         {
             var itemView = inflater.Inflate(Resource.Layout.ReportsCalendarFragmentDayCell, parent, false);
-            return new CalendarRecylerViewHolder(itemView);
+            return new CalendarRecyclerViewHolder(itemView);
         }
     }
 }

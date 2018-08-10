@@ -419,7 +419,7 @@
     </Compile>
     <Compile Include="Fragments\ReactiveFragment.cs" />
     <Compile Include="ViewHolders\WorkspaceSelectionViewHolder.cs" />
-    <Compile Include="ViewHolders\CalendarRecylerViewHolder.cs" />
+    <Compile Include="ViewHolders\CalendarRecyclerViewHolder.cs" />
     <Compile Include="Extensions\RxExtensions\CompoundButtonExtensions.cs" />
     <Compile Include="Extensions\RxExtensions\ViewExtensions.cs" />
     <Compile Include="Extensions\RxExtensions\TextViewExtensions.cs" />

@@ -25,7 +25,6 @@ namespace Toggl.Giskard.Fragments
             shortcutsRecyclerView = view.FindViewById<RecyclerView>(ReportsCalendarFragmentShortcuts);
 
             calendarCurrentMonthTextView = view.FindViewById<TextView>(ReportsCalendarCurrentMonthTitle);
-
         }
     }
 }

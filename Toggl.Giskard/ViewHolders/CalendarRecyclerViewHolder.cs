@@ -7,11 +7,11 @@ using TogglColors = Toggl.Foundation.MvvmCross.Helper.Color;
 
 namespace Toggl.Giskard.ViewHolders
 {
-    public sealed class CalendarRecylerViewHolder : BaseRecyclerViewHolder<CalendarDayViewModel>
+    public sealed class CalendarRecyclerViewHolder : BaseRecyclerViewHolder<CalendarDayViewModel>
     {
         private CalendarDayView calendarDayView;
 
-        public CalendarRecylerViewHolder(View itemView)
+        public CalendarRecyclerViewHolder(View itemView)
             : base(itemView)
         {
         }

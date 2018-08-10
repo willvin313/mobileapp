@@ -29,7 +29,6 @@ namespace Toggl.Giskard.Fragments
 
             var calendarAdapter = new CalendarPagerAdapter(Activity, ViewModel.CalendarDayTapped);
             pager.Adapter = calendarAdapter;
-            pager.SetCurrentItem(11, false);
 
             var shortcutAdapter = new SimpleAdapter<QuickSelectShortcut>(
                 Resource.Layout.ReportsCalendarShortcutCell,

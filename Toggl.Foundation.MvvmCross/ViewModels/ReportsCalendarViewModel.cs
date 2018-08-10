@@ -38,8 +38,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private readonly CalendarMonth initialMonth;
         private readonly ISubject<int> currentPageSubject = new Subject<int>();
-        private readonly ISubject<ReportsDateRangeParameter> highlitDateRangeSubject = new Subject<ReportsDateRangeParameter>();
         private readonly ISubject<ReportsDateRangeParameter> selectedDateRangeSubject = new Subject<ReportsDateRangeParameter>();
+        private readonly ISubject<ReportsDateRangeParameter> highlightedDateRangeSubject = new Subject<ReportsDateRangeParameter>();
 
         private CalendarDayViewModel startOfSelection;
         private QuickSelectShortcut weeklyQuickSelectShortcut;
@@ -100,7 +100,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .Select(initialMonth.AddMonths);
 
             ReloadCalendar = SelectedDateRangeObservable
-                .Merge(highlitDateRangeSubject.AsObservable())
+                .Merge(highlightedDateRangeSubject.AsObservable())
                 .SelectUnit()
                 .AsDriver(schedulerProvider);
 
@@ -189,7 +189,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     .WithDates(date, date)
                     .WithSource(ReportsSource.Calendar);
                 startOfSelection = tappedDay;
-                highlitDateRangeSubject.OnNext(dateRange);
+                highlightedDateRangeSubject.OnNext(dateRange);
             }
             else
             {
@@ -209,7 +209,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             calendarDisposeBag?.Dispose();
             calendarDisposeBag = new CompositeDisposable();
 
-            var highlightObservable = highlitDateRangeSubject.AsObservable();
+            var highlightObservable = highlightedDateRangeSubject.AsObservable();
 
             foreach (var month in months)
             {

@@ -2,12 +2,12 @@
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reactive.Linq;
-using CoreGraphics;
 using MvvmCross.Binding.BindingContext;
 using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Daneel.ViewSources;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Multivac.Extensions;
 using UIKit;
 
 namespace Toggl.Daneel.ViewControllers
@@ -16,6 +16,9 @@ namespace Toggl.Daneel.ViewControllers
     public partial class ReportsCalendarViewController : ReactiveViewController<ReportsCalendarViewModel>, IUICollectionViewDelegate
     {
         private bool calendarInitialized;
+
+        private UILabel[] headerLabels
+            => new[] { DayHeader0, DayHeader1, DayHeader2, DayHeader3, DayHeader4, DayHeader5, DayHeader6 };
 
         public ReportsCalendarViewController()
             : base(nameof(ReportsCalendarViewController))
@@ -36,7 +39,7 @@ namespace Toggl.Daneel.ViewControllers
             QuickSelectCollectionView.Source = quickSelectCollectionViewSource;
 
             //Updates
-            this.Bind(ViewModel.ReloadCalendar, range =>
+            this.BindVoid(ViewModel.ReloadCalendar, () =>
             {
                 CalendarCollectionView.ReloadData();
                 QuickSelectCollectionView.ReloadData();
@@ -56,13 +59,9 @@ namespace Toggl.Daneel.ViewControllers
 
         private void setHeaders(IImmutableList<string> headers)
         {
-            DayHeader0.Text = headers[0];
-            DayHeader1.Text = headers[1];
-            DayHeader2.Text = headers[2];
-            DayHeader3.Text = headers[3];
-            DayHeader4.Text = headers[4];
-            DayHeader5.Text = headers[5];
-            DayHeader6.Text = headers[6];
+            headerLabels
+                .Indexed()
+                .ForEach((label, index) => label.Text = headers[index]);
         }
 
         public override void DidMoveToParentViewController(UIViewController parent)
