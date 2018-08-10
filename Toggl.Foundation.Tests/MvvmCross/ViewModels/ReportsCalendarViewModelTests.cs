@@ -137,9 +137,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheCurrentPageProperty : ReportsCalendarViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public void IsInitializedTo11()
+            public async Task IsInitializedToTheNumberOfMonthsMinusOne()
             {
-                ViewModel.CurrentPage.FirstAsync().Should().Be(11);
+                TestScheduler.Start();
+                var currentPage = await ViewModel.CurrentPage.FirstAsync();
+
+                currentPage.Should().Be(ReportsCalendarViewModel.MonthsToShow - 1);
             }
         }
 
