@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
 using CoreGraphics;
-using Toggl.Foundation.MvvmCross.Helper;
 using UIKit;
 
 namespace Toggl.Daneel.Extensions
@@ -19,10 +18,10 @@ namespace Toggl.Daneel.Extensions
             })
             .DistinctUntilChanged();
 
-        public static Action<int> BindCurrentPage(this UIScrollView scrollView) => page =>
+        public static Action<int> BindCurrentPage(this UIScrollView scrollView, bool animated = false) => page =>
         {
             var scrollPoint = new CGPoint(scrollView.Frame.Size.Width * page, 0);
-            scrollView.SetContentOffset(scrollPoint, false);
+            scrollView.SetContentOffset(scrollPoint, animated);
         };
     }
 }
