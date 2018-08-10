@@ -43,23 +43,10 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
             protected async Task Initialize()
             {
-                using (var block = new AutoResetEvent(false))
-                {
-                    NavigationService
-                        .When(service => service.Navigate(Arg.Any<ReportsCalendarViewModel>()))
-                        .Do(async callInfo =>
-                        {
-                            var calendarViewModel = callInfo.Arg<ReportsCalendarViewModel>();
-                            calendarViewModel.Prepare();
-                            await calendarViewModel.Initialize();
-                            block.Set();
-                        });
+                await ViewModel.Initialize();
 
-                    await ViewModel.Initialize();
-                    ViewModel.ViewAppeared();
-
-                    block.WaitOne();
-                }
+                TestScheduler.Start();
+                ViewModel.ChangeDateRangeCommand.Execute(ReportsDateRangeParameter.WithDates(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow));
             }
         }
 
@@ -345,7 +332,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact]
             public async Task DoesNotGroupProjectSegmentsWithPercentageGreaterThanOrEqualFivePercent()
             {
-                ChartSegment[] segments =
+                var segments = new[]
                 {
                     new ChartSegment("Project 1", "Client 1", 2, 2, 0, "#ffffff"),
                     new ChartSegment("Project 2", "Client 2", 2, 2, 0, "#ffffff"),
@@ -354,7 +341,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     new ChartSegment("Project 5", "Client 5", 56, 56, 0, "#ffffff")
                 };
 
-                TimeService.CurrentDateTime.Returns(new DateTimeOffset(2018, 05, 15, 12, 00, 00, TimeSpan.Zero));
+                var now = new DateTimeOffset(2018, 05, 15, 12, 00, 00, TimeSpan.Zero);
+                TimeService.CurrentDateTime.Returns(now);
                 ReportsProvider.GetProjectSummary(WorkspaceId, Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
                     .Returns(Observable.Return(new ProjectSummaryReport(segments, projectsNotSyncedCount)));
 
