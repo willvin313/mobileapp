@@ -7,6 +7,9 @@ using CoreGraphics;
 using Foundation;
 using MvvmCross.Binding.BindingContext;
 using MvvmCross.Platforms.Ios.Binding;
+using MvvmCross.Platforms.Ios.Views;
+using MvvmCross.WeakSubscription;
+using MvvmCross.Plugin.Color;
 using MvvmCross.Platforms.Ios.Presenters.Attributes;
 using MvvmCross.Plugin.Color.Platforms.Ios;
 using MvvmCross.Plugin.Visibility;
@@ -30,7 +33,6 @@ using static Toggl.Foundation.MvvmCross.Helper.Animation;
 
 namespace Toggl.Daneel.ViewControllers
 {
-    [MvxRootPresentation(WrapInNavigationController = true)]
     public partial class MainViewController : ReactiveViewController<MainViewModel>
     {
         private const float showCardDelay = 0.1f;
@@ -40,11 +42,9 @@ namespace Toggl.Daneel.ViewControllers
         private const float spiderHingeHeight = 2;
 
         private const float tooltipOffset = 7;
-        private const float emptyViewTopMargin = 32;
 
         private readonly UIView spiderContainerView = new UIView();
         private readonly SpiderOnARopeView spiderBroView = new SpiderOnARopeView();
-        private readonly UIButton reportsButton = new UIButton(new CGRect(0, 0, 30, 40));
         private readonly UIButton settingsButton = new UIButton(new CGRect(0, 0, 30, 40));
         private readonly UIButton syncFailuresButton = new UIButton(new CGRect(0, 0, 30, 40));
         private readonly UIImageView titleImage = new UIImageView(UIImage.FromBundle("togglLogo"));
@@ -145,7 +145,6 @@ namespace Toggl.Daneel.ViewControllers
             TimeEntriesLogTableView.CustomRefreshControl = refreshControl;
 
             //Commands
-            bindingSet.Bind(reportsButton).To(vm => vm.OpenReportsCommand);
             bindingSet.Bind(settingsButton).To(vm => vm.OpenSettingsCommand);
             bindingSet.Bind(StopTimeEntryButton).To(vm => vm.StopTimeEntryCommand);
             bindingSet.Bind(StartTimeEntryButton).To(vm => vm.StartTimeEntryCommand);
@@ -245,7 +244,6 @@ namespace Toggl.Daneel.ViewControllers
             NavigationItem.RightBarButtonItems = new[]
             {
                 new UIBarButtonItem(settingsButton),
-                new UIBarButtonItem(reportsButton)
             };
 
 #if DEBUG
@@ -360,7 +358,6 @@ namespace Toggl.Daneel.ViewControllers
             StartTimeEntryButton.Transform = CGAffineTransform.MakeScale(0.01f, 0.01f);
 
             //Prepare Navigation bar images
-            reportsButton.SetImage(UIImage.FromBundle("icReports"), UIControlState.Normal);
             settingsButton.SetImage(UIImage.FromBundle("icSettings"), UIControlState.Normal);
             syncFailuresButton.SetImage(UIImage.FromBundle("icWarning"), UIControlState.Normal);
 
@@ -469,7 +466,7 @@ namespace Toggl.Daneel.ViewControllers
             emptyStateView.WidthAnchor.ConstraintEqualTo(TimeEntriesLogTableView.WidthAnchor).Active = true;
             emptyStateView.HeightAnchor.ConstraintEqualTo(TimeEntriesLogTableView.HeightAnchor).Active = true;
             emptyStateView.CenterYAnchor.ConstraintEqualTo(TimeEntriesLogTableView.CenterYAnchor).Active = true;
-            emptyStateView.TopAnchor.ConstraintEqualTo(TimeEntriesLogTableView.TopAnchor, emptyViewTopMargin).Active = true;
+            emptyStateView.TopAnchor.ConstraintEqualTo(TimeEntriesLogTableView.TopAnchor).Active = true;
         }
 
         private void prepareOnboarding()

@@ -35,6 +35,12 @@ namespace Toggl.Daneel.Presentation
             TimingFunction = Animation.Curves.SharpCurve.ToMediaTimingFunction()
         };
 
+        private UITabBarController mainTabBarController
+            => UIApplication.SharedApplication.KeyWindow?.RootViewController as UITabBarController;
+
+        public UIViewController TopViewController
+            => getPresentedViewController(mainTabBarController);
+
         public TogglPresenter(IUIApplicationDelegate applicationDelegate, UIWindow window)
             : base(applicationDelegate, window)
         {
@@ -140,15 +146,28 @@ namespace Toggl.Daneel.Presentation
 
         public override void Show(MvxViewModelRequest request)
         {
-            var navigationController = UIApplication.SharedApplication.KeyWindow?.RootViewController as MvxNavigationController;
-            var topViewController = navigationController == null
+            var topViewController = mainTabBarController == null
                 ? null
-                : getPresentedViewController(navigationController.TopViewController) as MvxViewController;
+                : getPresentedViewController(mainTabBarController.SelectedViewController) as MvxViewController;
 
             //Don't show the same view twice
             if (topViewController?.ViewModel?.GetType() == request.ViewModelType)
                 return;
-                
+
+            if (request.ViewModelType == typeof(MainViewModel))
+            {
+                mainTabBarController.SelectedIndex = 0;
+                (mainTabBarController.ViewControllers[0] as UINavigationController).PopToRootViewController(false);
+                return;
+            }
+
+            if (request.ViewModelType == typeof(ReportsViewModel))
+            {
+                mainTabBarController.SelectedIndex = 1;
+                (mainTabBarController.ViewControllers[1] as UINavigationController).PopToRootViewController(false);
+                return;
+            }
+
             base.Show(request);
         }
 
@@ -178,10 +197,11 @@ namespace Toggl.Daneel.Presentation
             {
                 case ReloadLogHint _:
                 {
-                    var mainViewController =
-                        MasterNavigationController
-                            ?.ChildViewControllers
-                            .FirstOrDefault(vc => vc is MainViewController) as MainViewController;
+                    var mainViewController = mainTabBarController
+                        .ViewControllers
+                        .Cast<UINavigationController>()
+                        .SelectMany(nav => nav.ViewControllers)
+                        .FirstOrDefault(vc => vc is MainViewController) as MainViewController;
 
                     mainViewController?.Reload();
 
@@ -189,7 +209,8 @@ namespace Toggl.Daneel.Presentation
                 }
 
                 case ToggleCalendarVisibilityHint calendarHint:
-                    if (MasterNavigationController?.TopViewController is ReportsViewController reportsViewController)
+
+                    if ((mainTabBarController.SelectedViewController as UINavigationController).TopViewController is ReportsViewController reportsViewController)
                     {
                         if (calendarHint.ForceHide || reportsViewController.CalendarIsVisible)
                         {
@@ -204,7 +225,7 @@ namespace Toggl.Daneel.Presentation
 
                 case ToggleRatingViewVisibilityHint ratingViewVisibilityHint:
                     {
-                        if (MasterNavigationController?.TopViewController is MainViewController mainViewController)
+                        if ((mainTabBarController.SelectedViewController as UINavigationController).TopViewController is MainViewController mainViewController)
                         {
                             if (ratingViewVisibilityHint.ForceHide)
                                 mainViewController.HideRatingView();
@@ -218,17 +239,21 @@ namespace Toggl.Daneel.Presentation
             base.ChangePresentation(hint);
         }
 
-        public UIViewController TopViewController
-            => getPresentedViewController(MasterNavigationController);
-
         private UIViewController getPresentedViewController(UIViewController current)
             => current.PresentedViewController == null || current.PresentedViewController.IsBeingDismissed
             ? current
             : getPresentedViewController(current.PresentedViewController);
 
-
         private T findViewController<T>()
-            => MasterNavigationController.ViewControllers.OfType<T>().Single();
+        {
+            var tabControllers = mainTabBarController.ViewControllers;
+            var viewControllers = new List<UIViewController>();
+            foreach (UINavigationController nav in tabControllers)
+            {
+                viewControllers.AddRange(nav.ViewControllers);
+            }
+            return viewControllers.AsEnumerable().OfType<T>().Single();
+        }
 
         private Dictionary<Type, INestedPresentationInfo> createNestedPresentationInfo()
             => new Dictionary<Type, INestedPresentationInfo>

@@ -524,6 +524,10 @@
     <ImageAsset Include="Resources\Images.xcassets\icWarning.imageset\icWarning.png" />
     <ImageAsset Include="Resources\Images.xcassets\icWarning.imageset\icWarning%402x.png" />
     <ImageAsset Include="Resources\Images.xcassets\icWarning.imageset\icWarning%403x.png" />
+    <ImageAsset Include="Resources\Images.xcassets\icTime.imageset\Contents.json" />
+    <ImageAsset Include="Resources\Images.xcassets\icTime.imageset\icTime.png" />
+    <ImageAsset Include="Resources\Images.xcassets\icTime.imageset\icTime%402x.png" />
+    <ImageAsset Include="Resources\Images.xcassets\icTime.imageset\icTime%403x.png" />
     <ImageAsset Include="Resources\Images.xcassets\icWorkspace.imageset\Contents.json" />
     <ImageAsset Include="Resources\Images.xcassets\icWorkspace.imageset\icWorkspace.png" />
     <ImageAsset Include="Resources\Images.xcassets\icWorkspace.imageset\icWorkspace%402x.png" />
@@ -1004,6 +1008,7 @@
       <DependentUpon>ReportsCalendarViewCell.cs</DependentUpon>
     </Compile>
     <Compile Include="Extensions\UIKitRxExtensions\UIScrollViewRxExtensions.cs" />
+    <Compile Include="ViewControllers\MainTabBarController.cs" />
     <Compile Include="Startup\NSRunLoopScheduler.cs" />
     <Compile Include="Converters\LambdaConverter.cs" />
     <Compile Include="Views\SnackBar.cs" />
@@ -1071,6 +1076,7 @@
     <Folder Include="Resources\Images.xcassets\paws.imageset\" />
     <Folder Include="Resources\Images.xcassets\icBackNoPadding.imageset\" />
     <Folder Include="Resources\Images.xcassets\icWarning.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icTime.imageset\" />
     <Folder Include="Resources\Images.xcassets\icIllustrationErrorWorkspace.imageset\" />
   </ItemGroup>
   <ItemGroup>

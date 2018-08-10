@@ -23,7 +23,6 @@ namespace Toggl.Daneel.Suggestions
         private const float titleSize = 12;
         private const float sideMargin = 16;
         private const float suggestionHeight = 64;
-        private const float emptyHeight = 32;
         private const float distanceAbowTitleLabel = 20;
         private const float distanceBelowTitleLabel = 16;
         private const float distanceBetweenSuggestions = 12;
@@ -64,7 +63,7 @@ namespace Toggl.Daneel.Suggestions
             this.DelayBind(() =>
             {
                 var heightConverter = new CollectionSizeToHeightConverter<Suggestion>(
-                    emptyHeight: emptyHeight,
+                    emptyHeight: 0,
                     heightPerElement: suggestionHeight + distanceBetweenSuggestions,
                     additionalHeight: distanceAbowTitleLabel
                                     + distanceBelowTitleLabel
