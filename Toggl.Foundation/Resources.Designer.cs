@@ -107,6 +107,12 @@ namespace Toggl.Foundation {
             }
         }
         
+        public static string Ok {
+            get {
+                return ResourceManager.GetString("Ok", resourceCulture);
+            }
+        }
+        
         public static string SignUpTitle {
             get {
                 return ResourceManager.GetString("SignUpTitle", resourceCulture);
@@ -308,12 +314,6 @@ namespace Toggl.Foundation {
         public static string DifferentWorkspaceAlertMessage {
             get {
                 return ResourceManager.GetString("DifferentWorkspaceAlertMessage", resourceCulture);
-            }
-        }
-        
-        public static string Ok {
-            get {
-                return ResourceManager.GetString("Ok", resourceCulture);
             }
         }
         
@@ -812,6 +812,18 @@ namespace Toggl.Foundation {
         public static string RatingViewNegativeCTAButtonTitle {
             get {
                 return ResourceManager.GetString("RatingViewNegativeCTAButtonTitle", resourceCulture);
+            }
+        }
+        
+        public static string ReportTooLongTitle {
+            get {
+                return ResourceManager.GetString("ReportTooLongTitle", resourceCulture);
+            }
+        }
+        
+        public static string ReportTooLongDescription {
+            get {
+                return ResourceManager.GetString("ReportTooLongDescription", resourceCulture);
             }
         }
         

@@ -3,30 +3,37 @@ using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Android.Support.V7.App;
 using MvvmCross;
 using MvvmCross.Platforms.Android;
 using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross.Services;
-using System.Linq;
+using Android.App;
+using Android.OS;
+using MvvmCross.Platforms.Android.Views;
 using Toggl.Giskard.Views;
 using Toggl.Multivac.Extensions;
+using AlertDialog = Android.Support.V7.App.AlertDialog;
 using Object = Java.Lang.Object;
 
 namespace Toggl.Giskard.Services
 {
     public sealed class DialogService : Object, IDialogService
     {
+        private readonly long delayBeforeLookingForTopActivityAgain = 300;
+
         public IObservable<bool> Confirm(string title, string message, string confirmButtonText, string dismissButtonText)
         {
-            var activity = Mvx.Resolve<IMvxAndroidCurrentTopActivity>().Activity;
-
             return Observable.Create<bool>(observer =>
             {
-                activity.RunOnUiThread(() =>
+                void showDialogIfActivityIsThere(Activity activity)
                 {
-                    var builder = new AlertDialog.Builder(activity, Resource.Style.TogglDialog)
-                        .SetMessage(message)
+                    if (activity == null || activity.IsFinishing)
+                    {
+                        observer.CompleteWith(false);
+                        return;
+                    }
+
+                    var builder = new AlertDialog.Builder(activity, Resource.Style.TogglDialog).SetMessage(message)
                         .SetPositiveButton(confirmButtonText, (s, e) => observer.CompleteWith(true));
 
                     if (!string.IsNullOrWhiteSpace(title))
@@ -43,10 +50,31 @@ namespace Toggl.Giskard.Services
                     dialog.CancelEvent += (s, e) => observer.CompleteWith(false);
 
                     dialog.Show();
-                });
+                }
+
+                tryToRunOnTopActivity(showDialogIfActivityIsThere);
 
                 return Disposable.Empty;
             });
+        }
+
+        private void tryToRunOnTopActivity(Action<Activity> action)
+        {
+            var runningTopActivity = findRunningTopActivity();
+
+            runningTopActivity?.RunOnUiThread(() => action(runningTopActivity));
+
+            if (runningTopActivity == null)
+            {
+                var handler = new Handler(MvxAndroidApplication.Instance.MainLooper);
+                handler.PostDelayed(() => action(findRunningTopActivity()), delayBeforeLookingForTopActivityAgain);
+            }
+        }
+
+        private Activity findRunningTopActivity()
+        {
+            var topActivity = Mvx.Resolve<IMvxAndroidCurrentTopActivity>() as QueryableMvxLifecycleMonitorCurrentTopActivity;
+            return topActivity?.FindNonFinishingCurrentActivity();
         }
 
         public IObservable<T> Select<T>(string title, IEnumerable<(string ItemName, T Item)> options, int initialSelectionIndex = 0)

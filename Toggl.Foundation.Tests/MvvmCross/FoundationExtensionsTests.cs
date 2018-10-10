@@ -99,9 +99,9 @@ namespace Toggl.Foundation.Tests.MvvmCross
             var actualFeedbackService = useFeedbackService ? Substitute.For<IFeedbackService>() : null;
             var actualOnboardingStorage = useOnboardingStorage ? Substitute.For<IOnboardingStorage>() : null;
             var actualNavigationService = useNavigationService ? Substitute.For<IForkingNavigationService>() : null;
+            var actualLastTimeUsageStorage = useLastTimeUsageStorage ? Substitute.For<ILastTimeUsageStorage>() : null;
             var actualApiErrorHandlingService = useApiErrorHandlingService ? Substitute.For<IErrorHandlingService>() : null;
             var actualAccessRestrictionStorage = useAccessRestrictionStorage ? Substitute.For<IAccessRestrictionStorage>() : null;
-            var actualLastTimeUsageStorage = useLastTimeUsageStorage ? Substitute.For<ILastTimeUsageStorage>() : null;
             var actualPermissionsService = usePermissionsService ? Substitute.For<IPermissionsService>() : null;
             var actualCalendarService = useCalendarService ? Substitute.For<ICalendarService>() : null;
 
@@ -192,8 +192,10 @@ namespace Toggl.Foundation.Tests.MvvmCross
                     .WithPlatformConstants(platformConstants)
                     .WithNotificationService(notificationService)
                     .WithRemoteConfigService(remoteConfigService)
+                    .WithIntentDonationService(IntentDonationService)
                     .WithApplicationShortcutCreator(applicationShortcutCreator)
                     .WithSuggestionProviderContainer(suggestionProviderContainer)
+                    .WithPrivateSharedStorageService(PrivateSharedStorageService)
                     .Build();
     }
 }

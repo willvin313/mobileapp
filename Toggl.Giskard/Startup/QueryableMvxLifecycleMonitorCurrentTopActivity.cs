@@ -62,6 +62,20 @@ namespace Toggl.Giskard
             return activityToReturn;
         }
 
+         public Activity FindNonFinishingCurrentActivity()
+         {
+             var weakReferenceToActivity = activities.FirstOrDefault(activityInfo =>
+             {
+                 activityInfo.Value.Activity.TryGetTarget(out var activity);
+                 return activityInfo.Value.IsCurrent && activity?.IsFinishing == false;
+             });
+
+             Activity activityToReturn = null;
+             weakReferenceToActivity.Value?.Activity?.TryGetTarget(out activityToReturn);
+
+             return activityToReturn;
+         }
+
         private Activity GetCurrentActivity()
         {
             Activity activity = null;

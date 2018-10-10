@@ -225,7 +225,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             DeleteCommand = new MvxAsyncCommand(delete);
             ConfirmCommand = new MvxCommand(confirm);
             SaveCommand = new MvxCommand(save);
-            CloseCommand = new MvxAsyncCommand(closeWithConfirmation);
+            CloseCommand = new MvxAsyncCommand(CloseWithConfirmation);
 
             StopCommand = new MvxCommand(stopTimeEntry, () => IsTimeEntryRunning);
             StopTimeEntryCommand = new MvxAsyncCommand<SelectTimeOrigin>(onStopTimeEntryCommand);
@@ -344,16 +344,17 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .Subscribe((Exception ex) => close(), () => close());
         }
 
-        private async Task closeWithConfirmation()
+        public async Task<bool> CloseWithConfirmation()
         {
             if (isDirty)
             {
                 var shouldDiscard = await dialogService.ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
                 if (!shouldDiscard)
-                    return;
+                    return false;
             }
 
             await close();
+            return true;
         }
 
         private Task close()

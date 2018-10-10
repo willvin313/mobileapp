@@ -308,3 +308,13 @@ Toggl.Giskard*/Resources/Resource.designer.cs
 # macOS Rider creates this .dll folders
 Toggl.Giskard/\*Undefined\*Tools
 Toggl.PrimeRadiant.Realm/\*Undefined\*Tools
+
+# Xcode
+xcuserdata/
+
+# Siri IntentStaticLib stuff
+Toggl.Daneel.IntentStaticLib/bo/
+Toggl.Daneel.IntentStaticLib/build/
+Toggl.Daneel.IntentStaticLib/libToggl.Daneel.IntentStaticLib-arm64.a
+Toggl.Daneel.IntentStaticLib/libToggl.Daneel.IntentStaticLib-i386.a
+Toggl.Daneel.IntentStaticLib/libToggl.Daneel.IntentStaticLib-armv7.a

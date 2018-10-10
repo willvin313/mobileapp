@@ -22,11 +22,12 @@ using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Foundation.MvvmCross.Onboarding.EditView;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using UIKit;
+using System.Threading.Tasks;
 
 namespace Toggl.Daneel.ViewControllers
 {
     [ModalCardPresentation]
-    public partial class EditTimeEntryViewController : MvxViewController<EditTimeEntryViewModel>
+    public partial class EditTimeEntryViewController : MvxViewController<EditTimeEntryViewModel>, IDismissableViewController
     {
         private const float nonScrollableContentHeight = 116f;
 
@@ -62,7 +63,6 @@ namespace Toggl.Daneel.ViewControllers
         {
             base.ViewDidLoad();
 
-            setupDismissingByTappingOnBackground();
             prepareViews();
             prepareOnboarding();
 
@@ -257,6 +257,11 @@ namespace Toggl.Daneel.ViewControllers
             adjustHeight();
         }
 
+        public async Task<bool> Dismiss()
+        {
+            return await ViewModel.CloseWithConfirmation();
+        }
+
         private void prepareViews()
         {
             DurationLabel.Font = DurationLabel.Font.GetMonospacedDigitFont();
@@ -286,15 +291,6 @@ namespace Toggl.Daneel.ViewControllers
         {
             var topOffset = (textView.Bounds.Height - textView.ContentSize.Height) / 2;
             textView.ContentInset = new UIEdgeInsets(topOffset, 0, 0, 0);
-        }
-
-        private void setupDismissingByTappingOnBackground()
-        {
-            if (PresentationController is ModalPresentationController modalPresentationController)
-            {
-                var tapToDismiss = new UITapGestureRecognizer(() => ViewModel.CloseCommand.Execute());
-                modalPresentationController.AdditionalContentView.AddGestureRecognizer(tapToDismiss);
-            }
         }
 
         private void prepareOnboarding()

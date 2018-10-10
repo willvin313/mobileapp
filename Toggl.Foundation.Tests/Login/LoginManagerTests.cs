@@ -10,7 +10,7 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
-using Toggl.Foundation.Interactors;
+using Toggl.Foundation.Services;
 using Toggl.Foundation.Login;
 using Toggl.Foundation.Shortcuts;
 using Toggl.Foundation.Tests.Generators;
@@ -52,10 +52,11 @@ namespace Toggl.Foundation.Tests.Login
             protected ITogglDataSource CreateDataSource(ITogglApi api) => DataSource;
             protected virtual IScheduler CreateScheduler => Scheduler;
             protected IAnalyticsService AnalyticsService { get; } = Substitute.For<IAnalyticsService>();
+            protected IPrivateSharedStorageService PrivateSharedStorageService { get; } = Substitute.For<IPrivateSharedStorageService>();
 
             protected LoginManagerTest()
             {
-                LoginManager = new LoginManager(ApiFactory, Database, GoogleService, ApplicationShortcutCreator, AccessRestrictionStorage, AnalyticsService, CreateDataSource, CreateScheduler);
+                LoginManager = new LoginManager(ApiFactory, Database, GoogleService, ApplicationShortcutCreator, AccessRestrictionStorage, AnalyticsService, PrivateSharedStorageService, CreateDataSource, CreateScheduler);
 
                 Api.User.Get().Returns(Observable.Return(User));
                 Api.User.SignUp(Email, Password, TermsAccepted, CountryId).Returns(Observable.Return(User));
@@ -83,7 +84,8 @@ namespace Toggl.Foundation.Tests.Login
                 bool useApplicationShortcutCreator,
                 bool useCreateDataSource,
                 bool useScheduler,
-                bool useAnalyticsService)
+                bool useAnalyticsService,
+                bool usePrivateSharedStorageService)
             {
                 var database = useDatabase ? Database : null;
                 var apiFactory = useApiFactory ? ApiFactory : null;
@@ -93,9 +95,10 @@ namespace Toggl.Foundation.Tests.Login
                 var shortcutCreator = useApplicationShortcutCreator ? ApplicationShortcutCreator : null;
                 var testScheduler = useScheduler ? Scheduler : null;
                 var analyticsService = useAnalyticsService ? AnalyticsService : null;
+                var privateSharedStorageService = usePrivateSharedStorageService ? PrivateSharedStorageService : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new LoginManager(apiFactory, database, googleService, shortcutCreator, accessRestrictionStorage, analyticsService, createDataSource, testScheduler);
+                    () => new LoginManager(apiFactory, database, googleService, shortcutCreator, accessRestrictionStorage, analyticsService, privateSharedStorageService, createDataSource, testScheduler);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
@@ -389,6 +392,22 @@ namespace Toggl.Foundation.Tests.Login
 
                 AnalyticsService.UserIsMissingApiToken.Received().Track(Arg.Is(LoginSignupAuthenticationMethod.SignUp));
             }
+
+            [Fact, LogIfTooSlow]
+            public async Task SavesTheApiTokenToPrivateSharedStorage()
+            {
+                await LoginManager.SignUp(Email, Password, TermsAccepted, CountryId);
+
+                PrivateSharedStorageService.Received().SaveApiToken(Arg.Any<string>());
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task SavesTheUserIdToPrivateSharedStorage()
+            {
+                await LoginManager.SignUp(Email, Password, TermsAccepted, CountryId);
+
+                PrivateSharedStorageService.Received().SaveUserId(Arg.Any<long>());
+            }
         }
 
         public sealed class TheRefreshTokenMethod : LoginManagerTest
@@ -443,6 +462,22 @@ namespace Toggl.Foundation.Tests.Login
                 await LoginManager
                         .RefreshToken(Password)
                         .SingleAsync();
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task SavesTheApiTokenToPrivateSharedStorage()
+            {
+                await LoginManager.RefreshToken(Password);
+
+                PrivateSharedStorageService.Received().SaveApiToken(Arg.Any<string>());
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task SavesTheUserIdToPrivateSharedStorage()
+            {
+                await LoginManager.RefreshToken(Password);
+
+                PrivateSharedStorageService.Received().SaveUserId(Arg.Any<long>());
             }
         }
 
@@ -528,6 +563,22 @@ namespace Toggl.Foundation.Tests.Login
                 }
 
                 AnalyticsService.UserIsMissingApiToken.Received().Track(Arg.Is(LoginSignupAuthenticationMethod.LoginGoogle));
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task SavesTheApiTokenToPrivateSharedStorage()
+            {
+                await LoginManager.LoginWithGoogle();
+
+                PrivateSharedStorageService.Received().SaveApiToken(Arg.Any<string>());
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task SavesTheUserIdToPrivateSharedStorage()
+            {
+                await LoginManager.LoginWithGoogle();
+
+                PrivateSharedStorageService.Received().SaveUserId(Arg.Any<long>());
             }
         }
 

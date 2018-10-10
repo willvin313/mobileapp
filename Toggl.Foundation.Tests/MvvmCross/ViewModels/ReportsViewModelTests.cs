@@ -40,7 +40,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             protected override ReportsViewModel CreateViewModel()
             {
                 DataSource.ReportsProvider.Returns(ReportsProvider);
-                return new ReportsViewModel(DataSource, TimeService, NavigationService, InteractorFactory, AnalyticsService, DialogService, SchedulerProvider);
+                return new ReportsViewModel(DataSource, TimeService, NavigationService, InteractorFactory, AnalyticsService, DialogService, IntentDonationService, SchedulerProvider);
             }
 
             protected async Task Initialize()
@@ -75,6 +75,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                                                         bool useAnalyticsService,
                                                         bool useInteractorFactory,
                                                         bool useDialogService,
+                                                        bool useIntentDonationService,
                                                         bool useSchedulerProvider)
             {
                 var timeService = useTimeService ? TimeService : null;
@@ -83,10 +84,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var interactorFactory = useInteractorFactory ? InteractorFactory : null;
                 var analyticsService = useAnalyticsService ? AnalyticsService : null;
                 var dialogService = useDialogService ? DialogService : null;
+                var intentDonationService = useIntentDonationService ? IntentDonationService : null;
                 var schedulerProvider = useSchedulerProvider ? SchedulerProvider : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new ReportsViewModel(reportsProvider, timeService, navigationService, interactorFactory, analyticsService, dialogService, schedulerProvider);
+                    () => new ReportsViewModel(reportsProvider, timeService, navigationService, interactorFactory, analyticsService, dialogService, intentDonationService, schedulerProvider);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();

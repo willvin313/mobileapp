@@ -6,12 +6,25 @@ using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Multivac;
 using UIKit;
 using static System.Math;
+using Toggl.Daneel.ViewControllers;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Toggl.Daneel.Presentation.Transition
 {
     public sealed class ModalPresentationController : UIPresentationController
     {
         private readonly Action onDismissedCallback;
+        private readonly UIImpactFeedbackGenerator feedbackGenerator;
+
+        private readonly nfloat backgroundAlpha = 0.8f;
+        private const double returnAnimationDuration = 0.1;
+        private const double impactThreshold = 0.4;
+
+        private CGPoint originalCenter;
+        private double keyboardHeight;
+
+        private List<NSObject> observers = new List<NSObject>();
 
         private nfloat maximumHeight
         {
@@ -43,10 +56,30 @@ namespace Toggl.Daneel.Presentation.Transition
 
             this.onDismissedCallback = onDismissedCallback;
 
-            var recognizer = new UITapGestureRecognizer(dismiss);
+            var recognizer = new UITapGestureRecognizer(() => dismiss());
             AdditionalContentView.AddGestureRecognizer(recognizer);
 
-            NSNotificationCenter.DefaultCenter.AddObserver(UIApplication.WillChangeStatusBarFrameNotification, onStatusBarFrameChanged);
+            var dismissBySwipingDown = new UIPanGestureRecognizer(handleSwipe);
+            presentedViewController.View.AddGestureRecognizer(dismissBySwipingDown);
+
+            feedbackGenerator = new UIImpactFeedbackGenerator(UIImpactFeedbackStyle.Light);
+
+            observers.AddRange(new[]
+            {
+                NSNotificationCenter.DefaultCenter.AddObserver(UIApplication.WillChangeStatusBarFrameNotification, onStatusBarFrameChanged),
+                UIKeyboard.Notifications.ObserveDidShow(keyboardVisibilityChanged),
+                UIKeyboard.Notifications.ObserveDidHide(keyboardVisibilityChanged)
+            });
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            if (!disposing) return;
+
+            observers.ForEach(NSNotificationCenter.DefaultCenter.RemoveObserver);
+            observers.Clear();
         }
 
         public override void PresentationTransitionWillBegin()
@@ -61,11 +94,11 @@ namespace Toggl.Daneel.Presentation.Transition
             var coordinator = PresentedViewController.GetTransitionCoordinator();
             if (coordinator == null)
             {
-                dimmingView.Alpha = 0.8f;
+                dimmingView.Alpha = backgroundAlpha;
                 return;
             }
 
-            coordinator.AnimateAlongsideTransition(_ => dimmingView.Alpha = 0.8f, null);
+            coordinator.AnimateAlongsideTransition(_ => dimmingView.Alpha = backgroundAlpha, null);
         }
 
         public override void DismissalTransitionWillBegin()
@@ -114,6 +147,9 @@ namespace Toggl.Daneel.Presentation.Transition
         {
             get
             {
+                if (ContainerView == null)
+                    return CGRect.Empty;
+
                 var containerSize = ContainerView.Bounds.Size;
                 var frame = CGRect.Empty;
                 frame.Size = GetSizeForChildContentContainer(PresentedViewController, containerSize);
@@ -123,15 +159,67 @@ namespace Toggl.Daneel.Presentation.Transition
             }
         }
 
-        private void dismiss()
+        private async void handleSwipe(UIPanGestureRecognizer recognizer)
         {
+            var translation = recognizer.TranslationInView(recognizer.View);
+            var height = FrameOfPresentedViewInContainerView.Size.Height - keyboardHeight;
+            var percent = (nfloat)Max(0, translation.Y / height);
+
+            switch (recognizer.State)
+            {
+                case UIGestureRecognizerState.Began:
+                    originalCenter = recognizer.View.Center;
+                    feedbackGenerator.Prepare();
+                    break;
+                case UIGestureRecognizerState.Changed:
+                    var center = new CGPoint(originalCenter.X, Max(originalCenter.Y, originalCenter.Y + translation.Y));
+                    recognizer.View.Center = center;
+                    dimmingView.Alpha = backgroundAlpha * (1 - percent);
+                    break;
+                case UIGestureRecognizerState.Ended:
+                case UIGestureRecognizerState.Cancelled:
+                    if (percent > impactThreshold && await dismiss())
+                    {
+                        feedbackGenerator.ImpactOccurred();
+                    }
+                    else
+                    {
+                        resetPosition(recognizer);
+                    }
+                    break;
+            }
+        }
+
+        private async Task<bool> dismiss()
+        {
+            if (PresentedViewController is IDismissableViewController dismissableViewController)
+            {
+                if (await dismissableViewController.Dismiss() == false)
+                    return false;
+            }
+
             PresentedViewController.DismissViewController(true, null);
             onDismissedCallback();
+            return true;
+        }
+
+        private void resetPosition(UIGestureRecognizer recognizer)
+        {
+            UIView.Animate(returnAnimationDuration, () =>
+            {
+                dimmingView.Alpha = backgroundAlpha;
+                recognizer.View.Center = originalCenter;
+            });
         }
 
         private void onStatusBarFrameChanged(NSNotification notification)
         {
             ContainerView?.SetNeedsLayout();
+        }
+
+        private void keyboardVisibilityChanged(object sender, UIKeyboardEventArgs e)
+        {
+            keyboardHeight = e.FrameEnd.Size.Height;
         }
     }
 }

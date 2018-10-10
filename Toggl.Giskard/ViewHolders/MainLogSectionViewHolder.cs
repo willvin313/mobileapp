@@ -7,6 +7,7 @@ using Android.Widget;
 using Toggl.Foundation.Extensions;
 using Toggl.Foundation.MvvmCross.Transformations;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Multivac.Extensions;
 
 namespace Toggl.Giskard.ViewHolders
 {
@@ -37,7 +38,7 @@ namespace Toggl.Giskard.ViewHolders
             var firstItem = Item.First();
             mainLogHeaderTitle.Text = DateToTitleString.Convert(firstItem.StartTime.Date);
 
-            var totalDuration = Item.Aggregate(TimeSpan.Zero, (acc, vm) => acc + (vm.Duration ?? TimeSpan.Zero));
+            var totalDuration = Item.Sum(vm => vm.Duration);
             mainLogHeaderDuration.Text = totalDuration.ToFormattedString(firstItem.DurationFormat);
         }
     }

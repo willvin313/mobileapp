@@ -1,4 +1,5 @@
 using System;
+using System.Reactive;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 
@@ -10,5 +11,8 @@ namespace Toggl.Foundation
         Task RunAfterDelay(TimeSpan delay, Action action);
         IObservable<DateTimeOffset> MidnightObservable { get; }
         IObservable<DateTimeOffset> CurrentDateTimeObservable { get; }
+        IObservable<Unit> SignificantTimeChangeObservable { get; }
+
+        void SignificantTimeChanged();
     }
 }

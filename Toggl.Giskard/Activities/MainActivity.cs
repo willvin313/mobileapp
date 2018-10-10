@@ -4,17 +4,22 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Android.App;
+using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Support.Design.Widget;
+using Android.Support.V4.Content;
 using Android.Support.V7.Widget;
 using Android.Support.V7.Widget.Helper;
 using Android.Views;
 using MvvmCross.Droid.Support.V7.AppCompat;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
+using Toggl.Foundation.MvvmCross.Collections.Changes;
+using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Sync;
 using Toggl.Giskard.Adapters;
+using Toggl.Giskard.BroadcastReceivers;
 using Toggl.Giskard.Extensions;
 using Toggl.Giskard.Extensions.Reactive;
 using Toggl.Giskard.Helper;
@@ -90,7 +95,16 @@ namespace Toggl.Giskard.Activities
 
             this.Bind(ViewModel.TimeEntriesCount, timeEntriesCountSubject);
 
+            ViewModel.ShouldReloadTimeEntryLog
+                    .VoidSubscribe(reload)
+                    .DisposedBy(DisposeBag);
+
             setupOnboardingSteps();
+        }
+
+        private void reload()
+        {
+            mainRecyclerAdapter.NotifyDataSetChanged();
         }
 
         private void setupLayoutManager(MainRecyclerAdapter mainAdapter)

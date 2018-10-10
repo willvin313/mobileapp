@@ -1,6 +1,7 @@
 ﻿using System;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.MvvmCross.Parameters;
+using Toggl.Foundation.Services;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar.QuickSelectShortcuts
 {
@@ -8,7 +9,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar.QuickSelectShort
         : ReportsCalendarBaseQuickSelectShortcut
     {
         public ReportsCalendarLastMonthQuickSelectShortcut(ITimeService timeService)
-            : base(timeService, Resources.LastMonth)
+            : base(timeService, Resources.LastMonth, ReportPeriod.LastMonth)
         {
         }
 

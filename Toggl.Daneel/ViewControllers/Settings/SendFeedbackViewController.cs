@@ -1,4 +1,7 @@
 ﻿using System.Reactive.Linq;
+using System.Threading.Tasks;
+using CoreGraphics;
+using Foundation;
 using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Extensions.Reactive;
@@ -12,7 +15,7 @@ using static Toggl.Multivac.Extensions.CommonFunctions;
 namespace Toggl.Daneel.ViewControllers.Settings
 {
     [ModalCardPresentation]
-    public sealed partial class SendFeedbackViewController : ReactiveViewController<SendFeedbackViewModel>
+    public sealed partial class SendFeedbackViewController : KeyboardAwareViewController<SendFeedbackViewModel>, IDismissableViewController
     {
 
         public SendFeedbackViewController()
@@ -44,10 +47,29 @@ namespace Toggl.Daneel.ViewControllers.Settings
             this.Bind(ViewModel.IsLoading, UIApplication.SharedApplication.Rx().NetworkActivityIndicatorVisible());
         }
 
+        protected override void KeyboardWillShow(object sender, UIKeyboardEventArgs e)
+        {
+            UIEdgeInsets contentInsets = new UIEdgeInsets(0, 0, e.FrameEnd.Height, 0);
+            FeedbackTextView.ContentInset = contentInsets;
+            FeedbackTextView.ScrollIndicatorInsets = contentInsets;
+        }
+
+        protected override void KeyboardWillHide(object sender, UIKeyboardEventArgs e)
+        {
+            FeedbackTextView.ContentInset = UIEdgeInsets.Zero;
+            FeedbackTextView.ScrollIndicatorInsets = UIEdgeInsets.Zero;
+        }
+
         public override void ViewWillAppear(bool animated)
         {
             base.ViewWillAppear(animated);
             IndicatorView.StartSpinning();
+        }
+
+        public async Task<bool> Dismiss()
+        {
+            await ViewModel.CloseButtonTapped.Execute();
+            return true;
         }
 
         private void prepareViews()

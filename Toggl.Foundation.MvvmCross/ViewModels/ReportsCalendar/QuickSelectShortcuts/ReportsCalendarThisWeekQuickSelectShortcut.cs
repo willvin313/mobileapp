@@ -1,5 +1,6 @@
 ﻿using Toggl.Foundation.Analytics;
 using Toggl.Foundation.MvvmCross.Parameters;
+using Toggl.Foundation.Services;
 using Toggl.Multivac;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar.QuickSelectShortcuts
@@ -11,7 +12,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar.QuickSelectShort
 
         public ReportsCalendarThisWeekQuickSelectShortcut
             (ITimeService timeService, BeginningOfWeek beginningOfWeek)
-            : base(timeService, Resources.ThisWeek)
+            : base(timeService, Resources.ThisWeek, ReportPeriod.ThisWeek)
         {
             this.beginningOfWeek = beginningOfWeek;
         }

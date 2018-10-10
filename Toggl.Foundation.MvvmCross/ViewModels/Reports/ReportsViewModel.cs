@@ -24,6 +24,7 @@ using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.MvvmCross.ViewModels.Hints;
 using Toggl.Foundation.MvvmCross.ViewModels.Reports;
 using Toggl.Foundation.Reports;
+using Toggl.Foundation.Services;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.Multivac.Models.Reports;
@@ -34,7 +35,7 @@ using CommonFunctions = Toggl.Multivac.Extensions.CommonFunctions;
 namespace Toggl.Foundation.MvvmCross.ViewModels.Reports
 {
     [Preserve(AllMembers = true)]
-    public sealed class ReportsViewModel : MvxViewModel
+    public sealed class ReportsViewModel : MvxViewModel<ReportPeriod>
     {
         private const float minimumSegmentPercentageToBeOnItsOwn = 5f;
         private const float maximumSegmentPercentageToEndUpInOther = 1f;
@@ -47,6 +48,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Reports
         private readonly IInteractorFactory interactorFactory;
         private readonly IAnalyticsService analyticsService;
         private readonly IDialogService dialogService;
+        private readonly IIntentDonationService intentDonationService;
 
         private readonly ReportsCalendarViewModel calendarViewModel;
 
@@ -140,14 +142,14 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Reports
 
         public IObservable<bool> WorkspaceHasBillableFeatureEnabled { get; }
 
-        public ReportsViewModel(
-            ITogglDataSource dataSource,
-            ITimeService timeService,
-            IMvxNavigationService navigationService,
-            IInteractorFactory interactorFactory,
-            IAnalyticsService analyticsService,
-            IDialogService dialogService,
-            ISchedulerProvider schedulerProvider)
+        public ReportsViewModel(ITogglDataSource dataSource,
+                                ITimeService timeService,
+                                IMvxNavigationService navigationService,
+                                IInteractorFactory interactorFactory,
+                                IAnalyticsService analyticsService,
+                                IDialogService dialogService,
+                                IIntentDonationService intentDonationService,
+                                ISchedulerProvider schedulerProvider)
         {
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
@@ -155,6 +157,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Reports
             Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(interactorFactory, nameof(interactorFactory));
             Ensure.Argument.IsNotNull(dialogService, nameof(dialogService));
+            Ensure.Argument.IsNotNull(intentDonationService, nameof(intentDonationService));
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
 
             this.timeService = timeService;
@@ -163,8 +166,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Reports
             this.dataSource = dataSource;
             this.interactorFactory = interactorFactory;
             this.dialogService = dialogService;
+            this.intentDonationService = intentDonationService;
 
-            calendarViewModel = new ReportsCalendarViewModel(timeService, dataSource);
+            calendarViewModel = new ReportsCalendarViewModel(timeService, dialogService, dataSource, intentDonationService);
 
             var totalsObservable = reportSubject
                 .SelectMany(_ => dataSource.ReportsProvider.GetTotals(workspaceId, startDate, endDate))
@@ -205,6 +209,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Reports
                 .Select(list => list.Where(w => !w.IsGhost))
                 .Select(readOnlyWorkspaceNameTuples)
                 .AsDriver(schedulerProvider);
+        }
+
+        public override void Prepare(ReportPeriod parameter)
+        {
+            base.Prepare();
+            calendarViewModel.SelectPeriod(parameter);
         }
 
         public override async Task Initialize()
@@ -254,6 +264,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Reports
             {
                 navigationService.Navigate(calendarViewModel);
                 didNavigateToCalendar = true;
+                intentDonationService.DonateShowReport();
             }
         }
 

@@ -10,6 +10,7 @@ using Toggl.Foundation.Suggestions;
 using Toggl.Foundation.Tests.Mocks;
 using Toggl.PrimeRadiant;
 using Toggl.PrimeRadiant.Models;
+using Toggl.Multivac.Models;
 using Xunit;
 using ITimeEntryPrototype = Toggl.Foundation.Models.ITimeEntryPrototype;
 
@@ -283,6 +284,14 @@ namespace Toggl.Foundation.Tests.Interactors
                 await DataSource.TimeEntries.Received().Create(Arg.Is<IThreadSafeTimeEntry>(
                     te => te.Start == ValidTime
                 ));
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task DonatesTheIntent()
+            {
+                await CallInteractor(CreatePrototype(ValidTime, ValidDescription, true, ProjectId));
+
+                IntentDonationService.Received().DonateStartTimeEntry(Arg.Any<IWorkspace>(), Arg.Any<ITimeEntry>());
             }
         }
     }

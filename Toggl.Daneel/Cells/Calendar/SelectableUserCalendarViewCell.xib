@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14313.18" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.14"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -18,14 +18,27 @@
                 <rect key="frame" x="0.0" y="0.0" width="288" height="47.5"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Work" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="b2i-0A-7ji">
-                        <rect key="frame" x="16" y="15" width="36" height="18"/>
-                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
-                        <nil key="textColor"/>
-                        <nil key="highlightedColor"/>
-                    </label>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="HEz-hN-CjK" customClass="FadeView">
+                        <rect key="frame" x="10" y="15" width="203" height="18"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="749" text="Work" textAlignment="natural" lineBreakMode="clip" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="b2i-0A-7ji">
+                                <rect key="frame" x="0.0" y="0.0" width="203" height="18"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="b2i-0A-7ji" firstAttribute="centerY" secondItem="HEz-hN-CjK" secondAttribute="centerY" id="1wu-SS-EFj"/>
+                            <constraint firstItem="b2i-0A-7ji" firstAttribute="top" secondItem="HEz-hN-CjK" secondAttribute="top" id="Lz0-9V-eDr"/>
+                            <constraint firstAttribute="trailing" secondItem="b2i-0A-7ji" secondAttribute="trailing" id="SR2-yV-CdM"/>
+                            <constraint firstItem="b2i-0A-7ji" firstAttribute="leading" secondItem="HEz-hN-CjK" secondAttribute="leading" id="U2Z-iZ-ujh"/>
+                            <constraint firstAttribute="bottom" secondItem="b2i-0A-7ji" secondAttribute="bottom" id="dDI-XL-5RR"/>
+                        </constraints>
+                    </view>
                     <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xWp-Sq-DKj">
-                        <rect key="frame" x="223" y="8" width="51" height="31"/>
+                        <rect key="frame" x="223" y="8.5" width="51" height="31"/>
                     </switch>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="IvN-nY-GBE" userLabel="Separator">
                         <rect key="frame" x="0.0" y="46.5" width="288" height="1"/>
@@ -36,17 +49,19 @@
                     </view>
                 </subviews>
                 <constraints>
+                    <constraint firstItem="xWp-Sq-DKj" firstAttribute="leading" secondItem="HEz-hN-CjK" secondAttribute="trailing" constant="10" id="1Wx-i6-LOL"/>
                     <constraint firstAttribute="trailing" secondItem="IvN-nY-GBE" secondAttribute="trailing" id="856-Tc-lMT"/>
-                    <constraint firstItem="b2i-0A-7ji" firstAttribute="centerY" secondItem="YTl-1W-gDM" secondAttribute="centerY" id="BV7-5d-pJG"/>
                     <constraint firstItem="xWp-Sq-DKj" firstAttribute="centerY" secondItem="YTl-1W-gDM" secondAttribute="centerY" id="ED6-A7-7wi"/>
-                    <constraint firstItem="b2i-0A-7ji" firstAttribute="leading" secondItem="YTl-1W-gDM" secondAttribute="leading" constant="16" id="GdE-2H-RDe"/>
+                    <constraint firstItem="HEz-hN-CjK" firstAttribute="leading" secondItem="YTl-1W-gDM" secondAttribute="leading" constant="10" id="Vui-3t-jZi"/>
                     <constraint firstAttribute="bottom" secondItem="IvN-nY-GBE" secondAttribute="bottom" id="lNt-hD-yJP"/>
                     <constraint firstAttribute="trailing" secondItem="xWp-Sq-DKj" secondAttribute="trailing" constant="16" id="uAX-7S-dts"/>
+                    <constraint firstItem="HEz-hN-CjK" firstAttribute="centerY" secondItem="YTl-1W-gDM" secondAttribute="centerY" id="ugy-2Q-ML0"/>
                     <constraint firstItem="IvN-nY-GBE" firstAttribute="leading" secondItem="YTl-1W-gDM" secondAttribute="leading" id="zff-zh-N5R"/>
                 </constraints>
             </tableViewCellContentView>
             <connections>
                 <outlet property="CalendarNameLabel" destination="b2i-0A-7ji" id="bwY-xI-9bb"/>
+                <outlet property="FadeView" destination="HEz-hN-CjK" id="JQx-Q6-8xw"/>
                 <outlet property="IsSelectedSwitch" destination="xWp-Sq-DKj" id="AaU-pc-yjA"/>
             </connections>
         </tableViewCell>

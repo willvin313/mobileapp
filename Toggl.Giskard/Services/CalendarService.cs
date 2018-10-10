@@ -20,6 +20,6 @@ namespace Toggl.Giskard.Services
             => new List<CalendarItem>();
 
         protected override CalendarItem NativeGetCalendarWithId(string id)
-            => throw new NotImplementedException();
+            => default(CalendarItem);
     }
 }

@@ -3,6 +3,7 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Toggl.Multivac;
@@ -16,11 +17,15 @@ namespace Toggl.Foundation
 
         private readonly IScheduler scheduler;
 
+        private readonly ISubject<Unit> significantTimeChange = new Subject<Unit>();
+
         public DateTimeOffset CurrentDateTime => floor(scheduler.Now);
 
         public IObservable<DateTimeOffset> CurrentDateTimeObservable { get; }
 
         public IObservable<DateTimeOffset> MidnightObservable { get; }
+
+        public IObservable<Unit> SignificantTimeChangeObservable => significantTimeChange.AsObservable();
 
         public TimeService(IScheduler scheduler)
         {
@@ -51,6 +56,8 @@ namespace Toggl.Foundation
                 .Do(action)
                 .ToTask();
         }
+
+        public void SignificantTimeChanged() => significantTimeChange.OnNext(Unit.Default);
 
         private DateTimeOffset floor(DateTimeOffset t)
             => new DateTimeOffset(t.Year, t.Month, t.Day, t.Hour, t.Minute, t.Second, t.Offset);

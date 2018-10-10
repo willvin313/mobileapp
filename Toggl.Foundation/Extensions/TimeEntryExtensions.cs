@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Toggl.Foundation.Calendar;
 using Toggl.Foundation.Models;
 
@@ -6,6 +6,18 @@ namespace Toggl.Foundation.Extensions
 {
     public static class TimeEntryExtensions
     {
+        public static ITimeEntryPrototype AsTimeEntryPrototype(this string description, DateTimeOffset startTime, long workspaceId)
+            => new TimeEntryPrototype(
+                workspaceId,
+                description: description,
+                duration: null,
+                startTime: startTime,
+                projectId: null,
+                taskId: null,
+                tagIds: null,
+                isBillable: false
+            );
+
         public static ITimeEntryPrototype AsTimeEntryPrototype(this CalendarItem calendarItem, long workspaceId)
             => new TimeEntryPrototype(
                 workspaceId,

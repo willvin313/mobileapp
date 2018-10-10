@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using MvvmCross.Binding.BindingContext;
 using MvvmCross.Platforms.Ios.Binding;
 using MvvmCross.Platforms.Ios.Views;
@@ -12,13 +13,19 @@ using Toggl.Foundation.MvvmCross.ViewModels;
 namespace Toggl.Daneel.ViewControllers
 {
     [ModalCardPresentation]
-    public sealed partial class EditProjectViewController : MvxViewController<EditProjectViewModel>
+    public sealed partial class EditProjectViewController : MvxViewController<EditProjectViewModel>, IDismissableViewController
     {
         private const float nameAlreadyTakenHeight = 16;
 
         public EditProjectViewController() 
             : base(nameof(EditProjectViewController), null)
         {
+        }
+
+        public async Task<bool> Dismiss()
+        {
+            await ViewModel.CloseCommand.ExecuteAsync();
+            return true;
         }
 
         public override void ViewDidLoad()

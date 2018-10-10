@@ -5,6 +5,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
+using System.Threading.Tasks;
 using Foundation;
 using MvvmCross.Binding;
 using MvvmCross.Binding.BindingContext;
@@ -33,7 +34,7 @@ using UIKit;
 namespace Toggl.Daneel.ViewControllers
 {
     [ModalCardPresentation]
-    public sealed partial class StartTimeEntryViewController : KeyboardAwareViewController<StartTimeEntryViewModel>
+    public sealed partial class StartTimeEntryViewController : KeyboardAwareViewController<StartTimeEntryViewModel>, IDismissableViewController
     {
         private bool isUpdatingDescriptionField;
 
@@ -209,6 +210,11 @@ namespace Toggl.Daneel.ViewControllers
                 .ObserveOn(SynchronizationContext.Current)
                 .Subscribe(async info => await ViewModel.OnTextFieldInfoFromView(info))
                 .DisposedBy(DisposeBag);
+        }
+
+        public async Task<bool> Dismiss()
+        {
+            return await ViewModel.Close();
         }
 
         private void onTextFieldInfo(TextFieldInfo textFieldInfo)

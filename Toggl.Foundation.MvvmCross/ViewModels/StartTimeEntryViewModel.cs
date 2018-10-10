@@ -17,11 +17,13 @@ using Toggl.Foundation.Autocomplete.Suggestions;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Models;
+using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.Services;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
@@ -45,17 +47,19 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly IAnalyticsService analyticsService;
         private readonly IAutocompleteProvider autocompleteProvider;
         private readonly ISchedulerProvider schedulerProvider;
+        private readonly IIntentDonationService intentDonationService;
 
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
-        private readonly ISubject<TextFieldInfo> uiSubject = new Subject<TextFieldInfo>();
+        private readonly ISubject<TextFieldInfo> uiSubject = new ReplaySubject<TextFieldInfo>();
         private readonly ISubject<TextFieldInfo> querySubject = new Subject<TextFieldInfo>();
         private readonly ISubject<AutocompleteSuggestionType> queryByTypeSubject = new Subject<AutocompleteSuggestionType>();
 
         private bool hasAnyTags;
         private bool hasAnyProjects;
-        private long defaultWorkspaceId;
+        private IThreadSafeWorkspace defaultWorkspace;
         private StartTimeEntryParameters parameter;
         private TextFieldInfo textFieldInfo = TextFieldInfo.Empty(0);
+        private StartTimeEntryParameters initialParameters;
 
         //Properties
         public IObservable<TextFieldInfo> TextFieldInfoObservable { get; }
@@ -202,7 +206,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IMvxNavigationService navigationService,
             IAnalyticsService analyticsService,
             IAutocompleteProvider autocompleteProvider,
-            ISchedulerProvider schedulerProvider
+            ISchedulerProvider schedulerProvider,
+            IIntentDonationService intentDonationService
         )
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
@@ -215,6 +220,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(autocompleteProvider, nameof(autocompleteProvider));
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
+            Ensure.Argument.IsNotNull(intentDonationService, nameof(intentDonationService));
 
             this.dataSource = dataSource;
             this.timeService = timeService;
@@ -225,12 +231,13 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             this.analyticsService = analyticsService;
             this.autocompleteProvider = autocompleteProvider;
             this.schedulerProvider = schedulerProvider;
+            this.intentDonationService = intentDonationService;
 
             OnboardingStorage = onboardingStorage;
 
             TextFieldInfoObservable = uiSubject.AsDriver(this.schedulerProvider);
 
-            BackCommand = new MvxAsyncCommand(back);
+            BackCommand = new MvxAsyncCommand(Close);
             DoneCommand = new MvxAsyncCommand(done);
             CreateCommand = new MvxAsyncCommand(create);
             DurationTapped = new MvxCommand(durationTapped);
@@ -276,6 +283,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Duration = parameter.Duration;
 
             PlaceholderText = parameter.PlaceholderText;
+            if (!string.IsNullOrEmpty(parameter.EntryDescription))
+            {
+                initialParameters = parameter;
+            }
 
             timeService.CurrentDateTimeObservable
                 .Where(_ => isRunning)
@@ -287,12 +298,44 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             await base.Initialize();
 
-            var workspace = await interactorFactory.GetDefaultWorkspace().Execute();
-            defaultWorkspaceId = workspace.Id;
+            defaultWorkspace = await interactorFactory.GetDefaultWorkspace().Execute();
 
-            textFieldInfo = TextFieldInfo.Empty(workspace.Id);
+            textFieldInfo = TextFieldInfo.Empty(parameter?.WorkspaceId ?? defaultWorkspace.Id);
+
+            if (initialParameters != null)
+            {
+                var spans = new List<ISpan>();
+                spans.Add(new TextSpan(initialParameters.EntryDescription));
+                if (initialParameters.ProjectId != null) {
+                    try
+                    {
+                        var project = await dataSource.Projects.GetById((long)initialParameters.ProjectId);
+                        spans.Add(new ProjectSpan(project));
+                    }
+                    catch
+                    {
+                        // Intentionally left blank
+                    }
+                }
+                if (initialParameters.TagIds != null) {
+                    try
+                    {
+                        var tags = initialParameters.TagIds.ToObservable()
+                            .SelectMany<long, IThreadSafeTag>(tagId => dataSource.Tags.GetById(tagId))
+                            .ToEnumerable();
+                        spans.AddRange(tags.Select(tag => new TagSpan(tag)));
+                    }
+                    catch
+                    {
+                        // Intentionally left blank
+                    }
+                }
+
+                textFieldInfo = textFieldInfo.ReplaceSpans(spans.ToImmutableList());
+            }
 
             await setBillableValues(textFieldInfo.ProjectId);
+            uiSubject.OnNext(textFieldInfo);
 
             hasAnyTags = (await dataSource.Tags.GetAll()).Any();
             hasAnyProjects = (await dataSource.Projects.GetAll()).Any();
@@ -308,6 +351,19 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             queryWith(textFieldInfo.ReplaceSpans(spans));
             await setBillableValues(textFieldInfo.ProjectId);
+        }
+
+        public async Task<bool> Close()
+        {
+            if (IsDirty)
+            {
+                var shouldDiscard = await dialogService.ConfirmDestructiveAction(ActionType.DiscardNewTimeEntry);
+                if (!shouldDiscard)
+                    return false;
+            }
+
+            await navigationService.Close(this);
+            return true;
         }
 
         private async Task selectSuggestion(AutocompleteSuggestion suggestion)
@@ -563,18 +619,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             }
         }
 
-        private async Task back()
-        {
-            if (IsDirty)
-            {
-                var shouldDiscard = await dialogService.ConfirmDestructiveAction(ActionType.DiscardNewTimeEntry);
-                if (!shouldDiscard)
-                    return;
-            }
-
-            await navigationService.Close(this);
-        }
-
         private async Task done()
         {
             await interactorFactory.CreateTimeEntry(this).Execute();
@@ -632,7 +676,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             if (firstSuggestion is ProjectSuggestion)
                 return suggestions
                     .GroupByWorkspaceAddingNoProject()
-                    .OrderByDefaultWorkspaceAndName(defaultWorkspaceId);
+                    .OrderByDefaultWorkspaceAndName(defaultWorkspace?.Id ?? 0);
 
             if (IsSuggestingTags)
                 suggestions = suggestions.Where(suggestion => suggestion.WorkspaceId == textFieldInfo.WorkspaceId);

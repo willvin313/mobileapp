@@ -17,6 +17,7 @@ namespace Toggl.Foundation.Interactors
                 timeService,
                 dataSource,
                 analyticsService,
+                intentDonationService,
                 prototype,
                 prototype.StartTime,
                 prototype.Duration);
@@ -27,6 +28,7 @@ namespace Toggl.Foundation.Interactors
                 timeService,
                 dataSource,
                 analyticsService,
+                intentDonationService,
                 prototype,
                 timeService.CurrentDateTime,
                 null,
@@ -38,6 +40,7 @@ namespace Toggl.Foundation.Interactors
                 timeService,
                 dataSource,
                 analyticsService,
+                intentDonationService,
                 suggestion,
                 timeService.CurrentDateTime,
                 null,

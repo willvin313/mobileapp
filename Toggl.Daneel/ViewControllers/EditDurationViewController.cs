@@ -2,6 +2,7 @@
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using CoreGraphics;
 using MvvmCross.Binding.BindingContext;
 using MvvmCross.Platforms.Ios.Binding;
@@ -10,7 +11,6 @@ using Toggl.Daneel.Converters;
 using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Daneel.Presentation.Attributes;
-using Toggl.Daneel.Presentation.Transition;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.MvvmCross.Combiners;
 using Toggl.Foundation.MvvmCross.Converters;
@@ -20,20 +20,21 @@ using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Multivac.Extensions;
 using UIKit;
 using static Toggl.Daneel.Extensions.FontExtensions;
+using System.Runtime.Remoting.Messaging;
 
 namespace Toggl.Daneel.ViewControllers
 {
     [ModalCardPresentation]
-    public sealed partial class EditDurationViewController : KeyboardAwareViewController<EditDurationViewModel>
+    public sealed partial class EditDurationViewController : KeyboardAwareViewController<EditDurationViewModel>, IDismissableViewController
     {
         private const int offsetFromSafeAreaTop = 20;
-        private const int bottomOffset = 48;
+        private const int additionalVerticalContentSize = 100;
         private const int stackViewSpacing = 26;
-        private bool viewDidAppear = false;
 
         private IDisposable startTimeChangingSubscription;
 
         private CompositeDisposable disposeBag = new CompositeDisposable();
+        private CGRect frameBeforeShowingKeyboard;
 
         public EditDurationViewController() : base(nameof(EditDurationViewController))
         {
@@ -45,7 +46,6 @@ namespace Toggl.Daneel.ViewControllers
 
             startTimeChangingSubscription = ViewModel.StartTimeChanging.Subscribe(startTimeChanging);
 
-            setupDismissingByTappingOnBackground();
             prepareViews();
 
             var durationCombiner = new DurationValueCombiner();
@@ -236,13 +236,6 @@ namespace Toggl.Daneel.ViewControllers
                 .DisposedBy(disposeBag);
         }
 
-        public override void ViewDidLayoutSubviews()
-        {
-            base.ViewDidLayoutSubviews();
-
-            adjustHeight();
-        }
-
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -258,65 +251,48 @@ namespace Toggl.Daneel.ViewControllers
         {
             base.ViewDidAppear(animated);
 
-            viewDidAppear = true;
-
-            if (ViewModel.IsDurationInitiallyFocused) {
+            if (ViewModel.IsDurationInitiallyFocused)
+            {
                 DurationInput.BecomeFirstResponder();
             }
         }
 
+        public async Task<bool> Dismiss()
+        {
+            await ViewModel.CloseCommand.ExecuteAsync();
+            return true;
+        }
+
         protected override void KeyboardWillShow(object sender, UIKeyboardEventArgs e)
         {
-            nfloat distanceFromTop = offsetFromSafeAreaTop;
-            if (UIDevice.CurrentDevice.CheckSystemVersion(11, 0))
-            {
-                distanceFromTop += UIApplication.SharedApplication.KeyWindow.SafeAreaInsets.Top;
-            }
+            frameBeforeShowingKeyboard = View.Frame;
 
-            View.Frame = new CGRect(0, distanceFromTop, View.Frame.Width, View.Frame.Height);
+            var safeAreaOffset = UIDevice.CurrentDevice.CheckSystemVersion(11, 0)
+                  ? Math.Max(UIApplication.SharedApplication.KeyWindow.SafeAreaInsets.Top, UIApplication.SharedApplication.StatusBarFrame.Height)
+                  : 0;
+            var distanceFromTop = Math.Max(safeAreaOffset, View.Frame.Y - e.FrameEnd.Height);
+
+            View.Frame = new CGRect(View.Frame.X, distanceFromTop, View.Frame.Width, View.Frame.Height);
             UIView.Animate(Animation.Timings.EnterTiming, () => View.LayoutIfNeeded());
         }
 
         protected override void KeyboardWillHide(object sender, UIKeyboardEventArgs e)
         {
-            var frame = View.ConvertRectFromView(WheelView.Frame, WheelView.Superview);
-            var height = frame.Bottom + bottomOffset;
-
-            if (ViewModel.IsEditingTime)
-            {
-                height -= DatePickerContainer.Frame.Height + stackViewSpacing;
-            }
-
-            var offsetFromTop = UIScreen.MainScreen.Bounds.Height - height;
-            View.Frame = new CGRect(0, offsetFromTop, View.Frame.Width, View.Frame.Height);
+            View.Frame = frameBeforeShowingKeyboard;
             UIView.Animate(Animation.Timings.EnterTiming, () => View.LayoutIfNeeded());
-        }
-
-        private void adjustHeight()
-        {
-            if (viewDidAppear) return;
-
-            var frame = View.ConvertRectFromView(WheelView.Frame, WheelView.Superview);
-            var height = frame.Bottom + bottomOffset;
-            var newSize = new CGSize(0, height);
-            if (newSize != PreferredContentSize)
-            {
-                PreferredContentSize = newSize;
-                PresentationController.ContainerViewWillLayoutSubviews();
-            }
-        }
-
-        private void setupDismissingByTappingOnBackground()
-        {
-            if (PresentationController is ModalPresentationController modalPresentationController)
-            {
-                var tapToDismiss = new UITapGestureRecognizer(() => ViewModel.CloseCommand.Execute());
-                modalPresentationController.AdditionalContentView.AddGestureRecognizer(tapToDismiss);
-            }
         }
 
         private void prepareViews()
         {
+            var width = UIScreen.MainScreen.Bounds.Width;
+            var height = width + additionalVerticalContentSize;
+
+            PreferredContentSize = new CGSize
+            {
+                Width = width,
+                Height = height
+            };
+
             EndTimeLabel.Font = EndTimeLabel.Font.GetMonospacedDigitFont();
             StartTimeLabel.Font = StartTimeLabel.Font.GetMonospacedDigitFont();
 

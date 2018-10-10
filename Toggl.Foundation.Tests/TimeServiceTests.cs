@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using FluentAssertions;
 using Microsoft.Reactive.Testing;
@@ -178,6 +179,29 @@ namespace Toggl.Foundation.Tests
             }
 
             private long ticksPerDay => TimeSpan.FromDays(1).Ticks;
+        }
+
+        public sealed class TheSignificantTimeChangeProperty
+        {
+            private readonly TimeService timeService;
+            private readonly TestScheduler scheduler;
+
+            public TheSignificantTimeChangeProperty()
+            {
+                scheduler = new TestScheduler();
+                timeService = new TimeService(scheduler);
+            }
+
+            [Fact, LogIfTooSlow]
+            public void EmitsEventWhenTimeZoneChangedInvoked()
+            {
+                var observer = scheduler.CreateObserver<Unit>();
+                timeService.SignificantTimeChangeObservable.Subscribe(observer);
+
+                timeService.SignificantTimeChanged();
+
+                observer.Messages.Count.Should().Be(1);
+            }
         }
 
         public sealed class TheRunAfterDelayMethod

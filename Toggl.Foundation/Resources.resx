@@ -45,6 +45,9 @@ of your time with reports</value>
     <data name="Back">
         <value>Back</value>
     </data>
+    <data name="Ok">
+        <value>Ok</value>
+    </data>
     <data name="SignUpTitle">
         <value>Sign up for free</value>
     </data>
@@ -404,6 +407,12 @@ account is not set up</value>
     </data>
     <data name="RatingViewNegativeCTAButtonTitle">
         <value>Tell us what’s wrong</value>
+    </data>
+    <data name="ReportTooLongTitle">
+        <value>Too Long</value>
+    </data>
+    <data name="ReportTooLongDescription">
+        <value>The maximum lenght of a report is 365 days.</value>
     </data>
     <data name="ArchivedProjectDecorator">
         <value>(archived)</value>

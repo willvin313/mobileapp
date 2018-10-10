@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using MvvmCross.Binding.BindingContext;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Daneel.ViewSources;
@@ -10,7 +11,7 @@ using UIKit;
 namespace Toggl.Daneel.ViewControllers
 {
     [ModalCardPresentation]
-    public partial class SelectWorkspaceViewController : KeyboardAwareViewController<SelectWorkspaceViewModel>
+    public partial class SelectWorkspaceViewController : KeyboardAwareViewController<SelectWorkspaceViewModel>, IDismissableViewController
     {
         public SelectWorkspaceViewController() 
             : base(nameof(SelectWorkspaceViewController))
@@ -44,6 +45,12 @@ namespace Toggl.Daneel.ViewControllers
 
             if (ViewModel.AllowQuerying)
                 SearchTextField.BecomeFirstResponder();
+        }
+
+        public async Task<bool> Dismiss()
+        {
+            await ViewModel.CloseCommand.ExecuteAsync();
+            return true;
         }
 
         protected override void KeyboardWillShow(object sender, UIKeyboardEventArgs e)

@@ -14,6 +14,9 @@ namespace Toggl.Foundation.Autocomplete
         public static TextFieldInfo Empty(long workspaceId)
             => new TextFieldInfo(workspaceId, ImmutableList<ISpan>.Empty);
 
+        public static TextFieldInfo WithDescription(long workspaceId, string description)
+        => new TextFieldInfo(workspaceId, ImmutableList.Create<ISpan>(new TextSpan(description)));
+
         private ProjectSpan projectSpan;
 
         public long WorkspaceId { get; }

@@ -6,6 +6,7 @@ using Toggl.Multivac;
 using Toggl.PrimeRadiant;
 using Toggl.PrimeRadiant.Settings;
 using Toggl.Ultrawave.Network;
+using Toggl.Foundation.Services;
 
 namespace Toggl.Foundation.Interactors
 {
@@ -18,6 +19,7 @@ namespace Toggl.Foundation.Interactors
         private readonly IUserPreferences userPreferences;
         private readonly IAnalyticsService analyticsService;
         private readonly INotificationService notificationService;
+        private readonly IIntentDonationService intentDonationService;
         private readonly IApplicationShortcutCreator shortcutCreator;
         private readonly ILastTimeUsageStorage lastTimeUsageStorage;
         private readonly IPlatformConstants platformConstants;
@@ -31,6 +33,7 @@ namespace Toggl.Foundation.Interactors
             IUserPreferences userPreferences,
             IAnalyticsService analyticsService,
             INotificationService notificationService,
+            IIntentDonationService intentDonationService,
             IApplicationShortcutCreator shortcutCreator,
             ILastTimeUsageStorage lastTimeUsageStorage,
             IPlatformConstants platformConstants,
@@ -44,6 +47,7 @@ namespace Toggl.Foundation.Interactors
             Ensure.Argument.IsNotNull(shortcutCreator, nameof(shortcutCreator));
             Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(notificationService, nameof(notificationService));
+            Ensure.Argument.IsNotNull(intentDonationService, nameof(intentDonationService));
             Ensure.Argument.IsNotNull(lastTimeUsageStorage, nameof(lastTimeUsageStorage));
             Ensure.Argument.IsNotNull(platformConstants, nameof(platformConstants));
             Ensure.Argument.IsNotNull(userAgent, nameof(userAgent));
@@ -56,6 +60,7 @@ namespace Toggl.Foundation.Interactors
             this.shortcutCreator = shortcutCreator;
             this.analyticsService = analyticsService;
             this.notificationService = notificationService;
+            this.intentDonationService = intentDonationService;
             this.lastTimeUsageStorage = lastTimeUsageStorage;
             this.platformConstants = platformConstants;
             this.userAgent = userAgent;

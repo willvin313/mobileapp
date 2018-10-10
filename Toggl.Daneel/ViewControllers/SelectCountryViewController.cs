@@ -5,11 +5,12 @@ using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using UIKit;
 using Toggl.Daneel.Extensions;
+using System.Threading.Tasks;
 
 namespace Toggl.Daneel.ViewControllers
 {
     [ModalCardPresentation]
-    public sealed partial class SelectCountryViewController : KeyboardAwareViewController<SelectCountryViewModel>
+    public sealed partial class SelectCountryViewController : KeyboardAwareViewController<SelectCountryViewModel>, IDismissableViewController
     {
         public SelectCountryViewController() : base(nameof(SelectCountryViewController))
         {
@@ -34,6 +35,12 @@ namespace Toggl.Daneel.ViewControllers
             bindingSet.Apply();
 
             SearchTextField.BecomeFirstResponder();
+        }
+
+        public async Task<bool> Dismiss()
+        {
+            await ViewModel.CloseCommand.ExecuteAsync();
+            return true;
         }
 
         protected override void KeyboardWillShow(object sender, UIKeyboardEventArgs e)

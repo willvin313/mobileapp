@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -64,7 +64,7 @@ namespace Toggl.Ultrawave.Tests.Integration
             {
                 var credentials = Credentials.WithApiToken(user.ApiToken);
                 var httpClient = new HttpClient();
-                var urlPrefixForV8 = BaseUrls.ForApi(ApiEnvironment.Staging).AbsoluteUri.Replace("/v9/", "/v8/");
+                var urlPrefixForV8 = BaseUrls.ForApi(ApiEnvironment.Staging).AbsoluteUri.Replace("/v9/", "/v8");
                 var requestMessage = new HttpRequestMessage(HttpMethod.Delete, $"{urlPrefixForV8}/workspaces/{user.DefaultWorkspaceId}/leave");
                 requestMessage.Headers.AddRange(new[] { credentials.Header });
                 await httpClient.SendAsync(requestMessage).ConfigureAwait(false);

@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Realms;
+using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Models;
 using Toggl.PrimeRadiant.Realm.Models;
 
@@ -279,20 +280,19 @@ namespace Toggl.PrimeRadiant.Realm
             var skipWorkspaceFetch = entity?.WorkspaceId == null || entity.WorkspaceId == 0;
             RealmWorkspace = skipWorkspaceFetch ? null : realm.All<RealmWorkspace>().Single(x => x.Id == entity.WorkspaceId || x.OriginalId == entity.WorkspaceId);
             var skipProjectFetch = entity?.ProjectId == null || entity.ProjectId == 0;
-            RealmProject = skipProjectFetch ? null : realm.All<RealmProject>().Single(x => x.Id == entity.ProjectId || x.OriginalId == entity.ProjectId);
-            var skipTaskFetch = entity?.TaskId == null || entity.TaskId == 0;
-            RealmTask = skipTaskFetch ? null : realm.All<RealmTask>().Single(x => x.Id == entity.TaskId || x.OriginalId == entity.TaskId);
+            RealmProject = skipProjectFetch ? null : realm.All<RealmProject>().SingleOrDefault(x => x.Id == entity.ProjectId || x.OriginalId == entity.ProjectId);
+            var skipTaskFetch = RealmProject == null || entity?.TaskId == null || entity.TaskId == 0;
+            RealmTask = skipTaskFetch ? null : realm.All<RealmTask>().SingleOrDefault(x => x.Id == entity.TaskId || x.OriginalId == entity.TaskId);
             Billable = entity.Billable;
             Start = entity.Start;
             Duration = entity.Duration;
             Description = entity.Description;
+
+            var tags = entity.TagIds?.Select(id =>
+                realm.All<RealmTag>().Single(x => x.Id == id || x.OriginalId == id)) ?? new RealmTag[0];
             RealmTags.Clear();
-            if (entity.TagIds != null)
-            {
-                var allRealmTags = entity.TagIds.Select(id => realm.All<RealmTag>().Single(x => x.Id == id || x.OriginalId == id));
-                foreach (var oneOfRealmTags in allRealmTags)
-                    RealmTags.Add(oneOfRealmTags);
-            }
+            tags.ForEach(RealmTags.Add);
+
             var skipUserFetch = entity?.UserId == null || entity.UserId == 0;
             RealmUser = skipUserFetch ? null : realm.All<RealmUser>().Single(x => x.Id == entity.UserId || x.OriginalId == entity.UserId);
         }

@@ -30,6 +30,7 @@
     <MtouchArch>x86_64</MtouchArch>
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
     <MtouchExtraArgs>--linkskip Toggl.Daneel --registrar:static</MtouchExtraArgs>
+    <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhone' ">
     <DebugSymbols>true</DebugSymbols>
@@ -650,6 +651,7 @@
   <ItemGroup>
     <Compile Include="Binding\DatePickerDateTimeOffsetTargetBinding.cs" />
     <Compile Include="Extensions\Binders\ReactiveTableViewBinder.cs" />
+    <Compile Include="Extensions\IntentPeriod.cs" />
     <Compile Include="Extensions\SectionedIndexExtensions.cs" />
     <Compile Include="Services\PermissionsService.cs" />
     <Compile Include="Services\CalendarService.cs" />
@@ -662,6 +664,7 @@
     <Compile Include="Extensions\Reactive\UITableViewExtensions.cs" />
     <Compile Include="Extensions\Reactive\UITextViewExtensions.cs" />
     <Compile Include="Extensions\Reactive\UIViewExtensions.cs" />
+    <Compile Include="Services\IntentDonationService.cs" />
     <Compile Include="Services\UserDefaultsStorage.cs" />
     <Compile Include="Startup\IOSSchedulerProvider.cs" />
     <Compile Include="Startup\Setup.cs" />
@@ -1131,6 +1134,8 @@
     </Compile>
     <Compile Include="Extensions\Reactive\UIControlExtensions.cs" />
     <Compile Include="Binding\LayoutConstraintActiveTargetBinding.cs" />
+    <Compile Include="ViewControllers\IDismissableViewController.cs" />
+    <Compile Include="Services\PrivateSharedStorageService.cs" />
     <Compile Include="Extensions\Reactive\FadeViewExtensions.cs" />
     <Compile Include="Extensions\Reactive\NSObjectExtensions.cs" />
     <Compile Include="Extensions\Reactive\UIStackViewExtensions.cs" />
@@ -1163,6 +1168,24 @@
     <ProjectReference Include="..\Toggl.Multivac\Toggl.Multivac.csproj">
       <Project>{6AF7BE5E-AF9D-4EA7-AF7F-28D07B8DEF24}</Project>
       <Name>Toggl.Multivac</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Toggl.Daneel.IntentBinding\Toggl.Daneel.IntentBinding.csproj">
+      <Project>{A1BBF640-E712-4E35-8E3F-AE07C7C7EDB0}</Project>
+      <Name>Toggl.Daneel.IntentBinding</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Toggl.Daneel.SiriExtension\Toggl.Daneel.SiriExtension.csproj">
+      <IsAppExtension>true</IsAppExtension>
+      <Project>{48C970FE-E13F-4664-A2FD-4EBFD2DD131E}</Project>
+      <Name>Toggl.Daneel.SiriExtension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Toggl.Daneel.ExtensionKit\Toggl.Daneel.ExtensionKit.csproj">
+      <Project>{ACA2821E-0FF9-4036-BFF6-E775BB4E6732}</Project>
+      <Name>Toggl.Daneel.ExtensionKit</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Toggl.Daneel.SiriExtension.UI\Toggl.Daneel.SiriExtension.UI.csproj">
+      <IsAppExtension>true</IsAppExtension>
+      <Project>{BC329A24-95D6-4D02-95B5-2AA699D8873A}</Project>
+      <Name>Toggl.Daneel.SiriExtension.UI</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

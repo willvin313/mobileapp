@@ -83,5 +83,11 @@ namespace Toggl.Multivac.Extensions
         {
             yield return item;
         }
+
+        public static TimeSpan Sum<T>(this IEnumerable<T> collection, Func<T, TimeSpan> selectTimeSpan)
+            => collection.Aggregate(TimeSpan.Zero, (acc, item) => acc + selectTimeSpan(item));
+
+        public static TimeSpan Sum<T>(this IEnumerable<T> collection, Func<T, TimeSpan?> selectTimespan)
+            => collection.Sum(item => selectTimespan(item) ?? TimeSpan.Zero);
     }
 }

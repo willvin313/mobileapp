@@ -5,6 +5,7 @@ using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Models;
+using Toggl.Foundation.Services;
 using Toggl.Foundation.Shortcuts;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
@@ -26,8 +27,10 @@ namespace Toggl.Foundation.Login
         private readonly IApplicationShortcutCreator shortcutCreator;
         private readonly IAccessRestrictionStorage accessRestrictionStorage;
         private readonly IAnalyticsService analyticsService;
+        private readonly IPrivateSharedStorageService privateSharedStorageService;
         private readonly Func<ITogglApi, ITogglDataSource> createDataSource;
         private readonly IScheduler scheduler;
+
         private readonly TimeSpan delayBeforeTryingToLogin = TimeSpan.FromSeconds(2);
 
         public LoginManager(
@@ -37,6 +40,7 @@ namespace Toggl.Foundation.Login
             IApplicationShortcutCreator shortcutCreator,
             IAccessRestrictionStorage accessRestrictionStorage,
             IAnalyticsService analyticsService,
+            IPrivateSharedStorageService privateSharedStorageService,
             Func<ITogglApi, ITogglDataSource> createDataSource,
             IScheduler scheduler
         )
@@ -47,6 +51,7 @@ namespace Toggl.Foundation.Login
             Ensure.Argument.IsNotNull(googleService, nameof(googleService));
             Ensure.Argument.IsNotNull(shortcutCreator, nameof(shortcutCreator));
             Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
+            Ensure.Argument.IsNotNull(privateSharedStorageService, nameof(privateSharedStorageService));
             Ensure.Argument.IsNotNull(createDataSource, nameof(createDataSource));
             Ensure.Argument.IsNotNull(scheduler, nameof(scheduler));
 
@@ -55,6 +60,7 @@ namespace Toggl.Foundation.Login
             this.accessRestrictionStorage = accessRestrictionStorage;
             this.googleService = googleService;
             this.analyticsService = analyticsService;
+            this.privateSharedStorageService = privateSharedStorageService;
             this.shortcutCreator = shortcutCreator;
             this.createDataSource = createDataSource;
             this.scheduler = scheduler;
@@ -152,6 +158,9 @@ namespace Toggl.Foundation.Login
 
         private ITogglDataSource dataSourceFromUser(IUser user)
         {
+            privateSharedStorageService.SaveApiToken(user.ApiToken);
+            privateSharedStorageService.SaveUserId(user.Id);
+
             var newCredentials = Credentials.WithApiToken(user.ApiToken);
             var api = apiFactory.CreateApiWith(newCredentials);
             return createDataSource(api);

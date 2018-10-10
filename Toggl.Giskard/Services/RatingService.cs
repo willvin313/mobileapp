@@ -7,7 +7,6 @@ namespace Toggl.Giskard.Services
     {
         public void AskForRating()
         {
-            throw new NotImplementedException();
         }
     }
 }

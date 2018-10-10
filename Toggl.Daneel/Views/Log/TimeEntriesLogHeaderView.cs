@@ -7,6 +7,7 @@ using Toggl.Foundation.Extensions;
 using Toggl.Foundation.MvvmCross.Transformations;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using UIKit;
+using Toggl.Multivac.Extensions;
 
 namespace Toggl.Daneel.Views
 {
@@ -56,7 +57,7 @@ namespace Toggl.Daneel.Views
 
             DateLabel.Text = DateToTitleString.Convert(firstItem.StartTime.Date);
 
-            var totalDuration = items.Aggregate(TimeSpan.Zero, (acc, vm) => acc + (vm.Duration ?? TimeSpan.Zero));
+            var totalDuration = items.Sum(vm => vm.Duration);
             DurationLabel.Text = totalDuration.ToFormattedString(firstItem.DurationFormat);
         }
     }

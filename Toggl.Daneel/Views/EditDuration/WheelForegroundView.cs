@@ -73,7 +73,7 @@ namespace Toggl.Daneel.Views.EditDuration
 
         private CGPoint endTimePosition;
 
-        private UITouch currentTouch;
+        private bool isDragging;
 
         private UIImage startHandleImage;
 
@@ -154,6 +154,9 @@ namespace Toggl.Daneel.Views.EditDuration
 
             startHandleImage = UIImage.FromBundle("icStartLabel");
             endHandleImage = UIImage.FromBundle("icEndLabel");
+
+            var gestureRecognizer = new UIPanGestureRecognizer(handleTouch);
+            AddGestureRecognizer(gestureRecognizer);
         }
 
         protected override void Dispose(bool disposing)
@@ -202,24 +205,40 @@ namespace Toggl.Daneel.Views.EditDuration
 
         #region Touch interaction
 
-        public override void TouchesBegan(NSSet touches, UIEvent evt)
+        private void handleTouch(UIPanGestureRecognizer recognizer)
         {
-            base.TouchesBegan(touches, evt);
-
-            var touch = findValidTouch(touches);
-            if (touch != null)
+            var position = recognizer.LocationInView(this);
+            switch (recognizer.State)
             {
-                currentTouch = touch;
+                case UIGestureRecognizerState.Began:
+                    touchesBegan(position);
+                    break;
+                case UIGestureRecognizerState.Changed:
+                    touchesMoved(position);
+                    break;
+                case UIGestureRecognizerState.Ended:
+                    touchesEnded();
+                    break;
+                case UIGestureRecognizerState.Cancelled:
+                case UIGestureRecognizerState.Failed:
+                    touchesCancelled();
+                    break;
+            }
+        }
+
+        public void touchesBegan(CGPoint position)
+        {
+            if (isValid(position))
+            {
+                isDragging = true;
                 feedbackGenerator = new UISelectionFeedbackGenerator();
                 feedbackGenerator.Prepare();
             }
         }
 
-        public override void TouchesMoved(NSSet touches, UIEvent evt)
+        public void touchesMoved(CGPoint position)
         {
-            base.TouchesMoved(touches, evt);
-
-            if (currentTouch == null) return;
+            if (isDragging == false) return;
 
             double previousAngle;
             switch (updateType)
@@ -235,8 +254,7 @@ namespace Toggl.Daneel.Views.EditDuration
                     break;
             }
 
-            var currentTapPosition = currentTouch.LocationInView(this);
-            var currentAngle = AngleBetween(currentTapPosition.ToMultivacPoint(), Center.ToMultivacPoint());
+            var currentAngle = AngleBetween(position.ToMultivacPoint(), Center.ToMultivacPoint());
 
             var angleChange = currentAngle - previousAngle;
             while (angleChange < -Math.PI) angleChange += FullCircle;
@@ -247,53 +265,44 @@ namespace Toggl.Daneel.Views.EditDuration
             updateEditedTime(timeChange);
         }
 
-        public override void TouchesCancelled(NSSet touches, UIEvent evt)
+        public void touchesCancelled()
         {
-            base.TouchesCancelled(touches, evt);
             finishTouchEditing();
         }
 
-        public override void TouchesEnded(NSSet touches, UIEvent evt)
+        public void touchesEnded()
         {
-            base.TouchesEnded(touches, evt);
-            if (currentTouch == null || currentTouch.Phase == UITouchPhase.Ended)
+            finishTouchEditing();
+            switch (updateType)
             {
-                finishTouchEditing();
-                switch (updateType)
-                {
-                    case WheelUpdateType.EditStartTime:
-                        timeEditedSubject.OnNext(EditTimeSource.WheelStartTime);
-                        break;
-                    case WheelUpdateType.EditEndTime:
-                        timeEditedSubject.OnNext(EditTimeSource.WheelEndTime);
-                        break;
-                    default:
-                        timeEditedSubject.OnNext(EditTimeSource.WheelBothTimes);
-                        break;
-                }
+                case WheelUpdateType.EditStartTime:
+                    timeEditedSubject.OnNext(EditTimeSource.WheelStartTime);
+                    break;
+                case WheelUpdateType.EditEndTime:
+                    timeEditedSubject.OnNext(EditTimeSource.WheelEndTime);
+                    break;
+                default:
+                    timeEditedSubject.OnNext(EditTimeSource.WheelBothTimes);
+                    break;
             }
         }
 
-        private UITouch findValidTouch(NSSet touches)
+        private bool isValid(CGPoint position)
         {
-            foreach (UITouch touch in touches)
+            var intention = determineTapIntention(position);
+            if (intention.HasValue)
             {
-                var position = touch.LocationInView(this);
-                var intention = determineTapIntention(position);
-                if (intention.HasValue)
+                updateType = intention.Value;
+                if (updateType == WheelUpdateType.EditBothAtOnce)
                 {
-                    updateType = intention.Value;
-                    if (updateType == WheelUpdateType.EditBothAtOnce)
-                    {
-                        editBothAtOnceStartTimeAngleOffset =
-                            AngleBetween(position.ToMultivacPoint(), Center.ToMultivacPoint()) - startTimeAngle;
-                    }
-
-                    return touch;
+                    editBothAtOnceStartTimeAngleOffset =
+                        AngleBetween(position.ToMultivacPoint(), Center.ToMultivacPoint()) - startTimeAngle;
                 }
+
+                return true;
             }
 
-            return null;
+            return false;
         }
 
         private WheelUpdateType? determineTapIntention(CGPoint position)
@@ -376,7 +385,7 @@ namespace Toggl.Daneel.Views.EditDuration
 
         private void finishTouchEditing()
         {
-            currentTouch = null;
+            isDragging = false;
             feedbackGenerator = null;
         }
 

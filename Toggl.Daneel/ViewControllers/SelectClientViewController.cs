@@ -1,4 +1,5 @@
-﻿using MvvmCross.Binding.BindingContext;
+﻿using System.Threading.Tasks;
+using MvvmCross.Binding.BindingContext;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Daneel.ViewSources;
 using Toggl.Foundation.MvvmCross.Helper;
@@ -8,7 +9,7 @@ using UIKit;
 namespace Toggl.Daneel.ViewControllers
 {
     [ModalCardPresentation]
-    public partial class SelectClientViewController : KeyboardAwareViewController<SelectClientViewModel>
+    public partial class SelectClientViewController : KeyboardAwareViewController<SelectClientViewModel>, IDismissableViewController
     {
         public SelectClientViewController()
             : base(nameof(SelectClientViewController))
@@ -46,6 +47,12 @@ namespace Toggl.Daneel.ViewControllers
             bindingSet.Apply();
 
             SearchTextField.BecomeFirstResponder();
+        }
+
+        public async Task<bool> Dismiss()
+        {
+            await ViewModel.CloseCommand.ExecuteAsync();
+            return true;
         }
 
         protected override void KeyboardWillShow(object sender, UIKeyboardEventArgs e)

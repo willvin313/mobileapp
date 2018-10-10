@@ -8,6 +8,7 @@ using Toggl.Foundation.Models.Interfaces;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant;
+using Toggl.Foundation.Services;
 
 namespace Toggl.Foundation.Interactors
 {
@@ -21,16 +22,18 @@ namespace Toggl.Foundation.Interactors
         private readonly ITogglDataSource dataSource;
         private readonly ITimeEntryPrototype prototype;
         private readonly IAnalyticsService analyticsService;
+        private readonly IIntentDonationService intentDonationService;
 
         public CreateTimeEntryInteractor(
             IIdProvider idProvider,
             ITimeService timeService,
             ITogglDataSource dataSource,
             IAnalyticsService analyticsService,
+            IIntentDonationService intentDonationService,
             ITimeEntryPrototype prototype,
             DateTimeOffset startTime,
             TimeSpan? duration)
-            : this(idProvider, timeService, dataSource, analyticsService, prototype, startTime, duration,
+            : this(idProvider, timeService, dataSource, analyticsService, intentDonationService, prototype, startTime, duration,
                 prototype.Duration.HasValue ? TimeEntryStartOrigin.Manual : TimeEntryStartOrigin.Timer) { }
 
         public CreateTimeEntryInteractor(
@@ -38,6 +41,7 @@ namespace Toggl.Foundation.Interactors
             ITimeService timeService,
             ITogglDataSource dataSource,
             IAnalyticsService analyticsService,
+            IIntentDonationService intentDonationService,
             ITimeEntryPrototype prototype,
             DateTimeOffset startTime,
             TimeSpan? duration,
@@ -49,6 +53,7 @@ namespace Toggl.Foundation.Interactors
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
             Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
+            Ensure.Argument.IsNotNull(intentDonationService, nameof(intentDonationService));
 
             this.origin = origin;
             this.duration = duration;
@@ -58,6 +63,7 @@ namespace Toggl.Foundation.Interactors
             this.dataSource = dataSource;
             this.timeService = timeService;
             this.analyticsService = analyticsService;
+            this.intentDonationService = intentDonationService;
         }
 
         public IObservable<IThreadSafeTimeEntry> Execute()
@@ -67,6 +73,7 @@ namespace Toggl.Foundation.Interactors
                 .SelectMany(dataSource.TimeEntries.Create)
                 .Do(notifyOfNewTimeEntryIfPossible)
                 .Do(dataSource.SyncManager.InitiatePushSync)
+                .Do(te => intentDonationService.DonateStartTimeEntry(te.Workspace, te))
                 .Track(StartTimeEntryEvent.With(origin), analyticsService);
 
         private TimeEntry userFromPrototype(IThreadSafeUser user)

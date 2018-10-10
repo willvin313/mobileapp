@@ -214,15 +214,6 @@ namespace Toggl.Daneel.Presentation
         {
             switch (hint)
             {
-                case ReloadLogHint _ when mainTabBarController
-                    .ViewControllers
-                    .Cast<UINavigationController>()
-                    .SelectMany(nav => nav.ViewControllers)
-                    .FirstOrDefault(vc => vc is MainViewController) is MainViewController viewController:
-
-                    viewController?.Reload();
-                    return;
-
                 case ToggleReportsCalendarVisibilityHint calendarHint:
 
                     if ((mainTabBarController.SelectedViewController as UINavigationController).TopViewController is ReportsViewController reportsViewController)

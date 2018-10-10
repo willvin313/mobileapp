@@ -348,18 +348,29 @@ namespace Toggl.Ultrawave.Tests.Integration
                 signingUp.Should().Throw<ArgumentException>();
             }
 
+
+            [Fact, LogTestInfo]
+            public void FailsWithUnauthorizedErrorWhenTheGoogleTokenIsEmpty()
+            {
+                Action signUp = () => unauthenticatedTogglApi
+                    .User
+                    .SignUpWithGoogle(string.Empty)
+                    .Wait();
+
+                signUp.Should().Throw<UnauthorizedException>();
+            }
+
             [Theory, LogTestInfo]
-            [InlineData("")]
             [InlineData("x.y.z")]
             [InlineData("asdkjasdkhjdsadhkda")]
-            public void FailsWhenTheGoogleTokenIsParameterARandomString(string notAToken)
+            public void FailsWithServiceUnavailableErrorWhenTheGoogleTokenIsARandomNonEmptyString(string notAToken)
             {
                 Action signUp = () => unauthenticatedTogglApi
                     .User
                     .SignUpWithGoogle(notAToken)
                     .Wait();
 
-                signUp.Should().Throw<UnauthorizedException>();
+                signUp.Should().Throw<ServiceUnavailableException>();
             }
 
             [Fact, LogTestInfo]
@@ -372,7 +383,7 @@ namespace Toggl.Ultrawave.Tests.Integration
                     .SignUpWithGoogle(jwt)
                     .Wait();
 
-                signUp.Should().Throw<UnauthorizedException>();
+                signUp.Should().Throw<ServiceUnavailableException>();
             }
         }
 

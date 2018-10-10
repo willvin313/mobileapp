@@ -45,6 +45,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IMvxNavigationService navigationService,
             IRemoteConfigService remoteConfigService,
             ISuggestionProviderContainer suggestionProviders,
+            IIntentDonationService intentDonationService,
             IAccessRestrictionStorage accessRestrictionStorage)
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
@@ -62,6 +63,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(remoteConfigService, nameof(remoteConfigService));
             Ensure.Argument.IsNotNull(suggestionProviders, nameof(suggestionProviders));
             Ensure.Argument.IsNotNull(accessRestrictionStorage, nameof(accessRestrictionStorage));
+            Ensure.Argument.IsNotNull(intentDonationService, nameof(intentDonationService));
+            Ensure.Argument.IsNotNull(dialogService, nameof(dialogService));
+            Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
 
             this.remoteConfigService = remoteConfigService;
 
@@ -76,6 +80,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 navigationService,
                 remoteConfigService,
                 suggestionProviders,
+                intentDonationService,
                 accessRestrictionStorage,
                 schedulerProvider);
 
@@ -86,6 +91,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 interactorFactory,
                 analyticsService,
                 dialogService,
+                intentDonationService,
                 schedulerProvider);
 
             calendarViewModel = new CalendarViewModel(

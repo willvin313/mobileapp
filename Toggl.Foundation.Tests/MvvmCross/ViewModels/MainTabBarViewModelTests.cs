@@ -30,6 +30,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     NavigationService,
                     RemoteConfigService,
                     SuggestionProviderContainer,
+                    IntentDonationService,
                     AccessRestrictionStorage
                 );
         }
@@ -52,6 +53,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     bool usePermissionsService,
                     bool useNavigationService,
                     bool useRemoteConfigService,
+                    bool useIntentDonationService,
                     bool useAccessRestrictionStorage,
                     bool useSuggestionProviderContainer)
             {
@@ -70,6 +72,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var remoteConfigService = useRemoteConfigService ? RemoteConfigService : null;
                 var accessRestrictionStorage = useAccessRestrictionStorage ? AccessRestrictionStorage : null;
                 var suggestionProviderContainer = useSuggestionProviderContainer ? SuggestionProviderContainer : null;
+                var intentDonationService = useIntentDonationService ? IntentDonationService : null;
 
                 Action tryingToConstructWithEmptyParameters =
                     () => new MainTabBarViewModel(
@@ -87,6 +90,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         navigationService,
                         remoteConfigService,
                         suggestionProviderContainer,
+                        intentDonationService,
                         accessRestrictionStorage
                     );
 

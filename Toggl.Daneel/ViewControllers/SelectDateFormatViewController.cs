@@ -1,4 +1,5 @@
-﻿using MvvmCross.Binding.BindingContext;
+﻿using System.Threading.Tasks;
+using MvvmCross.Binding.BindingContext;
 using MvvmCross.Platforms.Ios.Views;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Daneel.ViewSources;
@@ -8,7 +9,8 @@ namespace Toggl.Daneel.ViewControllers
 {
     [ModalCardPresentation]
     public sealed partial class SelectDateFormatViewController
-        : MvxViewController<SelectDateFormatViewModel>
+        : MvxViewController<SelectDateFormatViewModel>,
+          IDismissableViewController
     {
         public SelectDateFormatViewController() : base(nameof(SelectDateFormatViewController), null)
         {
@@ -32,6 +34,12 @@ namespace Toggl.Daneel.ViewControllers
                       .To(vm => vm.SelectFormatCommand);
 
             bindingSet.Apply();
+        }
+
+        public async Task<bool> Dismiss()
+        {
+            await ViewModel.CloseCommand.ExecuteAsync();
+            return true;
         }
     }
 }

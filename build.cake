@@ -226,7 +226,7 @@ private TemporaryFileTransformation GetIosInfoConfigurationTransformation()
     var commitCount = GetCommitCount();
     var reversedClientId = EnvironmentVariable("TOGGL_REVERSED_CLIENT_ID");
     var facebookAppId = EnvironmentVariable("TOGGL_FACEBOOK_APP_ID");
-    
+
     var bundleId = bundleIdToReplace;
     var appName = appNameToReplace;
     var iconSet = iconSetToReplace;
@@ -260,6 +260,130 @@ private TemporaryFileTransformation GetIosInfoConfigurationTransformation()
     };
 }
 
+private TemporaryFileTransformation GetIosSiriExtensionInfoConfigurationTransformation()
+{
+    const string path = "Toggl.Daneel.SiriExtension/Info.plist";
+    const string bundleIdToReplace = "com.toggl.daneel.debug.SiriExtension";
+    const string appNameToReplace = "Siri Extension Development";
+
+    var commitCount = GetCommitCount();
+
+    var bundleId = bundleIdToReplace;
+    var appName = appNameToReplace;
+
+    if (target == "Build.Release.iOS.AdHoc")
+    {
+        bundleId = "com.toggl.daneel.adhoc.SiriExtension";
+        appName = "Siri Extension Development";
+    }
+    else if (target == "Build.Release.iOS.AppStore")
+    {
+        bundleId = "com.toggl.daneel.SiriExtension";
+        appName = "Siri Extension";
+    }
+
+    var filePath = GetFiles(path).Single();
+    var file = TransformTextFile(filePath).ToString();
+
+    return new TemporaryFileTransformation
+    {
+        Path = path,
+        Original = file,
+        Temporary = file.Replace("IOS_BUNDLE_VERSION", commitCount)
+                        .Replace(bundleIdToReplace, bundleId)
+                        .Replace(appNameToReplace, appName)
+    };
+}
+
+private TemporaryFileTransformation GetIosSiriUIExtensionInfoConfigurationTransformation()
+{
+    const string path = "Toggl.Daneel.SiriExtension.UI/Info.plist";
+    const string bundleIdToReplace = "com.toggl.daneel.debug.SiriUIExtension";
+    const string appNameToReplace = "Toggl.Daneel.SiriExtension.UI";
+
+    var commitCount = GetCommitCount();
+
+    var bundleId = bundleIdToReplace;
+    var appName = appNameToReplace;
+
+    if (target == "Build.Release.iOS.AdHoc")
+    {
+        bundleId = "com.toggl.daneel.adhoc.SiriUIExtension";
+        appName = "Siri UI Extension Development";
+    }
+    else if (target == "Build.Release.iOS.AppStore")
+    {
+        bundleId = "com.toggl.daneel.SiriUIExtension";
+        appName = "Siri UI Extension";
+    }
+
+    var filePath = GetFiles(path).Single();
+    var file = TransformTextFile(filePath).ToString();
+
+    return new TemporaryFileTransformation
+    {
+        Path = path,
+        Original = file,
+        Temporary = file.Replace("IOS_BUNDLE_VERSION", commitCount)
+                        .Replace(bundleIdToReplace, bundleId)
+                        .Replace(appNameToReplace, appName)
+    };
+}
+
+private TemporaryFileTransformation GetIosEntitlementsConfigurationTransformation()
+{
+    const string path = "Toggl.Daneel/Entitlements.plist";
+    const string groupIdToReplace = "group.com.toggl.daneel.debug.extensions";
+
+    var groupId = groupIdToReplace;
+
+    if (target == "Build.Release.iOS.AdHoc")
+    {
+        groupId = "group.com.toggl.daneel.adhoc.extensions";
+    }
+    else if (target == "Build.Release.iOS.AppStore")
+    {
+        groupId = "group.com.toggl.daneel.extensions";
+    }
+
+    var filePath = GetFiles(path).Single();
+    var file = TransformTextFile(filePath).ToString();
+
+    return new TemporaryFileTransformation
+    {
+        Path = path,
+        Original = file,
+        Temporary = file.Replace(groupIdToReplace, groupId)
+    };
+}
+
+private TemporaryFileTransformation GetIosExtensionEntitlementsConfigurationTransformation()
+{
+    const string path = "Toggl.Daneel.SiriExtension/Entitlements.plist";
+    const string groupIdToReplace = "group.com.toggl.daneel.debug.extensions";
+
+    var groupId = groupIdToReplace;
+
+    if (target == "Build.Release.iOS.AdHoc")
+    {
+        groupId = "group.com.toggl.daneel.adhoc.extensions";
+    }
+    else if (target == "Build.Release.iOS.AppStore")
+    {
+        groupId = "group.com.toggl.daneel.extensions";
+    }
+
+    var filePath = GetFiles(path).Single();
+    var file = TransformTextFile(filePath).ToString();
+
+    return new TemporaryFileTransformation
+    {
+        Path = path,
+        Original = file,
+        Temporary = file.Replace(groupIdToReplace, groupId)
+    };
+}
+
 private TemporaryFileTransformation GetAndroidManifestTransformation()
 {
     const string path = "Toggl.Giskard/Properties/AndroidManifest.xml";
@@ -273,8 +397,8 @@ private TemporaryFileTransformation GetAndroidManifestTransformation()
 
     if (target == "Build.Release.Android.AdHoc")
     {
-        packageName = "com.toggl.giskard.calendar";
-        appName = "Toggl for Calendar Tests";
+        packageName = "com.toggl.giskard.adhoc";
+        appName = "Toggl for Tests";
     }
     else if (target == "Build.Release.Android.PlayStore")
     {
@@ -299,7 +423,7 @@ private TemporaryFileTransformation GetAndroidSplashScreenTransformation()
 {
     const string path = "Toggl.Giskard/Startup/SplashScreen.cs";
     const string appNameToReplace = "Toggl for Devs";
- 
+
     var appName = appNameToReplace;
 
     if (target == "Build.Release.Android.AdHoc")
@@ -356,9 +480,13 @@ private TemporaryFileTransformation GetIntegrationTestsConfigurationTransformati
 var transformations = new List<TemporaryFileTransformation>
 {
     GetIosInfoConfigurationTransformation(),
+    GetIosSiriExtensionInfoConfigurationTransformation(),
+    GetIosSiriUIExtensionInfoConfigurationTransformation(),
     GetIosCrashConfigurationTransformation(),
     GetIntegrationTestsConfigurationTransformation(),
     GetIosAnalyticsServicesConfigurationTransformation(),
+    GetIosEntitlementsConfigurationTransformation(),
+    GetIosExtensionEntitlementsConfigurationTransformation(),
     GetAndroidProjectConfigurationTransformation(),
     GetAndroidGoogleServicesTransformation(),
     GetAndroidGoogleLoginTransformation(),
@@ -407,6 +535,8 @@ Task("Clean")
         {
             CleanDirectory("./bin");
             CleanDirectory("./Toggl.Daneel/obj");
+            CleanDirectory("./Toggl.Daneel.SiriExtension/obj");
+            CleanDirectory("./Toggl.Daneel.SiriExtension.UI/obj");
             CleanDirectory("./Toggl.Daneel.Tests/obj");
             CleanDirectory("./Toggl.Daneel.Tests.UI/obj");
             CleanDirectory("./Toggl.Giskard/obj");
@@ -484,7 +614,7 @@ Task("Tests.Unit")
 
 //Integration Tests
 Task("Tests.Integration")
-    .IsDependentOn(buildAll ? "Build.Tests.All" : "Build.Tests.Integration")
+    .IsDependentOn("Build.Tests.Integration")
     .Does(Test(GetIntegrationTestProjects()));
 
 //UI Tests

@@ -73,6 +73,8 @@ namespace Toggl.Daneel.Cells.Calendar
                 BackgroundColor = UIColor.White
             };
 
+            prepareInitialConstraints();
+
             ContentView.BringSubviewToFront(TopDragIndicator);
             ContentView.BringSubviewToFront(BottomDragIndicator);
 
@@ -158,6 +160,16 @@ namespace Toggl.Daneel.Cells.Calendar
             BottomDragIndicator.Hidden = !IsEditing;
             topDragIndicatorBorderLayer.StrokeColor = color.CGColor;
             bottomDragIndicatorBorderLayer.StrokeColor = color.CGColor;
+        }
+
+        private void prepareInitialConstraints()
+        {
+            // The following constraints are required because there's an undocumented change in iOS 12
+            ContentView.TranslatesAutoresizingMaskIntoConstraints = false;
+            ContentView.TopAnchor.ConstraintEqualTo(TopAnchor).Active = true;
+            ContentView.BottomAnchor.ConstraintEqualTo(BottomAnchor).Active = true;
+            ContentView.LeadingAnchor.ConstraintEqualTo(LeadingAnchor).Active = true;
+            ContentView.TrailingAnchor.ConstraintEqualTo(TrailingAnchor).Active = true;
         }
 
         private void updateConstraints()

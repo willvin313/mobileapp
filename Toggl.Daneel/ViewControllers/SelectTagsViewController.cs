@@ -6,11 +6,12 @@ using Toggl.Foundation.MvvmCross.ViewModels;
 using UIKit;
 using Toggl.Daneel.Extensions;
 using Toggl.Foundation.MvvmCross.Helper;
+using System.Threading.Tasks;
 
 namespace Toggl.Daneel.ViewControllers
 {
     [ModalCardPresentation]
-    public sealed partial class SelectTagsViewController : KeyboardAwareViewController<SelectTagsViewModel>
+    public sealed partial class SelectTagsViewController : KeyboardAwareViewController<SelectTagsViewModel>, IDismissableViewController
     {
         public SelectTagsViewController() 
             : base(nameof(SelectTagsViewController))
@@ -67,6 +68,12 @@ namespace Toggl.Daneel.ViewControllers
             bindingSet.Apply();
 
             TextField.BecomeFirstResponder();
+        }
+
+        public async Task<bool> Dismiss()
+        {
+            await ViewModel.CloseCommand.ExecuteAsync();
+            return true;
         }
 
         protected override void KeyboardWillShow(object sender, UIKeyboardEventArgs e)

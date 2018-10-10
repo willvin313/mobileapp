@@ -1,4 +1,5 @@
-﻿using MvvmCross.Binding.BindingContext;
+﻿using System.Threading.Tasks;
+using MvvmCross.Binding.BindingContext;
 using MvvmCross.Platforms.Ios.Views;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Daneel.ViewSources;
@@ -8,11 +9,18 @@ namespace Toggl.Daneel.ViewControllers
 {
     [ModalCardPresentation]
     public partial class SelectDurationFormatViewController
-        : MvxViewController<SelectDurationFormatViewModel>
+        : MvxViewController<SelectDurationFormatViewModel>,
+          IDismissableViewController
     {
         public SelectDurationFormatViewController()
             : base(nameof(SelectDurationFormatViewController), null)
         {
+        }
+
+        public async Task<bool> Dismiss()
+        {
+            await ViewModel.CloseCommand.ExecuteAsync();
+            return true;
         }
 
         public override void ViewDidLoad()

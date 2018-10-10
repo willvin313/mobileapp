@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:tools="http://schemas.android.com/tools"
+<FrameLayout
+    xmlns:tools="http://schemas.android.com/tools"
     xmlns:local="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="72dp"
@@ -52,6 +53,7 @@
             android:id="@+id/TimeEntriesLogCellDescription"
             tools:visibility="visible"
             android:maxLines="1"
+            android:gravity="left"
             android:textSize="15sp"
             local:layout_goneMarginBottom="8dp"
             android:textColor="@android:color/black"
@@ -102,9 +104,9 @@
             android:maxLines="1"
             android:textSize="15sp"
             android:fontFamily="sans-serif-medium"
+            local:layout_constraintTop_toBottomOf="@id/AddDescriptionLabel"
             local:layout_constraintRight_toLeftOf="@+id/TimeEntryLogCellClientLabel"
             local:layout_constraintLeft_toRightOf="@id/TimeEntriesLogCellProjectLabel"
-            local:layout_constraintTop_toBottomOf="@id/AddDescriptionLabel"
             android:layout_marginBottom="16dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
@@ -115,25 +117,25 @@
             android:textSize="15sp"
             android:fontFamily="sans-serif"
             android:textColor="@color/clientName"
-            local:layout_constraintLeft_toRightOf="@id/TimeEntriesLogCellTaskLabel"
             local:layout_constraintTop_toBottomOf="@id/AddDescriptionLabel"
+            local:layout_constraintLeft_toRightOf="@id/TimeEntriesLogCellTaskLabel"
             android:layout_marginLeft="4dp"
             android:layout_marginBottom="16dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <View
             android:id="@+id/TimeEntriesLogCellDurationWhiteArea"
+            android:background="#ffffff"
             local:layout_constraintTop_toTopOf="parent"
             local:layout_constraintRight_toRightOf="parent"
             local:layout_constraintBottom_toBottomOf="parent"
-            android:background="#ffffff"
             android:layout_height="0dp"
             android:layout_width="72dp" />
         <View
             local:layout_constraintTop_toTopOf="parent"
             local:layout_constraintBottom_toBottomOf="parent"
-            local:layout_constraintRight_toLeftOf="@id/TimeEntriesLogCellDurationWhiteArea"
             android:background="@drawable/TransparentToWhiteGradient"
+            local:layout_constraintRight_toLeftOf="@id/TimeEntriesLogCellDurationWhiteArea"
             android:layout_height="0dp"
             android:layout_width="48dp" />
         <TextView
@@ -156,8 +158,8 @@
         <ImageView
             android:id="@+id/TimeEntriesLogCellBillable"
             android:src="@drawable/billable"
-            local:layout_constraintRight_toLeftOf="@id/TimeEntriesLogCellDuration"
             local:layout_constraintTop_toTopOf="@id/TimeEntriesLogCellDuration"
+            local:layout_constraintRight_toLeftOf="@id/TimeEntriesLogCellDuration"
             local:layout_constraintBottom_toBottomOf="@id/TimeEntriesLogCellDuration"
             android:layout_width="18dp"
             android:layout_height="18dp"
@@ -165,8 +167,8 @@
         <ImageView
             android:id="@+id/TimeEntriesLogCellTags"
             android:src="@drawable/tag"
-            local:layout_constraintRight_toLeftOf="@id/TimeEntriesLogCellBillable"
             local:layout_constraintTop_toTopOf="@id/TimeEntriesLogCellDuration"
+            local:layout_constraintRight_toLeftOf="@id/TimeEntriesLogCellBillable"
             local:layout_constraintBottom_toBottomOf="@id/TimeEntriesLogCellDuration"
             android:layout_width="18dp"
             android:layout_height="18dp"

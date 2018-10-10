@@ -110,18 +110,16 @@ namespace Toggl.Multivac.Tests
             [InlineData("Hello", 0, 5, "Hello")]
             [InlineData("Hello", 3, 2, "lo")]
             [InlineData("Hello", 0, 3, "Hel")]
-            [InlineData("🍌 🌽 🍄 🍆", 0, 7, "🍌 🌽 🍄 🍆")]
-            [InlineData("🍌 🌽 🍄 🍆", 0, 1, "🍌")]
-            [InlineData("🍌 🌽 🍄 🍆", 1, 1, " ")]
-            [InlineData("🍌 🌽 🍄 🍆", 2, 1, "🌽")]
-            [InlineData("🍌 🌽 🍄 🍆", 3, 1, " ")]
-            [InlineData("🍌 🌽 🍄 🍆", 4, 1, "🍄")]
-            [InlineData("🍌 🌽 🍄 🍆", 5, 1, " ")]
-            [InlineData("🍌 🌽 🍄 🍆", 6, 1, "🍆")]
-            [InlineData("🍌 🌽 🍄 🍆", 2, 4, "🌽 🍄 ")]
+            [InlineData("🍌 🍄 🍆", 0, 5, "🍌 🍄 🍆")]
+            [InlineData("🍌 🍄 🍆", 0, 1, "🍌")]
+            [InlineData("🍌 🍄 🍆", 1, 1, " ")]
+            [InlineData("🍌 🍄 🍆", 2, 1, "🍄")]
+            [InlineData("🍌 🍄 🍆", 3, 1, " ")]
+            [InlineData("🍌 🍄 🍆", 4, 1, "🍆")]
+            [InlineData("🍌 🍄 🍆", 2, 3, "🍄 🍆")]
             public void ReturnsExpectedSubstring(
                 string original, int start, int length, string substring)
-            {
+            {  
                 original.UnicodeSafeSubstring(start, length).Should().Be(substring);
             }
         }

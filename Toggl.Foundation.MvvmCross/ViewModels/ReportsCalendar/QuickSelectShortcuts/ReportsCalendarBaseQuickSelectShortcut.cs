@@ -1,6 +1,7 @@
 ﻿using MvvmCross.ViewModels;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Multivac;
+using Toggl.Foundation.Services;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar.QuickSelectShortcuts
 {
@@ -13,14 +14,18 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar.QuickSelectShort
 
         public bool Selected { get; private set; }
 
-        protected ReportsCalendarBaseQuickSelectShortcut(
-            ITimeService timeService, string title)
-        {
-            Ensure.Argument.IsNotNull(timeService, nameof(timeService));
-            Ensure.Argument.IsNotNull(title, nameof(title));
+        public ReportPeriod Period { get; private set; }
 
-            TimeService = timeService;
+        protected ReportsCalendarBaseQuickSelectShortcut(
+            ITimeService timeService, string title, ReportPeriod reportPeriod)
+        {
+            Ensure.Argument.IsNotNull(title, nameof(title));
+            Ensure.Argument.IsNotNull(timeService, nameof(timeService));
+            Ensure.Argument.IsNotNull(reportPeriod, nameof(reportPeriod));
+
             Title = title;
+            Period = reportPeriod;
+            TimeService = timeService;
         }
 
         public void OnDateRangeChanged(ReportsDateRangeParameter dateRange)

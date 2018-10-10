@@ -20,6 +20,7 @@ using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Suggestions;
+using Toggl.Giskard.BroadcastReceivers;
 using Toggl.Giskard.Presenters;
 using Toggl.Giskard.Services;
 using Toggl.Multivac.Extensions;
@@ -89,6 +90,9 @@ namespace Toggl.Giskard
             var permissionsService = new PermissionsService();
             var calendarService = new CalendarService(permissionsService);
 
+            ApplicationContext.RegisterReceiver(new TimezoneChangedBroadcastReceiver(timeService),
+                new IntentFilter(Intent.ActionTimezoneChanged));
+
             var foundation =
                 TogglFoundation
                     .ForClient(userAgent, appVersion)
@@ -110,6 +114,8 @@ namespace Toggl.Giskard
                     .WithSuggestionProviderContainer(suggestionProviderContainer)
                     .WithApplicationShortcutCreator(new ApplicationShortcutCreator(ApplicationContext))
                     .WithPlatformInfo(platformInfo)
+                    .WithIntentDonationService(new NoopIntentDonationService())
+                    .WithPrivateSharedStorageService(new NoopPrivateSharedStorageService())
 
                     .StartRegisteringPlatformServices()
                     .WithDialogService(dialogService)

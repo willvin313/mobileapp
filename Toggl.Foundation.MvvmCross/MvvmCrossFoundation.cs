@@ -36,6 +36,8 @@ namespace Toggl.Foundation.MvvmCross
         public IRemoteConfigService RemoteConfigService { get; }
         public IApplicationShortcutCreator ShortcutCreator { get; }
         public ISuggestionProviderContainer SuggestionProviderContainer { get; }
+        public IIntentDonationService IntentDonationService { get; }
+        public IPrivateSharedStorageService PrivateSharedStorageService { get; }
 
         public PlatformInfo PlatformInfo { get; }
         public IDialogService DialogService { get; }
@@ -89,7 +91,9 @@ namespace Toggl.Foundation.MvvmCross
             BackgroundService = builder.Foundation.BackgroundService;
             NotificationService = builder.Foundation.NotificationService;
             RemoteConfigService = builder.Foundation.RemoteConfigService;
+            IntentDonationService = builder.Foundation.IntentDonationService;
             SuggestionProviderContainer = builder.Foundation.SuggestionProviderContainer;
+            PrivateSharedStorageService = builder.Foundation.PrivateSharedStorageService;
         }
 
         public class Builder

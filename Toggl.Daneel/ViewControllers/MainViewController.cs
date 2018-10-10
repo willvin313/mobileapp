@@ -28,6 +28,7 @@ using Toggl.PrimeRadiant.Onboarding;
 using Toggl.PrimeRadiant.Settings;
 using UIKit;
 using static Toggl.Foundation.MvvmCross.Helper.Animation;
+using Toggl.Daneel.ExtensionKit;
 
 namespace Toggl.Daneel.ViewControllers
 {
@@ -212,8 +213,14 @@ namespace Toggl.Daneel.ViewControllers
                 SendFeedbackSuccessView.Rx().AnimatedIsVisible());
             this.BindVoid(SendFeedbackSuccessView.Rx().Tap(), ViewModel.RatingViewModel.CloseFeedbackSuccessView);
 
+            ViewModel.ShouldReloadTimeEntryLog
+                .VoidSubscribe(reload)
+                .DisposedBy(disposeBag);
+
             View.SetNeedsLayout();
             View.LayoutIfNeeded();
+
+            NSNotificationCenter.DefaultCenter.AddObserver(UIApplication.DidBecomeActiveNotification, onApplicationDidBecomeActive);
         }
 
         private void setupTableViewHeader()
@@ -254,6 +261,15 @@ namespace Toggl.Daneel.ViewControllers
                 new UIBarButtonItem(syncFailuresButton)
             };
 #endif
+        }
+
+        private void onApplicationDidBecomeActive(NSNotification notification)
+        {
+            if (SharedStorage.instance.GetNeedsSync())
+            {
+                SharedStorage.instance.SetNeedsSync(false);
+                ViewModel.RefreshAction.Execute();
+            }
         }
 
         private void toggleUndoDeletion(bool show)
@@ -383,6 +399,11 @@ namespace Toggl.Daneel.ViewControllers
             prepareEmptyStateView();
 
             View.BackgroundColor = Color.Main.BackgroundColor.ToNativeColor();
+
+            // Open edit view for the currently running time entry by swiping up
+            var swipeUpRunningCardGesture = new UISwipeGestureRecognizer(() => ViewModel.EditTimeEntryCommand.Execute());
+            swipeUpRunningCardGesture.Direction = UISwipeGestureRecognizerDirection.Up;
+            CurrentTimeEntryCard.AddGestureRecognizer(swipeUpRunningCardGesture);
         }
 
         private void showTimeEntryCard()
@@ -603,7 +624,7 @@ namespace Toggl.Daneel.ViewControllers
             swipeLeftGestureRecognizer = swipeLeftStep.DismissBySwiping(nextFirstTimeEntry, Direction.Left);
         }
 
-        internal void Reload()
+        private void reload()
         {
             var range = new NSRange(0, TimeEntriesLogTableView.NumberOfSections());
             var indexSet = NSIndexSet.FromNSRange(range);
