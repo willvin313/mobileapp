@@ -45,6 +45,8 @@ namespace Toggl.Daneel
                 "{TOGGL_APP_CENTER_ID_IOS}",
                 typeof(Microsoft.AppCenter.Crashes.Crashes),
                 typeof(Microsoft.AppCenter.Analytics.Analytics));
+            Firebase.PerformanceMonitoring.Performance.SharedInstance.InstrumentationEnabled = true;
+            Firebase.PerformanceMonitoring.Performance.SharedInstance.DataCollectionEnabled = true;
             Firebase.Core.App.Configure();
             Google.SignIn.SignIn.SharedInstance.ClientID =
                 Firebase.Core.App.DefaultInstance.Options.ClientId;
