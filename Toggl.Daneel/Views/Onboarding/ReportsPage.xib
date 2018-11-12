@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
-    <device id="retina4_7" orientation="portrait">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14313.18" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="ipad9_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
-        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.14"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -24,13 +23,13 @@
                     </constraints>
                 </imageView>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gZq-RR-xje">
-                    <rect key="frame" x="16" y="61" width="158" height="158"/>
+                    <rect key="frame" x="47.5" y="61" width="95" height="95"/>
                     <constraints>
                         <constraint firstAttribute="width" secondItem="gZq-RR-xje" secondAttribute="height" multiplier="1:1" id="Hcd-ax-5Lz"/>
                     </constraints>
                 </view>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gpt-Kt-u1S">
-                    <rect key="frame" x="0.0" y="251" width="190" height="38"/>
+                    <rect key="frame" x="0.0" y="188" width="190" height="38"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KN6-7b-jxo">
                             <rect key="frame" x="0.0" y="0.0" width="190" height="1"/>
@@ -81,7 +80,7 @@
                     </constraints>
                 </view>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8qq-Pq-owl">
-                    <rect key="frame" x="0.0" y="289" width="190" height="38"/>
+                    <rect key="frame" x="0.0" y="226" width="190" height="38"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="E4O-6r-rc9">
                             <rect key="frame" x="0.0" y="0.0" width="190" height="1"/>
@@ -133,7 +132,7 @@
                     </constraints>
                 </view>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1jn-vX-5bD">
-                    <rect key="frame" x="0.0" y="327" width="190" height="38"/>
+                    <rect key="frame" x="0.0" y="264" width="190" height="38"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZcC-jP-l0R">
                             <rect key="frame" x="0.0" y="0.0" width="190" height="1"/>
@@ -186,7 +185,7 @@
                     </constraints>
                 </view>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8GA-k7-Tq2">
-                    <rect key="frame" x="0.0" y="365" width="190" height="38"/>
+                    <rect key="frame" x="0.0" y="302" width="190" height="38"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1pV-8k-dtr">
                             <rect key="frame" x="0.0" y="0.0" width="190" height="1"/>
@@ -253,8 +252,10 @@
             </subviews>
             <color key="backgroundColor" red="0.98039215686274506" green="0.98431372549019602" blue="0.9882352941176471" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
+                <constraint firstItem="gZq-RR-xje" firstAttribute="centerX" secondItem="1" secondAttribute="centerX" id="0Ce-ky-bd3"/>
                 <constraint firstAttribute="trailing" secondItem="gZq-RR-xje" secondAttribute="trailing" constant="16" id="1qn-II-Wbm"/>
                 <constraint firstAttribute="trailing" secondItem="8GA-k7-Tq2" secondAttribute="trailing" id="DzF-H3-Y4c"/>
+                <constraint firstItem="gZq-RR-xje" firstAttribute="width" secondItem="1" secondAttribute="width" multiplier="0.5" id="Gq7-1a-Cwa"/>
                 <constraint firstItem="gpt-Kt-u1S" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="LXv-CZ-rOR"/>
                 <constraint firstItem="gZq-RR-xje" firstAttribute="top" secondItem="aca-32-LLi" secondAttribute="bottom" constant="32" id="MrX-Sm-Bw2"/>
                 <constraint firstItem="8qq-Pq-owl" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="PwS-fA-CBp"/>
@@ -272,6 +273,20 @@
                 <constraint firstItem="gZq-RR-xje" firstAttribute="leading" secondItem="1" secondAttribute="leading" constant="16" id="zwf-Wv-hpc"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <variation key="default">
+                <mask key="constraints">
+                    <exclude reference="0Ce-ky-bd3"/>
+                    <exclude reference="Gq7-1a-Cwa"/>
+                </mask>
+            </variation>
+            <variation key="heightClass=regular-widthClass=regular">
+                <mask key="constraints">
+                    <include reference="0Ce-ky-bd3"/>
+                    <exclude reference="1qn-II-Wbm"/>
+                    <include reference="Gq7-1a-Cwa"/>
+                    <exclude reference="zwf-Wv-hpc"/>
+                </mask>
+            </variation>
             <connections>
                 <outlet property="Chart" destination="gZq-RR-xje" id="M8O-8j-cyq"/>
             </connections>
