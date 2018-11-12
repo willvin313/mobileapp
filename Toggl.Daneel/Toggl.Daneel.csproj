@@ -1212,6 +1212,11 @@
       <Project>{BC329A24-95D6-4D02-95B5-2AA699D8873A}</Project>
       <Name>Toggl.Daneel.SiriExtension.UI</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Toggl.Daneel.Watch\Toggl.Daneel.Watch.csproj">
+      <IsWatchApp>true</IsWatchApp>
+      <Project>{3460DF7C-579B-419B-B887-37459B6E60C9}</Project>
+      <Name>Toggl.Daneel.Watch</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\Images.xcassets\line.imageset\" />
