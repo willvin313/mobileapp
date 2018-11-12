@@ -2,6 +2,7 @@
 
 using Foundation;
 using WatchKit;
+using WatchConnectivity;
 
 namespace Toggl.Daneel.WatchExtension
 {
@@ -11,6 +12,11 @@ namespace Toggl.Daneel.WatchExtension
         public override void ApplicationDidFinishLaunching()
         {
             // Perform any final initialization of your application.
+            if (WCSession.IsSupported)
+            {
+                WCSession.DefaultSession.Delegate = new WatchSessionHandler();
+                WCSession.DefaultSession.ActivateSession();
+            }
         }
 
         public override void ApplicationDidBecomeActive()
@@ -29,4 +35,3 @@ namespace Toggl.Daneel.WatchExtension
         }
     }
 }
-

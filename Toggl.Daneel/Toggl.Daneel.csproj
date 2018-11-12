@@ -1168,6 +1168,7 @@
       <DependentUpon>SelectDefaultWorkspaceTableViewCell.cs</DependentUpon>
     </Compile>
     <Compile Include="Extensions\IThreadSafeTimeEntryExtensions.cs" />
+    <Compile Include="Watch\WatchSessionHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Toggl.Foundation.MvvmCross\Toggl.Foundation.MvvmCross.csproj">
@@ -1257,6 +1258,7 @@
     <Folder Include="ViewControllers\Calendar\" />
     <Folder Include="Cells\Calendar\" />
     <Folder Include="Resources\Images.xcassets\icCalendarSmall.imageset\" />
+    <Folder Include="Watch\" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="GoogleService-Info.plist" />

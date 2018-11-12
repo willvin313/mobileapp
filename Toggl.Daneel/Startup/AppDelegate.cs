@@ -12,6 +12,7 @@ using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Intents;
 using Toggl.Daneel.Services;
 using Toggl.Daneel.ViewControllers;
+using Toggl.Daneel.Watch;
 using Toggl.Foundation;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.Extensions;
@@ -26,6 +27,7 @@ using Toggl.Foundation.Services;
 using Toggl.Foundation.Shortcuts;
 using UIKit;
 using UserNotifications;
+using WatchConnectivity;
 
 namespace Toggl.Daneel
 {
@@ -61,6 +63,12 @@ namespace Toggl.Daneel
             #if USE_ANALYTICS
             Facebook.CoreKit.ApplicationDelegate.SharedInstance.FinishedLaunching(application, launchOptions);
             #endif
+
+            if (WCSession.IsSupported)
+            {
+                WCSession.DefaultSession.Delegate = new WatchSessionHandler();
+                WCSession.DefaultSession.ActivateSession();
+            }
 
             return true;
         }
