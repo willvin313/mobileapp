@@ -97,6 +97,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
+    <Folder Include="InterfaceControllers\" />
+    <Folder Include="Extensions\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -105,15 +107,24 @@
   <ItemGroup>
     <Compile Include="ComplicationController.cs" />
     <Compile Include="ExtensionDelegate.cs" />
-    <Compile Include="InterfaceController.cs" />
-    <Compile Include="InterfaceController.designer.cs">
-      <DependentUpon>InterfaceController.cs</DependentUpon>
-    </Compile>
     <Compile Include="NotificationController.cs" />
     <Compile Include="NotificationController.designer.cs">
       <DependentUpon>NotificationController.cs</DependentUpon>
     </Compile>
     <Compile Include="WatchSessionHandler.cs" />
+    <Compile Include="InterfaceControllers\RunningTimeEntryInterfaceController.cs" />
+    <Compile Include="InterfaceControllers\RunningTimeEntryInterfaceController.designer.cs">
+      <DependentUpon>RunningTimeEntryInterfaceController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="InterfaceControllers\StartTimeEntryInterfaceController.cs" />
+    <Compile Include="InterfaceControllers\StartTimeEntryInterfaceController.designer.cs">
+      <DependentUpon>StartTimeEntryInterfaceController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="InterfaceControllers\LoginInterfaceController.cs" />
+    <Compile Include="InterfaceControllers\LoginInterfaceController.designer.cs">
+      <DependentUpon>LoginInterfaceController.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="PushNotificationPayload.json" />
