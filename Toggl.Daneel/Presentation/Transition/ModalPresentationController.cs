@@ -125,6 +125,7 @@ namespace Toggl.Daneel.Presentation.Transition
 
         public override void ContainerViewWillLayoutSubviews()
         {
+            dimmingView.Frame = ContainerView.Bounds;
             PresentedView.Frame = FrameOfPresentedViewInContainerView;
 
             var shadowPath = UIBezierPath.FromRoundedRect(PresentedViewController.View.Bounds, 8.0f).CGPath;
@@ -139,8 +140,17 @@ namespace Toggl.Daneel.Presentation.Transition
 
         public override CGSize GetSizeForChildContentContainer(IUIContentContainer contentContainer, CGSize parentContainerSize)
         {
-            var preferredHeight = Min(maximumHeight, PresentedViewController.PreferredContentSize.Height);
-            return new CGSize(parentContainerSize.Width, preferredHeight == 0 ? maximumHeight : preferredHeight);
+            if (PresentingViewController.TraitCollection.HorizontalSizeClass == UIUserInterfaceSizeClass.Regular
+                    && PresentingViewController.TraitCollection.VerticalSizeClass == UIUserInterfaceSizeClass.Regular)
+            {
+                var largerSide = (nfloat)Max(parentContainerSize.Width, parentContainerSize.Height);
+                return new CGSize(largerSide / 2, largerSide / 2);
+            }
+            else
+            {
+                var preferredHeight = Min(maximumHeight, PresentedViewController.PreferredContentSize.Height);
+                return new CGSize(parentContainerSize.Width, preferredHeight == 0 ? maximumHeight : preferredHeight);
+            }
         }
 
         public override CGRect FrameOfPresentedViewInContainerView
@@ -153,8 +163,8 @@ namespace Toggl.Daneel.Presentation.Transition
                 var containerSize = ContainerView.Bounds.Size;
                 var frame = CGRect.Empty;
                 frame.Size = GetSizeForChildContentContainer(PresentedViewController, containerSize);
-                frame.X = 0;
-                frame.Y = containerSize.Height - frame.Size.Height;
+                frame.X = (containerSize.Width - frame.Size.Width) / 2;
+                frame.Y = (containerSize.Height - frame.Size.Height) / 2;
                 return frame;
             }
         }
