@@ -15,6 +15,7 @@ using Toggl.Daneel.ViewControllers;
 using Toggl.Daneel.Watch;
 using Toggl.Foundation;
 using Toggl.Foundation.Analytics;
+using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.MvvmCross;
@@ -66,7 +67,8 @@ namespace Toggl.Daneel
 
             if (WCSession.IsSupported)
             {
-                WCSession.DefaultSession.Delegate = new WatchSessionHandler();
+                var dataSource = Mvx.Resolve<ITogglDataSource>();
+                WCSession.DefaultSession.Delegate = new WatchSessionHandler(dataSource);
                 WCSession.DefaultSession.ActivateSession();
             }
 

@@ -32,5 +32,12 @@ namespace Toggl.Daneel.WatchExtension
             var response = new NSDictionary<NSString, NSObject>();
             replyHandler(response);
         }
+
+        [Export("session:didReceiveApplicationContext:")]
+        public override void DidReceiveApplicationContext(WCSession session, NSDictionary<NSString, NSObject> applicationContext)
+        {
+            Console.WriteLine("Did receive application context: {0}", applicationContext);
+            NSNotificationCenter.DefaultCenter.PostNotificationName("DidReceiveApplicationContext", null);
+        }
     }
 }
