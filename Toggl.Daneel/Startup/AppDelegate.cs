@@ -67,8 +67,10 @@ namespace Toggl.Daneel
 
             if (WCSession.IsSupported)
             {
+                var timeService = Mvx.Resolve<ITimeService>();
                 var dataSource = Mvx.Resolve<ITogglDataSource>();
-                WCSession.DefaultSession.Delegate = new WatchSessionHandler(dataSource);
+                var interactorFactory = Mvx.Resolve<IInteractorFactory>();
+                WCSession.DefaultSession.Delegate = new WatchSessionHandler(timeService, dataSource, interactorFactory);
                 WCSession.DefaultSession.ActivateSession();
             }
 

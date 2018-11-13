@@ -4,6 +4,7 @@ namespace Toggl.Foundation.Analytics
     {
         Manual,
         Deeplink,
-        Siri
+        Siri,
+        AppleWatch
     }
 }
