@@ -45,7 +45,9 @@ namespace Toggl.Daneel.ViewControllers
 
         protected override void KeyboardWillShow(object sender, UIKeyboardEventArgs e)
         {
-            BottomConstraint.AnimateSetConstant(e.FrameEnd.Height, View);
+            var bottomPosition = UIScreen.MainScreen.Bounds.Height - View.Frame.Y - View.Frame.Height;
+            var constant = e.FrameEnd.Height - bottomPosition;
+            BottomConstraint.AnimateSetConstant(constant, View);
         }
 
         protected override void KeyboardWillHide(object sender, UIKeyboardEventArgs e)
