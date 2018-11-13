@@ -37,10 +37,23 @@ namespace Toggl.Daneel.Presentation.Transition
         public override void ContainerViewWillLayoutSubviews()
         {
             PresentedView.Layer.CornerRadius = 8;
+            dimmingView.Frame = ContainerView.Bounds;
         }
 
         public override CGSize GetSizeForChildContentContainer(IUIContentContainer contentContainer, CGSize parentContainerSize)
-            => PresentedViewController.PreferredContentSize;
+        {
+            if (PresentingViewController.TraitCollection.HorizontalSizeClass == UIUserInterfaceSizeClass.Regular
+                    && PresentingViewController.TraitCollection.VerticalSizeClass == UIUserInterfaceSizeClass.Regular)
+            {
+                var largerSide = System.Math.Max(parentContainerSize.Width, parentContainerSize.Height);
+                var preferredSize = PresentedViewController.PreferredContentSize;
+                return new CGSize((largerSide / 2) - 32, preferredSize.Height); // 16 point padding
+            }
+            else
+            {
+                return PresentedViewController.PreferredContentSize;
+            }
+        }
 
         public override CGRect FrameOfPresentedViewInContainerView
         {
