@@ -74,7 +74,7 @@ namespace Toggl.Daneel.WatchExtension.InterfaceControllers
             {
                 WKExtension.SharedExtension.InvokeOnMainThread(() =>
                 {
-                    PresentController("RunningTimeEntryInterfaceController", string.Empty);
+                    ReloadRootControllers(new[] { "RunningTimeEntryInterfaceController" }, null);
                 });
             }
         }
