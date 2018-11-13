@@ -1,6 +1,8 @@
 ﻿using System;
 using Foundation;
+using Toggl.Daneel.WatchExtension.Extensions;
 using WatchConnectivity;
+using WatchKit;
 
 namespace Toggl.Daneel.WatchExtension
 {
@@ -37,6 +39,16 @@ namespace Toggl.Daneel.WatchExtension
         public override void DidReceiveApplicationContext(WCSession session, NSDictionary<NSString, NSObject> applicationContext)
         {
             Console.WriteLine("Did receive application context: {0}", applicationContext);
+
+            if (!WCSession.DefaultSession.ReceivedApplicationContext.ContainsKey("LoggedIn".ToNSString()))
+            {
+                WKExtension.SharedExtension.InvokeOnMainThread(() =>
+                {
+                    WKInterfaceController.ReloadRootControllers(new[] { "LoginInterfaceController" }, null);
+                });
+                return;
+            }
+
             NSNotificationCenter.DefaultCenter.PostNotificationName("DidReceiveApplicationContext", null);
         }
     }

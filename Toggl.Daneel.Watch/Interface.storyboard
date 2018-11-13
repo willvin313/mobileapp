@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14460.31" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="FDi-8B-izX">
-    <device id="watch38" orientation="portrait">
+    <device id="watch44" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
@@ -47,12 +47,16 @@
             <objects>
                 <controller identifier="StartTimeEntryInterfaceController" id="FDi-8B-izX" customClass="StartTimeEntryInterfaceController">
                     <items>
-                        <button width="1" alignment="left" title="Enter description" id="o76-cW-qAv">
-                            <fontDescription key="font" type="system" pointSize="13"/>
-                            <connections>
-                                <action selector="OnEnterDescriptionPress:" destination="FDi-8B-izX" id="vlR-5O-LkN"/>
-                            </connections>
-                        </button>
+                        <group width="1" alignment="left" layout="vertical" id="ad8-EW-kAy">
+                            <items>
+                                <button width="1" alignment="left" title="Enter description" id="o76-cW-qAv">
+                                    <fontDescription key="font" type="system" pointSize="13"/>
+                                    <connections>
+                                        <action selector="OnEnterDescriptionPress:" destination="FDi-8B-izX" id="vlR-5O-LkN"/>
+                                    </connections>
+                                </button>
+                            </items>
+                        </group>
                         <group width="1" alignment="left" verticalAlignment="bottom" id="8t5-8F-CQb">
                             <items>
                                 <button width="1" alignment="left" title="Start" id="8kb-ZS-dBE">
@@ -72,10 +76,18 @@
             </objects>
             <point key="canvasLocation" x="-457" y="348"/>
         </scene>
-        <!--Login Interface Controller-->
+        <!--LoginInterfaceController-->
         <scene sceneID="jCF-Df-fdj">
             <objects>
-                <controller id="vZs-Rs-luw" customClass="LoginInterfaceController"/>
+                <controller identifier="LoginInterfaceController" id="vZs-Rs-luw" customClass="LoginInterfaceController">
+                    <items>
+                        <group alignment="center" verticalAlignment="center" layout="vertical" id="j8S-uh-U2s">
+                            <items>
+                                <label alignment="center" text="Please login or sign up in your iPhone first." textAlignment="center" numberOfLines="0" id="Ks1-zI-Bk9"/>
+                            </items>
+                        </group>
+                    </items>
+                </controller>
             </objects>
             <point key="canvasLocation" x="-457" y="0.0"/>
         </scene>

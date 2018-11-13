@@ -3,6 +3,7 @@
 using Foundation;
 using WatchKit;
 using WatchConnectivity;
+using Toggl.Daneel.WatchExtension.Extensions;
 
 namespace Toggl.Daneel.WatchExtension
 {
@@ -23,6 +24,15 @@ namespace Toggl.Daneel.WatchExtension
         {
             // Restart any tasks that were paused (or not yet started) while the application was inactive.
             // If the application was previously in the background, optionally refresh the user interface.
+
+            if (!WCSession.DefaultSession.ReceivedApplicationContext.ContainsKey("LoggedIn".ToNSString()))
+            {
+                WKExtension.SharedExtension.InvokeOnMainThread(() =>
+                {
+                    WKInterfaceController.ReloadRootControllers(new[] { "LoginInterfaceController" }, null);
+                });
+                return;
+            }
         }
 
         public override void ApplicationWillResignActive()

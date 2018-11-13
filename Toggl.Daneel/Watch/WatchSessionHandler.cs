@@ -40,6 +40,12 @@ namespace Toggl.Daneel.Watch
                 .CurrentlyRunningTimeEntry
                 .Subscribe(currentRunningTimeEntryChanged)
                 .DisposedBy(disposeBag);
+
+            this.dataSource
+                .User
+                .Get()
+                .Subscribe(currentUserChanged)
+                .DisposedBy(disposeBag);
         }
 
         [Export("session:activationDidCompleteWithState:error:")]
@@ -102,6 +108,26 @@ namespace Toggl.Daneel.Watch
             else
             {
                 mutableContext["RunningTimeEntry"] = timeEntryDict;
+            }
+
+            var updatedContext = new NSDictionary<NSString, NSObject>(mutableContext.Keys, mutableContext.Values);
+
+            NSError error;
+            WCSession.DefaultSession.UpdateApplicationContext(updatedContext, out error);
+        }
+
+        private void currentUserChanged(IThreadSafeUser user)
+        {
+            var context = WCSession.DefaultSession.ApplicationContext ?? new NSDictionary<NSString, NSObject>();
+            var mutableContext = new NSMutableDictionary<NSString, NSObject>(context);
+
+            if (user == null)
+            {
+                mutableContext.Remove("LoggedIn".ToNSString());
+            }
+            else
+            {
+                mutableContext["LoggedIn"] = new NSNumber(true);
             }
 
             var updatedContext = new NSDictionary<NSString, NSObject>(mutableContext.Keys, mutableContext.Values);
