@@ -28,6 +28,7 @@ namespace Toggl.Daneel.WatchExtension.InterfaceControllers
         {
             // This method is called when the watch view controller is about to be visible to the user.
             Console.WriteLine("{0} will activate", this);
+            updateInterface();
         }
 
         public override void DidDeactivate()
@@ -49,6 +50,11 @@ namespace Toggl.Daneel.WatchExtension.InterfaceControllers
 
         private void contextReceived(NSNotification notification)
         {
+            updateInterface();
+        }
+
+        private void updateInterface()
+        {
             var runningTimeEntry = WCSession.DefaultSession.ReceivedApplicationContext["RunningTimeEntry"] as NSDictionary;
             if (runningTimeEntry != null)
             {
@@ -58,6 +64,13 @@ namespace Toggl.Daneel.WatchExtension.InterfaceControllers
                 DescriptionLabel.SetText(description);
                 RunningTimer.SetDate(start);
                 RunningTimer.Start();
+            }
+            else
+            {
+                WKExtension.SharedExtension.InvokeOnMainThread(() =>
+                {
+                    DismissController();
+                });
             }
         }
     }

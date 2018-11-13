@@ -6,12 +6,14 @@ using Toggl.Daneel.Extensions.Models;
 using Toggl.Foundation;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
+using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using WatchConnectivity;
 using System.Reactive.Linq;
+using Toggl.Daneel.Extensions;
 
 namespace Toggl.Daneel.Watch
 {
@@ -64,6 +66,10 @@ namespace Toggl.Daneel.Watch
                 case "StopRunningTimeEntry":
                     stopRunningTimeEntry();
                     break;
+                case "StartTimeEntry":
+                    var description = (message["Description"] as NSString).ToString();
+                    startTimeEntry(description);
+                    break;
                 default:
                     Console.WriteLine("Unknown action: {0}", action);
                     break;
@@ -88,7 +94,16 @@ namespace Toggl.Daneel.Watch
 
             var context = WCSession.DefaultSession.ApplicationContext ?? new NSDictionary<NSString, NSObject>();
             var mutableContext = new NSMutableDictionary<NSString, NSObject>(context);
-            mutableContext["RunningTimeEntry"] = timeEntryDict;
+
+            if (timeEntryDict == null)
+            {
+                mutableContext.Remove("RunningTimeEntry".ToNSString());
+            }
+            else
+            {
+                mutableContext["RunningTimeEntry"] = timeEntryDict;
+            }
+
             var updatedContext = new NSDictionary<NSString, NSObject>(mutableContext.Keys, mutableContext.Values);
 
             NSError error;
@@ -98,6 +113,13 @@ namespace Toggl.Daneel.Watch
         private async Task stopRunningTimeEntry()
         {
             await interactorFactory.StopTimeEntry(timeService.CurrentDateTime, TimeEntryStopOrigin.AppleWatch).Execute();
+        }
+
+        private async Task startTimeEntry(string description)
+        {
+            var workspaceId = (await dataSource.User.Get()).DefaultWorkspaceId.Value;
+            var prototype = description.AsTimeEntryPrototype(timeService.CurrentDateTime, workspaceId);
+            await interactorFactory.CreateTimeEntry(prototype).Execute();
         }
     }
 }

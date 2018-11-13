@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14460.31" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="AgC-eL-Hgc">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14460.31" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="FDi-8B-izX">
     <device id="watch38" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -9,10 +9,10 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="14460.16"/>
     </dependencies>
     <scenes>
-        <!--Running Time Entry Interface Controller-->
+        <!--RunningTimeEntryInterfaceController-->
         <scene sceneID="aou-V4-d1y">
             <objects>
-                <controller id="AgC-eL-Hgc" customClass="RunningTimeEntryInterfaceController">
+                <controller identifier="RunningTimeEntryInterfaceController" id="AgC-eL-Hgc" customClass="RunningTimeEntryInterfaceController">
                     <items>
                         <group width="1" alignment="left" layout="vertical" id="euJ-mG-Jkk">
                             <items>
@@ -40,21 +40,44 @@
                     </connections>
                 </controller>
             </objects>
-            <point key="canvasLocation" x="-98" y="0.0"/>
+            <point key="canvasLocation" x="-130" y="348"/>
         </scene>
-        <!--Start Time Entry Interface Controller-->
+        <!--StartTimeEntryInterfaceController-->
         <scene sceneID="evB-X4-MiQ">
             <objects>
-                <controller id="FDi-8B-izX" customClass="StartTimeEntryInterfaceController"/>
+                <controller identifier="StartTimeEntryInterfaceController" id="FDi-8B-izX" customClass="StartTimeEntryInterfaceController">
+                    <items>
+                        <button width="1" alignment="left" title="Enter description" id="o76-cW-qAv">
+                            <fontDescription key="font" type="system" pointSize="13"/>
+                            <connections>
+                                <action selector="OnEnterDescriptionPress:" destination="FDi-8B-izX" id="vlR-5O-LkN"/>
+                            </connections>
+                        </button>
+                        <group width="1" alignment="left" verticalAlignment="bottom" id="8t5-8F-CQb">
+                            <items>
+                                <button width="1" alignment="left" title="Start" id="8kb-ZS-dBE">
+                                    <color key="backgroundColor" red="0.0" green="0.97680455450000003" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    <connections>
+                                        <action selector="OnStartTimeEntryPress:" destination="FDi-8B-izX" id="ki0-es-INf"/>
+                                    </connections>
+                                </button>
+                            </items>
+                        </group>
+                    </items>
+                    <connections>
+                        <outlet property="EnterDescriptionButton" destination="o76-cW-qAv" id="41P-tx-xeD"/>
+                        <outlet property="StartTimeEntryButton" destination="8kb-ZS-dBE" id="e8J-fc-pNi"/>
+                    </connections>
+                </controller>
             </objects>
-            <point key="canvasLocation" x="-98" y="303"/>
+            <point key="canvasLocation" x="-457" y="348"/>
         </scene>
         <!--Login Interface Controller-->
         <scene sceneID="jCF-Df-fdj">
             <objects>
                 <controller id="vZs-Rs-luw" customClass="LoginInterfaceController"/>
             </objects>
-            <point key="canvasLocation" x="-98" y="607"/>
+            <point key="canvasLocation" x="-457" y="0.0"/>
         </scene>
         <!--Static Notification Interface Controller-->
         <scene sceneID="AEw-b0-oYE">
