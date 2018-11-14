@@ -1,4 +1,5 @@
 ﻿using System;
+using ClockKit;
 using Foundation;
 using Toggl.Daneel.WatchExtension.Extensions;
 using WatchConnectivity;
@@ -47,6 +48,12 @@ namespace Toggl.Daneel.WatchExtension
                     WKInterfaceController.ReloadRootControllers(new[] { "LoginInterfaceController" }, null);
                 });
                 return;
+            }
+
+            var activeComplications = CLKComplicationServer.SharedInstance.ActiveComplications;
+            foreach (var complication in activeComplications)
+            {
+                CLKComplicationServer.SharedInstance.ReloadTimeline(complication);
             }
 
             NSNotificationCenter.DefaultCenter.PostNotificationName("DidReceiveApplicationContext", null);

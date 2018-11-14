@@ -1,9 +1,7 @@
-﻿using System;
-
-using Foundation;
-using WatchKit;
-using WatchConnectivity;
+﻿using Foundation;
 using Toggl.Daneel.WatchExtension.Extensions;
+using WatchConnectivity;
+using WatchKit;
 
 namespace Toggl.Daneel.WatchExtension
 {

@@ -2,6 +2,7 @@
 
 using Foundation;
 using ClockKit;
+using WatchConnectivity;
 
 namespace Toggl.Daneel.WatchExtension
 {
@@ -13,61 +14,49 @@ namespace Toggl.Daneel.WatchExtension
             // Note: this .ctor should not contain any initialization logic
         }
 
-        #region Timeline Configuration
-
         public override void GetSupportedTimeTravelDirections(CLKComplication complication, Action<CLKComplicationTimeTravelDirections> handler)
         {
-            handler(CLKComplicationTimeTravelDirections.Forward | CLKComplicationTimeTravelDirections.Backward);
+            handler(CLKComplicationTimeTravelDirections.None);
         }
-
-        public override void GetTimelineStartDate(CLKComplication complication, Action<NSDate> handler)
-        {
-            handler(null);
-        }
-
-        public override void GetTimelineEndDate(CLKComplication complication, Action<NSDate> handler)
-        {
-            handler(null);
-        }
-
-        public override void GetPrivacyBehavior(CLKComplication complication, Action<CLKComplicationPrivacyBehavior> handler)
-        {
-            handler(CLKComplicationPrivacyBehavior.ShowOnLockScreen);
-        }
-
-        #endregion
-
-        #region Timeline Population
 
         public override void GetCurrentTimelineEntry(CLKComplication complication, Action<CLKComplicationTimelineEntry> handler)
         {
-            // Call the handler with the current timeline entry
-            handler(null);
+            if (complication.Family == CLKComplicationFamily.UtilitarianLarge)
+            {
+                var template = new CLKComplicationTemplateUtilitarianLargeFlat();
+
+                var runningTimeEntry = WCSession.DefaultSession.ReceivedApplicationContext["RunningTimeEntry"] as NSDictionary;
+                if (runningTimeEntry != null)
+                {
+                    var description = (runningTimeEntry["Description"] as NSString).ToString();
+                    description = description.Length > 0 ? description : "No description";
+
+                    var textProvider = CLKSimpleTextProvider.FromText(description, "Stop");
+                    template.TextProvider = textProvider;
+                    var entry = CLKComplicationTimelineEntry.Create(NSDate.Now, template);
+                    handler(entry);
+                }
+                else
+                {
+                    var textProvider = CLKSimpleTextProvider.FromText("Start time entry", "Start");
+                    template.TextProvider = textProvider;
+                    var entry = CLKComplicationTimelineEntry.Create(NSDate.Now, template);
+                    handler(entry);
+                }
+            }
         }
-
-        public override void GetTimelineEntriesBeforeDate(CLKComplication complication, NSDate beforeDate, nuint limit, Action<CLKComplicationTimelineEntry[]> handler)
-        {
-            // Call the handler with the timeline entries prior to the given date
-            handler(null);
-        }
-
-        public override void GetTimelineEntriesAfterDate(CLKComplication complication, NSDate afterDate, nuint limit, Action<CLKComplicationTimelineEntry[]> handler)
-        {
-            // Call the handler with the timeline entries after to the given date
-            handler(null);
-        }
-
-        #endregion
-
-        #region Placeholder Templates
 
         public override void GetLocalizableSampleTemplate(CLKComplication complication, Action<CLKComplicationTemplate> handler)
         {
             // This method will be called once per supported complication, and the results will be cached
-            handler(null);
-        }
+            if (complication.Family == CLKComplicationFamily.UtilitarianLarge)
+            {
+                var template = new CLKComplicationTemplateUtilitarianLargeFlat();
+                var textProvider = CLKSimpleTextProvider.FromText("Hello, World!", "Toggl");
+                template.TextProvider = textProvider;
 
-        #endregion
+                handler(template);
+            }
+        }
     }
 }
-

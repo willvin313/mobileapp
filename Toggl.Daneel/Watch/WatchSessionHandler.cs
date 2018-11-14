@@ -101,6 +101,8 @@ namespace Toggl.Daneel.Watch
             var context = WCSession.DefaultSession.ApplicationContext ?? new NSDictionary<NSString, NSObject>();
             var mutableContext = new NSMutableDictionary<NSString, NSObject>(context);
 
+            mutableContext["LoggedIn"] = new NSNumber(true);
+
             if (timeEntryDict == null)
             {
                 mutableContext.Remove("RunningTimeEntry".ToNSString());
