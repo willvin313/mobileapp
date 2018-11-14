@@ -136,6 +136,7 @@ namespace Toggl.Daneel.Presentation.Transition
             PresentedViewController.View.Layer.ShadowPath = shadowPath;
             PresentedViewController.View.Layer.ShadowOffset = CGSize.Empty;
             PresentedViewController.View.Layer.ShadowColor = UIColor.FromRGB(181f / 255f, 188f / 255f, 192f / 255f).CGColor;
+            PresentedViewController.View.ClipsToBounds = true;
         }
 
         public override CGSize GetSizeForChildContentContainer(IUIContentContainer contentContainer, CGSize parentContainerSize)

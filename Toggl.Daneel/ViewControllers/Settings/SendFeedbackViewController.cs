@@ -82,7 +82,9 @@ namespace Toggl.Daneel.ViewControllers.Settings
 
         protected override void KeyboardWillShow(object sender, UIKeyboardEventArgs e)
         {
-            UIEdgeInsets contentInsets = new UIEdgeInsets(0, 0, e.FrameEnd.Height, 0);
+            var bottomPosition = UIScreen.MainScreen.Bounds.Height - View.Frame.Y - View.Frame.Height;
+            var bottomInset = e.FrameEnd.Height - bottomPosition;
+            UIEdgeInsets contentInsets = new UIEdgeInsets(0, 0, bottomInset, 0);
             FeedbackTextView.ContentInset = contentInsets;
             FeedbackTextView.ScrollIndicatorInsets = contentInsets;
         }

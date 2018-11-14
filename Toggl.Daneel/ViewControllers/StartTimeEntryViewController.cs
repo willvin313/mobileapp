@@ -252,15 +252,13 @@ namespace Toggl.Daneel.ViewControllers
 
         protected override void KeyboardWillShow(object sender, UIKeyboardEventArgs e)
         {
-            BottomDistanceConstraint.Constant = e.FrameEnd.Height;
-            UIView.Animate(Animation.Timings.EnterTiming, () => View.LayoutIfNeeded());
+            var bottomPosition = UIScreen.MainScreen.Bounds.Height - View.Frame.Y - View.Frame.Height;
+            var constant = e.FrameEnd.Height - bottomPosition;
+            BottomDistanceConstraint.AnimateSetConstant(constant, View);
         }
 
         protected override void KeyboardWillHide(object sender, UIKeyboardEventArgs e)
-        {
-            BottomDistanceConstraint.Constant = 0;
-            UIView.Animate(Animation.Timings.EnterTiming, () => View.LayoutIfNeeded());
-        }
+            => BottomDistanceConstraint.AnimateSetConstant(0, View);
 
         public override void TouchesBegan(NSSet touches, UIEvent evt)
         {

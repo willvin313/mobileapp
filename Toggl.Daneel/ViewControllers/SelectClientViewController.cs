@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using MvvmCross.Binding.BindingContext;
+using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Daneel.ViewSources;
 using Toggl.Foundation.MvvmCross.Helper;
@@ -57,14 +58,12 @@ namespace Toggl.Daneel.ViewControllers
 
         protected override void KeyboardWillShow(object sender, UIKeyboardEventArgs e)
         {
-            BottomConstraint.Constant = e.FrameEnd.Height;
-            UIView.Animate(Animation.Timings.EnterTiming, () => View.LayoutIfNeeded());
+            var bottomPosition = UIScreen.MainScreen.Bounds.Height - View.Frame.Y - View.Frame.Height;
+            var constant = e.FrameEnd.Height - bottomPosition;
+            BottomConstraint.AnimateSetConstant(constant, View);
         }
 
         protected override void KeyboardWillHide(object sender, UIKeyboardEventArgs e)
-        {
-            BottomConstraint.Constant = 0;
-            UIView.Animate(Animation.Timings.EnterTiming, () => View.LayoutIfNeeded());
-        }
+            => BottomConstraint.AnimateSetConstant(0, View);
     }
 }
