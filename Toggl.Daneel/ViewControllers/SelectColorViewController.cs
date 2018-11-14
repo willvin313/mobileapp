@@ -85,10 +85,21 @@ namespace Toggl.Daneel.ViewControllers
         private void prepareViews()
         {
             var screenWidth = UIScreen.MainScreen.Bounds.Width;
+            nfloat preferredWidth = 0;
+            if (PresentingViewController.TraitCollection.HorizontalSizeClass == UIUserInterfaceSizeClass.Regular
+                    && PresentingViewController.TraitCollection.VerticalSizeClass == UIUserInterfaceSizeClass.Regular)
+            {
+                var screenHeight = UIScreen.MainScreen.Bounds.Height;
+                var largerSide = (nfloat)Math.Max(screenWidth, screenHeight);
+                preferredWidth = (largerSide / 2) - 32;
+            }
+            else
+            {
+                preferredWidth = screenWidth > 320 ? screenWidth - 32 : 312;
+            }
             PreferredContentSize = new CGSize
             {
-                // ScreenWidth - 32 for 16pt margins on both sides
-                Width = screenWidth > 320 ? screenWidth - 32 : 312,
+                Width = preferredWidth,
                 Height = ViewModel.AllowCustomColors ? customColorEnabledHeight : customColorDisabledHeight
             };
 
