@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
-    <device id="retina4_7" orientation="portrait">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="ipad9_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
-        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
-        <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
-        <capability name="Self referencing constraints of the same attribute" minToolsVersion="5.1"/>
-        <capability name="Unknown constraint types" minToolsVersion="5.1"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -68,7 +64,7 @@
                     </state>
                 </button>
                 <stackView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" axis="vertical" spacing="26" translatesAutoresizingMaskIntoConstraints="NO" id="bRk-TA-ikl">
-                    <rect key="frame" x="0.0" y="49" width="288" height="529"/>
+                    <rect key="frame" x="0.0" y="49" width="288" height="506.5"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zRB-mu-8nc">
                             <rect key="frame" x="0.0" y="0.0" width="288" height="56"/>
@@ -86,7 +82,7 @@
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" image="icEndLabel" translatesAutoresizingMaskIntoConstraints="NO" id="xO0-Bb-VWh">
-                                            <rect key="frame" x="54" y="8" width="9" height="9"/>
+                                            <rect key="frame" x="54.5" y="7.5" width="9" height="9"/>
                                         </imageView>
                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MTr-8e-VhT">
                                             <rect key="frame" x="-7.5" y="24" width="159" height="31"/>
@@ -154,10 +150,10 @@
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" image="icStartLabel" translatesAutoresizingMaskIntoConstraints="NO" id="Rb0-t8-ESu">
-                                            <rect key="frame" x="51" y="7.5" width="9" height="10"/>
+                                            <rect key="frame" x="51" y="7" width="9" height="10"/>
                                         </imageView>
                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="f2y-9L-nF2">
-                                            <rect key="frame" x="17" y="24" width="109" height="31.5"/>
+                                            <rect key="frame" x="17.5" y="24" width="109" height="31.5"/>
                                             <color key="backgroundColor" red="0.95686274510000002" green="0.95686274510000002" blue="0.95686274510000002" alpha="1" colorSpace="calibratedRGB"/>
                                             <userDefinedRuntimeAttributes>
                                                 <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
@@ -231,22 +227,22 @@
                             </constraints>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="urI-dQ-w1K">
-                            <rect key="frame" x="0.0" y="305" width="288" height="224"/>
+                            <rect key="frame" x="0.0" y="305" width="288" height="201.5"/>
                             <subviews>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UPo-1v-886" customClass="WheelBackgroundView">
-                                    <rect key="frame" x="32" y="0.0" width="224" height="224"/>
+                                    <rect key="frame" x="43" y="0.0" width="202" height="201.5"/>
                                     <constraints>
                                         <constraint firstAttribute="width" secondItem="UPo-1v-886" secondAttribute="height" multiplier="1:1" id="5x7-W2-T2n"/>
                                     </constraints>
                                 </view>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5uR-7c-EpB" customClass="WheelForegroundView">
-                                    <rect key="frame" x="32" y="0.0" width="224" height="224"/>
+                                    <rect key="frame" x="43" y="0.0" width="202" height="201.5"/>
                                     <constraints>
                                         <constraint firstAttribute="width" secondItem="5uR-7c-EpB" secondAttribute="height" multiplier="1:1" id="S1t-cB-fCd"/>
                                     </constraints>
                                 </view>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="A8e-aL-HzQ">
-                                    <rect key="frame" x="81" y="96" width="126" height="32"/>
+                                    <rect key="frame" x="81" y="85" width="126" height="32"/>
                                     <subviews>
                                         <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" image="duration" translatesAutoresizingMaskIntoConstraints="NO" id="KQv-M8-qqz">
                                             <rect key="frame" x="12" y="8" width="13" height="16"/>
@@ -255,7 +251,7 @@
                                             </constraints>
                                         </imageView>
                                         <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" text="0:00:00" textAlignment="center" adjustsFontSizeToFit="NO" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="azJ-VB-or1" customClass="DurationField">
-                                            <rect key="frame" x="31" y="3" width="85" height="27"/>
+                                            <rect key="frame" x="31" y="2.5" width="85" height="27"/>
                                             <nil key="textColor"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="22"/>
                                             <textInputTraits key="textInputTraits"/>
@@ -284,13 +280,29 @@
                                 <constraint firstItem="A8e-aL-HzQ" firstAttribute="centerX" secondItem="urI-dQ-w1K" secondAttribute="centerX" id="FnF-6K-x63"/>
                                 <constraint firstItem="5uR-7c-EpB" firstAttribute="centerY" secondItem="urI-dQ-w1K" secondAttribute="centerY" id="HXo-fA-myX"/>
                                 <constraint firstAttribute="trailing" secondItem="5uR-7c-EpB" secondAttribute="trailing" constant="32" id="Jgp-LJ-BX3"/>
+                                <constraint firstItem="5uR-7c-EpB" firstAttribute="width" secondItem="urI-dQ-w1K" secondAttribute="width" multiplier="0.7" id="MIU-8D-dwK"/>
                                 <constraint firstItem="UPo-1v-886" firstAttribute="centerY" secondItem="urI-dQ-w1K" secondAttribute="centerY" id="QZU-KA-abx"/>
                                 <constraint firstItem="5uR-7c-EpB" firstAttribute="top" secondItem="urI-dQ-w1K" secondAttribute="top" id="UgV-sF-umX"/>
                                 <constraint firstItem="A8e-aL-HzQ" firstAttribute="centerY" secondItem="urI-dQ-w1K" secondAttribute="centerY" id="elA-bV-Fh6"/>
                                 <constraint firstAttribute="bottom" secondItem="5uR-7c-EpB" secondAttribute="bottom" id="lzW-BW-O1e"/>
                                 <constraint firstItem="UPo-1v-886" firstAttribute="height" secondItem="5uR-7c-EpB" secondAttribute="height" id="tZz-QS-cHe"/>
+                                <constraint firstItem="5uR-7c-EpB" firstAttribute="centerX" secondItem="urI-dQ-w1K" secondAttribute="centerX" id="thS-Gb-a3K"/>
                                 <constraint firstItem="UPo-1v-886" firstAttribute="centerX" secondItem="urI-dQ-w1K" secondAttribute="centerX" id="zv0-lh-RvJ"/>
                             </constraints>
+                            <variation key="default">
+                                <mask key="constraints">
+                                    <exclude reference="MIU-8D-dwK"/>
+                                    <exclude reference="thS-Gb-a3K"/>
+                                </mask>
+                            </variation>
+                            <variation key="heightClass=regular-widthClass=regular">
+                                <mask key="constraints">
+                                    <exclude reference="8IG-SO-Tml"/>
+                                    <exclude reference="Jgp-LJ-BX3"/>
+                                    <include reference="MIU-8D-dwK"/>
+                                    <include reference="thS-Gb-a3K"/>
+                                </mask>
+                            </variation>
                         </view>
                     </subviews>
                 </stackView>
