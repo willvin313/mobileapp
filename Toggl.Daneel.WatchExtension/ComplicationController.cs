@@ -4,6 +4,7 @@ using Foundation;
 using ClockKit;
 using WatchConnectivity;
 using UIKit;
+using Toggl.Daneel.WatchExtension.Extensions;
 
 namespace Toggl.Daneel.WatchExtension
 {
@@ -55,11 +56,18 @@ namespace Toggl.Daneel.WatchExtension
 
                     var startTime = runningTimeEntry["Start"] as NSDate;
 
+                    NSString projectName = null;
+                    if (runningTimeEntry.ContainsKey("Project".ToNSString()))
+                    {
+                        var project = runningTimeEntry["Project"] as NSDictionary;
+                        projectName = project["Name"] as NSString;
+                    }
+
                     var template = new CLKComplicationTemplateModularLargeStandardBody();
                     var descriptionTextProvider = CLKSimpleTextProvider.FromText(description, "Toggl");
                     descriptionTextProvider.TintColor = UIColor.Red;
-                    var projectTextProvider = CLKSimpleTextProvider.FromText("No project", "Toggl");
-                    projectTextProvider.TintColor = UIColor.LightGray;
+                    var projectTextProvider = CLKSimpleTextProvider.FromText(projectName ?? "---", "Toggl");
+                    projectTextProvider.TintColor = projectName == null ? UIColor.LightGray : UIColor.White;
                     var runningTimeTextProvider = CLKRelativeDateTextProvider.FromDate(startTime, CLKRelativeDateStyle.Timer, NSCalendarUnit.Hour | NSCalendarUnit.Minute | NSCalendarUnit.Second);
                     runningTimeTextProvider.TintColor = UIColor.White;
                     template.HeaderTextProvider = descriptionTextProvider;
