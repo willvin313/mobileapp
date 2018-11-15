@@ -65,13 +65,6 @@ namespace Toggl.Daneel.WatchExtension.InterfaceControllers
                 RunningTimer.SetDate(start);
                 RunningTimer.Start();
             }
-            else
-            {
-                WKExtension.SharedExtension.InvokeOnMainThread(() =>
-                {
-                    ReloadRootControllers(new[] { "StartTimeEntryInterfaceController" }, null);
-                });
-            }
         }
     }
 }

@@ -50,6 +50,22 @@ namespace Toggl.Daneel.WatchExtension
                 return;
             }
 
+            var runningTimeEntry = WCSession.DefaultSession.ReceivedApplicationContext["RunningTimeEntry"] as NSDictionary;
+            if (runningTimeEntry != null)
+            {
+                WKExtension.SharedExtension.InvokeOnMainThread(() =>
+                {
+                    WKInterfaceController.ReloadRootControllers(new[] { "RunningTimeEntryInterfaceController" }, null);
+                });
+            }
+            else
+            {
+                WKExtension.SharedExtension.InvokeOnMainThread(() =>
+                {
+                    WKInterfaceController.ReloadRootControllers(new[] { "MainInterfaceController" }, null);
+                });
+            }
+
             var activeComplications = CLKComplicationServer.SharedInstance.ActiveComplications;
             foreach (var complication in activeComplications)
             {

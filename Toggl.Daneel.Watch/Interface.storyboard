@@ -91,10 +91,10 @@
             </objects>
             <point key="canvasLocation" x="-457" y="0.0"/>
         </scene>
-        <!--Main Interface Controller-->
+        <!--MainInterfaceController-->
         <scene sceneID="PZo-tn-suU">
             <objects>
-                <controller id="p98-0t-WfP" customClass="MainInterfaceController">
+                <controller identifier="MainInterfaceController" id="p98-0t-WfP" customClass="MainInterfaceController">
                     <items>
                         <label alignment="left" text="Suggestions" id="BXG-n2-Gfw">
                             <fontDescription key="font" style="UICTFontTextStyleHeadline"/>
@@ -151,13 +151,24 @@
                                 </tableRow>
                             </items>
                         </table>
+                        <group width="1" alignment="center" verticalAlignment="center" id="ymr-lv-rsQ">
+                            <items>
+                                <label width="100" alignment="center" text="Insert Spiderbro here" textAlignment="center" numberOfLines="0" id="huh-Pb-UqN"/>
+                            </items>
+                        </group>
                     </items>
                     <menu key="menu" id="uW1-em-tbH">
                         <items>
-                            <menuItem title="Start Time Entry" icon="add" id="TH5-h3-g13"/>
+                            <menuItem title="Start Time Entry" icon="add" id="TH5-h3-g13">
+                                <connections>
+                                    <action selector="OnStartTimeEntrySelected:" destination="p98-0t-WfP" id="T6b-du-P0g"/>
+                                </connections>
+                            </menuItem>
                         </items>
                     </menu>
                     <connections>
+                        <outlet property="EmptyStateContainer" destination="ymr-lv-rsQ" id="Syl-MN-5BP"/>
+                        <outlet property="EmptyStateLabel" destination="huh-Pb-UqN" id="pdu-Xa-C6E"/>
                         <outlet property="SuggestionsLabel" destination="BXG-n2-Gfw" id="7mQ-85-vnr"/>
                         <outlet property="SuggestionsTable" destination="m1E-a0-oiQ" id="fvn-ei-52C"/>
                         <outlet property="TimeEntriesLabel" destination="5gR-IT-OHs" id="FkH-ts-pv7"/>

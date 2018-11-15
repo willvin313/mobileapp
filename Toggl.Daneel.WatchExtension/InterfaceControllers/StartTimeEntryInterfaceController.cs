@@ -23,8 +23,6 @@ namespace Toggl.Daneel.WatchExtension.InterfaceControllers
 
             // Configure interface objects here.
             Console.WriteLine("{0} awake with context", this);
-
-            NSNotificationCenter.DefaultCenter.AddObserver(new NSString("DidReceiveApplicationContext"), contextReceived);
         }
 
         public override void WillActivate()
@@ -65,18 +63,6 @@ namespace Toggl.Daneel.WatchExtension.InterfaceControllers
         private void onError(NSError error)
         {
             Console.WriteLine("Failed to send message: {0)", error);
-        }
-
-        private void contextReceived(NSNotification notification)
-        {
-            var runningTimeEntry = WCSession.DefaultSession.ReceivedApplicationContext["RunningTimeEntry"] as NSDictionary;
-            if (runningTimeEntry != null)
-            {
-                WKExtension.SharedExtension.InvokeOnMainThread(() =>
-                {
-                    ReloadRootControllers(new[] { "RunningTimeEntryInterfaceController" }, null);
-                });
-            }
         }
     }
 }

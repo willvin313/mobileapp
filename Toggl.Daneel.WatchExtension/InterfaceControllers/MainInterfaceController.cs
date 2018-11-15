@@ -38,6 +38,11 @@ namespace Toggl.Daneel.WatchExtension.InterfaceControllers
             Console.WriteLine("{0} did deactivate", this);
         }
 
+        partial void OnStartTimeEntrySelected(NSObject sender)
+        {
+            PresentController("StartTimeEntryInterfaceController", string.Empty);
+        }
+
         private void contextReceived(NSNotification notification)
         {
             updateInterface();
@@ -45,6 +50,8 @@ namespace Toggl.Daneel.WatchExtension.InterfaceControllers
 
         private void updateInterface()
         {
+            var isEmpty = true;
+
             var suggestionsArray = WCSession.DefaultSession.ReceivedApplicationContext["Suggestions"] as NSArray;
             if (suggestionsArray != null && suggestionsArray.Count > 0)
             {
@@ -63,6 +70,7 @@ namespace Toggl.Daneel.WatchExtension.InterfaceControllers
 
                 SuggestionsLabel.SetHidden(false);
                 SuggestionsTable.SetHidden(false);
+                isEmpty = false;
             }
             else
             {
@@ -109,12 +117,16 @@ namespace Toggl.Daneel.WatchExtension.InterfaceControllers
 
                 TimeEntriesLabel.SetHidden(false);
                 TimeEntriesTable.SetHidden(false);
+                isEmpty = false;
             }
             else
             {
                 TimeEntriesLabel.SetHidden(true);
                 TimeEntriesTable.SetHidden(true);
             }
+
+            EmptyStateContainer.SetHidden(!isEmpty);
+            EmptyStateLabel.SetHidden(!isEmpty);
         }
     }
 }

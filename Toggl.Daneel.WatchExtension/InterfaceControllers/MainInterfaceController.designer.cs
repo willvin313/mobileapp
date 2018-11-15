@@ -13,6 +13,12 @@ namespace Toggl.Daneel.WatchExtension.InterfaceControllers
 	partial class MainInterfaceController
 	{
 		[Outlet]
+		WatchKit.WKInterfaceGroup EmptyStateContainer { get; set; }
+
+		[Outlet]
+		WatchKit.WKInterfaceLabel EmptyStateLabel { get; set; }
+
+		[Outlet]
 		WatchKit.WKInterfaceLabel SuggestionsLabel { get; set; }
 
 		[Outlet]
@@ -23,6 +29,9 @@ namespace Toggl.Daneel.WatchExtension.InterfaceControllers
 
 		[Outlet]
 		WatchKit.WKInterfaceTable TimeEntriesTable { get; set; }
+
+		[Action ("OnStartTimeEntrySelected:")]
+		partial void OnStartTimeEntrySelected (Foundation.NSObject sender);
 		
 		void ReleaseDesignerOutlets ()
 		{
@@ -44,6 +53,16 @@ namespace Toggl.Daneel.WatchExtension.InterfaceControllers
 			if (TimeEntriesTable != null) {
 				TimeEntriesTable.Dispose ();
 				TimeEntriesTable = null;
+			}
+
+			if (EmptyStateContainer != null) {
+				EmptyStateContainer.Dispose ();
+				EmptyStateContainer = null;
+			}
+
+			if (EmptyStateLabel != null) {
+				EmptyStateLabel.Dispose ();
+				EmptyStateLabel = null;
 			}
 		}
 	}
