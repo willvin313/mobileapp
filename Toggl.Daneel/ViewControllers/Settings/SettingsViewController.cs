@@ -132,6 +132,10 @@ namespace Toggl.Daneel.ViewControllers
                 .ObserveWillEnterForeground((sender, e) => startAnimations())
                 .DisposedBy(DisposeBag);
 
+            CloseButton.Rx().Tap()
+                .VoidSubscribe(() => { DismissViewController(true, null); })
+                .DisposedBy(DisposeBag);
+
             if (!ViewModel.CalendarSettingsEnabled)
                 hideCalendarSettingsSection();
 

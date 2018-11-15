@@ -163,6 +163,23 @@ namespace Toggl.Daneel.Presentation
                 return;
             }
 
+            if (request.ViewModelType == typeof(SettingsViewModel)
+                && TopViewController.TraitCollection.HorizontalSizeClass == UIUserInterfaceSizeClass.Regular
+                && TopViewController.TraitCollection.VerticalSizeClass == UIUserInterfaceSizeClass.Regular)
+            {
+                var transitionDelegate = new FromRightTransitionDelegate(
+                    () => ModalViewControllers.Remove(viewController)
+                );
+                viewController.ModalPresentationStyle = UIModalPresentationStyle.Custom;
+                viewController.TransitioningDelegate = transitionDelegate;
+
+                TopViewController.PresentViewController(viewController, true, null);
+
+                ModalViewControllers.Add(viewController);
+
+                return;
+            }
+
             base.ShowChildViewController(viewController, attribute, request);
         }
 

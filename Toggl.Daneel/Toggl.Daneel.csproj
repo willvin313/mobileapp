@@ -1168,6 +1168,9 @@
       <DependentUpon>SelectDefaultWorkspaceTableViewCell.cs</DependentUpon>
     </Compile>
     <Compile Include="Extensions\IThreadSafeTimeEntryExtensions.cs" />
+    <Compile Include="Presentation\Transition\FromRightTransitionDelegate.cs" />
+    <Compile Include="Presentation\Transition\FromRightTransition.cs" />
+    <Compile Include="Presentation\Transition\SplitScreenPresentationController.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Toggl.Foundation.MvvmCross\Toggl.Foundation.MvvmCross.csproj">

@@ -132,7 +132,10 @@ namespace Toggl.Daneel.ViewControllers
 
 		[Outlet]
 		UIKit.UIView WorkspaceView { get; set; }
-		
+
+		[Outlet]
+		UIKit.UIButton CloseButton { get; set; }
+
 		void ReleaseDesignerOutlets ()
 		{
 			if (AboutView != null) {
@@ -333,6 +336,11 @@ namespace Toggl.Daneel.ViewControllers
 			if (WorkspaceView != null) {
 				WorkspaceView.Dispose ();
 				WorkspaceView = null;
+			}
+
+			if (CloseButton != null) {
+				CloseButton.Dispose ();
+				CloseButton = null;
 			}
 		}
 	}
