@@ -99,6 +99,7 @@
     <Folder Include="Resources\" />
     <Folder Include="InterfaceControllers\" />
     <Folder Include="Extensions\" />
+    <Folder Include="Cells\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -125,6 +126,19 @@
     <Compile Include="InterfaceControllers\LoginInterfaceController.designer.cs">
       <DependentUpon>LoginInterfaceController.cs</DependentUpon>
     </Compile>
+    <Compile Include="InterfaceControllers\MainInterfaceController.cs" />
+    <Compile Include="InterfaceControllers\MainInterfaceController.designer.cs">
+      <DependentUpon>MainInterfaceController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Cells\SuggestionRowController.cs" />
+    <Compile Include="Cells\SuggestionRowController.designer.cs">
+      <DependentUpon>SuggestionRowController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Cells\TimeEntryRowController.cs" />
+    <Compile Include="Cells\TimeEntryRowController.designer.cs">
+      <DependentUpon>TimeEntryRowController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Extensions\ColorExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="PushNotificationPayload.json" />

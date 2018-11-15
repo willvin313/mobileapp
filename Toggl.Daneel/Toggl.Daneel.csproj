@@ -1173,6 +1173,7 @@
     <Compile Include="Extensions\NumberExtensions.cs" />
     <Compile Include="Extensions\Models\TimeEntryExtensions.cs" />
     <Compile Include="Extensions\Models\ProjectExtensions.cs" />
+    <Compile Include="Extensions\Models\SuggestionExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Toggl.Foundation.MvvmCross\Toggl.Foundation.MvvmCross.csproj">

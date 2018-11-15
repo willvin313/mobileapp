@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14460.31" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="FDi-8B-izX">
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="14460.31" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="p98-0t-WfP">
     <device id="watch44" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -40,7 +40,7 @@
                     </connections>
                 </controller>
             </objects>
-            <point key="canvasLocation" x="-130" y="348"/>
+            <point key="canvasLocation" x="-109" y="581"/>
         </scene>
         <!--StartTimeEntryInterfaceController-->
         <scene sceneID="evB-X4-MiQ">
@@ -74,7 +74,7 @@
                     </connections>
                 </controller>
             </objects>
-            <point key="canvasLocation" x="-457" y="348"/>
+            <point key="canvasLocation" x="-109" y="278"/>
         </scene>
         <!--LoginInterfaceController-->
         <scene sceneID="jCF-Df-fdj">
@@ -90,6 +90,82 @@
                 </controller>
             </objects>
             <point key="canvasLocation" x="-457" y="0.0"/>
+        </scene>
+        <!--Main Interface Controller-->
+        <scene sceneID="PZo-tn-suU">
+            <objects>
+                <controller id="p98-0t-WfP" customClass="MainInterfaceController">
+                    <items>
+                        <label alignment="left" text="Suggestions" id="BXG-n2-Gfw">
+                            <fontDescription key="font" style="UICTFontTextStyleHeadline"/>
+                        </label>
+                        <table alignment="left" id="m1E-a0-oiQ">
+                            <items>
+                                <tableRow identifier="SuggestionRow" id="gSx-Av-T13" customClass="SuggestionRowController">
+                                    <group key="rootItem" width="1" height="0.0" alignment="left" layout="vertical" id="SHa-ad-AFv">
+                                        <items>
+                                            <label alignment="left" text="Description" id="pha-7W-ZMb"/>
+                                            <label alignment="left" text="Project: Task" id="xOQ-M3-jKW">
+                                                <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
+                                            </label>
+                                        </items>
+                                        <edgeInsets key="margins" left="6" right="6" top="4" bottom="4"/>
+                                    </group>
+                                    <connections>
+                                        <outlet property="ContentGroup" destination="SHa-ad-AFv" id="xbW-NB-dRu"/>
+                                        <outlet property="DescriptionLabel" destination="pha-7W-ZMb" id="m3x-sX-zYJ"/>
+                                        <outlet property="ProjectLabel" destination="xOQ-M3-jKW" id="IFT-WL-Le2"/>
+                                    </connections>
+                                </tableRow>
+                            </items>
+                        </table>
+                        <group width="1" alignment="left" id="mj0-ZC-Gu5">
+                            <items>
+                                <label alignment="left" text="Today - 0:59:59" id="5gR-IT-OHs">
+                                    <fontDescription key="font" style="UICTFontTextStyleHeadline"/>
+                                </label>
+                            </items>
+                            <edgeInsets key="margins" left="0.0" right="0.0" top="12" bottom="0.0"/>
+                        </group>
+                        <table alignment="left" id="nsi-9S-fLF">
+                            <items>
+                                <tableRow identifier="TimeEntryRow" id="up8-bF-UgW" customClass="TimeEntryRowController">
+                                    <group key="rootItem" width="1" height="0.0" alignment="left" layout="vertical" id="6BW-M5-jXM">
+                                        <items>
+                                            <label alignment="left" text="Description" id="FQX-AY-AYO"/>
+                                            <label alignment="left" text="Project: Task" id="8KB-4U-CTv">
+                                                <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
+                                            </label>
+                                            <label alignment="left" text="0:59:59" id="Zwn-Cw-ntI">
+                                                <fontDescription key="font" style="UICTFontTextStyleSubhead"/>
+                                            </label>
+                                        </items>
+                                        <edgeInsets key="margins" left="6" right="6" top="4" bottom="4"/>
+                                    </group>
+                                    <connections>
+                                        <outlet property="ContentGroup" destination="6BW-M5-jXM" id="WcS-Hn-WPT"/>
+                                        <outlet property="DescriptionLabel" destination="FQX-AY-AYO" id="STY-ly-dHn"/>
+                                        <outlet property="DurationLabel" destination="Zwn-Cw-ntI" id="avz-Qf-CES"/>
+                                        <outlet property="ProjectLabel" destination="8KB-4U-CTv" id="eGy-J8-2c6"/>
+                                    </connections>
+                                </tableRow>
+                            </items>
+                        </table>
+                    </items>
+                    <menu key="menu" id="uW1-em-tbH">
+                        <items>
+                            <menuItem title="Start Time Entry" icon="add" id="TH5-h3-g13"/>
+                        </items>
+                    </menu>
+                    <connections>
+                        <outlet property="SuggestionsLabel" destination="BXG-n2-Gfw" id="7mQ-85-vnr"/>
+                        <outlet property="SuggestionsTable" destination="m1E-a0-oiQ" id="fvn-ei-52C"/>
+                        <outlet property="TimeEntriesLabel" destination="5gR-IT-OHs" id="FkH-ts-pv7"/>
+                        <outlet property="TimeEntriesTable" destination="nsi-9S-fLF" id="tkq-0K-srT"/>
+                    </connections>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="-458" y="278"/>
         </scene>
         <!--Static Notification Interface Controller-->
         <scene sceneID="AEw-b0-oYE">

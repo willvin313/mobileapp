@@ -9,11 +9,15 @@ using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Models.Interfaces;
+using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using WatchConnectivity;
 using System.Reactive.Linq;
 using Toggl.Daneel.Extensions;
+using Toggl.Foundation.Suggestions;
+using System.Linq;
+using System.Reactive;
 
 namespace Toggl.Daneel.Watch
 {
@@ -22,18 +26,25 @@ namespace Toggl.Daneel.Watch
         private readonly ITimeService timeService;
         private readonly ITogglDataSource dataSource;
         private readonly IInteractorFactory interactorFactory;
+        private readonly ISuggestionProviderContainer suggestionProvider;
 
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
 
-        public WatchSessionHandler(ITimeService timeService, ITogglDataSource dataSource, IInteractorFactory interactorFactory)
+        public WatchSessionHandler(
+            ITimeService timeService, 
+            ITogglDataSource dataSource, 
+            IInteractorFactory interactorFactory,
+            ISuggestionProviderContainer suggestionProvider)
         {
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
             Ensure.Argument.IsNotNull(interactorFactory, nameof(interactorFactory));
+            Ensure.Argument.IsNotNull(suggestionProvider, nameof(suggestionProvider));
 
             this.timeService = timeService;
             this.dataSource = dataSource;
             this.interactorFactory = interactorFactory;
+            this.suggestionProvider = suggestionProvider;
 
             this.dataSource
                 .TimeEntries
@@ -45,6 +56,21 @@ namespace Toggl.Daneel.Watch
                 .User
                 .Get()
                 .Subscribe(currentUserChanged)
+                .DisposedBy(disposeBag);
+
+            this.dataSource
+                .TimeEntries
+                .ItemsChanged()
+                .Subscribe(async _ => await updateRecentTimeEntries())
+                .DisposedBy(disposeBag);
+
+            Observable
+                .CombineLatest(
+                    dataSource.Workspaces.ItemsChanged(),
+                    dataSource.TimeEntries.ItemsChanged())
+                .SelectUnit()
+                .StartWith(Unit.Default)
+                .Subscribe(async _ => await updateSuggestions())
                 .DisposedBy(disposeBag);
         }
 
@@ -148,6 +174,54 @@ namespace Toggl.Daneel.Watch
             var workspaceId = (await dataSource.User.Get()).DefaultWorkspaceId.Value;
             var prototype = description.AsTimeEntryPrototype(timeService.CurrentDateTime, workspaceId);
             await interactorFactory.CreateTimeEntry(prototype).Execute();
+        }
+
+        private async Task updateRecentTimeEntries()
+        {
+            var timeEntries = await dataSource
+                .TimeEntries
+                .GetAll(te => te.Start > timeService.CurrentDateTime.ToLocalTime().Date);
+
+            var timeEntriesArray = new NSMutableArray();
+
+            timeEntries
+                .Select(timeEntry => timeEntry.ToNSDictionary())
+                .ForEach(timeEntriesArray.Add);
+
+            var context = WCSession.DefaultSession.ApplicationContext ?? new NSDictionary<NSString, NSObject>();
+            var mutableContext = new NSMutableDictionary<NSString, NSObject>(context);
+
+            mutableContext["TodayTimeEntries"] = timeEntriesArray;
+
+            var updatedContext = new NSDictionary<NSString, NSObject>(mutableContext.Keys, mutableContext.Values);
+
+            NSError error;
+            WCSession.DefaultSession.UpdateApplicationContext(updatedContext, out error);
+        }
+
+        private async Task updateSuggestions()
+        {
+            var suggestions = await suggestionProvider
+                .Providers
+                .Select(provider => provider.GetSuggestions())
+                .Aggregate(Observable.Merge)
+                .ToArray();
+
+            var suggestionsArray = new NSMutableArray();
+
+            suggestions
+                .Select(suggestion => suggestion.ToNSDictionary())
+                .ForEach(suggestionsArray.Add);
+
+            var context = WCSession.DefaultSession.ApplicationContext ?? new NSDictionary<NSString, NSObject>();
+            var mutableContext = new NSMutableDictionary<NSString, NSObject>(context);
+
+            mutableContext["Suggestions"] = suggestionsArray;
+
+            var updatedContext = new NSDictionary<NSString, NSObject>(mutableContext.Keys, mutableContext.Values);
+
+            NSError error;
+            WCSession.DefaultSession.UpdateApplicationContext(updatedContext, out error);
         }
     }
 }

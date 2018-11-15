@@ -26,6 +26,7 @@ using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
 using Toggl.Foundation.MvvmCross.ViewModels.Reports;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Shortcuts;
+using Toggl.Foundation.Suggestions;
 using UIKit;
 using UserNotifications;
 using WatchConnectivity;
@@ -70,7 +71,8 @@ namespace Toggl.Daneel
                 var timeService = Mvx.Resolve<ITimeService>();
                 var dataSource = Mvx.Resolve<ITogglDataSource>();
                 var interactorFactory = Mvx.Resolve<IInteractorFactory>();
-                WCSession.DefaultSession.Delegate = new WatchSessionHandler(timeService, dataSource, interactorFactory);
+                var suggestionProvider = Mvx.Resolve<ISuggestionProviderContainer>();
+                WCSession.DefaultSession.Delegate = new WatchSessionHandler(timeService, dataSource, interactorFactory, suggestionProvider);
                 WCSession.DefaultSession.ActivateSession();
             }
 

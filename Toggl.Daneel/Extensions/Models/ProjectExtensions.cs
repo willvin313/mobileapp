@@ -12,12 +12,14 @@ namespace Toggl.Daneel.Extensions.Models
                 {
                     "Id".ToNSString(),
                     "Name".ToNSString(),
+                    "Color".ToNSString(),
                 };
 
             var values = new NSObject[]
             {
                     project.Id.ToNSNumber(),
                     project.Name.ToNSString(),
+                    project.Color.ToNSString(),
             };
 
             return NSDictionary<NSString, NSObject>.FromObjectsAndKeys(values, keys);

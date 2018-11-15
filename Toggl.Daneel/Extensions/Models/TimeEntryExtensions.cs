@@ -18,7 +18,10 @@ namespace Toggl.Daneel.Extensions.Models
                 dict.Add("Duration".ToNSString(), timeEntry.Duration.Value.ToNSNumber());
 
             if (timeEntry.ProjectId.HasValue)
+            {
+                dict.Add("ProjectId".ToNSString(), timeEntry.ProjectId.Value.ToNSNumber());
                 dict.Add("Project".ToNSString(), timeEntry.Project.ToNSDictionary());
+            }
 
             return NSDictionary<NSString, NSObject>.FromObjectsAndKeys(dict.Values, dict.Keys);
         }
