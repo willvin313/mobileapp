@@ -16,7 +16,7 @@ namespace Toggl.Daneel.WatchExtension.InterfaceControllers
 		WatchKit.WKInterfaceGroup EmptyStateContainer { get; set; }
 
 		[Outlet]
-		WatchKit.WKInterfaceLabel EmptyStateLabel { get; set; }
+		WatchKit.WKInterfaceSKScene SpiderBroScene { get; set; }
 
 		[Outlet]
 		WatchKit.WKInterfaceLabel SuggestionsLabel { get; set; }
@@ -35,6 +35,16 @@ namespace Toggl.Daneel.WatchExtension.InterfaceControllers
 		
 		void ReleaseDesignerOutlets ()
 		{
+			if (EmptyStateContainer != null) {
+				EmptyStateContainer.Dispose ();
+				EmptyStateContainer = null;
+			}
+
+			if (SpiderBroScene != null) {
+				SpiderBroScene.Dispose ();
+				SpiderBroScene = null;
+			}
+
 			if (SuggestionsLabel != null) {
 				SuggestionsLabel.Dispose ();
 				SuggestionsLabel = null;
@@ -53,16 +63,6 @@ namespace Toggl.Daneel.WatchExtension.InterfaceControllers
 			if (TimeEntriesTable != null) {
 				TimeEntriesTable.Dispose ();
 				TimeEntriesTable = null;
-			}
-
-			if (EmptyStateContainer != null) {
-				EmptyStateContainer.Dispose ();
-				EmptyStateContainer = null;
-			}
-
-			if (EmptyStateLabel != null) {
-				EmptyStateLabel.Dispose ();
-				EmptyStateLabel = null;
 			}
 		}
 	}

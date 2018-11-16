@@ -9,39 +9,6 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="14460.16"/>
     </dependencies>
     <scenes>
-        <!--RunningTimeEntryInterfaceController-->
-        <scene sceneID="aou-V4-d1y">
-            <objects>
-                <controller identifier="RunningTimeEntryInterfaceController" id="AgC-eL-Hgc" customClass="RunningTimeEntryInterfaceController">
-                    <items>
-                        <group width="1" alignment="left" layout="vertical" id="euJ-mG-Jkk">
-                            <items>
-                                <label alignment="left" text="Description" numberOfLines="2" id="sFZ-py-qtc">
-                                    <fontDescription key="font" style="UICTFontTextStyleTitle3"/>
-                                </label>
-                                <timer alignment="left" id="nYh-go-AO7"/>
-                            </items>
-                        </group>
-                        <group width="1" alignment="left" verticalAlignment="bottom" id="qr5-WF-72J">
-                            <items>
-                                <button width="1" alignment="left" title="Stop" id="Iia-hC-j6Z">
-                                    <color key="backgroundColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                    <connections>
-                                        <action selector="OnStopButtonPress:" destination="AgC-eL-Hgc" id="9FI-Uw-qkM"/>
-                                    </connections>
-                                </button>
-                            </items>
-                        </group>
-                    </items>
-                    <connections>
-                        <outlet property="DescriptionLabel" destination="sFZ-py-qtc" id="eJX-Cz-5op"/>
-                        <outlet property="RunningTimer" destination="nYh-go-AO7" id="XOh-x8-b7Y"/>
-                        <outlet property="StopButton" destination="Iia-hC-j6Z" id="VQ4-GA-gKs"/>
-                    </connections>
-                </controller>
-            </objects>
-            <point key="canvasLocation" x="-109" y="581"/>
-        </scene>
         <!--StartTimeEntryInterfaceController-->
         <scene sceneID="evB-X4-MiQ">
             <objects>
@@ -151,9 +118,9 @@
                                 </tableRow>
                             </items>
                         </table>
-                        <group width="1" alignment="center" verticalAlignment="center" id="ymr-lv-rsQ">
+                        <group width="1" alignment="center" verticalAlignment="center" layout="vertical" id="ymr-lv-rsQ">
                             <items>
-                                <label width="100" alignment="center" text="Insert Spiderbro here" textAlignment="center" numberOfLines="0" id="huh-Pb-UqN"/>
+                                <spriteKitScene width="1" alignment="left" id="NWA-Vz-iAn"/>
                             </items>
                         </group>
                     </items>
@@ -168,7 +135,7 @@
                     </menu>
                     <connections>
                         <outlet property="EmptyStateContainer" destination="ymr-lv-rsQ" id="Syl-MN-5BP"/>
-                        <outlet property="EmptyStateLabel" destination="huh-Pb-UqN" id="pdu-Xa-C6E"/>
+                        <outlet property="SpiderBroScene" destination="NWA-Vz-iAn" id="c5W-Vk-jXa"/>
                         <outlet property="SuggestionsLabel" destination="BXG-n2-Gfw" id="7mQ-85-vnr"/>
                         <outlet property="SuggestionsTable" destination="m1E-a0-oiQ" id="fvn-ei-52C"/>
                         <outlet property="TimeEntriesLabel" destination="5gR-IT-OHs" id="FkH-ts-pv7"/>

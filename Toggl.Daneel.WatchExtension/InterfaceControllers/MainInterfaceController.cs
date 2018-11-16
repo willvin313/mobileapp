@@ -2,6 +2,7 @@
 using Foundation;
 using Toggl.Daneel.WatchExtension.Cells;
 using Toggl.Daneel.WatchExtension.Extensions;
+using Toggl.Daneel.WatchExtension.SpriteKit;
 using UIKit;
 using WatchConnectivity;
 using WatchKit;
@@ -126,7 +127,9 @@ namespace Toggl.Daneel.WatchExtension.InterfaceControllers
             }
 
             EmptyStateContainer.SetHidden(!isEmpty);
-            EmptyStateLabel.SetHidden(!isEmpty);
+
+            if (isEmpty)
+                SpiderBroScene.PresentScene(new SpiderScene());
         }
     }
 }

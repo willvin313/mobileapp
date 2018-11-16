@@ -94,12 +94,18 @@
     <ImageAsset Include="Assets.xcassets\Complication.complicationset\ExtraLarge.imageset\Contents.json" />
     <ImageAsset Include="Assets.xcassets\Complication.complicationset\Modular.imageset\Contents.json" />
     <ImageAsset Include="Assets.xcassets\Complication.complicationset\Utilitarian.imageset\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\SpiderBro.imageset\Contents.json" />
+    <ImageAsset Include="Assets.xcassets\SpiderBro.imageset\icIllustrationSpider.png" />
+    <ImageAsset Include="Assets.xcassets\SpiderBro.imageset\icIllustrationSpider%402x.png" />
+    <ImageAsset Include="Assets.xcassets\SpiderBro.imageset\icIllustrationSpider%403x.png" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
     <Folder Include="InterfaceControllers\" />
     <Folder Include="Extensions\" />
     <Folder Include="Cells\" />
+    <Folder Include="SpriteKit\" />
+    <Folder Include="Assets.xcassets\SpiderBro.imageset\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -139,6 +145,7 @@
       <DependentUpon>TimeEntryRowController.cs</DependentUpon>
     </Compile>
     <Compile Include="Extensions\ColorExtensions.cs" />
+    <Compile Include="SpriteKit\SpiderScene.cs" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="PushNotificationPayload.json" />
