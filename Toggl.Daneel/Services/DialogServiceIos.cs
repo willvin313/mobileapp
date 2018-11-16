@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using CoreGraphics;
 using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Multivac;
@@ -46,6 +47,14 @@ namespace Toggl.Daneel.Services
                 alert.AddAction(dismiss);
                 alert.PreferredAction = confirm;
 
+                if (alert.PopoverPresentationController is UIPopoverPresentationController presentationController)
+                {
+                    var targetView = topViewControllerProvider.TopViewController.View;
+                    presentationController.SourceView = targetView;
+                    presentationController.SourceRect = new CGRect(targetView.Center.X, targetView.Center.Y, 0, 0);
+                    presentationController.PermittedArrowDirections = 0;
+                }
+
                 topViewControllerProvider
                     .TopViewController
                     .PresentViewController(alert, true, null);
@@ -81,6 +90,14 @@ namespace Toggl.Daneel.Services
                 actionSheet.AddAction(cancelAction);
                 actionSheet.AddAction(confirmAction);
 
+                if (actionSheet.PopoverPresentationController is UIPopoverPresentationController presentationController)
+                {
+                    var targetView = topViewControllerProvider.TopViewController.View;
+                    presentationController.SourceView = targetView;
+                    presentationController.SourceRect = new CGRect(targetView.Center.X, targetView.Center.Y, 0, 0);
+                    presentationController.PermittedArrowDirections = 0;
+                }
+
                 topViewControllerProvider
                     .TopViewController
                     .PresentViewController(actionSheet, true, null);
@@ -101,6 +118,14 @@ namespace Toggl.Daneel.Services
                 });
 
                 alert.AddAction(alertAction);
+
+                if (alert.PopoverPresentationController is UIPopoverPresentationController presentationController)
+                {
+                    var targetView = topViewControllerProvider.TopViewController.View;
+                    presentationController.SourceView = targetView;
+                    presentationController.SourceRect = new CGRect(targetView.Center.X, targetView.Center.Y, 0, 0);
+                    presentationController.PermittedArrowDirections = 0;
+                }
 
                 topViewControllerProvider
                     .TopViewController
@@ -138,6 +163,14 @@ namespace Toggl.Daneel.Services
                 });
 
                 actionSheet.AddAction(cancelAction);
+
+                if (actionSheet.PopoverPresentationController is UIPopoverPresentationController presentationController)
+                {
+                    var targetView = topViewControllerProvider.TopViewController.View;
+                    presentationController.SourceView = targetView;
+                    presentationController.SourceRect = new CGRect(targetView.Center.X, targetView.Center.Y, 0, 0);
+                    presentationController.PermittedArrowDirections = 0;
+                }
 
                 topViewControllerProvider
                     .TopViewController
