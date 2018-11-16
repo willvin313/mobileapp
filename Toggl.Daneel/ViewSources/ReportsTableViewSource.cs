@@ -20,14 +20,23 @@ namespace Toggl.Daneel.ViewSources
 
         public event EventHandler<CGPoint> OnScroll;
 
-        private readonly nfloat headerHeight;
         private readonly nfloat bottomHeight = 78;
+        private nfloat headerHeight
+        {
+            get
+            {
+                var isTablet = UIScreen.MainScreen.TraitCollection.HorizontalSizeClass == UIUserInterfaceSizeClass.Regular
+                    && UIScreen.MainScreen.TraitCollection.VerticalSizeClass == UIUserInterfaceSizeClass.Regular;
+                return isTablet
+                    ? summaryHeight + (UIScreen.MainScreen.Bounds.Width / 4) + bottomHeight
+                    : summaryHeight + UIScreen.MainScreen.Bounds.Width;
+            }
+        }
 
         public ReportsTableViewSource(UITableView tableView, ReportsViewModel viewModel)
             : base(tableView)
         {
             this.viewModel = viewModel;
-            headerHeight = summaryHeight + UIScreen.MainScreen.Bounds.Width;
             tableView.TableHeaderView = new UIView(new CGRect(0, 0, tableView.Bounds.Size.Width, headerHeight));
             tableView.ContentInset = new UIEdgeInsets(-headerHeight, 0, viewModel.Workspaces.Count > 1 ? bottomHeight : 0, 0);
             tableView.SeparatorStyle = UITableViewCellSeparatorStyle.None;

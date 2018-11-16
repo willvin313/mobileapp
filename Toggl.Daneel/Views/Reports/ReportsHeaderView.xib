@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14313.13.2" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
-    <device id="retina4_0" orientation="portrait">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="ipad9_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.9"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -384,14 +384,14 @@ the selected time period.</string>
                     </constraints>
                 </view>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BGP-SH-dFd">
-                    <rect key="frame" x="32" y="494" width="311" height="311"/>
+                    <rect key="frame" x="140.5" y="494" width="94" height="94"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="oxk-69-eH5" customClass="PieChartView">
-                            <rect key="frame" x="0.0" y="0.0" width="311" height="311"/>
+                            <rect key="frame" x="0.0" y="0.0" width="94" height="94"/>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="HT1-Ki-ody" customClass="LoadingPieChartView">
-                            <rect key="frame" x="0.0" y="0.0" width="311" height="311"/>
+                            <rect key="frame" x="0.0" y="0.0" width="94" height="94"/>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         </view>
                     </subviews>
@@ -437,6 +437,7 @@ the selected time period.</string>
                 <constraint firstItem="nZs-8E-xY9" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="XqN-5b-wLy"/>
                 <constraint firstItem="NbX-Ka-Aog" firstAttribute="top" secondItem="CCY-m1-lmD" secondAttribute="bottom" id="bJL-JB-yQO"/>
                 <constraint firstItem="NbX-Ka-Aog" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="bNC-d6-Zua"/>
+                <constraint firstItem="BGP-SH-dFd" firstAttribute="width" secondItem="1" secondAttribute="width" multiplier="0.25" id="etH-dZ-Elk"/>
                 <constraint firstItem="qPk-V7-gUb" firstAttribute="leading" secondItem="1" secondAttribute="leading" constant="16" id="fU5-oX-HHc"/>
                 <constraint firstAttribute="trailing" secondItem="NbX-Ka-Aog" secondAttribute="trailing" id="k9e-mf-uND"/>
                 <constraint firstAttribute="trailing" secondItem="BGP-SH-dFd" secondAttribute="trailing" constant="32" id="mhT-uz-Vby"/>
@@ -446,6 +447,18 @@ the selected time period.</string>
                 <constraint firstItem="BGP-SH-dFd" firstAttribute="top" secondItem="CCY-m1-lmD" secondAttribute="bottom" constant="24" id="xQl-m8-OhD"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <variation key="default">
+                <mask key="constraints">
+                    <exclude reference="etH-dZ-Elk"/>
+                </mask>
+            </variation>
+            <variation key="heightClass=regular-widthClass=regular">
+                <mask key="constraints">
+                    <exclude reference="WAv-ec-XhB"/>
+                    <include reference="etH-dZ-Elk"/>
+                    <exclude reference="mhT-uz-Vby"/>
+                </mask>
+            </variation>
             <connections>
                 <outlet property="BarChartCardView" destination="HOY-AE-hBa" id="phn-9J-YLY"/>
                 <outlet property="BarChartContainerView" destination="8Hy-my-iyb" id="MZ2-he-WKj"/>

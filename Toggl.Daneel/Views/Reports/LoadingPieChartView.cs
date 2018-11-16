@@ -62,14 +62,14 @@ namespace Toggl.Daneel.Views.Reports
                 radius = Center.X;
                 start = new CGPoint(Center.X, Center.Y + radius);
 
+                background?.RemoveFromSuperLayer();
+                foreground?.RemoveFromSuperLayer();
+
                 foreground = new CAShapeLayer();
                 foreground.FillColor = darkColor;
 
                 background = new CAShapeLayer();
                 background.FillColor = lightColor;
-
-                background.RemoveFromSuperLayer();
-                foreground.RemoveFromSuperLayer();
 
                 Layer.AddSublayer(background);
                 Layer.AddSublayer(foreground);
