@@ -2,6 +2,8 @@
 <RelativeLayout xmlns:tools="http://schemas.android.com/tools"
     xmlns:local="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xamarin="http://schemas.xamarin.com/android/xamarin/tools"
+    xamarin:classes="Toggl.Giskard.Activities.EditTimeEntryActivity"
     android:focusable="true"
     android:clickable="true"
     android:orientation="vertical"
@@ -123,7 +125,7 @@
                 </RelativeLayout>
             </LinearLayout>
             <LinearLayout
-                android:id="@+id/EditTimeEntryProjectContainer"
+                android:id="@+id/ProjectContainer"
                 local:MvxBind="Click SelectProjectCommand"
                 android:background="?attr/selectableItemBackground"
                 android:layout_height="48dp"
@@ -147,7 +149,7 @@
                     android:layout_below="@id/EditErrorContainer"
                     android:layout_toRightOf="@id/EditTimeEntryColumnAnchor" />
                 <TextView
-                    android:id="@+id/EditProjectTaskClient"
+                    android:id="@+id/ProjectTaskClientTextView"
                     tools:text="Superday"
                     android:ellipsize="end"
                     android:scrollHorizontally="true"
@@ -167,12 +169,12 @@
                 android:layout_height="0.5dp"
                 android:layout_marginLeft="56dp"
                 android:layout_width="match_parent"
-                android:layout_below="@id/EditTimeEntryProjectContainer" />
+                android:layout_below="@id/ProjectContainer" />
             <FrameLayout
                 android:id="@+id/EditTimeEntryTagsContainer"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
-                android:layout_below="@id/EditTimeEntryProjectContainer">
+                android:layout_below="@id/ProjectContainer">
                 <LinearLayout
                     local:MvxBind="Click SelectTagsCommand; Visibility Visibility(ShowTags(IsInaccessible, HasTags))"
                     android:background="?attr/selectableItemBackground"
@@ -257,7 +259,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_below="@id/EditBillableRow" />
             <RelativeLayout
-                android:id="@+id/EditTimeLeftPart"
+                android:id="@+id/StartTimeAreaStopTimeArea"
                 android:background="?attr/selectableItemBackground"
                 android:layout_weight="1"
                 android:layout_width="match_parent"
@@ -297,7 +299,7 @@
                     android:layout_alignStart="@id/EditStartValueLabel" />
             </RelativeLayout>
             <RelativeLayout
-                android:id="@+id/EditTimeRightPart"
+                android:id="@+id/StopTimeArea"
                 android:background="?attr/selectableItemBackground"
                 android:layout_weight="1"
                 android:layout_width="match_parent"
@@ -364,7 +366,7 @@
                 android:layout_width="match_parent"
                 android:layout_below="@id/EditBillableRow" />
             <LinearLayout
-                android:id="@+id/EditDuration"
+                android:id="@+id/DurationArea"
                 android:orientation="vertical"
                 android:background="?attr/selectableItemBackground"
                 android:layout_height="72dp"
@@ -391,19 +393,19 @@
                     android:layout_height="wrap_content" />
             </LinearLayout>
             <View
-                android:id="@+id/EditDurationBottomBorder"
+                android:id="@+id/DurationAreaBottomBorder"
                 android:background="@color/separator"
                 android:layout_height="0.5dp"
                 android:layout_marginLeft="56dp"
                 android:layout_width="match_parent"
-                android:layout_below="@id/EditDuration" />
+                android:layout_below="@id/DurationArea" />
             <LinearLayout
                 android:id="@+id/EditTimeEntryDeleteContainer"
                 local:MvxBind="Click DeleteCommand"
                 android:background="?attr/selectableItemBackground"
                 android:layout_height="48dp"
                 android:layout_width="match_parent"
-                android:layout_below="@id/EditDurationBottomBorder">
+                android:layout_below="@id/DurationAreaBottomBorder">
                 <ImageView
                     android:id="@+id/EditTimeEntryDeleteIcon"
                     android:scaleType="center"

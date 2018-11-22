@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Android.App;
@@ -33,10 +32,10 @@ namespace Toggl.Giskard.Activities
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
+
             SetContentView(Resource.Layout.EditTimeEntryActivity);
             OverridePendingTransition(Resource.Animation.abc_slide_in_bottom, Resource.Animation.abc_fade_out);
 
-            initializeViews();
             setupBindings();
         }
 
@@ -68,7 +67,7 @@ namespace Toggl.Giskard.Activities
             new CategorizeTimeUsingProjectsOnboardingStep(storage, ViewModel.HasProject)
                 .ManageDismissableTooltip(
                     projectTooltip,
-                    projectContainer,
+                    ProjectContainer,
                     (window, view) => PopupOffsets.FromDp(16, 8, this),
                     storage)
                 .DisposedBy(DisposeBag);
@@ -82,15 +81,15 @@ namespace Toggl.Giskard.Activities
 
         private void setupBindings()
         {
-            startTimeArea.Rx().Tap()
+            StartTimeArea.Rx().Tap()
                 .Subscribe(_ => ViewModel.SelectTimeCommand.Execute(StartTime))
                 .DisposedBy(DisposeBag);
 
-            stopTimeArea.Rx().Tap()
+            StopTimeArea.Rx().Tap()
                 .Subscribe(_ => ViewModel.StopTimeEntryCommand.Execute(StopTime))
                 .DisposedBy(DisposeBag);
 
-            durationArea.Rx().Tap()
+            DurationArea.Rx().Tap()
                 .Subscribe(_ => ViewModel.SelectTimeCommand.Execute(Duration))
                 .DisposedBy(DisposeBag);
 
@@ -102,7 +101,7 @@ namespace Toggl.Giskard.Activities
 
         private void onProjectTaskOrClientChanged(bool hasProject)
         {
-            projectTaskClientTextView.TextFormatted = 
+            ProjectTaskClientTextView.TextFormatted = 
                 TimeEntryExtensions.ToProjectTaskClient(
                     hasProject,
                     ViewModel.Project,

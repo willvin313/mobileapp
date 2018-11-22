@@ -452,9 +452,6 @@
     <Compile Include="Activities\SettingsActivity.ViewBinds.cs">
       <DependentUpon>SettingsActivity.cs</DependentUpon>
     </Compile>
-    <Compile Include="Activities\EditTimeEntryActivity.ViewBinds.cs">
-      <DependentUpon>EditTimeEntryActivity.cs</DependentUpon>
-    </Compile>
     <Compile Include="Activities\StartTimeEntryActivity.ViewBinds.cs">
       <DependentUpon>StartTimeEntryActivity.cs</DependentUpon>
     </Compile>
