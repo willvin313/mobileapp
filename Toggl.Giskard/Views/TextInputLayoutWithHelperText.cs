@@ -20,7 +20,7 @@ using Exception = Java.Lang.Exception;
 
 namespace Toggl.Giskard.Views
 {
-    [Register("com.toggl.giskard.TextInputLayoutWithHelperText")]
+    [Register("toggl.giskard.views.TextInputLayoutWithHelperText")]
     public class TextInputLayoutWithHelperText : TextInputLayout, IViewPropertyAnimatorListener
     {
         private readonly FastOutSlowInInterpolator interpolator = new FastOutSlowInInterpolator();

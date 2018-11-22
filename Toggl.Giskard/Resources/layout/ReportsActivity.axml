@@ -5,7 +5,7 @@
     android:animateLayoutChanges="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <com.toggl.giskard.ReportsLinearLayout
+    <toggl.giskard.views.ReportsLinearLayout
         android:id="@+id/ReportsActivityMainContainer"
         tools:visibility="gone"
         android:clickable="true"
@@ -29,7 +29,7 @@
             local:MvxTemplateSelector="@string/ReportsTemplateSelector"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-    </com.toggl.giskard.ReportsLinearLayout>
+    </toggl.giskard.views.ReportsLinearLayout>
     <android.support.v7.widget.Toolbar
         android:id="@+id/Toolbar"
         android:minHeight="?attr/actionBarSize"
