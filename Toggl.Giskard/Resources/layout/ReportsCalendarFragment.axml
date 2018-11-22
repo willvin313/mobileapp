@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:local="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xamarin="http://schemas.xamarin.com/android/xamarin/tools"
     tools:background="@color/toolbarBlack"
     android:orientation="vertical"
     android:animateLayoutChanges="true"
@@ -90,6 +91,7 @@
         android:layout_height="wrap_content" />
     <mvvmcross.droid.support.v7.recyclerview.MvxRecyclerView
         android:id="@+id/ReportsCalendarFragmentShortcuts"
+        xamarin:managedType="MvvmCross.Droid.Support.V7.RecyclerView.MvxRecyclerView"
         local:MvxBind="ItemsSource QuickSelectShortcuts; ItemClick QuickSelectCommand"
         android:scrollbars="vertical"
         local:MvxTemplateSelector="@string/ReportsCalendarShortcutsTemplateSelector"
