@@ -25,16 +25,16 @@ namespace Toggl.Foundation.Tests.MvvmCross
             protected AppStart<OnboardingViewModel> AppStart { get; }
             protected IMvxApplication App { get; } = Substitute.For<IMvxApplication>();
             protected ISyncManager SyncManager { get; } = Substitute.For<ISyncManager>();
-            protected ILoginManager LoginManager { get; } = Substitute.For<ILoginManager>();
+            protected IUserAccessManager UserAccessManager { get; } = Substitute.For<IUserAccessManager>();
             protected IOnboardingStorage OnboardingStorage { get; } = Substitute.For<IOnboardingStorage>();
             protected IAccessRestrictionStorage AccessRestrictionStorage { get; } =
                 Substitute.For<IAccessRestrictionStorage>();
 
             protected AppStartTest()
             {
-                AppStart = new AppStart<OnboardingViewModel>(App, TimeService, LoginManager, OnboardingStorage, NavigationService, AccessRestrictionStorage);
+                AppStart = new AppStart<OnboardingViewModel>(App, TimeService, UserAccessManager, OnboardingStorage, NavigationService, AccessRestrictionStorage);
                 DataSource.SyncManager.Returns(SyncManager);
-                LoginManager.GetDataSourceIfLoggedIn().Returns(DataSource);
+                UserAccessManager.GetDataSourceIfLoggedIn().Returns(DataSource);
             }
         }
 
@@ -44,13 +44,13 @@ namespace Toggl.Foundation.Tests.MvvmCross
             [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(
                 bool useTimeService,
-                bool userLoginManager,
+                bool useUserAccessManager,
                 bool useOnboardingStorage,
                 bool userNavigationService,
                 bool useAccessRestrictionStorage)
             {
                 var timeService = useTimeService ? TimeService : null;
-                var loginManager = userLoginManager ? LoginManager : null;
+                var userAccessManager = useUserAccessManager ? UserAccessManager : null;
                 var onboardingStorage = useOnboardingStorage ? OnboardingStorage : null;
                 var navigationService = userNavigationService ? NavigationService : null;
                 var accessRestrictionStorage = useAccessRestrictionStorage ? AccessRestrictionStorage : null;
@@ -59,7 +59,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
                     () => new AppStart<OnboardingViewModel>(
                         App,
                         timeService,
-                        loginManager,
+                        userAccessManager,
                         onboardingStorage,
                         navigationService,
                         accessRestrictionStorage);
@@ -79,7 +79,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
                 await Task.Run(() => AppStart.Start());
 
                 await NavigationService.Received().Navigate<OutdatedAppViewModel>();
-                LoginManager.DidNotReceive().GetDataSourceIfLoggedIn();
+                UserAccessManager.DidNotReceive().GetDataSourceIfLoggedIn();
             }
 
             [Fact, LogIfTooSlow]
@@ -90,7 +90,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
                 await Task.Run(() => AppStart.Start());
 
                 await NavigationService.Received().Navigate<OutdatedAppViewModel>();
-                LoginManager.DidNotReceive().GetDataSourceIfLoggedIn();
+                UserAccessManager.DidNotReceive().GetDataSourceIfLoggedIn();
             }
 
             [Fact, LogIfTooSlow]
@@ -113,7 +113,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
                 await Task.Run(() => AppStart.Start());
 
                 await NavigationService.Received().Navigate<OutdatedAppViewModel>();
-                LoginManager.DidNotReceive().GetDataSourceIfLoggedIn();
+                UserAccessManager.DidNotReceive().GetDataSourceIfLoggedIn();
             }
 
             [Fact, LogIfTooSlow]
@@ -126,7 +126,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
 
                 await NavigationService.Received().Navigate<OutdatedAppViewModel>();
                 await NavigationService.DidNotReceive().Navigate<TokenResetViewModel>();
-                LoginManager.DidNotReceive().GetDataSourceIfLoggedIn();
+                UserAccessManager.DidNotReceive().GetDataSourceIfLoggedIn();
             }
 
             [Fact, LogIfTooSlow]
@@ -140,7 +140,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
                 user.ApiToken.Returns(newApiToken);
                 userSource.Current.Returns(Observable.Return(user));
                 dataSource.User.Returns(userSource);
-                LoginManager.GetDataSourceIfLoggedIn().Returns(dataSource);
+                UserAccessManager.GetDataSourceIfLoggedIn().Returns(dataSource);
                 AccessRestrictionStorage.IsUnauthorized(Arg.Is(oldApiToken)).Returns(true);
                 AccessRestrictionStorage.IsApiOutdated().Returns(false);
                 AccessRestrictionStorage.IsClientOutdated().Returns(false);
@@ -154,7 +154,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
             public async Task ShowsTheOnboardingViewModelIfTheUserHasNotLoggedInPreviously()
             {
                 ITogglDataSource dataSource = null;
-                LoginManager.GetDataSourceIfLoggedIn().Returns(dataSource);
+                UserAccessManager.GetDataSourceIfLoggedIn().Returns(dataSource);
 
                 await Task.Run(() => AppStart.Start());
 
@@ -165,7 +165,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
             public async Task CallsForkNavigateToMainTabBarViewModelAndMainViewModelIfTheUserHasLoggedInPreviously()
             {
                 var dataSource = Substitute.For<ITogglDataSource>();
-                LoginManager.GetDataSourceIfLoggedIn().Returns(dataSource);
+                UserAccessManager.GetDataSourceIfLoggedIn().Returns(dataSource);
 
                 await Task.Run(() => AppStart.Start());
 

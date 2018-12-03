@@ -63,10 +63,10 @@ namespace Toggl.Foundation.MvvmCross
                 return dataSource;
             }
 
-            var loginManager =
-                new LoginManager(foundation.ApiFactory, foundation.Database, foundation.GoogleService, foundation.ShortcutCreator, foundation.PrivateSharedStorageService, createDataSource);
+            var userAccessManager =
+                new UserAccessManager(foundation.ApiFactory, foundation.Database, foundation.GoogleService, foundation.ShortcutCreator, foundation.PrivateSharedStorageService, createDataSource);
 
-            Mvx.RegisterSingleton<ILoginManager>(loginManager);
+            Mvx.RegisterSingleton<IUserAccessManager>(userAccessManager);
         }
 
         private static void initializeInversionOfControl(MvvmCrossFoundation foundation)

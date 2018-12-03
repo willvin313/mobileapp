@@ -37,7 +37,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
             protected override LoginViewModel CreateViewModel()
                 => new LoginViewModel(
-                    LoginManager,
+                    UserAccessManager,
                     AnalyticsService,
                     OnboardingStorage,
                     NavigationService,
@@ -53,7 +53,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Xunit.Theory, LogIfTooSlow]
             [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(
-                bool userLoginManager,
+                bool useUserAccessManager,
                 bool useAnalyticsService,
                 bool useOnboardingStorage,
                 bool userNavigationService,
@@ -63,7 +63,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 bool useTimeService,
                 bool useSchedulerProvider)
             {
-                var loginManager = userLoginManager ? LoginManager : null;
+                var userAccessManager = useUserAccessManager ? UserAccessManager : null;
                 var analyticsSerivce = useAnalyticsService ? AnalyticsService : null;
                 var onboardingStorage = useOnboardingStorage ? OnboardingStorage : null;
                 var navigationService = userNavigationService ? NavigationService : null;
@@ -74,7 +74,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var schedulerProvider = useSchedulerProvider ? SchedulerProvider : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new LoginViewModel(loginManager,
+                    () => new LoginViewModel(userAccessManager,
                                              analyticsSerivce,
                                              onboardingStorage,
                                              navigationService,
@@ -120,7 +120,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SetEmail(Email.From(email));
                 ViewModel.SetPassword(Password.From(password));
                 //Make sure isloading is true
-                LoginManager
+                UserAccessManager
                     .Login(Arg.Any<Email>(), Arg.Any<Password>())
                     .Returns(Observable.Never<ITogglDataSource>());
                 ViewModel.Login();
@@ -148,28 +148,28 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheLoginMethod : LoginViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public void CallsTheLoginManagerWhenTheEmailAndPasswordAreValid()
+            public void CallsTheUserAccessManagerWhenTheEmailAndPasswordAreValid()
             {
                 ViewModel.SetEmail(ValidEmail);
                 ViewModel.SetPassword(ValidPassword);
 
                 ViewModel.Login();
 
-                LoginManager.Received().Login(Arg.Is(ValidEmail), Arg.Is(ValidPassword));
+                UserAccessManager.Received().Login(Arg.Is(ValidEmail), Arg.Is(ValidPassword));
             }
 
             [Fact, LogIfTooSlow]
             public void DoesNothingWhenThePageIsCurrentlyLoading()
             {
                 var never = Observable.Never<ITogglDataSource>();
-                LoginManager.Login(Arg.Any<Email>(), Arg.Any<Password>()).Returns(never);
+                UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>()).Returns(never);
                 ViewModel.SetEmail(ValidEmail);
                 ViewModel.SetPassword(ValidPassword);
                 ViewModel.Login();
 
                 ViewModel.Login();
 
-                LoginManager.Received(1).Login(Arg.Any<Email>(), Arg.Any<Password>());
+                UserAccessManager.Received(1).Login(Arg.Any<Email>(), Arg.Any<Password>());
             }
 
             public sealed class WhenLoginSucceeds : LoginViewModelTest
@@ -178,7 +178,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     ViewModel.SetEmail(ValidEmail);
                     ViewModel.SetPassword(ValidPassword);
-                    LoginManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
+                    UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
                         .Returns(Observable.Return(DataSource));
                 }
 
@@ -241,7 +241,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     var observer = TestScheduler.CreateObserver<bool>();
                     ViewModel.IsLoading.Subscribe(observer);
-                    LoginManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
+                    UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
                         .Returns(Observable.Throw<ITogglDataSource>(new Exception()));
 
                     ViewModel.Login();
@@ -257,7 +257,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 [Fact, LogIfTooSlow]
                 public void DoesNotNavigate()
                 {
-                    LoginManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
+                    UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
                         .Returns(Observable.Throw<ITogglDataSource>(new Exception()));
 
                     ViewModel.Login();
@@ -272,7 +272,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     ViewModel.ErrorMessage.Subscribe(observer);
                     var exception = new UnauthorizedException(
                         Substitute.For<IRequest>(), Substitute.For<IResponse>());
-                    LoginManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
+                    UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
                         .Returns(Observable.Throw<ITogglDataSource>(exception));
 
                     ViewModel.Login();
@@ -290,7 +290,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     var observer = TestScheduler.CreateObserver<string>();
                     var exception = new GoogleLoginException(true);
                     ViewModel.ErrorMessage.Subscribe(observer);
-                    LoginManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
+                    UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
                         .Returns(Observable.Throw<ITogglDataSource>(exception));
 
                     ViewModel.Login();
@@ -307,7 +307,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     var observer = TestScheduler.CreateObserver<string>();
                     var exception = new Exception();
                     ViewModel.ErrorMessage.Subscribe(observer);
-                    LoginManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
+                    UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
                         .Returns(Observable.Throw<ITogglDataSource>(exception));
 
                     ViewModel.Login();
@@ -325,7 +325,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     var observer = TestScheduler.CreateObserver<string>();
                     var exception = new Exception();
                     ViewModel.ErrorMessage.Subscribe(observer);
-                    LoginManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
+                    UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
                         .Returns(Observable.Throw<ITogglDataSource>(exception));
                     ErrorHandlingService.TryHandleDeprecationError(Arg.Any<Exception>())
                         .Returns(true);
@@ -342,7 +342,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 public void TracksTheEventAndException()
                 {
                     var exception = new Exception();
-                    LoginManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
+                    UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
                         .Returns(Observable.Throw<ITogglDataSource>(exception));
 
                     ViewModel.Login();
@@ -357,29 +357,29 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheGoogleLoginMethod : LoginViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public void CallsTheLoginManager()
+            public void CallsTheUserAccessManager()
             {
                 ViewModel.GoogleLogin();
 
-                LoginManager.Received().LoginWithGoogle();
+                UserAccessManager.Received().LoginWithGoogle();
             }
 
             [Fact, LogIfTooSlow]
             public void DoesNothingWhenThePageIsCurrentlyLoading()
             {
                 var never = Observable.Never<ITogglDataSource>();
-                LoginManager.LoginWithGoogle().Returns(never);
+                UserAccessManager.LoginWithGoogle().Returns(never);
                 ViewModel.GoogleLogin();
 
                 ViewModel.GoogleLogin();
 
-                LoginManager.Received(1).LoginWithGoogle();
+                UserAccessManager.Received(1).LoginWithGoogle();
             }
 
             [Fact, LogIfTooSlow]
             public void NavigatesToTheTimeEntriesViewModelWhenTheLoginSucceeds()
             {
-                LoginManager.LoginWithGoogle()
+                UserAccessManager.LoginWithGoogle()
                     .Returns(Observable.Return(Substitute.For<ITogglDataSource>()));
 
                 ViewModel.GoogleLogin();
@@ -390,7 +390,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public void TracksGoogleLoginEvent()
             {
-                LoginManager.LoginWithGoogle()
+                UserAccessManager.LoginWithGoogle()
                     .Returns(Observable.Return(Substitute.For<ITogglDataSource>()));
 
                 ViewModel.GoogleLogin();
@@ -403,7 +403,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 var observer = TestScheduler.CreateObserver<bool>();
                 ViewModel.IsLoading.Subscribe(observer);
-                LoginManager.LoginWithGoogle()
+                UserAccessManager.LoginWithGoogle()
                     .Returns(Observable.Throw<ITogglDataSource>(new GoogleLoginException(false)));
 
                 ViewModel.GoogleLogin();
@@ -419,7 +419,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public void DoesNotNavigateWhenTheLoginFails()
             {
-                LoginManager.LoginWithGoogle()
+                UserAccessManager.LoginWithGoogle()
                     .Returns(Observable.Throw<ITogglDataSource>(new GoogleLoginException(false)));
 
                 ViewModel.GoogleLogin();
@@ -432,7 +432,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 var observer = SchedulerProvider.TestScheduler.CreateObserver<string>();
                 ViewModel.ErrorMessage.Subscribe(observer);
-                LoginManager.LoginWithGoogle()
+                UserAccessManager.LoginWithGoogle()
                     .Returns(Observable.Throw<ITogglDataSource>(new GoogleLoginException(true)));
 
                 ViewModel.GoogleLogin();
@@ -447,7 +447,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public void SavesTheTimeOfLastLogin(DateTimeOffset now)
             {
                 TimeService.CurrentDateTime.Returns(now);
-                LoginManager.LoginWithGoogle()
+                UserAccessManager.LoginWithGoogle()
                     .Returns(Observable.Return(Substitute.For<ITogglDataSource>()));
                 var viewModel = CreateViewModel();
 
@@ -529,7 +529,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 await ViewModel.StartPasswordManager();
 
-                await LoginManager.Received().Login(Arg.Any<Email>(), Arg.Any<Password>());
+                await UserAccessManager.Received().Login(Arg.Any<Email>(), Arg.Any<Password>());
             }
 
             [Fact, LogIfTooSlow]
@@ -604,7 +604,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 await ViewModel.StartPasswordManager();
 
-                await LoginManager.DidNotReceive().Login(Arg.Any<Email>(), Arg.Any<Password>());
+                await UserAccessManager.DidNotReceive().Login(Arg.Any<Email>(), Arg.Any<Password>());
             }
 
             [Fact, LogIfTooSlow]

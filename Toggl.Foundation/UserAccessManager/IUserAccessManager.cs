@@ -5,7 +5,7 @@ using Toggl.Multivac;
 
 namespace Toggl.Foundation.Login
 {
-    public interface ILoginManager
+    public interface IUserAccessManager
     {
         ITogglDataSource GetDataSourceIfLoggedIn();
 

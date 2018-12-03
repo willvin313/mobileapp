@@ -49,7 +49,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 return new SettingsViewModel(
                     UserAgent,
                     DataSource,
-                    LoginManager,
+                    UserAccessManager,
                     DialogService,
                     UserPreferences,
                     FeedbackService,
@@ -75,7 +75,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public void ThrowsIfAnyOfTheArgumentsIsNull(
                 bool useUserAgent,
                 bool useDataSource,
-                bool useLoginManager,
+                bool useUserAccessManager,
                 bool useDialogService,
                 bool useUserPreferences,
                 bool useFeedbackService,
@@ -90,7 +90,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 var userAgent = useUserAgent ? UserAgent : null;
                 var dataSource = useDataSource ? DataSource : null;
-                var loginManager = useLoginManager ? LoginManager : null;
+                var userAccessManager = useUserAccessManager ? UserAccessManager : null;
                 var dialogService = useDialogService ? DialogService : null;
                 var userPreferences = useUserPreferences ? UserPreferences : null;
                 var feedbackService = useFeedbackService ? FeedbackService : null;
@@ -107,7 +107,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     () => new SettingsViewModel(
                         userAgent,
                         dataSource,
-                        loginManager,
+                        userAccessManager,
                         dialogService,
                         userPreferences,
                         feedbackService,
@@ -259,7 +259,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 doNotShowConfirmationDialog();
                 await ViewModel.TryLogout();
 
-                await LoginManager.Received().Logout();
+                await UserAccessManager.Received().Logout();
             }
 
             [Fact, LogIfTooSlow]
@@ -334,7 +334,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 await ViewModel.TryLogout();
 
-                await LoginManager.DidNotReceive().Logout();
+                await UserAccessManager.DidNotReceive().Logout();
                 await NavigationService.DidNotReceive().Navigate<LoginViewModel>();
             }
 
@@ -350,7 +350,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 await ViewModel.TryLogout();
 
-                await LoginManager.Received().Logout();
+                await UserAccessManager.Received().Logout();
                 await NavigationService.Received().Navigate<LoginViewModel>();
             }
 

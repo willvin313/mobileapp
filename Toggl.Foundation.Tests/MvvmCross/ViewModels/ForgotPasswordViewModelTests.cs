@@ -24,7 +24,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             protected Email InvalidEmail { get; } = Email.From("This is not an email");
 
             protected override ForgotPasswordViewModel CreateViewModel()
-                => new ForgotPasswordViewModel(TimeService, LoginManager, AnalyticsService, NavigationService,
+                => new ForgotPasswordViewModel(TimeService, UserAccessManager, AnalyticsService, NavigationService,
                     SchedulerProvider);
         }
 
@@ -34,20 +34,20 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(
                 bool useTimeService,
-                bool useLoginManager,
+                bool useUserAccessManager,
                 bool useAnalyticsService,
                 bool useNavigationService,
                 bool useSchedulerProvider)
             {
                 var timeService = useTimeService ? TimeService : null;
-                var loginManager = useLoginManager ? LoginManager : null;
+                var userAccessManager = useUserAccessManager ? UserAccessManager : null;
                 var analyticsSerivce = useAnalyticsService ? AnalyticsService : null;
                 var navigationService = useNavigationService ? NavigationService : null;
                 var schedulerProvider = useSchedulerProvider ? SchedulerProvider : null;
 
                 Action tryingToConstructWithEmptyParameters =
                     () => new ForgotPasswordViewModel(
-                        timeService, loginManager, analyticsSerivce, navigationService, schedulerProvider);
+                        timeService, userAccessManager, analyticsSerivce, navigationService, schedulerProvider);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
@@ -73,7 +73,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public void SetsErrorMessageToEmpty()
             {
                 ViewModel.Email.OnNext(ValidEmail);
-                LoginManager
+                UserAccessManager
                     .ResetPassword(Arg.Any<Email>())
                     .Returns(Observable.Never<string>());
 
@@ -89,7 +89,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public void SetsPasswordResetSuccessfulToFalse()
             {
                 ViewModel.Email.OnNext(ValidEmail);
-                LoginManager
+                UserAccessManager
                     .ResetPassword(Arg.Any<Email>())
                     .Returns(Observable.Never<string>());
 
@@ -108,7 +108,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 ViewModel.Reset.Execute();
 
-                LoginManager.Received().ResetPassword(ValidEmail);
+                UserAccessManager.Received().ResetPassword(ValidEmail);
             }
 
             [Fact, LogIfTooSlow]
@@ -145,7 +145,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public void CannotExecuteIfIsLoading()
             {
                 ViewModel.Email.OnNext(ValidEmail);
-                LoginManager
+                UserAccessManager
                     .ResetPassword(Arg.Any<Email>())
                     .Returns(Observable.Never<string>());
 
@@ -163,7 +163,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 public void SetsIsLoadingToFalse()
                 {
                     ViewModel.Email.OnNext(ValidEmail);
-                    LoginManager
+                    UserAccessManager
                         .ResetPassword(Arg.Any<Email>())
                         .Returns(Observable.Return("Great success"));
 
@@ -180,7 +180,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 public void SetsPasswordResetSuccessfulToTrue()
                 {
                     ViewModel.Email.OnNext(ValidEmail);
-                    LoginManager
+                    UserAccessManager
                         .ResetPassword(Arg.Any<Email>())
                         .Returns(Observable.Return("Great success"));
 
@@ -197,7 +197,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 public void CallsTimeServiceToCloseViewModelAfterFourSeconds()
                 {
                     ViewModel.Email.OnNext(ValidEmail);
-                    LoginManager
+                    UserAccessManager
                         .ResetPassword(Arg.Any<Email>())
                         .Returns(Observable.Return("Great success"));
 
@@ -213,9 +213,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     var testScheduler = new TestScheduler();
                     var timeService = new TimeService(testScheduler);
                     var viewModel = new ForgotPasswordViewModel(
-                        timeService, LoginManager, AnalyticsService, NavigationService, SchedulerProvider);
+                        timeService, UserAccessManager, AnalyticsService, NavigationService, SchedulerProvider);
                     viewModel.Email.OnNext(ValidEmail);
-                    LoginManager
+                    UserAccessManager
                         .ResetPassword(Arg.Any<Email>())
                         .Returns(Observable.Return("Great success"));
 
@@ -238,7 +238,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 public void SetsIsLoadingToFalse()
                 {
                     ViewModel.Email.OnNext(ValidEmail);
-                    LoginManager
+                    UserAccessManager
                         .ResetPassword(Arg.Any<Email>())
                         .Returns(Observable.Throw<string>(new Exception()));
 
@@ -256,7 +256,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     ViewModel.Email.OnNext(ValidEmail);
                     var exception = new BadRequestException(
                         Substitute.For<IRequest>(), Substitute.For<IResponse>());
-                    LoginManager
+                    UserAccessManager
                         .ResetPassword(Arg.Any<Email>())
                         .Returns(Observable.Throw<string>(exception));
 
@@ -273,7 +273,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 public void SetsOfflineErrorWhenReceivesOfflineException()
                 {
                     ViewModel.Email.OnNext(ValidEmail);
-                    LoginManager
+                    UserAccessManager
                         .ResetPassword(Arg.Any<Email>())
                         .Returns(Observable.Throw<string>(new OfflineException()));
 
@@ -294,7 +294,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         Substitute.For<IRequest>(),
                         Substitute.For<IResponse>(),
                         errorString.Get);
-                    LoginManager
+                    UserAccessManager
                         .ResetPassword(Arg.Any<Email>())
                         .Returns(Observable.Throw<string>(exception));
 
@@ -311,7 +311,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 public void SetsGeneralErrorForAnyOtherException()
                 {
                     ViewModel.Email.OnNext(ValidEmail);
-                    LoginManager
+                    UserAccessManager
                         .ResetPassword(Arg.Any<Email>())
                         .Returns(Observable.Throw<string>(new Exception()));
 

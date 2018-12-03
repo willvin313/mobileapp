@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -7,7 +6,6 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Reactive.Testing;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Services;
@@ -30,9 +28,9 @@ using User = Toggl.Ultrawave.Models.User;
 
 namespace Toggl.Foundation.Tests.Login
 {
-    public sealed class LoginManagerTests
+    public sealed class UserAccessManagerTests
     {
-        public abstract class LoginManagerTest
+        public abstract class UserAccessManagerTest
         {
             protected static readonly Password Password = "theirobotmoviesucked123".ToPassword();
             protected static readonly Email Email = "susancalvin@psychohistorian.museum".ToEmail();
@@ -47,16 +45,16 @@ namespace Toggl.Foundation.Tests.Login
             protected IAccessRestrictionStorage AccessRestrictionStorage { get; } = Substitute.For<IAccessRestrictionStorage>();
             protected ITogglDataSource DataSource { get; } = Substitute.For<ITogglDataSource>();
             protected IApplicationShortcutCreator ApplicationShortcutCreator { get; } = Substitute.For<IApplicationShortcutCreator>();
-            protected readonly ILoginManager LoginManager;
+            protected readonly IUserAccessManager UserAccessManager;
             protected IScheduler Scheduler { get; } = System.Reactive.Concurrency.Scheduler.Default;
             protected ITogglDataSource CreateDataSource(ITogglApi api) => DataSource;
             protected virtual IScheduler CreateScheduler => Scheduler;
             protected IAnalyticsService AnalyticsService { get; } = Substitute.For<IAnalyticsService>();
             protected IPrivateSharedStorageService PrivateSharedStorageService { get; } = Substitute.For<IPrivateSharedStorageService>();
 
-            protected LoginManagerTest()
+            protected UserAccessManagerTest()
             {
-                LoginManager = new LoginManager(ApiFactory, Database, GoogleService, ApplicationShortcutCreator, PrivateSharedStorageService, CreateDataSource);
+                UserAccessManager = new UserAccessManager(ApiFactory, Database, GoogleService, ApplicationShortcutCreator, PrivateSharedStorageService, CreateDataSource);
 
                 Api.User.Get().Returns(Observable.Return(User));
                 Api.User.SignUp(Email, Password, TermsAccepted, CountryId).Returns(Observable.Return(User));
@@ -66,13 +64,13 @@ namespace Toggl.Foundation.Tests.Login
             }
         }
 
-        public abstract class LoginManagerWithTestSchedulerTest : LoginManagerTest
+        public abstract class UserAccessManagerWithTestSchedulerTest : UserAccessManagerTest
         {
             protected readonly TestScheduler TestScheduler = new TestScheduler();
             protected override IScheduler CreateScheduler => TestScheduler;
         }
 
-        public sealed class Constructor : LoginManagerTest
+        public sealed class Constructor : UserAccessManagerTest
         {
             [Theory, LogIfTooSlow]
             [ConstructorData]
@@ -92,14 +90,14 @@ namespace Toggl.Foundation.Tests.Login
                 var privateSharedStorageService = usePrivateSharedStorageService ? PrivateSharedStorageService : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new LoginManager(apiFactory, database, googleService, shortcutCreator, privateSharedStorageService, createDataSource);
+                    () => new UserAccessManager(apiFactory, database, googleService, shortcutCreator, privateSharedStorageService, createDataSource);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
             }
         }
 
-        public sealed class TheLoginMethod : LoginManagerTest
+        public sealed class TheUserAccessMethod : UserAccessManagerTest
         {
             [Theory, LogIfTooSlow]
             [InlineData("susancalvin@psychohistorian.museum", null)]
@@ -123,7 +121,7 @@ namespace Toggl.Foundation.Tests.Login
                 var actualPassword = password.ToPassword();
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => LoginManager.Login(actualEmail, actualPassword).Wait();
+                    () => UserAccessManager.Login(actualEmail, actualPassword).Wait();
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentException>();
@@ -132,7 +130,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task EmptiesTheDatabaseBeforeTryingToLogin()
             {
-                await LoginManager.Login(Email, Password);
+                await UserAccessManager.Login(Email, Password);
 
                 Received.InOrder(async () =>
                 {
@@ -144,7 +142,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task CallsTheGetMethodOfTheUserApi()
             {
-                await LoginManager.Login(Email, Password);
+                await UserAccessManager.Login(Email, Password);
 
                 await Api.User.Received().Get();
             }
@@ -152,7 +150,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task PersistsTheUserToTheDatabase()
             {
-                await LoginManager.Login(Email, Password);
+                await UserAccessManager.Login(Email, Password);
 
                 await Database.User.Received().Create(Arg.Is<IDatabaseUser>(receivedUser => receivedUser.Id == User.Id));
             }
@@ -160,7 +158,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task PersistsTheUserWithTheSyncStatusSetToInSync()
             {
-                await LoginManager.Login(Email, Password);
+                await UserAccessManager.Login(Email, Password);
 
                 await Database.User.Received().Create(Arg.Is<IDatabaseUser>(receivedUser => receivedUser.SyncStatus == SyncStatus.InSync));
             }
@@ -168,7 +166,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task AlwaysReturnsASingleResult()
             {
-                await LoginManager
+                await UserAccessManager
                         .Login(Email, Password)
                         .SingleAsync();
             }
@@ -176,7 +174,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task NotifiesShortcutCreatorAboutLogin()
             {
-                await LoginManager.Login(Email, Password);
+                await UserAccessManager.Login(Email, Password);
 
                 ApplicationShortcutCreator.Received().OnLogin(Arg.Any<ITogglDataSource>());
             }
@@ -188,20 +186,20 @@ namespace Toggl.Foundation.Tests.Login
                 Api.User.Get().Returns(Observable.Throw<IUser>(serverErrorException));
 
                 Action tryingToLoginWhenTheApiIsThrowingSomeRandomServerErrorException =
-                    () => LoginManager.Login(Email, Password).Wait();
+                    () => UserAccessManager.Login(Email, Password).Wait();
 
                 tryingToLoginWhenTheApiIsThrowingSomeRandomServerErrorException
                     .Should().Throw<ServerErrorException>();
             }
         }
 
-        public sealed class TheResetPasswordMethod : LoginManagerTest
+        public sealed class TheResetPasswordMethod : UserAccessManagerTest
         {
             [Theory, LogIfTooSlow]
             [InlineData("foo")]
             public void ThrowsWhenEmailIsInvalid(string emailString)
             {
-                Action tryingToResetWithInvalidEmail = () => LoginManager
+                Action tryingToResetWithInvalidEmail = () => UserAccessManager
                     .ResetPassword(Email.From(emailString))
                     .Wait();
 
@@ -211,7 +209,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task UsesApiWithoutCredentials()
             {
-                await LoginManager.ResetPassword(Email.From("some@email.com"));
+                await UserAccessManager.ResetPassword(Email.From("some@email.com"));
 
                 ApiFactory.Received().CreateApiWith(Arg.Is<Credentials>(
                     arg => arg.Header.Name == null
@@ -227,27 +225,27 @@ namespace Toggl.Foundation.Tests.Login
             {
                 var email = address.ToEmail();
 
-                await LoginManager.ResetPassword(email);
+                await UserAccessManager.ResetPassword(email);
 
                 await Api.User.Received().ResetPassword(Arg.Is(email));
             }
         }
 
-        public sealed class TheLogoutMethod : LoginManagerTest
+        public sealed class TheLogoutMethod : UserAccessManagerTest
         {
             [Fact, LogIfTooSlow]
             public async Task LogsOutAfterLogin()
             {
-                await LoginManager.Login(Email, Password);
-                await LoginManager.Logout();
+                await UserAccessManager.Login(Email, Password);
+                await UserAccessManager.Logout();
                 await DataSource.Received().Logout();
             }
 
             [Fact, LogIfTooSlow]
             public async Task LogsOutAfterSignup()
             {
-                await LoginManager.SignUp(Email, Password, TermsAccepted, CountryId);
-                await LoginManager.Logout();
+                await UserAccessManager.SignUp(Email, Password, TermsAccepted, CountryId);
+                await UserAccessManager.Logout();
                 await DataSource.Received().Logout();
             }
 
@@ -257,8 +255,8 @@ namespace Toggl.Foundation.Tests.Login
                 var user = Substitute.For<IDatabaseUser>();
                 user.Email.Returns(Email);
                 Database.User.Single().Returns(Observable.Return(user));
-                await LoginManager.RefreshToken(Password);
-                await LoginManager.Logout();
+                await UserAccessManager.RefreshToken(Password);
+                await UserAccessManager.Logout();
                 await DataSource.Received().Logout();
             }
 
@@ -266,13 +264,13 @@ namespace Toggl.Foundation.Tests.Login
             public async Task LogsOutAfterGoogleLogin()
             {
                 GoogleService.GetAuthToken().Returns(Observable.Return("sometoken"));
-                await LoginManager.LoginWithGoogle();
-                await LoginManager.Logout();
+                await UserAccessManager.LoginWithGoogle();
+                await UserAccessManager.Logout();
                 await DataSource.Received().Logout();
             }
         }
 
-        public sealed class TheGetDataSourceIfLoggedInInMethod : LoginManagerTest
+        public sealed class TheGetDataSourceIfLoggedInInMethod : UserAccessManagerTest
         {
             [Fact, LogIfTooSlow]
             public void ReturnsNullIfTheDatabaseHasNoUsers()
@@ -280,7 +278,7 @@ namespace Toggl.Foundation.Tests.Login
                 var observable = Observable.Throw<IDatabaseUser>(new InvalidOperationException());
                 Database.User.Single().Returns(observable);
 
-                var result = LoginManager.GetDataSourceIfLoggedIn();
+                var result = UserAccessManager.GetDataSourceIfLoggedIn();
 
                 result.Should().BeNull();
             }
@@ -291,13 +289,13 @@ namespace Toggl.Foundation.Tests.Login
                 var observable = Observable.Return<IDatabaseUser>(FoundationUser.Clean(User));
                 Database.User.Single().Returns(observable);
 
-                var result = LoginManager.GetDataSourceIfLoggedIn();
+                var result = UserAccessManager.GetDataSourceIfLoggedIn();
 
                 result.Should().NotBeNull();
             }
         }
 
-        public sealed class TheSignUpMethod : LoginManagerTest
+        public sealed class TheSignUpMethod : UserAccessManagerTest
         {
             [Theory, LogIfTooSlow]
             [InlineData("susancalvin@psychohistorian.museum", null)]
@@ -321,7 +319,7 @@ namespace Toggl.Foundation.Tests.Login
                 var actualPassword = password.ToPassword();
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => LoginManager.SignUp(actualEmail, actualPassword, true, 0).Wait();
+                    () => UserAccessManager.SignUp(actualEmail, actualPassword, true, 0).Wait();
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentException>();
@@ -330,7 +328,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task EmptiesTheDatabaseBeforeTryingToCreateTheUser()
             {
-                await LoginManager.SignUp(Email, Password, TermsAccepted, CountryId);
+                await UserAccessManager.SignUp(Email, Password, TermsAccepted, CountryId);
 
                 Received.InOrder(async () =>
                 {
@@ -342,7 +340,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task CallsTheSignUpMethodOfTheUserApi()
             {
-                await LoginManager.SignUp(Email, Password, TermsAccepted, CountryId);
+                await UserAccessManager.SignUp(Email, Password, TermsAccepted, CountryId);
 
                 await Api.User.Received().SignUp(Email, Password, TermsAccepted, CountryId);
             }
@@ -350,7 +348,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task PersistsTheUserToTheDatabase()
             {
-                await LoginManager.SignUp(Email, Password, TermsAccepted, CountryId);
+                await UserAccessManager.SignUp(Email, Password, TermsAccepted, CountryId);
 
                 await Database.User.Received().Create(Arg.Is<IDatabaseUser>(receivedUser => receivedUser.Id == User.Id));
             }
@@ -358,7 +356,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task PersistsTheUserWithTheSyncStatusSetToInSync()
             {
-                await LoginManager.SignUp(Email, Password, TermsAccepted, CountryId);
+                await UserAccessManager.SignUp(Email, Password, TermsAccepted, CountryId);
 
                 await Database.User.Received().Create(Arg.Is<IDatabaseUser>(receivedUser => receivedUser.SyncStatus == SyncStatus.InSync));
             }
@@ -366,7 +364,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task AlwaysReturnsASingleResult()
             {
-                await LoginManager
+                await UserAccessManager
                         .SignUp(Email, Password, TermsAccepted, CountryId)
                         .SingleAsync();
             }
@@ -374,7 +372,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task NotifiesShortcutCreatorAboutLogin()
             {
-                await LoginManager.SignUp(Email, Password, TermsAccepted, CountryId);
+                await UserAccessManager.SignUp(Email, Password, TermsAccepted, CountryId);
 
                 ApplicationShortcutCreator.Received().OnLogin(Arg.Any<ITogglDataSource>());
             }
@@ -386,7 +384,7 @@ namespace Toggl.Foundation.Tests.Login
                 Api.User.SignUp(Email, Password, TermsAccepted, CountryId).Returns(Observable.Throw<IUser>(serverErrorException));
 
                 Action tryingToSignUpWhenTheApiIsThrowingSomeRandomServerErrorException =
-                    () => LoginManager.SignUp(Email, Password, TermsAccepted, CountryId).Wait();
+                    () => UserAccessManager.SignUp(Email, Password, TermsAccepted, CountryId).Wait();
 
                 tryingToSignUpWhenTheApiIsThrowingSomeRandomServerErrorException
                     .Should().Throw<ServerErrorException>();
@@ -395,7 +393,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task SavesTheApiTokenToPrivateSharedStorage()
             {
-                await LoginManager.SignUp(Email, Password, TermsAccepted, CountryId);
+                await UserAccessManager.SignUp(Email, Password, TermsAccepted, CountryId);
 
                 PrivateSharedStorageService.Received().SaveApiToken(Arg.Any<string>());
             }
@@ -403,13 +401,13 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task SavesTheUserIdToPrivateSharedStorage()
             {
-                await LoginManager.SignUp(Email, Password, TermsAccepted, CountryId);
+                await UserAccessManager.SignUp(Email, Password, TermsAccepted, CountryId);
 
                 PrivateSharedStorageService.Received().SaveUserId(Arg.Any<long>());
             }
         }
 
-        public sealed class TheRefreshTokenMethod : LoginManagerTest
+        public sealed class TheRefreshTokenMethod : UserAccessManagerTest
         {
             public TheRefreshTokenMethod()
             {
@@ -425,7 +423,7 @@ namespace Toggl.Foundation.Tests.Login
             public void ThrowsIfYouPassInvalidParameters(string password)
             {
                 Action tryingToRefreshWithInvalidParameters =
-                    () => LoginManager.RefreshToken(password.ToPassword()).Wait();
+                    () => UserAccessManager.RefreshToken(password.ToPassword()).Wait();
 
                 tryingToRefreshWithInvalidParameters
                     .Should().Throw<ArgumentException>();
@@ -434,7 +432,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task CallsTheGetMethodOfTheUserApi()
             {
-                await LoginManager.RefreshToken(Password);
+                await UserAccessManager.RefreshToken(Password);
 
                  await Api.User.Received().Get();
             }
@@ -442,7 +440,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task PersistsTheUserToTheDatabase()
             {
-                await LoginManager.RefreshToken(Password);
+                await UserAccessManager.RefreshToken(Password);
 
                 await Database.User.Received().Update(Arg.Is<IDatabaseUser>(receivedUser => receivedUser.Id == User.Id));
             }
@@ -450,7 +448,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task PersistsTheUserWithTheSyncStatusSetToInSync()
             {
-                await LoginManager.RefreshToken(Password);
+                await UserAccessManager.RefreshToken(Password);
 
                 await Database.User.Received().Update(Arg.Is<IDatabaseUser>(receivedUser => receivedUser.SyncStatus == SyncStatus.InSync));
             }
@@ -458,7 +456,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task AlwaysReturnsASingleResult()
             {
-                await LoginManager
+                await UserAccessManager
                         .RefreshToken(Password)
                         .SingleAsync();
             }
@@ -466,7 +464,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task SavesTheApiTokenToPrivateSharedStorage()
             {
-                await LoginManager.RefreshToken(Password);
+                await UserAccessManager.RefreshToken(Password);
 
                 PrivateSharedStorageService.Received().SaveApiToken(Arg.Any<string>());
             }
@@ -474,15 +472,15 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task SavesTheUserIdToPrivateSharedStorage()
             {
-                await LoginManager.RefreshToken(Password);
+                await UserAccessManager.RefreshToken(Password);
 
                 PrivateSharedStorageService.Received().SaveUserId(Arg.Any<long>());
             }
         }
 
-        public sealed class TheLoginUsingGoogleMethod : LoginManagerTest
+        public sealed class TheUserAccessUsingGoogleMethod : UserAccessManagerTest
         {
-            public TheLoginUsingGoogleMethod()
+            public TheUserAccessUsingGoogleMethod()
             {
                 GoogleService.GetAuthToken().Returns(Observable.Return("sometoken"));
             }
@@ -490,7 +488,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task EmptiesTheDatabaseBeforeTryingToCreateTheUser()
             {
-                await LoginManager.LoginWithGoogle();
+                await UserAccessManager.LoginWithGoogle();
 
                 Received.InOrder(async () =>
                 {
@@ -502,7 +500,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task UsesTheGoogleServiceToGetTheToken()
             {
-                await LoginManager.LoginWithGoogle();
+                await UserAccessManager.LoginWithGoogle();
 
                 await GoogleService.Received().GetAuthToken();
             }
@@ -510,7 +508,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task CallsTheGetWithGoogleOfTheUserApi()
             {
-                await LoginManager.LoginWithGoogle();
+                await UserAccessManager.LoginWithGoogle();
 
                 await Api.User.Received().GetWithGoogle();
             }
@@ -518,7 +516,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task PersistsTheUserToTheDatabase()
             {
-                await LoginManager.LoginWithGoogle();
+                await UserAccessManager.LoginWithGoogle();
 
                 await Database.User.Received().Create(Arg.Is<IDatabaseUser>(receivedUser => receivedUser.Id == User.Id));
             }
@@ -526,7 +524,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task PersistsTheUserWithTheSyncStatusSetToInSync()
             {
-                await LoginManager.LoginWithGoogle();
+                await UserAccessManager.LoginWithGoogle();
 
                 await Database.User.Received().Create(Arg.Is<IDatabaseUser>(receivedUser => receivedUser.SyncStatus == SyncStatus.InSync));
             }
@@ -534,7 +532,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task AlwaysReturnsASingleResult()
             {
-                await LoginManager
+                await UserAccessManager
                         .LoginWithGoogle()
                         .SingleAsync();
             }
@@ -542,7 +540,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task NotifiesShortcutCreatorAboutLogin()
             {
-                await LoginManager.LoginWithGoogle();
+                await UserAccessManager.LoginWithGoogle();
 
                 ApplicationShortcutCreator.Received().OnLogin(Arg.Any<ITogglDataSource>());
             }
@@ -550,7 +548,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task SavesTheApiTokenToPrivateSharedStorage()
             {
-                await LoginManager.LoginWithGoogle();
+                await UserAccessManager.LoginWithGoogle();
 
                 PrivateSharedStorageService.Received().SaveApiToken(Arg.Any<string>());
             }
@@ -558,7 +556,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task SavesTheUserIdToPrivateSharedStorage()
             {
-                await LoginManager.LoginWithGoogle();
+                await UserAccessManager.LoginWithGoogle();
 
                 PrivateSharedStorageService.Received().SaveUserId(Arg.Any<long>());
             }

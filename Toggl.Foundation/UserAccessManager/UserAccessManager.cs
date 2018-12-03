@@ -14,7 +14,7 @@ using Toggl.Ultrawave.Network;
 
 namespace Toggl.Foundation.Login
 {
-    public sealed class LoginManager : ILoginManager
+    public sealed class UserAccessManager : IUserAccessManager
     {
         private readonly IApiFactory apiFactory;
         private readonly ITogglDatabase database;
@@ -30,7 +30,7 @@ namespace Toggl.Foundation.Login
         public IObservable<Unit> UserLoggedIn => userLoggedInSubject.AsObservable();
         public IObservable<Unit> UserLoggedOut => userLoggedOutSubject.AsObservable();
 
-        public LoginManager(
+        public UserAccessManager(
             IApiFactory apiFactory,
             ITogglDatabase database,
             IGoogleService googleService,

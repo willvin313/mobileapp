@@ -20,7 +20,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
     [Preserve(AllMembers = true)]
     public sealed class TokenResetViewModel : MvxViewModel
     {
-        private readonly ILoginManager loginManager;
+        private readonly IUserAccessManager userAccessManager;
         private readonly ITogglDataSource dataSource;
         private readonly IDialogService dialogService;
         private readonly IForkingNavigationService navigationService;
@@ -52,7 +52,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public InputAction<string> SetPassword { get; private set; }
 
         public TokenResetViewModel(
-            ILoginManager loginManager,
+            IUserAccessManager userAccessManager,
             ITogglDataSource dataSource,
             IDialogService dialogService,
             IForkingNavigationService navigationService,
@@ -62,7 +62,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         )
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
-            Ensure.Argument.IsNotNull(loginManager, nameof(loginManager));
+            Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
             Ensure.Argument.IsNotNull(dialogService, nameof(dialogService));
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
             Ensure.Argument.IsNotNull(userPreferences, nameof(userPreferences));
@@ -70,7 +70,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
 
             this.dataSource = dataSource;
-            this.loginManager = loginManager;
+            this.userAccessManager = userAccessManager;
             this.dialogService = dialogService;
             this.navigationService = navigationService;
             this.userPreferences = userPreferences;
@@ -151,7 +151,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             analyticsService.Logout.Track(LogoutSource.TokenReset);
             userPreferences.Reset();
 
-            await loginManager.Logout();
+            await userAccessManager.Logout();
             await navigationService.Navigate<LoginViewModel>();
         }
 
@@ -164,7 +164,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     return Disposable.Empty;
                 }
 
-                loginManager
+                userAccessManager
                     .RefreshToken(passwordSubject.Value)
                     .Subscribe(onDataSource, error =>
                     {

@@ -38,7 +38,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
             protected override TokenResetViewModel CreateViewModel()
                 => new TokenResetViewModel(
-                    LoginManager,
+                    UserAccessManager,
                     DataSource,
                     DialogService,
                     NavigationService,
@@ -51,7 +51,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         {
             [Theory, LogIfTooSlow, ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(
-                bool userLoginManager,
+                bool useUserAccessManager,
                 bool userNavigationService,
                 bool useDataSource,
                 bool useDialogService,
@@ -60,7 +60,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 bool useSchedulerProvider
             )
             {
-                var loginManager = userLoginManager ? LoginManager : null;
+                var userAccessManager = useUserAccessManager ? UserAccessManager : null;
                 var navigationService = userNavigationService ? NavigationService : null;
                 var dataSource = useDataSource ? DataSource : null;
                 var dialogService = useDialogService ? DialogService : null;
@@ -70,7 +70,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 Action tryingToConstructWithEmptyParameters =
                     () => new TokenResetViewModel(
-                        loginManager,
+                        userAccessManager,
                         dataSource,
                         dialogService,
                         navigationService,
@@ -112,7 +112,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 var scheduler = new TestScheduler();
                 var never = Observable.Never<ITogglDataSource>();
-                LoginManager.RefreshToken(Arg.Any<Password>()).Returns(never);
+                UserAccessManager.RefreshToken(Arg.Any<Password>()).Returns(never);
                 await ViewModel.SetPassword.Execute(ValidPassword.ToString());
                 var nextIsEnabledObserver = Observe(ViewModel.NextIsEnabled);
 
@@ -148,24 +148,24 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 TestScheduler.Start();
                 executionObserver.Messages.Last().Value.Kind.Should().Be(NotificationKind.OnError);
-                await LoginManager.DidNotReceive().RefreshToken(Arg.Any<Password>());
+                await UserAccessManager.DidNotReceive().RefreshToken(Arg.Any<Password>());
             }
 
             [Fact, LogIfTooSlow]
-            public async Task CallsTheLoginManagerWhenThePasswordIsValid()
+            public async Task CallsTheUserAccessManagerWhenThePasswordIsValid()
             {
                 await ViewModel.SetPassword.Execute(ValidPassword.ToString());
 
                 await ViewModel.Done.Execute();
 
-                await LoginManager.Received().RefreshToken(Arg.Is(ValidPassword));
+                await UserAccessManager.Received().RefreshToken(Arg.Is(ValidPassword));
             }
 
             [Fact, LogIfTooSlow]
             public async Task NavigatesToTheMainViewModelModelWhenTheTokenRefreshSucceeds()
             {
                 await ViewModel.SetPassword.Execute(ValidPassword.ToString());
-                LoginManager.RefreshToken(Arg.Any<Password>())
+                UserAccessManager.RefreshToken(Arg.Any<Password>())
                             .Returns(Observable.Return(Substitute.For<ITogglDataSource>()));
 
                 await ViewModel.Done.Execute();
@@ -180,7 +180,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 await ViewModel.SetPassword.Execute(ValidPassword.ToString());
                 var isLoadingObserver = Observe(ViewModel.IsLoading);
 
-                LoginManager.RefreshToken(Arg.Any<Password>())
+                UserAccessManager.RefreshToken(Arg.Any<Password>())
                             .Returns(Observable.Return(Substitute.For<ITogglDataSource>()));
 
                 await ViewModel.Done.Execute();
@@ -193,7 +193,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task StopsTheViewModelLoadStateWhenItErrors()
             {
                 await ViewModel.SetPassword.Execute(ValidPassword.ToString());
-                LoginManager.RefreshToken(Arg.Any<Password>())
+                UserAccessManager.RefreshToken(Arg.Any<Password>())
                             .Returns(Observable.Throw<ITogglDataSource>(new Exception()));
                 var isLoadingObserver = Observe(ViewModel.IsLoading);
 
@@ -208,7 +208,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task DoesNotNavigateWhenTheLoginFails()
             {
                 await ViewModel.SetPassword.Execute(ValidPassword.ToString());
-                LoginManager.RefreshToken(Arg.Any<Password>())
+                UserAccessManager.RefreshToken(Arg.Any<Password>())
                             .Returns(Observable.Throw<ITogglDataSource>(new Exception()));
 
                 ViewModel.Done.Execute();
@@ -235,7 +235,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 await ViewModel.SignOut.Execute();
 
-                await LoginManager.Received().Logout();
+                await UserAccessManager.Received().Logout();
             }
 
             [Fact, LogIfTooSlow]

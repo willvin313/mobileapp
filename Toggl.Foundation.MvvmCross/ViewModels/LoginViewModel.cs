@@ -30,7 +30,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Password = 2
         }
 
-        private readonly ILoginManager loginManager;
+        private readonly IUserAccessManager userAccessManager;
         private readonly IAnalyticsService analyticsService;
         private readonly IOnboardingStorage onboardingStorage;
         private readonly IForkingNavigationService navigationService;
@@ -71,7 +71,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public IObservable<bool> IsShowPasswordButtonVisible { get; }
 
         public LoginViewModel(
-            ILoginManager loginManager,
+            IUserAccessManager userAccessManager,
             IAnalyticsService analyticsService,
             IOnboardingStorage onboardingStorage,
             IForkingNavigationService navigationService,
@@ -81,7 +81,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             ITimeService timeService,
             ISchedulerProvider schedulerProvider)
         {
-            Ensure.Argument.IsNotNull(loginManager, nameof(loginManager));
+            Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
             Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(onboardingStorage, nameof(onboardingStorage));
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
@@ -92,7 +92,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
 
             this.timeService = timeService;
-            this.loginManager = loginManager;
+            this.userAccessManager = userAccessManager;
             this.analyticsService = analyticsService;
             this.onboardingStorage = onboardingStorage;
             this.navigationService = navigationService;
@@ -182,7 +182,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             errorMessageSubject.OnNext("");
 
             loginDisposable =
-                loginManager
+                userAccessManager
                     .Login(emailSubject.Value, passwordSubject.Value)
                     .Track(analyticsService.Login, AuthenticationMethod.EmailAndPassword)
                     .Subscribe(onDataSource, onError, onCompleted);
@@ -228,7 +228,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             isLoadingSubject.OnNext(true);
 
-            loginDisposable = loginManager
+            loginDisposable = userAccessManager
                 .LoginWithGoogle()
                 .Track(analyticsService.Login, AuthenticationMethod.Google)
                 .Subscribe(onDataSource, onError, onCompleted);

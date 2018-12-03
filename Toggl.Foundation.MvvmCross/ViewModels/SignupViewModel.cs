@@ -39,7 +39,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         }
 
         private readonly IApiFactory apiFactory;
-        private readonly ILoginManager loginManager;
+        private readonly IUserAccessManager userAccessManager;
         private readonly IAnalyticsService analyticsService;
         private readonly IOnboardingStorage onboardingStorage;
         private readonly IForkingNavigationService navigationService;
@@ -88,7 +88,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public SignupViewModel(
             IApiFactory apiFactory,
-            ILoginManager loginManager,
+            IUserAccessManager userAccessManager,
             IAnalyticsService analyticsService,
             IOnboardingStorage onboardingStorage,
             IForkingNavigationService navigationService,
@@ -98,7 +98,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             ISchedulerProvider schedulerProvider)
         {
             Ensure.Argument.IsNotNull(apiFactory, nameof(apiFactory));
-            Ensure.Argument.IsNotNull(loginManager, nameof(loginManager));
+            Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
             Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(onboardingStorage, nameof(onboardingStorage));
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
@@ -108,7 +108,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
 
             this.apiFactory = apiFactory;
-            this.loginManager = loginManager;
+            this.userAccessManager = userAccessManager;
             this.analyticsService = analyticsService;
             this.onboardingStorage = onboardingStorage;
             this.navigationService = navigationService;
@@ -252,7 +252,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             errorMessageSubject.OnNext(string.Empty);
 
             signupDisposable =
-                loginManager
+                userAccessManager
                     .SignUp(emailSubject.Value, passwordSubject.Value, termsOfServiceAccepted, (int)countryId.Value)
                     .Track(analyticsService.SignUp, AuthenticationMethod.EmailAndPassword)
                     .Subscribe(onDataSource, onError, onCompleted);
@@ -318,7 +318,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             isLoadingSubject.OnNext(true);
             errorMessageSubject.OnNext(string.Empty);
 
-            signupDisposable = loginManager
+            signupDisposable = userAccessManager
                 .SignUpWithGoogle(termsOfServiceAccepted, (int)countryId.Value)
                 .Track(analyticsService.SignUp, AuthenticationMethod.Google)
                 .Subscribe(onDataSource, onError, onCompleted);
