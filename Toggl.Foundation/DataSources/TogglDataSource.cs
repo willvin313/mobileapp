@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources.Interfaces;
+using Toggl.Foundation.Login;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.Reports;
 using Toggl.Foundation.Services;
@@ -27,6 +29,7 @@ namespace Toggl.Foundation.DataSources
         private readonly IErrorHandlingService errorHandlingService;
         private readonly IApplicationShortcutCreator shortcutCreator;
         private readonly TimeSpan minimumTimeInBackgroundForFullSync;
+        private readonly CompositeDisposable disposeBag = new CompositeDisposable();
 
         private bool isLoggedIn;
         private IDisposable signalDisposable;
@@ -44,7 +47,8 @@ namespace Toggl.Foundation.DataSources
             TimeSpan minimumTimeInBackgroundForFullSync,
             INotificationService notificationService,
             IApplicationShortcutCreator shortcutCreator,
-            IAnalyticsService analyticsService)
+            IAnalyticsService analyticsService,
+            ILoginManager loginManager)
         {
             Ensure.Argument.IsNotNull(api, nameof(api));
             Ensure.Argument.IsNotNull(database, nameof(database));
@@ -82,7 +86,14 @@ namespace Toggl.Foundation.DataSources
             FeedbackApi = api.Feedback;
 
             isLoggedIn = true;
+
+            loginManager
+                .UserLoggedOut
+                .SelectMany(_ => Logout())
+                .Subscribe()
+                .DisposedBy(disposeBag);
         }
+
         public ITimeEntriesSource TimeEntries { get; }
 
         public ISingletonDataSource<IThreadSafeUser> User { get; }

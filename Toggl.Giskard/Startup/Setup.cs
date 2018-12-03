@@ -4,8 +4,6 @@ using Android.Content;
 using MvvmCross;
 using MvvmCross.Binding;
 using MvvmCross.Droid.Support.V7.AppCompat;
-using MvvmCross.Exceptions;
-using MvvmCross.Logging;
 using MvvmCross.Navigation;
 using MvvmCross.Platforms.Android;
 using MvvmCross.Platforms.Android.Presenters;
@@ -38,7 +36,6 @@ namespace Toggl.Giskard
 
         private IAnalyticsService analyticsService;
         private IForkingNavigationService navigationService;
-        private PlatformInfo platformInfo;
 
 #if USE_PRODUCTION_API
         private const ApiEnvironment environment = ApiEnvironment.Production;
@@ -51,12 +48,11 @@ namespace Toggl.Giskard
         protected override IMvxNavigationService InitializeNavigationService(IMvxViewModelLocatorCollection collection)
         {
             analyticsService = new AnalyticsServiceAndroid();
-            platformInfo = new PlatformInfo { Platform = Platform.Giskard };
 
             var loader = CreateViewModelLoader(collection);
             Mvx.RegisterSingleton<IMvxViewModelLoader>(loader);
 
-            navigationService = new NavigationService(null, loader, analyticsService, platformInfo);
+            navigationService = new NavigationService(null, loader, analyticsService, Platform.Giskard);
 
             Mvx.RegisterSingleton<IForkingNavigationService>(navigationService);
             Mvx.RegisterSingleton<IMvxNavigationService>(navigationService);
@@ -68,75 +64,19 @@ namespace Toggl.Giskard
 
         protected override void InitializeApp(IMvxPluginManager pluginManager, IMvxApplication app)
         {
-            const string clientName = "Giskard";
-            var packageInfo = ApplicationContext.PackageManager.GetPackageInfo(ApplicationContext.PackageName, 0);
-            var version = packageInfo.VersionName;
-            var sharedPreferences = ApplicationContext.GetSharedPreferences(clientName, FileCreationMode.Private);
-            var database = new Database();
-            var scheduler = Scheduler.Default;
-            var timeService = new TimeService(scheduler);
-            var suggestionProviderContainer = new SuggestionProviderContainer(
-                new MostUsedTimeEntrySuggestionProvider(database, timeService, maxNumberOfSuggestions)
-            );
 
-            var appVersion = Version.Parse(version);
-            var userAgent = new UserAgent(clientName, version);
-            var mailService = new MailServiceAndroid(ApplicationContext);
-            var dialogService = new DialogServiceAndroid();
-            var platformConstants = new PlatformConstants();
-            var keyValueStorage = new SharedPreferencesStorageAndroid(sharedPreferences);
-            var settingsStorage = new SettingsStorage(appVersion, keyValueStorage);
-            var feedbackService = new FeedbackService(userAgent, mailService, dialogService, platformConstants);
             var schedulerProvider = new AndroidSchedulerProvider();
-            var permissionsService = new PermissionsServiceAndroid();
-            var calendarService = new CalendarServiceAndroid(permissionsService);
+            var platformInfo = new AndroidPlatformInfo(environment, ApplicationContext);
 
-            ApplicationContext.RegisterReceiver(new TimezoneChangedBroadcastReceiver(timeService),
-                new IntentFilter(Intent.ActionTimezoneChanged));
-
-            var foundation =
-                TogglFoundation
-                    .ForClient(userAgent, appVersion)
-                    .WithDatabase(database)
-                    .WithScheduler(scheduler)
-                    .WithTimeService(timeService)
-                    .WithMailService(mailService)
-                    .WithApiEnvironment(environment)
-                    .WithGoogleService<GoogleServiceAndroid>()
-                    .WithRatingService(new RatingServiceAndroid(ApplicationContext))
-                    .WithLicenseProvider<LicenseProviderAndroid>()
-                    .WithAnalyticsService(analyticsService)
-                    .WithSchedulerProvider(schedulerProvider)
-                    .WithPlatformConstants(platformConstants)
-                    .WithNotificationService<NotificationServiceAndroid>()
-                    .WithRemoteConfigService<RemoteConfigServiceAndroid>()
-                    .WithApiFactory(new ApiFactory(environment, userAgent))
-                    .WithBackgroundService(new BackgroundService(timeService))
-                    .WithSuggestionProviderContainer(suggestionProviderContainer)
-                    .WithApplicationShortcutCreator(new ApplicationShortcutCreator(ApplicationContext))
-                    .WithPlatformInfo(platformInfo)
-                    .WithStopwatchProvider<FirebaseStopwatchProviderAndroid>()
-                    .WithIntentDonationService(new NoopIntentDonationServiceAndroid())
-                    .WithPrivateSharedStorageService(new NoopPrivateSharedStorageServiceAndroid())
-
-                    .StartRegisteringPlatformServices()
-                    .WithDialogService(dialogService)
-                    .WithFeedbackService(feedbackService)
-                    .WithLastTimeUsageStorage(settingsStorage)
-                    .WithBrowserService<BrowserServiceAndroid>()
-                    .WithCalendarService(calendarService)
-                    .WithKeyValueStorage(keyValueStorage)
-                    .WithUserPreferences(settingsStorage)
-                    .WithOnboardingStorage(settingsStorage)
-                    .WithNavigationService(navigationService)
-                    .WithPermissionsService(permissionsService)
-                    .WithAccessRestrictionStorage(settingsStorage)
-                    .WithErrorHandlingService(new ErrorHandlingService(navigationService, settingsStorage))
-                    .Build();
+            var dependencyContainer = new AndroidDependencyContainer(navigationService, platformInfo, schedulerProvider);
 
             foundation.RevokeNewUserIfNeeded().Initialize();
 
             ensureDataSourceInitializationIfLoggedIn();
+
+
+            ApplicationContext.RegisterReceiver(new TimezoneChangedBroadcastReceiver(dependencyContainer.TimeService.Value),
+                new IntentFilter(Intent.ActionTimezoneChanged));
 
             base.InitializeApp(pluginManager, app);
         }

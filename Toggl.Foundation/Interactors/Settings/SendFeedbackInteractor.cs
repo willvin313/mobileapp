@@ -24,7 +24,7 @@ namespace Toggl.Foundation.Interactors.Settings
 
         private readonly IDataSource<IThreadSafeTimeEntry, IDatabaseTimeEntry> timeEntriesDataSource;
 
-        private readonly IPlatformConstants platformConstants;
+        private readonly IPlatformInfo platformConstants;
 
         private readonly IUserPreferences userPreferences;
 
@@ -41,7 +41,7 @@ namespace Toggl.Foundation.Interactors.Settings
             ISingletonDataSource<IThreadSafeUser> userDataSource,
             IDataSource<IThreadSafeWorkspace, IDatabaseWorkspace> workspacesDataSource,
             IDataSource<IThreadSafeTimeEntry, IDatabaseTimeEntry> timeEntriesDataSource,
-            IPlatformConstants platformConstants,
+            IPlatformInfo platformConstants,
             IUserPreferences userPreferences,
             ILastTimeUsageStorage lastTimeUsageStorage,
             ITimeService timeService,

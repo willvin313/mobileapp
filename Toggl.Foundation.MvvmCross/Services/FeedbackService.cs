@@ -3,7 +3,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Toggl.Foundation.Services;
 using Toggl.Multivac;
-using Toggl.Ultrawave.Network;
 
 namespace Toggl.Foundation.MvvmCross.Services
 {
@@ -12,33 +11,29 @@ namespace Toggl.Foundation.MvvmCross.Services
         private const string feedbackRecipient = "support@toggl.com";
         private const string subject = "Toggl Mobile App Feedback";
 
-        private readonly UserAgent userAgent;
         private readonly IMailService mailService;
+        private readonly IPlatformInfo platformInfo;
         private readonly IDialogService dialogService;
-        private readonly IPlatformConstants platformConstants;
 
         public FeedbackService(
-            UserAgent userAgent,
             IMailService mailService,
             IDialogService dialogService,
-            IPlatformConstants platformConstants)
+            IPlatformInfo platformInfo)
         {
-            Ensure.Argument.IsNotNull(userAgent, nameof(userAgent));
             Ensure.Argument.IsNotNull(mailService, nameof(mailService));
+            Ensure.Argument.IsNotNull(platformInfo, nameof(platformInfo));
             Ensure.Argument.IsNotNull(dialogService, nameof(dialogService));
-            Ensure.Argument.IsNotNull(platformConstants, nameof(platformConstants));
 
-            this.userAgent = userAgent;
             this.mailService = mailService;
+            this.platformInfo = platformInfo;
             this.dialogService = dialogService;
-            this.platformConstants = platformConstants;
         }
 
         public async Task SubmitFeedback()
         {
-            var version = userAgent.ToString();
-            var phone = platformConstants.PhoneModel;
-            var os = platformConstants.OperatingSystem;
+            var phone = platformInfo.PhoneModel;
+            var os = platformInfo.OperatingSystem;
+            var version = platformInfo.UserAgent.ToString();
 
             var messageBuilder = new StringBuilder();
             messageBuilder.Append("\n\n"); // 2 leading newlines, so user user can type something above this info

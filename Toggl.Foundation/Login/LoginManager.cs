@@ -2,14 +2,12 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Models;
 using Toggl.Foundation.Services;
-using Toggl.Foundation.Shortcuts;
 using Toggl.Multivac;
+using Toggl.Multivac.Extensions;
 using Toggl.Multivac.Models;
 using Toggl.PrimeRadiant;
-using Toggl.Ultrawave;
 using Toggl.Ultrawave.Network;
 
 namespace Toggl.Foundation.Login
@@ -19,93 +17,140 @@ namespace Toggl.Foundation.Login
         private readonly IApiFactory apiFactory;
         private readonly ITogglDatabase database;
         private readonly IGoogleService googleService;
-        private readonly IApplicationShortcutCreator shortcutCreator;
         private readonly IPrivateSharedStorageService privateSharedStorageService;
-        private readonly Func<ITogglApi, ITogglDataSource> createDataSource;
+        private readonly ISubject<Unit> userLoggedInSubject = new Subject<Unit>();
+        private readonly ISubject<Unit> userLoggedOutSubject = new Subject<Unit>();
 
-        private ITogglDataSource cachedDataSource;
-        private ISubject<Unit> userLoggedInSubject = new Subject<Unit>();
-        private ISubject<Unit> userLoggedOutSubject = new Subject<Unit>();
-
-        public IObservable<Unit> UserLoggedIn => userLoggedInSubject.AsObservable();
-        public IObservable<Unit> UserLoggedOut => userLoggedOutSubject.AsObservable();
+        public IObservable<Unit> UserLoggedIn { get; }
+        public IObservable<Unit> UserLoggedOut { get; }
 
         public LoginManager(
             IApiFactory apiFactory,
             ITogglDatabase database,
             IGoogleService googleService,
-            IApplicationShortcutCreator shortcutCreator,
-            IPrivateSharedStorageService privateSharedStorageService,
-            Func<ITogglApi, ITogglDataSource> createDataSource
-        )
+            IPrivateSharedStorageService privateSharedStorageService)
         {
             Ensure.Argument.IsNotNull(database, nameof(database));
             Ensure.Argument.IsNotNull(apiFactory, nameof(apiFactory));
             Ensure.Argument.IsNotNull(googleService, nameof(googleService));
-            Ensure.Argument.IsNotNull(shortcutCreator, nameof(shortcutCreator));
             Ensure.Argument.IsNotNull(privateSharedStorageService, nameof(privateSharedStorageService));
-            Ensure.Argument.IsNotNull(createDataSource, nameof(createDataSource));
 
             this.database = database;
             this.apiFactory = apiFactory;
             this.googleService = googleService;
             this.privateSharedStorageService = privateSharedStorageService;
-            this.shortcutCreator = shortcutCreator;
-            this.createDataSource = createDataSource;
+
+            UserLoggedIn = userLoggedInSubject.AsObservable();
+            UserLoggedOut = userLoggedOutSubject.AsObservable();
         }
 
-        public IObservable<ITogglDataSource> Login(Email email, Password password)
-        {
-            if (!email.IsValid)
-                throw new ArgumentException($"A valid {nameof(email)} must be provided when trying to login");
-            if (!password.IsValid)
-                throw new ArgumentException($"A valid {nameof(password)} must be provided when trying to login");
+        public bool IsUserLoggedIn()
+            => database.User
+                    .Single()
+                    .SelectValue(true)
+                    .Catch(Observable.Return(false))
+                    .Wait();
 
-            var credentials = Credentials.WithPassword(email, password);
+        public IObservable<bool> Login(Email email, Password password)
+            => Observable.StartAsync(async () =>
+            {
+                if (!email.IsValid)
+                    throw new ArgumentException($"A valid {nameof(email)} must be provided when trying to login");
+                if (!password.IsValid)
+                    throw new ArgumentException($"A valid {nameof(password)} must be provided when trying to login");
 
-            return database
-                .Clear()
-                .SelectMany(_ => apiFactory.CreateApiWith(credentials).User.Get())
-                .Select(User.Clean)
-                .SelectMany(database.User.Create)
-                .Select(dataSourceFromUser)
-                .Do(shortcutCreator.OnLogin)
-                .Do(_ => userLoggedInSubject.OnNext(Unit.Default));
-        }
+                var credentials = Credentials.WithPassword(email, password);
 
-        public IObservable<ITogglDataSource> LoginWithGoogle()
-            => database
-                .Clear()
-                .SelectMany(_ => googleService.LogOutIfNeeded())
-                .SelectMany(_ => googleService.GetAuthToken())
-                .SelectMany(loginWithGoogle);
+                await database.Clear();
 
-        public IObservable<ITogglDataSource> SignUp(Email email, Password password, bool termsAccepted, int countryId)
-        {
-            if (!email.IsValid)
-                throw new ArgumentException($"A valid {nameof(email)} must be provided when trying to signup");
-            if (!password.IsValid)
-                throw new ArgumentException($"A valid {nameof(password)} must be provided when trying to signup");
+                var user = await apiFactory
+                    .CreateApiWith(credentials)
+                    .User
+                    .Get()
+                    .Select(User.Clean)
+                    .SelectMany(database.User.Create);
 
-            return database
-                .Clear()
-                .SelectMany(_ => signUp(email, password, termsAccepted, countryId))
-                .Select(User.Clean)
-                .SelectMany(database.User.Create)
-                .Select(dataSourceFromUser)
-                .Do(shortcutCreator.OnLogin);
-        }
+                finishLogin(user);
+                return true;
+            });
 
-        public IObservable<ITogglDataSource> SignUpWithGoogle(bool termsAccepted, int countryId)
-            => database
-                .Clear()
-                .SelectMany(_ => googleService.LogOutIfNeeded())
-                .SelectMany(_ => googleService.GetAuthToken())
-                .SelectMany(authToken => signUpWithGoogle(authToken, termsAccepted, countryId));
+        public IObservable<bool> LoginWithGoogle()
+            => Observable.StartAsync(async () =>
+            {
+                await database.Clear();
 
-        public IObservable<Unit> Logout()
-            => cachedDataSource.Logout()
-                .Do(_ => userLoggedOutSubject.OnNext(Unit.Default));
+                await googleService.LogOutIfNeeded();
+
+                var authToken = await googleService.GetAuthToken();
+                var credentials = Credentials.WithGoogleToken(authToken);
+
+                var user = await apiFactory.CreateApiWith(credentials)
+                    .User.GetWithGoogle()
+                    .Select(User.Clean)
+                    .SelectMany(database.User.Create);
+
+                finishLogin(user);
+                return true;
+            });
+
+        public IObservable<bool> SignUp(Email email, Password password, bool termsAccepted, int countryId)
+            => Observable.StartAsync(async () =>
+            {
+                if (!email.IsValid)
+                    throw new ArgumentException($"A valid {nameof(email)} must be provided when trying to signup");
+                if (!password.IsValid)
+                    throw new ArgumentException($"A valid {nameof(password)} must be provided when trying to signup");
+
+                await database.Clear();
+
+                var user = await apiFactory
+                    .CreateApiWith(Credentials.None)
+                    .User.SignUp(email, password, termsAccepted, countryId)
+                    .Select(User.Clean)
+                    .SelectMany(database.User.Create);
+
+                finishLogin(user);
+                return true;
+            });
+
+        public IObservable<bool> SignUpWithGoogle(bool termsAccepted, int countryId)
+
+            => Observable.StartAsync(async () =>
+            {
+                await database.Clear();
+
+                await googleService.LogOutIfNeeded();
+                var googleToken = await googleService.GetAuthToken();
+
+                var user = await apiFactory
+                        .CreateApiWith(Credentials.None)
+                        .User.SignUpWithGoogle(googleToken, termsAccepted, countryId)
+                        .Select(User.Clean)
+                        .SelectMany(database.User.Create);
+
+                finishLogin(user);
+                return true;
+            });
+
+        public IObservable<bool> RefreshToken(Password password)
+            => Observable.StartAsync(async () =>
+            {
+                if (!password.IsValid)
+                    throw new ArgumentException($"A valid {nameof(password)} must be provided when trying to refresh token");
+
+                var email = await database.User.Single().Select(u => u.Email);
+
+                var credentials = Credentials.WithPassword(email, password);
+
+                var user = await apiFactory
+                    .CreateApiWith(credentials)
+                    .User.Get()
+                    .Select(User.Clean)
+                    .SelectMany(database.User.Update);
+
+                finishLogin(user);
+                return true;
+            });
 
         public IObservable<string> ResetPassword(Email email)
         {
@@ -116,77 +161,14 @@ namespace Toggl.Foundation.Login
             return api.User.ResetPassword(email);
         }
 
-        public ITogglDataSource GetDataSourceIfLoggedIn()
-            => database.User
-                .Single()
-                .Select(dataSourceFromUser)
-                .Catch(Observable.Return<ITogglDataSource>(null))
-                .Do(shortcutCreator.OnLogin)
-                .Do(_ => userLoggedInSubject.OnNext(Unit.Default))
-                .Wait();
+        public void Logout()
+            => userLoggedOutSubject.OnNext(Unit.Default);
 
-        public IObservable<ITogglDataSource> RefreshToken(Password password)
-        {
-            if (!password.IsValid)
-                throw new ArgumentException($"A valid {nameof(password)} must be provided when trying to refresh token");
-
-            return database.User
-                .Single()
-                .Select(user => user.Email)
-                .Select(email => Credentials.WithPassword(email, password))
-                .Select(apiFactory.CreateApiWith)
-                .SelectMany(api => api.User.Get())
-                .Select(User.Clean)
-                .SelectMany(database.User.Update)
-                .Select(dataSourceFromUser)
-                .Do(shortcutCreator.OnLogin)
-                .Do(_ => userLoggedInSubject.OnNext(Unit.Default));
-        }
-
-        private ITogglDataSource dataSourceFromUser(IUser user)
+        private void finishLogin(IUser user)
         {
             privateSharedStorageService.SaveApiToken(user.ApiToken);
             privateSharedStorageService.SaveUserId(user.Id);
-
-            var newCredentials = Credentials.WithApiToken(user.ApiToken);
-            var api = apiFactory.CreateApiWith(newCredentials);
-            cachedDataSource = createDataSource(api);
-            return cachedDataSource;
-        }
-
-        private IObservable<ITogglDataSource> loginWithGoogle(string googleToken)
-        {
-            var credentials = Credentials.WithGoogleToken(googleToken);
-
-            return Observable
-                .Return(apiFactory.CreateApiWith(credentials))
-                .SelectMany(api => api.User.GetWithGoogle())
-                .Select(User.Clean)
-                .SelectMany(database.User.Create)
-                .Select(dataSourceFromUser)
-                .Do(shortcutCreator.OnLogin)
-                .Do(_ => userLoggedInSubject.OnNext(Unit.Default));
-        }
-
-        private IObservable<IUser> signUp(Email email, Password password, bool termsAccepted, int countryId)
-        {
-            return apiFactory
-                .CreateApiWith(Credentials.None)
-                .User
-                .SignUp(email, password, termsAccepted, countryId);
-        }
-
-
-        private IObservable<ITogglDataSource> signUpWithGoogle(string googleToken, bool termsAccepted, int countryId)
-        {
-            var api = apiFactory.CreateApiWith(Credentials.None);
-            return api.User
-                .SignUpWithGoogle(googleToken, termsAccepted, countryId)
-                .Select(User.Clean)
-                .SelectMany(database.User.Create)
-                .Select(dataSourceFromUser)
-                .Do(shortcutCreator.OnLogin)
-                .Do(_ => userLoggedInSubject.OnNext(Unit.Default));
+            userLoggedInSubject.OnNext(Unit.Default);
         }
     }
 }

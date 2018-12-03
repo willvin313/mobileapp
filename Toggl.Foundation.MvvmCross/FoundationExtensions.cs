@@ -15,10 +15,10 @@ namespace Toggl.Foundation.MvvmCross
         private const int newUserThreshold = 60;
         private static readonly TimeSpan retryDelayLimit = TimeSpan.FromSeconds(60);
 
-        public static MvvmCrossFoundation.Builder StartRegisteringPlatformServices(this TogglFoundation.Builder builder)
+        public static MvvmCrossFoundation.Builder StartRegisteringPlatformServices(this FoundationDependencyContainer.Builder builder)
             => builder.Build().StartRegisteringPlatformServices();
 
-        public static MvvmCrossFoundation.Builder StartRegisteringPlatformServices(this TogglFoundation foundation)
+        public static MvvmCrossFoundation.Builder StartRegisteringPlatformServices(this FoundationDependencyContainer foundation)
             => new MvvmCrossFoundation.Builder(foundation);
 
         public static MvvmCrossFoundation RevokeNewUserIfNeeded(this MvvmCrossFoundation foundation)
@@ -69,15 +69,13 @@ namespace Toggl.Foundation.MvvmCross
             Mvx.RegisterSingleton<ILoginManager>(loginManager);
         }
 
-        private static void initializeInversionOfControl(MvvmCrossFoundation foundation)
+        private static void initializeInversionOfControl(FoundationUiDependencyContainer foundation)
         {
             Mvx.RegisterSingleton(foundation.StopwatchProvider);
             Mvx.RegisterSingleton(foundation.BackgroundService);
             Mvx.RegisterSingleton(foundation.DialogService);
             Mvx.RegisterSingleton(foundation.Database);
             Mvx.RegisterSingleton(foundation.BrowserService);
-            Mvx.RegisterSingleton(foundation.UserAgent);
-            Mvx.RegisterSingleton(foundation.Scheduler);
             Mvx.RegisterSingleton(foundation.ApiFactory);
             Mvx.RegisterSingleton(foundation.TimeService);
             Mvx.RegisterSingleton(foundation.MailService);
@@ -87,7 +85,7 @@ namespace Toggl.Foundation.MvvmCross
             Mvx.RegisterSingleton(foundation.FeedbackService);
             Mvx.RegisterSingleton(foundation.ShortcutCreator);
             Mvx.RegisterSingleton(foundation.AnalyticsService);
-            Mvx.RegisterSingleton(foundation.PlatformConstants);
+            Mvx.RegisterSingleton(foundation.PlatformInfo);
             Mvx.RegisterSingleton(foundation.NotificationService);
             Mvx.RegisterSingleton(foundation.Database.IdProvider);
             Mvx.RegisterSingleton(foundation.RemoteConfigService);

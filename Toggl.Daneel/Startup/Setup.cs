@@ -93,7 +93,7 @@ namespace Toggl.Daneel
             var notificationService = new NotificationServiceIos(permissionsService, timeService);
 
             var foundation =
-                TogglFoundation
+                FoundationDependencyContainer
                     .ForClient(userAgent, appVersion)
                     .WithDatabase(database)
                     .WithScheduler(scheduler)

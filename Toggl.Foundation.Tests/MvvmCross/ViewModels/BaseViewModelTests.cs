@@ -31,7 +31,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         protected ILicenseProvider LicenseProvider { get; } = Substitute.For<ILicenseProvider>();
         protected IFeedbackService FeedbackService { get; } = Substitute.For<IFeedbackService>();
         protected IBackgroundService BackgroundService { get; } = Substitute.For<IBackgroundService>();
-        protected IPlatformConstants PlatformConstants { get; } = Substitute.For<IPlatformConstants>();
+        protected IPlatformInfo PlatformConstants { get; } = Substitute.For<IPlatformInfo>();
         protected IOnboardingStorage OnboardingStorage { get; } = Substitute.For<IOnboardingStorage>();
         protected IRemoteConfigService RemoteConfigService { get; } = Substitute.For<IRemoteConfigService>();
         protected IPasswordManagerService PasswordManagerService { get; } = Substitute.For<IPasswordManagerService>();

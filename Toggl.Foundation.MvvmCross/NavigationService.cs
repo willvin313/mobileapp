@@ -10,17 +10,17 @@ namespace Toggl.Foundation.MvvmCross
 {
     public sealed class NavigationService : MvxNavigationService, IForkingNavigationService
     {
+        private readonly Platform platform;
         private readonly IAnalyticsService analyticsService;
-        private readonly PlatformInfo platformInfo;
 
         public NavigationService(
             IMvxNavigationCache navigationCache,
             IMvxViewModelLoader viewModelLoader,
             IAnalyticsService analyticsService,
-            PlatformInfo platformInfo) : base(navigationCache, viewModelLoader)
+            Platform platform) : base(navigationCache, viewModelLoader)
         {
+            this.platform = platform;
             this.analyticsService = analyticsService;
-            this.platformInfo = platformInfo;
         }
 
         public override Task Navigate(IMvxViewModel viewModel, IMvxBundle presentationBundle = null)
@@ -74,13 +74,6 @@ namespace Toggl.Foundation.MvvmCross
         public Task ForkNavigate<TDaneelViewModel, TGiskardViewModel>()
             where TDaneelViewModel : IMvxViewModel
             where TGiskardViewModel : IMvxViewModel
-        {
-            if (platformInfo.Platform == Platform.Daneel)
-            {
-                return Navigate<TDaneelViewModel>();
-            }
-
-            return Navigate<TGiskardViewModel>();
-        }
+            => platform == Platform.Daneel ? Navigate<TDaneelViewModel>() : Navigate<TGiskardViewModel>();
     }
 }

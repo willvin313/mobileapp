@@ -47,7 +47,7 @@ namespace Toggl.Foundation.Tests.Interactors.Settings
                     useUserDataSource ? DataSource.User : null,
                     useWorkspacesDataSource ? DataSource.Workspaces : null,
                     useTimeEntriesDataSource ? DataSource.TimeEntries : null,
-                    usePlatformConstants ? Substitute.For<IPlatformConstants>() : null,
+                    usePlatformConstants ? Substitute.For<IPlatformInfo>() : null,
                     useUserPreferences ? UserPreferences : null,
                     useLastTimeUsageStorage ? Substitute.For<ILastTimeUsageStorage>() : null,
                     useTimeService ? TimeService : null,

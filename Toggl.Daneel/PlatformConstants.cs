@@ -6,7 +6,7 @@ using UIKit;
 
 namespace Toggl.Daneel
 {
-    public sealed class PlatformConstants : IPlatformConstants
+    public sealed class PlatformConstants : IPlatformInfo
     {
         private const string phoneModelProperty = "hw.machine";
 

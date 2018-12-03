@@ -356,7 +356,7 @@
     <Compile Include="Activities\SettingsActivity.cs" />
     <Compile Include="Bindings\EditTextFocusTargetBinding.cs" />
     <Compile Include="Presenters\TogglPresenter.cs" />
-    <Compile Include="PlatformConstants.cs" />
+    <Compile Include="AndroidPlatformInfo.cs" />
     <Compile Include="Activities\StartTimeEntryActivity.cs" />
     <Compile Include="Extensions\VisibilityExtensions.cs" />
     <Compile Include="Activities\BrowserActivity.cs" />
@@ -506,6 +506,7 @@
     <Compile Include="ViewHolders\MainLogUserFeedbackViewHolder.cs" />
     <Compile Include="Extensions\Reactive\ImageViewExtensions.cs" />      
     <Compile Include="Extensions\TimeEntryExtensions.cs" />
+    <Compile Include="AndroidDependencyContainer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\AndroidManifest.xml" />

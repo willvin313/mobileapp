@@ -14,7 +14,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.Services
     {
         public sealed class TheSubmitFeedbackCommand : BaseMvvmCrossTests
         {
-            private readonly IPlatformConstants platformConstants = Substitute.For<IPlatformConstants>();
+            private readonly IPlatformInfo platformConstants = Substitute.For<IPlatformInfo>();
             private readonly UserAgent userAgent = new UserAgent("Test", "0.1");
             private readonly IMailService mailService = Substitute.For<IMailService>();
             private readonly IDialogService dialogService = Substitute.For<IDialogService>();

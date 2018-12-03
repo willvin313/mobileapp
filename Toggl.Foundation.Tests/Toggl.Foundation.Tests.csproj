@@ -42,5 +42,7 @@
   <ItemGroup>
     <Compile Remove="MvvmCross\ViewModels\ReportsCalendarQuickSelectShortcuts\ReportsCalendarLastWeekQuickSelectShortcutTests.cs" />
     <Compile Remove="Sync\States\CleanUp\TrackInaccessibleDataBeforeCleanUpStateTests.cs" />
+    <Compile Remove="MvvmCross\Calendar\CalendarLayoutCalculatorTests.cs" />
+    <Compile Remove="MvvmCross\ViewModels\TokenResetViewModelTests.cs" />
   </ItemGroup>
 </Project>

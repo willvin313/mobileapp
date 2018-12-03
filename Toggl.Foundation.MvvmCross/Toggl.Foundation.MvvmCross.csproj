@@ -26,4 +26,18 @@
   <ItemGroup>
     <Folder Include="ViewModels\Settings\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="ViewModelLocator.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ViewModelLocator.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="IMvxNavigateEventArgs.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModelLocator.cs">
+      <DependentUpon>ViewModelLocator.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>
