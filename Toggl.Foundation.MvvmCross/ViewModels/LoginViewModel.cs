@@ -184,7 +184,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             loginDisposable =
                 userAccessManager
                     .Login(emailSubject.Value, passwordSubject.Value)
-                    .Track(analyticsService.Login, AuthenticationMethod.EmailAndPassword)
                     .Subscribe(onDataSource, onError, onCompleted);
         }
 
@@ -230,7 +229,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             loginDisposable = userAccessManager
                 .LoginWithGoogle()
-                .Track(analyticsService.Login, AuthenticationMethod.Google)
                 .Subscribe(onDataSource, onError, onCompleted);
         }
 
@@ -264,15 +262,13 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             switch (exception)
             {
-                case UnauthorizedException forbidden:
+                case UnauthorizedException ex:
                     errorMessageSubject.OnNext(Resources.IncorrectEmailOrPassword);
                     break;
                 case GoogleLoginException googleEx when googleEx.LoginWasCanceled:
                     errorMessageSubject.OnNext("");
                     break;
                 default:
-                    analyticsService.UnknownLoginFailure.Track(exception.GetType().FullName, exception.Message, exception.StackTrace);
-                    analyticsService.Track(exception);
                     errorMessageSubject.OnNext(Resources.GenericLoginError);
                     break;
             }

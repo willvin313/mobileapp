@@ -10,9 +10,11 @@ namespace Toggl.Foundation.Login
         ITogglDataSource GetDataSourceIfLoggedIn();
 
         IObservable<ITogglDataSource> LoginWithGoogle();
+
         IObservable<ITogglDataSource> Login(Email email, Password password);
 
         IObservable<ITogglDataSource> SignUpWithGoogle(bool termsAccepted, int countryId);
+
         IObservable<ITogglDataSource> SignUp(Email email, Password password, bool termsAccepted, int countryId);
 
         IObservable<Unit> Logout();

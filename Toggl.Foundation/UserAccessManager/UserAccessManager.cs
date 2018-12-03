@@ -2,14 +2,19 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
+using Toggl.Foundation.Exceptions;
+using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Models;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Shortcuts;
 using Toggl.Multivac;
+using Toggl.Multivac.Extensions;
 using Toggl.Multivac.Models;
 using Toggl.PrimeRadiant;
 using Toggl.Ultrawave;
+using Toggl.Ultrawave.Exceptions;
 using Toggl.Ultrawave.Network;
 
 namespace Toggl.Foundation.Login
@@ -22,6 +27,7 @@ namespace Toggl.Foundation.Login
         private readonly IApplicationShortcutCreator shortcutCreator;
         private readonly IPrivateSharedStorageService privateSharedStorageService;
         private readonly Func<ITogglApi, ITogglDataSource> createDataSource;
+        private readonly IAnalyticsService analyticsService;
 
         private ITogglDataSource cachedDataSource;
         private ISubject<Unit> userLoggedInSubject = new Subject<Unit>();
@@ -36,8 +42,8 @@ namespace Toggl.Foundation.Login
             IGoogleService googleService,
             IApplicationShortcutCreator shortcutCreator,
             IPrivateSharedStorageService privateSharedStorageService,
-            Func<ITogglApi, ITogglDataSource> createDataSource
-        )
+            Func<ITogglApi, ITogglDataSource> createDataSource,
+            IAnalyticsService analyticsService)
         {
             Ensure.Argument.IsNotNull(database, nameof(database));
             Ensure.Argument.IsNotNull(apiFactory, nameof(apiFactory));
@@ -45,6 +51,7 @@ namespace Toggl.Foundation.Login
             Ensure.Argument.IsNotNull(shortcutCreator, nameof(shortcutCreator));
             Ensure.Argument.IsNotNull(privateSharedStorageService, nameof(privateSharedStorageService));
             Ensure.Argument.IsNotNull(createDataSource, nameof(createDataSource));
+            Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
 
             this.database = database;
             this.apiFactory = apiFactory;
@@ -52,6 +59,7 @@ namespace Toggl.Foundation.Login
             this.privateSharedStorageService = privateSharedStorageService;
             this.shortcutCreator = shortcutCreator;
             this.createDataSource = createDataSource;
+            this.analyticsService = analyticsService;
         }
 
         public IObservable<ITogglDataSource> Login(Email email, Password password)
@@ -69,6 +77,8 @@ namespace Toggl.Foundation.Login
                 .Select(User.Clean)
                 .SelectMany(database.User.Create)
                 .Select(dataSourceFromUser)
+                .Track(analyticsService.Login, AuthenticationMethod.EmailAndPassword)
+                .Do(CommonFunctions.DoNothing, onLoginError)
                 .Do(shortcutCreator.OnLogin)
                 .Do(_ => userLoggedInSubject.OnNext(Unit.Default));
         }
@@ -164,6 +174,8 @@ namespace Toggl.Foundation.Login
                 .Select(User.Clean)
                 .SelectMany(database.User.Create)
                 .Select(dataSourceFromUser)
+                .Track(analyticsService.Login, AuthenticationMethod.Google)
+                .Do(CommonFunctions.DoNothing, onLoginError)
                 .Do(shortcutCreator.OnLogin)
                 .Do(_ => userLoggedInSubject.OnNext(Unit.Default));
         }
@@ -173,7 +185,9 @@ namespace Toggl.Foundation.Login
             return apiFactory
                 .CreateApiWith(Credentials.None)
                 .User
-                .SignUp(email, password, termsAccepted, countryId);
+                .SignUp(email, password, termsAccepted, countryId)
+                .Track(analyticsService.SignUp, AuthenticationMethod.EmailAndPassword)
+                .Do(CommonFunctions.DoNothing, onSignupError);
         }
 
 
@@ -185,8 +199,39 @@ namespace Toggl.Foundation.Login
                 .Select(User.Clean)
                 .SelectMany(database.User.Create)
                 .Select(dataSourceFromUser)
+                .Track(analyticsService.SignUp, AuthenticationMethod.Google)
+                .Do(CommonFunctions.DoNothing, onSignupError)
                 .Do(shortcutCreator.OnLogin)
                 .Do(_ => userLoggedInSubject.OnNext(Unit.Default));
+        }
+
+        private void onLoginError(Exception e)
+        {
+            switch (e)
+            {
+                case UnauthorizedException _:
+                case GoogleLoginException googleEx when googleEx.LoginWasCanceled:
+                    break;
+                default:
+                    analyticsService.UnknownLoginFailure.Track(e.GetType().FullName, e.Message, e.StackTrace);
+                    analyticsService.Track(e);
+                    break;
+            }
+        }
+
+        private void onSignupError(Exception e)
+        {
+            switch (e)
+            {
+                case UnauthorizedException _:
+                case GoogleLoginException googleEx when googleEx.LoginWasCanceled:
+                case EmailIsAlreadyUsedException _:
+                    break;
+                default:
+                    analyticsService.UnknownSignUpFailure.Track(e.GetType().FullName, e.Message, e.StackTrace);
+                    analyticsService.Track(e);
+                    break;
+            }
         }
     }
 }

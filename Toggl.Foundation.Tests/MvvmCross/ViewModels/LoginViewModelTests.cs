@@ -206,14 +206,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     NavigationService.Received().ForkNavigate<MainTabBarViewModel, MainViewModel>();
                 }
 
-                [Fact, LogIfTooSlow]
-                public void TracksTheLoginEvent()
-                {
-                    ViewModel.Login();
-
-                    AnalyticsService.Received().Login.Track(AuthenticationMethod.EmailAndPassword);
-                }
-
                 [FsCheck.Xunit.Property]
                 public void SavesTheTimeOfLastLogin(DateTimeOffset now)
                 {
@@ -337,20 +329,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         ReactiveTest.OnNext(1, "")
                     );
                 }
-
-                [Fact, LogIfTooSlow]
-                public void TracksTheEventAndException()
-                {
-                    var exception = new Exception();
-                    UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
-                        .Returns(Observable.Throw<ITogglDataSource>(exception));
-
-                    ViewModel.Login();
-
-                    AnalyticsService.UnknownLoginFailure.Received()
-                        .Track(exception.GetType().FullName, exception.Message, exception.StackTrace);
-                    AnalyticsService.Received().Track(exception);
-                }
             }
         }
 
@@ -385,17 +363,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.GoogleLogin();
 
                 NavigationService.Received().ForkNavigate<MainTabBarViewModel, MainViewModel>();
-            }
-
-            [Fact, LogIfTooSlow]
-            public void TracksGoogleLoginEvent()
-            {
-                UserAccessManager.LoginWithGoogle()
-                    .Returns(Observable.Return(Substitute.For<ITogglDataSource>()));
-
-                ViewModel.GoogleLogin();
-
-                AnalyticsService.Received().Login.Track(AuthenticationMethod.Google);
             }
 
             [Fact, LogIfTooSlow]

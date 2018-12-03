@@ -64,7 +64,9 @@ namespace Toggl.Foundation.MvvmCross
             }
 
             var userAccessManager =
-                new UserAccessManager(foundation.ApiFactory, foundation.Database, foundation.GoogleService, foundation.ShortcutCreator, foundation.PrivateSharedStorageService, createDataSource);
+                new UserAccessManager(foundation.ApiFactory, foundation.Database, foundation.GoogleService,
+                    foundation.ShortcutCreator, foundation.PrivateSharedStorageService, createDataSource,
+                    foundation.AnalyticsService);
 
             Mvx.RegisterSingleton<IUserAccessManager>(userAccessManager);
         }

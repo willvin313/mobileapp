@@ -54,7 +54,8 @@ namespace Toggl.Foundation.Tests.Login
 
             protected UserAccessManagerTest()
             {
-                UserAccessManager = new UserAccessManager(ApiFactory, Database, GoogleService, ApplicationShortcutCreator, PrivateSharedStorageService, CreateDataSource);
+                UserAccessManager = new UserAccessManager(ApiFactory, Database, GoogleService,
+                    ApplicationShortcutCreator, PrivateSharedStorageService, CreateDataSource, AnalyticsService);
 
                 Api.User.Get().Returns(Observable.Return(User));
                 Api.User.SignUp(Email, Password, TermsAccepted, CountryId).Returns(Observable.Return(User));
@@ -80,7 +81,8 @@ namespace Toggl.Foundation.Tests.Login
                 bool useGoogleService,
                 bool useApplicationShortcutCreator,
                 bool useCreateDataSource,
-                bool usePrivateSharedStorageService)
+                bool usePrivateSharedStorageService,
+                bool useAnalyticsService)
             {
                 var database = useDatabase ? Database : null;
                 var apiFactory = useApiFactory ? ApiFactory : null;
@@ -88,16 +90,18 @@ namespace Toggl.Foundation.Tests.Login
                 var createDataSource = useCreateDataSource ? CreateDataSource : (Func<ITogglApi, ITogglDataSource>)null;
                 var shortcutCreator = useApplicationShortcutCreator ? ApplicationShortcutCreator : null;
                 var privateSharedStorageService = usePrivateSharedStorageService ? PrivateSharedStorageService : null;
+                var analyticsService = useAnalyticsService ? AnalyticsService : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new UserAccessManager(apiFactory, database, googleService, shortcutCreator, privateSharedStorageService, createDataSource);
+                    () => new UserAccessManager(apiFactory, database, googleService, shortcutCreator,
+                        privateSharedStorageService, createDataSource, analyticsService);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
             }
         }
 
-        public sealed class TheUserAccessMethod : UserAccessManagerTest
+        public sealed class TheLoginMethod : UserAccessManagerTest
         {
             [Theory, LogIfTooSlow]
             [InlineData("susancalvin@psychohistorian.museum", null)]
@@ -190,6 +194,34 @@ namespace Toggl.Foundation.Tests.Login
 
                 tryingToLoginWhenTheApiIsThrowingSomeRandomServerErrorException
                     .Should().Throw<ServerErrorException>();
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task CallsAnalyticsService()
+            {
+                await UserAccessManager.Login(Email, Password);
+
+                AnalyticsService.Received().Login.Track(AuthenticationMethod.EmailAndPassword);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task TracksTheEventAndException()
+            {
+                var exception = new Exception();
+                Api.User.Get()
+                    .Returns(Observable.Throw<IUser>(exception));
+
+                try
+                {
+                    await UserAccessManager.Login(Email, Password);
+                }
+                catch
+                {
+                }
+
+                AnalyticsService.UnknownLoginFailure.Received()
+                    .Track(exception.GetType().FullName, exception.Message, Arg.Any<string>());
+                AnalyticsService.Received().Track(exception);
             }
         }
 
@@ -405,6 +437,14 @@ namespace Toggl.Foundation.Tests.Login
 
                 PrivateSharedStorageService.Received().SaveUserId(Arg.Any<long>());
             }
+
+            [Fact, LogIfTooSlow]
+            public async Task CallsAnalyticsService()
+            {
+                await UserAccessManager.SignUp(Email, Password, true, 0);
+
+                AnalyticsService.Received().SignUp.Track(AuthenticationMethod.EmailAndPassword);
+            }
         }
 
         public sealed class TheRefreshTokenMethod : UserAccessManagerTest
@@ -478,9 +518,9 @@ namespace Toggl.Foundation.Tests.Login
             }
         }
 
-        public sealed class TheUserAccessUsingGoogleMethod : UserAccessManagerTest
+        public sealed class TheLoginWithGoogleMethod : UserAccessManagerTest
         {
-            public TheUserAccessUsingGoogleMethod()
+            public TheLoginWithGoogleMethod()
             {
                 GoogleService.GetAuthToken().Returns(Observable.Return("sometoken"));
             }
@@ -559,6 +599,71 @@ namespace Toggl.Foundation.Tests.Login
                 await UserAccessManager.LoginWithGoogle();
 
                 PrivateSharedStorageService.Received().SaveUserId(Arg.Any<long>());
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task CallsAnalyticsService()
+            {
+                await UserAccessManager.Login(Email, Password);
+
+                AnalyticsService.Received().Login.Track(AuthenticationMethod.Google);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task TracksTheEventAndException()
+            {
+                var exception = new Exception();
+                Api.User.GetWithGoogle()
+                    .Returns(Observable.Throw<IUser>(exception));
+
+                try
+                {
+                    await UserAccessManager.LoginWithGoogle();
+                }
+                catch
+                {
+                }
+
+                AnalyticsService.UnknownLoginFailure.Received()
+                    .Track(exception.GetType().FullName, exception.Message, Arg.Any<string>());
+                AnalyticsService.Received().Track(exception);
+            }
+        }
+
+        public sealed class TheSignupWithGoogleMethod : UserAccessManagerTest
+        {
+            public TheSignupWithGoogleMethod()
+            {
+                GoogleService.GetAuthToken().Returns(Observable.Return("sometoken"));
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task CallsAnalyticsService()
+            {
+                await UserAccessManager.SignUpWithGoogle(true, 0);
+
+                AnalyticsService.Received().SignUp.Track(AuthenticationMethod.Google);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task TracksTheEventAndException()
+            {
+                var exception = new Exception();
+                Api.User.SignUpWithGoogle(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<int>())
+                    .Returns(Observable.Throw<IUser>(exception));
+
+                try
+                {
+                    await UserAccessManager.SignUpWithGoogle(true, 0);
+                }
+                catch
+                {
+
+                }
+
+                AnalyticsService.UnknownSignUpFailure.Received()
+                    .Track(exception.GetType().FullName, exception.Message, Arg.Any<string>());
+                AnalyticsService.Received().Track(exception);
             }
         }
     }

@@ -5,11 +5,9 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FsCheck;
-using FsCheck.Xunit;
 using Microsoft.Reactive.Testing;
 using NSubstitute;
 using NUnit.Framework;
-using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Exceptions;
 using Toggl.Foundation.Interactors;
@@ -43,7 +41,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 => new SignupViewModel(
                     ApiFactory,
                     UserAccessManager,
-                    AnalyticsService,
                     OnboardingStorage,
                     NavigationService,
                     ErrorHandlingService,
@@ -69,7 +66,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public void ThrowsIfAnyOfTheArgumentsIsNull(
                 bool useApiFactory,
                 bool useUserAccessManager,
-                bool useAnalyticsService,
                 bool useOnboardingStorage,
                 bool userNavigationService,
                 bool useApiErrorHandlingService,
@@ -79,7 +75,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 var apiFactory = useApiFactory ? ApiFactory : null;
                 var userAccessManager = useUserAccessManager ? UserAccessManager : null;
-                var analyticsSerivce = useAnalyticsService ? AnalyticsService : null;
                 var onboardingStorage = useOnboardingStorage ? OnboardingStorage : null;
                 var navigationService = userNavigationService ? NavigationService : null;
                 var apiErrorHandlingService = useApiErrorHandlingService ? ErrorHandlingService : null;
@@ -91,7 +86,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     () => new SignupViewModel(
                         apiFactory,
                         userAccessManager,
-                        analyticsSerivce,
                         onboardingStorage,
                         navigationService,
                         apiErrorHandlingService,
@@ -327,17 +321,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         ReactiveTest.OnNext(1, false),
                         ReactiveTest.OnNext(2, true)
                     );
-                }
-
-                [Fact, LogIfTooSlow]
-                public async Task TracksGoogleSignupEvent()
-                {
-                    UserAccessManager.SignUpWithGoogle(true, Arg.Any<int>()).Returns(
-                        Observable.Return(Substitute.For<ITogglDataSource>()));
-
-                    await ViewModel.GoogleSignup();
-
-                    AnalyticsService.SignUp.Received().Track(AuthenticationMethod.Google);
                 }
 
                 [Fact, LogIfTooSlow]
@@ -661,12 +644,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         Arg.Any<int>());
                 }
 
-                [Fact, LogIfTooSlow]
-                public void TracksSignupEvent()
-                {
-                    AnalyticsService.SignUp.Received().Track(AuthenticationMethod.EmailAndPassword);
-                }
-
                 public sealed class WhenSignupSucceeds : SuccessfulSignupTest
                 {
                     protected override void ExecuteCommand()
@@ -800,19 +777,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                             ReactiveTest.OnNext(1, ""),
                             ReactiveTest.OnNext(2, Resources.GenericSignUpError)
                         );
-                    }
-
-                    [Fact, LogIfTooSlow]
-                    public async Task TracksTheEventAndException()
-                    {
-                        var exception = new Exception();
-                        prepareException(exception);
-
-                        await ViewModel.Signup();
-
-                        AnalyticsService.UnknownSignUpFailure.Received()
-                            .Track(exception.GetType().FullName, exception.Message, exception.StackTrace);
-                        AnalyticsService.Received().Track(exception);
                     }
                 }
             }

@@ -40,7 +40,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private readonly IApiFactory apiFactory;
         private readonly IUserAccessManager userAccessManager;
-        private readonly IAnalyticsService analyticsService;
         private readonly IOnboardingStorage onboardingStorage;
         private readonly IForkingNavigationService navigationService;
         private readonly IErrorHandlingService errorHandlingService;
@@ -89,7 +88,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public SignupViewModel(
             IApiFactory apiFactory,
             IUserAccessManager userAccessManager,
-            IAnalyticsService analyticsService,
             IOnboardingStorage onboardingStorage,
             IForkingNavigationService navigationService,
             IErrorHandlingService errorHandlingService,
@@ -99,7 +97,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             Ensure.Argument.IsNotNull(apiFactory, nameof(apiFactory));
             Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
-            Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(onboardingStorage, nameof(onboardingStorage));
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
             Ensure.Argument.IsNotNull(errorHandlingService, nameof(errorHandlingService));
@@ -109,7 +106,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             this.apiFactory = apiFactory;
             this.userAccessManager = userAccessManager;
-            this.analyticsService = analyticsService;
             this.onboardingStorage = onboardingStorage;
             this.navigationService = navigationService;
             this.errorHandlingService = errorHandlingService;
@@ -254,7 +250,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             signupDisposable =
                 userAccessManager
                     .SignUp(emailSubject.Value, passwordSubject.Value, termsOfServiceAccepted, (int)countryId.Value)
-                    .Track(analyticsService.SignUp, AuthenticationMethod.EmailAndPassword)
                     .Subscribe(onDataSource, onError, onCompleted);
         }
 
@@ -290,8 +285,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     errorMessageSubject.OnNext(Resources.EmailIsAlreadyUsedError);
                     break;
                 default:
-                    analyticsService.UnknownSignUpFailure.Track(exception.GetType().FullName, exception.Message, exception.StackTrace);
-                    analyticsService.Track(exception);
                     errorMessageSubject.OnNext(Resources.GenericSignUpError);
                     break;
             }
@@ -320,7 +313,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             signupDisposable = userAccessManager
                 .SignUpWithGoogle(termsOfServiceAccepted, (int)countryId.Value)
-                .Track(analyticsService.SignUp, AuthenticationMethod.Google)
                 .Subscribe(onDataSource, onError, onCompleted);
         }
 
