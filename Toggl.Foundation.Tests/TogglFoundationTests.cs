@@ -13,6 +13,7 @@ using System.Reactive.Concurrency;
 using Toggl.Multivac;
 using Toggl.Ultrawave.Network;
 using IStopwatchProvider = Toggl.Foundation.Diagnostics.IStopwatchProvider;
+using Toggl.Foundation.Suggestions.Interfaces;
 
 namespace Toggl.Foundation.Tests
 {
@@ -43,6 +44,7 @@ namespace Toggl.Foundation.Tests
                 bool useRemoteConfigService,
                 bool useIntentDonationService,
                 bool useApplicationShortcutCreator,
+                bool useDismissedSuggestionStorage,
                 bool usePrivateSharedStorageService,
                 bool useSuggestionProviderContainer)
             {
@@ -64,6 +66,7 @@ namespace Toggl.Foundation.Tests
                 var notificationService = useNotificationService ? Substitute.For<INotificationService>() : null;
                 var remoteConfigService = useRemoteConfigService ? Substitute.For<IRemoteConfigService>() : null;
                 var intentDonationService = useIntentDonationService ? Substitute.For<IIntentDonationService>() : null;
+                var dismissedSuggestionStorage = useDismissedSuggestionStorage ? Substitute.For<IDismissedSuggestionStorage>() : null;
                 var applicationShortcutCreator = useApplicationShortcutCreator ? Substitute.For<IApplicationShortcutCreator>() : null;
                 var suggestionProviderContainer = useSuggestionProviderContainer ? Substitute.For<ISuggestionProviderContainer>() : null;
                 var privateSharedStorageService = usePrivateSharedStorageService ? Substitute.For<IPrivateSharedStorageService>() : null;
@@ -89,6 +92,7 @@ namespace Toggl.Foundation.Tests
                         .WithNotificationService(notificationService)
                         .WithRemoteConfigService(remoteConfigService)
                         .WithIntentDonationService(intentDonationService)
+                        .WithDismissedSuggestionStorage(dismissedSuggestionStorage)
                         .WithApplicationShortcutCreator(applicationShortcutCreator)
                         .WithSuggestionProviderContainer(suggestionProviderContainer)
                         .WithPrivateSharedStorageService(privateSharedStorageService)
@@ -120,6 +124,7 @@ namespace Toggl.Foundation.Tests
                 var remoteConfigService = Substitute.For<IRemoteConfigService>();
                 var intentDonationService = Substitute.For<IIntentDonationService>();
                 var applicationShortcutCreator = Substitute.For<IApplicationShortcutCreator>();
+                var dismissedSuggestionStorage = Substitute.For<IDismissedSuggestionStorage>();
                 var suggestionProviderContainer = Substitute.For<ISuggestionProviderContainer>();
                 var privateSharedStorageService = Substitute.For<IPrivateSharedStorageService>();
 
@@ -143,6 +148,7 @@ namespace Toggl.Foundation.Tests
                         .WithNotificationService(notificationService)
                         .WithRemoteConfigService(remoteConfigService)
                         .WithIntentDonationService(intentDonationService)
+                        .WithDismissedSuggestionStorage(dismissedSuggestionStorage)
                         .WithApplicationShortcutCreator(applicationShortcutCreator)
                         .WithPrivateSharedStorageService(privateSharedStorageService)
                         .WithSuggestionProviderContainer(suggestionProviderContainer)

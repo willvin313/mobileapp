@@ -9,6 +9,7 @@ using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Shortcuts;
 using Toggl.Foundation.Suggestions;
+using Toggl.Foundation.Suggestions.Interfaces;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Multivac;
 using Toggl.PrimeRadiant;
@@ -39,6 +40,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
         private readonly IBackgroundService backgroundService = Substitute.For<IBackgroundService>();
         private readonly IPlatformConstants platformConstants = Substitute.For<IPlatformConstants>();
         private readonly IRemoteConfigService remoteConfigService = Substitute.For<IRemoteConfigService>();
+        private readonly IDismissedSuggestionStorage dismissedSuggestionStorage = Substitute.For<IDismissedSuggestionStorage>();
         private readonly IApplicationShortcutCreator applicationShortcutCreator = Substitute.For<IApplicationShortcutCreator>();
         private readonly ISuggestionProviderContainer suggestionProviderContainer = Substitute.For<ISuggestionProviderContainer>();
         private readonly ISchedulerProvider schedulerProvider = new TestSchedulerProvider();
@@ -196,6 +198,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
                     .WithNotificationService(notificationService)
                     .WithRemoteConfigService(remoteConfigService)
                     .WithIntentDonationService(IntentDonationService)
+                    .WithDismissedSuggestionStorage(dismissedSuggestionStorage)
                     .WithApplicationShortcutCreator(applicationShortcutCreator)
                     .WithSuggestionProviderContainer(suggestionProviderContainer)
                     .WithPrivateSharedStorageService(PrivateSharedStorageService)

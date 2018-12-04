@@ -114,6 +114,7 @@ namespace Toggl.Daneel
                     .WithSuggestionProviderContainer(suggestionProviderContainer)
                     .WithIntentDonationService(intentDonationService)
                     .WithStopwatchProvider<FirebaseStopwatchProviderIos>()
+                    .WithDismissedSuggestionStorage<DismissedSuggestionStorage>()
                     .WithPrivateSharedStorageService(privateSharedStorageService)
                     .WithPlatformInfo(platformInfo)
 

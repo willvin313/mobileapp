@@ -5,6 +5,7 @@ using Toggl.Foundation.Login;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Shortcuts;
 using Toggl.Foundation.Suggestions;
+using Toggl.Foundation.Suggestions.Interfaces;
 using Toggl.Multivac;
 using Toggl.PrimeRadiant;
 using Toggl.Ultrawave;
@@ -36,6 +37,7 @@ namespace Toggl.Foundation
         public IRemoteConfigService RemoteConfigService { get; }
         public IApplicationShortcutCreator ShortcutCreator { get; }
         public IIntentDonationService IntentDonationService { get; }
+        public IDismissedSuggestionStorage DismissedSuggestionStorage { get; }
         public IPrivateSharedStorageService PrivateSharedStorageService { get; }
         public ISuggestionProviderContainer SuggestionProviderContainer { get; }
 
@@ -67,6 +69,7 @@ namespace Toggl.Foundation
             NotificationService = builder.NotificationService;
             RemoteConfigService = builder.RemoteConfigService;
             IntentDonationService = builder.IntentDonationService;
+            DismissedSuggestionStorage = builder.DismissedSuggestionStorage;
             PrivateSharedStorageService = builder.PrivateSharedStorageService;
             SuggestionProviderContainer = builder.SuggestionProviderContainer;
         }
@@ -89,12 +92,13 @@ namespace Toggl.Foundation
             public IAnalyticsService AnalyticsService { get; internal set; }
             public IStopwatchProvider StopwatchProvider { get; internal set; }
             public ISchedulerProvider SchedulerProvider { get; internal set; }
+            public IPlatformConstants PlatformConstants { get; internal set; }
+            public IBackgroundService BackgroundService { get; internal set; }
             public INotificationService NotificationService { get; internal set; }
             public IRemoteConfigService RemoteConfigService { get; internal set; }
             public IApplicationShortcutCreator ShortcutCreator { get; internal set; }
-            public IBackgroundService BackgroundService { get; internal set; }
-            public IPlatformConstants PlatformConstants { get; internal set; }
             public IIntentDonationService IntentDonationService { get; internal set; }
+            public IDismissedSuggestionStorage DismissedSuggestionStorage { get; internal set; }
             public ISuggestionProviderContainer SuggestionProviderContainer { get; internal set; }
             public IPrivateSharedStorageService PrivateSharedStorageService { get; internal set; }
 
@@ -230,6 +234,12 @@ namespace Toggl.Foundation
                 return this;
             }
 
+            public Builder WithDismissedSuggestionStorage(IDismissedSuggestionStorage dismissedSuggestionStorage)
+            {
+                DismissedSuggestionStorage = dismissedSuggestionStorage;
+                return this;
+            }
+
             public Builder WithDatabase<TDatabase>()
                 where TDatabase : ITogglDatabase, new()
                 => WithDatabase(new TDatabase());
@@ -290,6 +300,10 @@ namespace Toggl.Foundation
                 where TStopwatchProvider : IStopwatchProvider, new()
                 => WithStopwatchProvider(new TStopwatchProvider());
 
+            public Builder WithDismissedSuggestionStorage<TDismissedSuggestionStorage>()
+                where TDismissedSuggestionStorage : IDismissedSuggestionStorage, new()
+                => WithDismissedSuggestionStorage(new TDismissedSuggestionStorage());
+
             public TogglFoundation Build()
                 => new TogglFoundation(this);
 
@@ -315,6 +329,7 @@ namespace Toggl.Foundation
                 Ensure.Argument.IsNotNull(NotificationService, nameof(NotificationService));
                 Ensure.Argument.IsNotNull(RemoteConfigService, nameof(RemoteConfigService));
                 Ensure.Argument.IsNotNull(IntentDonationService, nameof(IntentDonationService));
+                Ensure.Argument.IsNotNull(DismissedSuggestionStorage, nameof(DismissedSuggestionStorage));
                 Ensure.Argument.IsNotNull(SuggestionProviderContainer, nameof(SuggestionProviderContainer));
                 Ensure.Argument.IsNotNull(PrivateSharedStorageService, nameof(PrivateSharedStorageService));
             }

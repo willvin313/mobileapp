@@ -117,6 +117,7 @@ namespace Toggl.Giskard
                     .WithPlatformInfo(platformInfo)
                     .WithStopwatchProvider<FirebaseStopwatchProviderAndroid>()
                     .WithIntentDonationService(new NoopIntentDonationServiceAndroid())
+                    .WithDismissedSuggestionStorage<DismissedSuggestionStorage>()
                     .WithPrivateSharedStorageService(new NoopPrivateSharedStorageServiceAndroid())
 
                     .StartRegisteringPlatformServices()
