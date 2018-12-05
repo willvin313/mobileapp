@@ -73,9 +73,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private IObservable<Unit> reset()
         {
-            return userAccessManager.ResetPassword(Email.Value)
+            return userAccessManager
+                .ResetPassword(Email.Value)
                 .ObserveOn(schedulerProvider.MainScheduler)
-                .Track(analyticsService.ResetPassword)
                 .SelectUnit()
                 .Do(closeWithDelay);
         }

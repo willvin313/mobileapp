@@ -112,16 +112,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public void TracksPasswordReset()
-            {
-                ViewModel.Email.OnNext(ValidEmail);
-
-                ViewModel.Reset.Execute();
-
-                AnalyticsService.Received().ResetPassword.Track();
-            }
-
-            [Fact, LogIfTooSlow]
             public void CannotExecuteWhenEmailIsNotValid()
             {
                 ViewModel.Email.OnNext(InvalidEmail);

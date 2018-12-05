@@ -261,6 +261,14 @@ namespace Toggl.Foundation.Tests.Login
 
                 await Api.User.Received().ResetPassword(Arg.Is(email));
             }
+
+            [Fact, LogIfTooSlow]
+            public async Task CallsAnalyticsService()
+            {
+                await UserAccessManager.ResetPassword(Email.From("ialwaysforgetmypassword@gmail.com"));
+
+                AnalyticsService.Received().ResetPassword.Track();
+            }
         }
 
         public sealed class TheLogoutMethod : UserAccessManagerTest

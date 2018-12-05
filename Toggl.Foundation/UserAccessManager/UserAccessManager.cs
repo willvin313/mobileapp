@@ -123,7 +123,10 @@ namespace Toggl.Foundation.Login
                 throw new ArgumentException($"A valid {nameof(email)} must be provided when trying to reset forgotten password.");
 
             var api = apiFactory.CreateApiWith(Credentials.None);
-            return api.User.ResetPassword(email);
+            return api
+                .User
+                .ResetPassword(email)
+                .Track(analyticsService.ResetPassword);
         }
 
         public ITogglDataSource GetDataSourceIfLoggedIn()
