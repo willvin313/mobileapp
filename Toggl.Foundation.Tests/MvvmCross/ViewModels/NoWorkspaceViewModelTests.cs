@@ -51,7 +51,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task ClosesWhenAnotherWorkspaceIsFetched()
             {
                 var workspace = Substitute.For<IThreadSafeWorkspace>();
-                DataSource.Workspaces.GetAll().Returns(Observable.Return(new List<IThreadSafeWorkspace>() { workspace }));
+                InteractorFactory.GetAllWorkspaces().Execute().Returns(Observable.Return(new List<IThreadSafeWorkspace>() { workspace }));
 
                 await ViewModel.TryAgain.Execute();
 
@@ -63,7 +63,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task ResetsNoWorkspaceStateWhenAnotherWorkspaceIsFetched()
             {
                 var workspace = Substitute.For<IThreadSafeWorkspace>();
-                DataSource.Workspaces.GetAll().Returns(Observable.Return(new List<IThreadSafeWorkspace>() { workspace }));
+                InteractorFactory.GetAllWorkspaces().Execute().Returns(Observable.Return(new List<IThreadSafeWorkspace>() { workspace }));
 
                 await ViewModel.TryAgain.Execute();
 

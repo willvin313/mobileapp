@@ -216,8 +216,8 @@ namespace Toggl.Foundation.Login
                 case GoogleLoginException googleEx when googleEx.LoginWasCanceled:
                     break;
                 default:
-                    analyticsService.UnknownLoginFailure.Track(e.GetType().FullName, e.Message, e.StackTrace);
-                    analyticsService.Track(e);
+                    analyticsService.UnknownLoginFailure.Track(e.GetType().FullName, e.Message);
+                    analyticsService.TrackAnonymized(e);
                     break;
             }
         }
@@ -231,8 +231,8 @@ namespace Toggl.Foundation.Login
                 case EmailIsAlreadyUsedException _:
                     break;
                 default:
-                    analyticsService.UnknownSignUpFailure.Track(e.GetType().FullName, e.Message, e.StackTrace);
-                    analyticsService.Track(e);
+                    analyticsService.UnknownSignUpFailure.Track(e.GetType().FullName, e.Message);
+                    analyticsService.TrackAnonymized(e);
                     break;
             }
         }

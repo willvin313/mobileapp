@@ -15,6 +15,7 @@ using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Interactors;
+using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Services;
@@ -245,7 +246,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
                     break;
 
                 case CalendarItemSource.Calendar:
-                    var workspace = await interactorFactory.GetDefaultWorkspace().Execute();
+                    var workspace = await interactorFactory.GetDefaultWorkspace()
+                        .TrackException<InvalidOperationException, IThreadSafeWorkspace>("CalendarViewModel.handleCalendarItem")
+                        .Execute();
                     var prototype = calendarItem.AsTimeEntryPrototype(workspace.Id);
                     analyticsService.TimeEntryStarted.Track(TimeEntryStartOrigin.CalendarEvent);
                     await interactorFactory.CreateTimeEntry(prototype).Execute();
@@ -255,7 +258,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
 
         private async Task durationSelected(DateTimeOffset startTime, TimeSpan duration)
         {
-            var workspace = await interactorFactory.GetDefaultWorkspace().Execute();
+            var workspace = await interactorFactory.GetDefaultWorkspace()
+                .TrackException<InvalidOperationException, IThreadSafeWorkspace>("CalendarViewModel.durationSelected")
+                .Execute();
+
             var prototype = duration.AsTimeEntryPrototype(startTime, workspace.Id);
             var timeEntry = await interactorFactory.CreateTimeEntry(prototype).Execute();
             analyticsService.TimeEntryStarted.Track(TimeEntryStartOrigin.CalendarTapAndDrag);

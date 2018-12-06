@@ -21,5 +21,8 @@ namespace Toggl.Giskard.Extensions.Reactive
 
         public static Action<string> TextObserver(this IReactive<TextView> reactive)
             => text => reactive.Base.Text = text;
+
+        public static Action<ISpannable> TextFormattedObserver(this IReactive<TextView> reactive)
+            => text => reactive.Base.TextFormatted = text;
     }
 }

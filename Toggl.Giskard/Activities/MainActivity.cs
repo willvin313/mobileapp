@@ -10,10 +10,12 @@ using Android.Support.Design.Widget;
 using Android.Support.V4.Content;
 using Android.Support.V7.Widget;
 using Android.Support.V7.Widget.Helper;
+using Android.Text;
 using Android.Views;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.Diagnostics;
+using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Sync;
@@ -42,6 +44,7 @@ namespace Toggl.Giskard.Activities
         private MainRecyclerAdapter mainRecyclerAdapter;
         private LinearLayoutManager layoutManager;
         private FirebaseStopwatchProviderAndroid localStopwatchProvider = new FirebaseStopwatchProviderAndroid();
+        private CancellationTokenSource cardAnimationCancellation;
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -59,13 +62,13 @@ namespace Toggl.Giskard.Activities
 
             runningEntryCardFrame.Visibility = ViewStates.Invisible;
 
-            reportsView.Rx().BindAction(ViewModel.OpenReports);
-            settingsView.Rx().BindAction(ViewModel.OpenSettings);
-            stopButton.Rx().BindAction(ViewModel.StopTimeEntry, _ => TimeEntryStopOrigin.Manual);
+            reportsView.Rx().BindAction(ViewModel.OpenReports).DisposedBy(DisposeBag);
+            settingsView.Rx().BindAction(ViewModel.OpenSettings).DisposedBy(DisposeBag);
+            stopButton.Rx().BindAction(ViewModel.StopTimeEntry, _ => TimeEntryStopOrigin.Manual).DisposedBy(DisposeBag);
 
-            playButton.Rx().BindAction(ViewModel.StartTimeEntry, _ => true);
-            playButton.Rx().BindAction(ViewModel.StartTimeEntry, _ => false, ButtonEventType.LongPress);
- 
+            playButton.Rx().BindAction(ViewModel.StartTimeEntry, _ => true).DisposedBy(DisposeBag);
+            playButton.Rx().BindAction(ViewModel.StartTimeEntry, _ => false, ButtonEventType.LongPress).DisposedBy(DisposeBag);
+
             timeEntryCard.Rx().Tap()
                 .WithLatestFrom(ViewModel.CurrentRunningTimeEntry, (_, te) => te.Id)
                 .Subscribe(ViewModel.SelectTimeEntry.Inputs)
@@ -92,20 +95,15 @@ namespace Toggl.Giskard.Activities
                 .DisposedBy(DisposeBag);
 
             ViewModel.CurrentRunningTimeEntry
-                .Select(te => te?.Project?.Client != null)
-                .Subscribe(timeEntryCardClientLabel.Rx().IsVisible())
-                .DisposedBy(DisposeBag);
-
-            ViewModel.CurrentRunningTimeEntry
-                .Select(te => te?.Project?.Name ?? "")
-                .Subscribe(timeEntryCardProjectLabel.Rx().TextObserver())
+                .Select(createProjectClientTaskLabel)
+                .Subscribe(timeEntryCardProjectClientTaskLabel.Rx().TextFormattedObserver())
                 .DisposedBy(DisposeBag);
 
             var projectVisibilityObservable = ViewModel.CurrentRunningTimeEntry
                 .Select(te => te?.Project != null);
 
             projectVisibilityObservable
-                .Subscribe(timeEntryCardProjectLabel.Rx().IsVisible())
+                .Subscribe(timeEntryCardProjectClientTaskLabel.Rx().IsVisible())
                 .DisposedBy(DisposeBag);
 
             projectVisibilityObservable
@@ -115,10 +113,6 @@ namespace Toggl.Giskard.Activities
             var projectColorObservable = ViewModel.CurrentRunningTimeEntry
                 .Select(te => te?.Project?.Color ?? "#000000")
                 .Select(Color.ParseColor);
-
-            projectColorObservable
-                .Subscribe(timeEntryCardProjectLabel.SetTextColor)
-                .DisposedBy(DisposeBag);
 
             projectColorObservable
                 .Subscribe(timeEntryCardDotView.Rx().DrawableColor())
@@ -203,6 +197,15 @@ namespace Toggl.Giskard.Activities
             onCreateStopwatch.Stop();
         }
 
+        public ISpannable createProjectClientTaskLabel(IThreadSafeTimeEntry te)
+        {
+            if (te == null)
+                return new SpannableString(string.Empty);
+
+            var hasProject = te.ProjectId != null;
+            return Extensions.TimeEntryExtensions.ToProjectTaskClient(hasProject, te.Project?.Name, te.Project?.Color, te.Task?.Name, te.Project?.Client?.Name);
+        }
+
         public void SetupRatingViewVisibility(bool isVisible)
         {
             mainRecyclerAdapter.SetupRatingViewVisibility(isVisible);
@@ -267,15 +270,19 @@ namespace Toggl.Giskard.Activities
 
         private async void onTimeEntryCardVisibilityChanged(bool visible)
         {
+            cardAnimationCancellation?.Cancel();
             if (runningEntryCardFrame == null) return;
 
             var isCardVisible = runningEntryCardFrame.Visibility == ViewStates.Visible;
             if (isCardVisible == visible) return;
 
+            cardAnimationCancellation = new CancellationTokenSource();
+
             var fabListener = new FabAsyncHideListener();
             var radialAnimation =
                 runningEntryCardFrame
                     .AnimateWithCircularReveal()
+                    .WithCancellationToken(cardAnimationCancellation.Token)
                     .SetDuration(TimeSpan.FromSeconds(0.5))
                     .SetBehaviour((x, y, w, h) => (x, y + h, 0, w))
                     .SetType(() => visible ? Appear : Disappear);
@@ -287,6 +294,7 @@ namespace Toggl.Giskard.Activities
 
                 radialAnimation
                     .OnAnimationEnd(_ => stopButton.Show())
+                    .OnAnimationCancel(() => playButton.Show())
                     .Start();
             }
             else
@@ -296,6 +304,7 @@ namespace Toggl.Giskard.Activities
 
                 radialAnimation
                     .OnAnimationEnd(_ => playButton.Show())
+                    .OnAnimationCancel(() => stopButton.Show())
                     .Start();
             }
         }

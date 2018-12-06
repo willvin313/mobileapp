@@ -55,11 +55,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             StartTimeEntry = InputAction<Suggestion>.FromAsync(suggestion => startTimeEntry(suggestion));
 
-            Suggestions = Observable
-                .CombineLatest(
-                    dataSource.Workspaces.ItemsChanged(), 
-                    dataSource.TimeEntries.ItemsChanged())
-                .SelectUnit()
+            Suggestions = interactorFactory.ObserveWorkspaceOrTimeEntriesChanges().Execute()
                 .StartWith(Unit.Default)
                 .SelectMany(_ => getSuggestions())
                 .AsDriver(onErrorJustReturn: new Suggestion[0], schedulerProvider: schedulerProvider);

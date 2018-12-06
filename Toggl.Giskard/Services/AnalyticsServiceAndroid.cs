@@ -36,6 +36,16 @@ namespace Toggl.Giskard.Services
             Crashes.TrackError(exception);
         }
 
+        public override void Track(Exception exception, string message)
+        {
+            var dict = new Dictionary<string, string>
+            {
+                [nameof(message)] = message,
+            };
+
+            Crashes.TrackError(exception, dict);
+        }
+
         private Bundle bundleFromParameters(Dictionary<string, string> parameters)
         {
             var bundle = new Bundle();

@@ -32,6 +32,8 @@ namespace Toggl.Foundation.Interactors
 
         IInteractor<IObservable<IThreadSafeTimeEntry>> StopTimeEntry(DateTimeOffset currentDateTime, TimeEntryStopOrigin origin);
 
+        IInteractor<IObservable<Unit>> ObserveTimeEntriesChanges();
+
         #endregion
 
         #region Projects
@@ -63,6 +65,10 @@ namespace Toggl.Foundation.Interactors
         IInteractor<IObservable<bool>> IsBillableAvailableForWorkspace(long workspaceId);
 
         IInteractor<IObservable<Unit>> CreateDefaultWorkspace();
+
+        IInteractor<IObservable<IEnumerable<IThreadSafeWorkspace>>> ObserveAllWorkspaces();
+
+        IInteractor<IObservable<Unit>> ObserveWorkspacesChanges();
 
         #endregion
 
@@ -142,6 +148,12 @@ namespace Toggl.Foundation.Interactors
         #region Tags
 
         IInteractor<IObservable<IThreadSafeTag>> CreateTag(string tagName, long workspaceId);
+
+        #endregion
+
+        #region Changes
+
+        IInteractor<IObservable<Unit>> ObserveWorkspaceOrTimeEntriesChanges();
 
         #endregion
     }

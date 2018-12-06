@@ -174,7 +174,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             WorkspaceName =
                 dataSource.User.Current
                     .DistinctUntilChanged(user => user.DefaultWorkspaceId)
-                    .SelectMany(_ => interactorFactory.GetDefaultWorkspace().Execute())
+                    .SelectMany(_ => interactorFactory.GetDefaultWorkspace()
+                        .TrackException<InvalidOperationException, IThreadSafeWorkspace>("SettingsViewModel.constructor")
+                        .Execute()
+                    )
                     .Select(workspace => workspace.Name);
 
             BeginningOfWeek =
@@ -264,7 +267,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public async Task PickDefaultWorkspace()
         {
-            var defaultWorkspace = await interactorFactory.GetDefaultWorkspace().Execute();
+            var defaultWorkspace = await interactorFactory.GetDefaultWorkspace()
+                .TrackException<InvalidOperationException, IThreadSafeWorkspace>("SettingsViewModel.PickDefaultWorkspace")
+                .Execute();
+
             var parameters = WorkspaceParameters.Create(defaultWorkspace.Id, Resources.SetDefaultWorkspace, allowQuerying: false);
             var selectedWorkspaceId =
                 await navigationService

@@ -220,8 +220,8 @@ namespace Toggl.Foundation.Tests.Login
                 }
 
                 AnalyticsService.UnknownLoginFailure.Received()
-                    .Track(exception.GetType().FullName, exception.Message, Arg.Any<string>());
-                AnalyticsService.Received().Track(exception);
+                    .Track(exception.GetType().FullName, exception.Message);
+                AnalyticsService.Received().TrackAnonymized(exception);
             }
         }
 
@@ -633,8 +633,8 @@ namespace Toggl.Foundation.Tests.Login
                 }
 
                 AnalyticsService.UnknownLoginFailure.Received()
-                    .Track(exception.GetType().FullName, exception.Message, Arg.Any<string>());
-                AnalyticsService.Received().Track(exception);
+                    .Track(exception.GetType().FullName, exception.Message);
+                AnalyticsService.Received().TrackAnonymized(exception);
             }
         }
 
@@ -670,8 +670,8 @@ namespace Toggl.Foundation.Tests.Login
                 }
 
                 AnalyticsService.UnknownSignUpFailure.Received()
-                    .Track(exception.GetType().FullName, exception.Message, Arg.Any<string>());
-                AnalyticsService.Received().Track(exception);
+                    .Track(exception.GetType().FullName, exception.Message);
+                AnalyticsService.Received().TrackAnonymized(exception);
             }
         }
     }

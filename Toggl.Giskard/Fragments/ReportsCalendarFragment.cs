@@ -72,7 +72,9 @@ namespace Toggl.Giskard.Fragments
             if (!anyShortcutIsSelected) return;
 
             var dateRangeStartDate = dateRange.StartDate;
-            var monthToScroll = ViewModel.Months.IndexOf(month => month.CalendarMonth.Month == dateRangeStartDate.Month);
+            var monthToScroll = ViewModel.Months.IndexOf(month =>
+                month.CalendarMonth.Month == dateRangeStartDate.Month &&
+                month.CalendarMonth.Year == dateRangeStartDate.Year);
             if (monthToScroll == pager.CurrentItem) return;
 
             var dateRangeStartDateIsContaintedInCurrentMonthView = ViewModel

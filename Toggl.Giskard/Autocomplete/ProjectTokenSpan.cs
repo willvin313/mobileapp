@@ -10,12 +10,18 @@ namespace Toggl.Giskard.Autocomplete
 
         public string ProjectColor { get; }
 
-        public ProjectTokenSpan(long projectId, string projectName, string projectColor)
+        public long? TaskId { get; set; }
+
+        public string TaskName { get; set; }
+
+        public ProjectTokenSpan(long projectId, string projectName, string projectColor, long? taskId, string taskName)
             : base(Color.White, Color.ParseColor(projectColor), false)
         {
             ProjectId = projectId;
             ProjectName = projectName;
             ProjectColor = projectColor;
+            TaskId = taskId;
+            TaskName = taskName ?? string.Empty;
         }
     }
 }
