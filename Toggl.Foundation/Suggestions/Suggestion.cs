@@ -15,6 +15,8 @@ namespace Toggl.Foundation.Suggestions
 
         public long? TaskId { get; } = null;
 
+        public long? ClientId { get; } = null;
+
         public string ProjectColor { get; } = Color.NoProject;
 
         public string ProjectName { get; } = "";
@@ -50,6 +52,7 @@ namespace Toggl.Foundation.Suggestions
             ProjectColor = timeEntry.Project.Color;
 
             ClientName = timeEntry.Project.Client?.Name ?? "";
+            ClientId = timeEntry.Project.ClientId;
 
             if (timeEntry.Task == null) return;
 

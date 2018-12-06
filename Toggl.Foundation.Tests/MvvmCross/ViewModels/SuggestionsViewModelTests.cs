@@ -15,6 +15,9 @@ using TimeEntry = Toggl.Foundation.Models.TimeEntry;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.DataSources;
 using System.Reactive.Subjects;
+using FsCheck.Xunit;
+using Toggl.Foundation.Tests.Mocks;
+using Toggl.Foundation.MvvmCross.Parameters;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 {
@@ -23,7 +26,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public abstract class SuggestionsViewModelTest : BaseViewModelTests<SuggestionsViewModel>
         {
             protected override SuggestionsViewModel CreateViewModel()
-                => new SuggestionsViewModel(DataSource, InteractorFactory, OnboardingStorage, SuggestionProviderContainer, SchedulerProvider);
+                => new SuggestionsViewModel(TimeService, DataSource, InteractorFactory, OnboardingStorage, NavigationService, SuggestionProviderContainer, SchedulerProvider);
 
             protected override void AdditionalViewModelSetup()
             {
@@ -45,20 +48,30 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Theory, LogIfTooSlow]
             [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(
-                bool useDataSource,
                 bool useContainer,
+                bool useDataSource,
+                bool useTimeService,
+                bool useNavigationService,
                 bool useOnboardingStorage,
                 bool useInteractorFactory,
                 bool useSchedulerProvider)
             {
-                var container = useContainer ? SuggestionProviderContainer : null;
                 var dataSource = useDataSource ? DataSource : null;
+                var timeService = useTimeService ? TimeService : null;
+                var container = useContainer ? SuggestionProviderContainer : null;
+                var navigationService = useNavigationService ? NavigationService : null;
                 var onboardingStorage = useOnboardingStorage ? OnboardingStorage : null;
                 var interactorFactory = useInteractorFactory ? InteractorFactory : null;
                 var schedulerProvider = useSchedulerProvider ? SchedulerProvider : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new SuggestionsViewModel(dataSource, interactorFactory, onboardingStorage, container,
+                    () => new SuggestionsViewModel(
+                        timeService,
+                        dataSource,
+                        interactorFactory,
+                        onboardingStorage,
+                        navigationService,
+                        container,
                         schedulerProvider);
 
                 tryingToConstructWithEmptyParameters
@@ -277,6 +290,73 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 timeEntry.Description.Returns("Testing");
                 timeEntry.WorkspaceId.Returns(10);
                 return new Suggestion(timeEntry);
+            }
+        }
+
+        public sealed class TheStartAndEditTimeEntryAction
+        {
+            public sealed class NavigatesToTheStartTimeEntryView : SuggestionsViewModelTest
+            {
+                [Property, LogIfTooSlow]
+                public void PassingTheCurrentTime(DateTimeOffset now)
+                {
+                    TimeService.CurrentDateTime.Returns(now);
+                    var suggestion = new Suggestion(new MockTimeEntry());
+
+                    ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
+
+                    NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
+                        Arg.Is<StartTimeEntryParameters>(parameters => parameters.StartTime == now)
+                    ).Wait();
+                }
+
+                [Property, LogIfTooSlow]
+                public void PassingTheDescriptionFromSuggestion(string description)
+                {
+                    var suggestion = new Suggestion(new MockTimeEntry { Description = description });
+
+                    ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
+
+                    NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
+                        Arg.Is<StartTimeEntryParameters>(parameters => parameters.EntryDescription == description)
+                    ).Wait();
+                }
+
+                [Property, LogIfTooSlow]
+                public void PassingTheWorkspaceIdFromSuggestion(long workspaceId)
+                {
+                    var suggestion = new Suggestion(new MockTimeEntry { WorkspaceId = workspaceId });
+
+                    ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
+
+                    NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
+                        Arg.Is<StartTimeEntryParameters>(parameters => parameters.WorkspaceId == workspaceId)
+                    ).Wait();
+                }
+
+                [Property, LogIfTooSlow]
+                public void PassingTheProjectIdFromSuggestion(long? projectId)
+                {
+                    var suggestion = new Suggestion(new MockTimeEntry { ProjectId = projectId });
+
+                    ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
+
+                    NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
+                        Arg.Is<StartTimeEntryParameters>(parameters => parameters.ProjectId == projectId)
+                    ).Wait();
+                }
+
+                [Property, LogIfTooSlow]
+                public void PassingTheTaskIdFromSuggestion(long? taskId)
+                {
+                    var suggestion = new Suggestion(new MockTimeEntry { TaskId = taskId });
+
+                    ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
+
+                    NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
+                        Arg.Is<StartTimeEntryParameters>(parameters => parameters.TaskId == taskId)
+                    ).Wait();
+                }
             }
         }
     }

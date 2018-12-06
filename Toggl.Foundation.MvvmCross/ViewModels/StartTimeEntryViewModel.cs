@@ -329,43 +329,73 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             {
                 var spans = new List<ISpan>();
                 spans.Add(new TextSpan(initialParameters.EntryDescription));
-                if (initialParameters.ProjectId != null) {
-                    try
-                    {
-                        var project = await dataSource.Projects.GetById((long)initialParameters.ProjectId);
-                        spans.Add(new ProjectSpan(project));
-                    }
-                    catch
-                    {
-                        // Intentionally left blank
-                    }
-                }
-                if (initialParameters.TagIds != null) {
-                    try
-                    {
-                        var tags = initialParameters.TagIds.ToObservable()
-                            .SelectMany<long, IThreadSafeTag>(tagId => dataSource.Tags.GetById(tagId))
-                            .ToEnumerable();
-                        spans.AddRange(tags.Select(tag => new TagSpan(tag)));
-                    }
-                    catch
-                    {
-                        // Intentionally left blank
-                    }
-                }
-
+                var taskAdded = await tryToAddTask(spans);
+                if (!taskAdded)
+                    await tryToAddProject(spans);
+                await tryToAddTags(spans);
                 textFieldInfo = textFieldInfo.ReplaceSpans(spans.ToImmutableList());
             }
 
             await setBillableValues(textFieldInfo.ProjectId);
             uiSubject.OnNext(textFieldInfo);
-
             hasAnyTags = (await dataSource.Tags.GetAll()).Any();
             hasAnyProjects = (await dataSource.Projects.GetAll()).Any();
 
             dataSource.User.Current
                       .Subscribe(onUserChanged)
                       .DisposedBy(disposeBag);
+        }
+
+        private async Task<bool> tryToAddTask(List<ISpan> spans)
+        {
+            try
+            {
+                if (initialParameters.TaskId == null)
+                    return false;
+
+                var task = await dataSource.Tasks.GetById(initialParameters.TaskId.Value);
+                spans.Add(new ProjectSpan(task));
+                return true;
+            }
+            catch
+            {
+                //Intentionally left (almost) blank
+                return false;
+            }
+        }
+
+        private async Task tryToAddProject(List<ISpan> spans)
+        {
+            try
+            {
+                if (initialParameters.ProjectId != null)
+                {
+                    var project = await dataSource.Projects.GetById(initialParameters.ProjectId.Value);
+                    spans.Add(new ProjectSpan(project));
+                }
+            }
+            catch
+            {
+                //Intentionally left blank
+            }
+        }
+
+        private async Task tryToAddTags(List<ISpan> spans)
+        {
+            try
+            {
+                if (initialParameters.TagIds != null)
+                {
+                        await initialParameters.TagIds.ToObservable()
+                            .SelectMany(tagId => dataSource.Tags.GetById(tagId))
+                            .Select(tag => new TagSpan(tag))
+                            .Do(spans.Add);
+                }
+            }
+            catch
+            {
+                //Intentionally left blank
+            }
         }
 
         public override void ViewAppeared()

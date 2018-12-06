@@ -140,7 +140,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             TimeService = timeService;
 
-            SuggestionsViewModel = new SuggestionsViewModel(dataSource, interactorFactory, onboardingStorage, suggestionProviders, schedulerProvider);
+            SuggestionsViewModel = new SuggestionsViewModel(timeService, dataSource, interactorFactory, onboardingStorage, navigationService, suggestionProviders, schedulerProvider);
             RatingViewModel = new RatingViewModel(timeService, dataSource, ratingService, analyticsService, onboardingStorage, navigationService, SchedulerProvider);
             TimeEntriesViewModel = new TimeEntriesViewModel(dataSource, interactorFactory, analyticsService, SchedulerProvider);
 
