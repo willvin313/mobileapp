@@ -1,17 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Immutable;
+using System.Linq;
 using System.Reactive.Subjects;
-using MvvmCross.Binding.BindingContext;
-using MvvmCross.Platforms.Ios.Binding;
-using MvvmCross.Platforms.Ios.Binding.Views;
 using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Foundation;
-using Toggl.Foundation.MvvmCross.Converters;
 using Toggl.Foundation.MvvmCross.Helper;
-using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Suggestions;
-using Toggl.Multivac.Extensions;
 using UIKit;
-using static Toggl.Daneel.Extensions.ViewBindingExtensions;
 
 namespace Toggl.Daneel.Suggestions
 {
@@ -54,7 +48,7 @@ namespace Toggl.Daneel.Suggestions
             LayoutIfNeeded();
         }
 
-        public void OnSuggestions(Suggestion[] suggestions)
+        public void OnSuggestions(IImmutableList<Suggestion> suggestions)
         {
             foreach (UIView view in Subviews)
             {
@@ -64,7 +58,8 @@ namespace Toggl.Daneel.Suggestions
                 }
             }
 
-            for (int i = 0; i < suggestions.Length; i++)
+            var suggestionCount = suggestions.Count();
+            for (int i = 0; i < suggestionCount; i++)
             {
                 var suggestionView = SuggestionView.Create();
                 suggestionView.Suggestion = suggestions[i];
@@ -80,7 +75,7 @@ namespace Toggl.Daneel.Suggestions
                     SuggestionTapped.OnNext(suggestionView.Suggestion);
                 }));
             }
-            heightConstraint.Constant = heightForSuggestionCount(suggestions.Length);
+            heightConstraint.Constant = heightForSuggestionCount(suggestionCount);
             heightConstraint.Active = true;
             SetNeedsLayout();
         }

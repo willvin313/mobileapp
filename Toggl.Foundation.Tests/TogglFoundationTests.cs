@@ -7,7 +7,6 @@ using Toggl.Foundation.Services;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.PrimeRadiant;
 using Xunit;
-using Toggl.Foundation.Suggestions;
 using Toggl.Foundation.Analytics;
 using System.Reactive.Concurrency;
 using Toggl.Multivac;
@@ -45,8 +44,7 @@ namespace Toggl.Foundation.Tests
                 bool useIntentDonationService,
                 bool useApplicationShortcutCreator,
                 bool useDismissedSuggestionStorage,
-                bool usePrivateSharedStorageService,
-                bool useSuggestionProviderContainer)
+                bool usePrivateSharedStorageService)
             {
                 var version = useVersion ? Version.Parse("1.0") : null;
                 var platformInfo = usePlatformInfo ? new PlatformInfo() : null;
@@ -68,7 +66,6 @@ namespace Toggl.Foundation.Tests
                 var intentDonationService = useIntentDonationService ? Substitute.For<IIntentDonationService>() : null;
                 var dismissedSuggestionStorage = useDismissedSuggestionStorage ? Substitute.For<IDismissedSuggestionStorage>() : null;
                 var applicationShortcutCreator = useApplicationShortcutCreator ? Substitute.For<IApplicationShortcutCreator>() : null;
-                var suggestionProviderContainer = useSuggestionProviderContainer ? Substitute.For<ISuggestionProviderContainer>() : null;
                 var privateSharedStorageService = usePrivateSharedStorageService ? Substitute.For<IPrivateSharedStorageService>() : null;
                 var schedulerProvider = useSchedulerProvider ? Substitute.For<ISchedulerProvider>() : null;
 
@@ -94,7 +91,6 @@ namespace Toggl.Foundation.Tests
                         .WithIntentDonationService(intentDonationService)
                         .WithDismissedSuggestionStorage(dismissedSuggestionStorage)
                         .WithApplicationShortcutCreator(applicationShortcutCreator)
-                        .WithSuggestionProviderContainer(suggestionProviderContainer)
                         .WithPrivateSharedStorageService(privateSharedStorageService)
                         .Build();
 
@@ -125,7 +121,6 @@ namespace Toggl.Foundation.Tests
                 var intentDonationService = Substitute.For<IIntentDonationService>();
                 var applicationShortcutCreator = Substitute.For<IApplicationShortcutCreator>();
                 var dismissedSuggestionStorage = Substitute.For<IDismissedSuggestionStorage>();
-                var suggestionProviderContainer = Substitute.For<ISuggestionProviderContainer>();
                 var privateSharedStorageService = Substitute.For<IPrivateSharedStorageService>();
 
                 Action tryingToConstructWithValidParameters = () =>
@@ -151,7 +146,6 @@ namespace Toggl.Foundation.Tests
                         .WithDismissedSuggestionStorage(dismissedSuggestionStorage)
                         .WithApplicationShortcutCreator(applicationShortcutCreator)
                         .WithPrivateSharedStorageService(privateSharedStorageService)
-                        .WithSuggestionProviderContainer(suggestionProviderContainer)
                         .Build();
 
                 tryingToConstructWithValidParameters.Should().NotThrow();

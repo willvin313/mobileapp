@@ -42,7 +42,6 @@ namespace Toggl.Foundation.Tests.MvvmCross
         private readonly IRemoteConfigService remoteConfigService = Substitute.For<IRemoteConfigService>();
         private readonly IDismissedSuggestionStorage dismissedSuggestionStorage = Substitute.For<IDismissedSuggestionStorage>();
         private readonly IApplicationShortcutCreator applicationShortcutCreator = Substitute.For<IApplicationShortcutCreator>();
-        private readonly ISuggestionProviderContainer suggestionProviderContainer = Substitute.For<ISuggestionProviderContainer>();
         private readonly ISchedulerProvider schedulerProvider = new TestSchedulerProvider();
 
         private readonly IDialogService dialogService = Substitute.For<IDialogService>();
@@ -200,7 +199,6 @@ namespace Toggl.Foundation.Tests.MvvmCross
                     .WithIntentDonationService(IntentDonationService)
                     .WithDismissedSuggestionStorage(dismissedSuggestionStorage)
                     .WithApplicationShortcutCreator(applicationShortcutCreator)
-                    .WithSuggestionProviderContainer(suggestionProviderContainer)
                     .WithPrivateSharedStorageService(PrivateSharedStorageService)
                     .Build();
     }

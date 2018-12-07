@@ -18,6 +18,7 @@ using System.Reactive.Subjects;
 using FsCheck.Xunit;
 using Toggl.Foundation.Tests.Mocks;
 using Toggl.Foundation.MvvmCross.Parameters;
+using System.Collections.Immutable;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 {
@@ -26,7 +27,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public abstract class SuggestionsViewModelTest : BaseViewModelTests<SuggestionsViewModel>
         {
             protected override SuggestionsViewModel CreateViewModel()
-                => new SuggestionsViewModel(TimeService, DataSource, InteractorFactory, OnboardingStorage, NavigationService, SuggestionProviderContainer, SchedulerProvider);
+                => new SuggestionsViewModel(TimeService, DataSource, InteractorFactory, OnboardingStorage, SchedulerProvider, NavigationService);
 
             protected override void AdditionalViewModelSetup()
             {
@@ -34,12 +35,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 var provider = Substitute.For<ISuggestionProvider>();
                 provider.GetSuggestions().Returns(Observable.Empty<Suggestion>());
-                SuggestionProviderContainer.Providers.Returns(new[] { provider }.ToList().AsReadOnly());
-            }
-
-            protected void SetProviders(ISuggestionProviderContainer container, params ISuggestionProvider[] providers)
-            {
-                container.Providers.Returns(providers.ToList().AsReadOnly());
             }
         }
 
@@ -48,7 +43,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Theory, LogIfTooSlow]
             [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(
-                bool useContainer,
                 bool useDataSource,
                 bool useTimeService,
                 bool useNavigationService,
@@ -58,21 +52,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 var dataSource = useDataSource ? DataSource : null;
                 var timeService = useTimeService ? TimeService : null;
-                var container = useContainer ? SuggestionProviderContainer : null;
                 var navigationService = useNavigationService ? NavigationService : null;
                 var onboardingStorage = useOnboardingStorage ? OnboardingStorage : null;
                 var interactorFactory = useInteractorFactory ? InteractorFactory : null;
                 var schedulerProvider = useSchedulerProvider ? SchedulerProvider : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new SuggestionsViewModel(
-                        timeService,
-                        dataSource,
-                        interactorFactory,
-                        onboardingStorage,
-                        navigationService,
-                        container,
-                        schedulerProvider);
+                    () => new SuggestionsViewModel(timeService, dataSource, interactorFactory, onboardingStorage, schedulerProvider, navigationService);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
@@ -82,57 +68,10 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheSuggestionsProperty : SuggestionsViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task WorksWithSeveralProviders()
+            public async Task IsEmptyIfThereAreNoSuggestions()
             {
-                var provider1 = Substitute.For<ISuggestionProvider>();
-                var provider2 = Substitute.For<ISuggestionProvider>();
-                var suggestion1 = createSuggestion("t1", 12, 9);
-                var suggestion2 = createSuggestion("t2", 9, 12);
-                provider1.GetSuggestions().Returns(Observable.Return(suggestion1));
-                provider2.GetSuggestions().Returns(Observable.Return(suggestion2));
-                SetProviders(SuggestionProviderContainer, provider1, provider2);
-                var observer = TestScheduler.CreateObserver<Suggestion[]>();
-
-                await ViewModel.Initialize();
-                ViewModel.Suggestions.Subscribe(observer);
-                TestScheduler.Start();
-
-                var suggestions = observer.Messages.First().Value.Value;
-                suggestions.Should().HaveCount(2).And.Contain(new[] { suggestion1, suggestion2 });
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task WorksIfProviderHasMultipleSuggestions()
-            {
-                var provider = Substitute.For<ISuggestionProvider>();
-                var suggestions = Enumerable.Range(1, 3).Select(createSuggestion).ToArray();
-                var observableContent = suggestions
-                    .Select(suggestion => createRecorded(1, suggestion))
-                    .ToArray();
-                var observable = TestScheduler.CreateColdObservable(observableContent).Take(suggestions.Length);
-                provider.GetSuggestions().Returns(observable);
-                SetProviders(SuggestionProviderContainer, provider);
-                var observer = TestScheduler.CreateObserver<Suggestion[]>();
-
-                await ViewModel.Initialize();
-                ViewModel.Suggestions.Subscribe(observer);
-                TestScheduler.Start();
-
-                var receivedSuggestions = observer.Messages.First().Value.Value;
-                receivedSuggestions.Should().HaveCount(suggestions.Length).And.Contain(suggestions);
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task WorksIfProvidersAreEmpty()
-            {
-                var providers = Enumerable.Range(0, 3)
-                    .Select(_ => Substitute.For<ISuggestionProvider>()).ToArray();
-
-                foreach (var provider in providers)
-                    provider.GetSuggestions().Returns(Observable.Empty<Suggestion>());
-
-                SetProviders(SuggestionProviderContainer, providers);
-                var observer = TestScheduler.CreateObserver<Suggestion[]>();
+                InteractorFactory.GetSuggestions(Arg.Any<int>()).Execute().Returns(Observable.Return(new Suggestion[0]));
+                var observer = TestScheduler.CreateObserver<IImmutableList<Suggestion>>();
 
                 await ViewModel.Initialize();
                 ViewModel.Suggestions.Subscribe(observer);
@@ -149,10 +88,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 DataSource.Workspaces.Updated.Returns(workspaceUpdatedSubject.AsObservable());
                 DataSource.Workspaces.Created.Returns(Observable.Empty<IThreadSafeWorkspace>());
                 DataSource.Workspaces.Deleted.Returns(Observable.Empty<long>());
-
-                var provider = suggestionProvider();
-                SetProviders(SuggestionProviderContainer, provider);
-                var observer = TestScheduler.CreateObserver<Suggestion[]>();
+                var observer = TestScheduler.CreateObserver<IImmutableList<Suggestion>>();
 
                 await ViewModel.Initialize();
                 ViewModel.Suggestions.Subscribe(observer);
@@ -164,7 +100,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 observer.Messages.Should().HaveCount(2);
                 observer.Messages.First().Value.Value.Should().HaveCount(0);
                 observer.Messages.Last().Value.Value.Should().HaveCount(0);
-                await provider.Received(2).GetSuggestions();
             }
 
             [Fact, LogIfTooSlow]
@@ -175,9 +110,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 DataSource.TimeEntries.Created.Returns(Observable.Empty<IThreadSafeTimeEntry>());
                 DataSource.TimeEntries.Deleted.Returns(Observable.Empty<long>());
 
-                var provider = suggestionProvider();
-                SetProviders(SuggestionProviderContainer, provider);
-                var observer = TestScheduler.CreateObserver<Suggestion[]>();
+                var observer = TestScheduler.CreateObserver<IImmutableList<Suggestion>>();
 
                 await ViewModel.Initialize();
                 ViewModel.Suggestions.Subscribe(observer);
@@ -189,16 +122,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 observer.Messages.Should().HaveCount(2);
                 observer.Messages.First().Value.Value.Should().HaveCount(0);
                 observer.Messages.Last().Value.Value.Should().HaveCount(0);
-                await provider.Received(2).GetSuggestions();
-            }
-
-            private ISuggestionProvider suggestionProvider()
-            {
-                var provider = Substitute.For<ISuggestionProvider>();
-                
-                provider.GetSuggestions().Returns(Observable.Empty<Suggestion>());
-
-                return provider;
             }
 
             private Suggestion createSuggestion(int index) => createSuggestion($"te{index}", 0, 0);

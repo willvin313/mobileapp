@@ -6,7 +6,6 @@ using Toggl.Multivac;
 using Toggl.PrimeRadiant;
 using Toggl.PrimeRadiant.Settings;
 using Toggl.Ultrawave.Network;
-using Toggl.Foundation.Services;
 
 namespace Toggl.Foundation.Interactors
 {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Android.Runtime;
@@ -63,7 +64,7 @@ namespace Toggl.Giskard.ViewHolders
                 .Subscribe(updateViewVisibility)
                 .DisposedBy(DisposeBag);
 
-            var suggestionCount = suggestionsViewModel.Suggestions.Select(s => s.Length);
+            var suggestionCount = suggestionsViewModel.Suggestions.Select(s => s.Count());
             var currentIndexAndSuggestionCount =
                 Observable.CombineLatest(snapHelper.CurrentIndexObservable, suggestionCount,
                     (currIndx, count) => (currIndx, count));
@@ -102,7 +103,7 @@ namespace Toggl.Giskard.ViewHolders
             DisposeBag.Dispose();
         }
 
-        private void onSuggestionsChanged(Suggestion[] suggestions)
+        private void onSuggestionsChanged(IImmutableList<Suggestion> suggestions)
         {
             mainSuggestionsRecyclerAdapter.UpdateDataset(suggestions.ToImmutableList());
         }

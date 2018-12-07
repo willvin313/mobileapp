@@ -144,5 +144,11 @@ namespace Toggl.Foundation.Interactors
         IInteractor<IObservable<IThreadSafeTag>> CreateTag(string tagName, long workspaceId);
 
         #endregion
+
+        #region Suggestions
+
+        IInteractor<IObservable<IEnumerable<Suggestion>>> GetSuggestions(int count);
+
+        #endregion
     }
 }

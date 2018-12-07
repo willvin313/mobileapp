@@ -1,5 +1,3 @@
-using System.Linq;
-using System.Reactive.Linq;
 using Microsoft.Reactive.Testing;
 using MvvmCross.ViewModels;
 using NSubstitute;
@@ -8,7 +6,6 @@ using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.Login;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.Services;
-using Toggl.Foundation.Suggestions;
 using Toggl.PrimeRadiant;
 using Toggl.PrimeRadiant.Settings;
 using Toggl.Ultrawave;
@@ -37,8 +34,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         protected IPasswordManagerService PasswordManagerService { get; } = Substitute.For<IPasswordManagerService>();
         protected IErrorHandlingService ErrorHandlingService { get; } = Substitute.For<IErrorHandlingService>();
 
-        protected ISuggestionProviderContainer SuggestionProviderContainer { get; } =
-            Substitute.For<ISuggestionProviderContainer>();
         protected IAutocompleteProvider AutocompleteProvider { get; } = Substitute.For<IAutocompleteProvider>();
         protected IAccessRestrictionStorage AccessRestrictionStorage { get; } = Substitute.For<IAccessRestrictionStorage>();
         protected IStopwatchProvider StopwatchProvider { get; } = Substitute.For<IStopwatchProvider>();

@@ -4,8 +4,6 @@ using Android.Content;
 using MvvmCross;
 using MvvmCross.Binding;
 using MvvmCross.Droid.Support.V7.AppCompat;
-using MvvmCross.Exceptions;
-using MvvmCross.Logging;
 using MvvmCross.Navigation;
 using MvvmCross.Platforms.Android;
 using MvvmCross.Platforms.Android.Presenters;
@@ -75,10 +73,6 @@ namespace Toggl.Giskard
             var database = new Database();
             var scheduler = Scheduler.Default;
             var timeService = new TimeService(scheduler);
-            var suggestionProviderContainer = new SuggestionProviderContainer(
-                new MostUsedTimeEntrySuggestionProvider(database, timeService, maxNumberOfSuggestions)
-            );
-
             var appVersion = Version.Parse(version);
             var userAgent = new UserAgent(clientName, version);
             var mailService = new MailServiceAndroid(ApplicationContext);
@@ -112,7 +106,6 @@ namespace Toggl.Giskard
                     .WithRemoteConfigService<RemoteConfigServiceAndroid>()
                     .WithApiFactory(new ApiFactory(environment, userAgent))
                     .WithBackgroundService(new BackgroundService(timeService))
-                    .WithSuggestionProviderContainer(suggestionProviderContainer)
                     .WithApplicationShortcutCreator(new ApplicationShortcutCreator(ApplicationContext))
                     .WithPlatformInfo(platformInfo)
                     .WithStopwatchProvider<FirebaseStopwatchProviderAndroid>()

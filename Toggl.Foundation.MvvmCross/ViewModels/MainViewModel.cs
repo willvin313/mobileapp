@@ -3,9 +3,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Threading.Tasks;
-using MvvmCross.Commands;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 using Toggl.Foundation;
@@ -23,7 +21,6 @@ using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.MvvmCross.ViewModels.Hints;
 using Toggl.Foundation.MvvmCross.ViewModels.Reports;
 using Toggl.Foundation.Services;
-using Toggl.Foundation.Suggestions;
 using Toggl.Foundation.Sync;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
@@ -106,7 +103,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IInteractorFactory interactorFactory,
             IMvxNavigationService navigationService,
             IRemoteConfigService remoteConfigService,
-            ISuggestionProviderContainer suggestionProviders,
             IIntentDonationService intentDonationService,
             IAccessRestrictionStorage accessRestrictionStorage,
             ISchedulerProvider schedulerProvider,
@@ -123,7 +119,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
             Ensure.Argument.IsNotNull(stopwatchProvider, nameof(stopwatchProvider));
             Ensure.Argument.IsNotNull(remoteConfigService, nameof(remoteConfigService));
-            Ensure.Argument.IsNotNull(suggestionProviders, nameof(suggestionProviders));
             Ensure.Argument.IsNotNull(intentDonationService, nameof(intentDonationService));
             Ensure.Argument.IsNotNull(accessRestrictionStorage, nameof(accessRestrictionStorage));
 
@@ -140,7 +135,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             TimeService = timeService;
 
-            SuggestionsViewModel = new SuggestionsViewModel(timeService, dataSource, interactorFactory, onboardingStorage, navigationService, suggestionProviders, schedulerProvider);
+            SuggestionsViewModel = new SuggestionsViewModel(timeService, dataSource, interactorFactory, onboardingStorage, schedulerProvider, navigationService);
             RatingViewModel = new RatingViewModel(timeService, dataSource, ratingService, analyticsService, onboardingStorage, navigationService, SchedulerProvider);
             TimeEntriesViewModel = new TimeEntriesViewModel(dataSource, interactorFactory, analyticsService, SchedulerProvider);
 

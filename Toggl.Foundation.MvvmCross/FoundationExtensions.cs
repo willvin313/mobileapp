@@ -91,7 +91,6 @@ namespace Toggl.Foundation.MvvmCross
             Mvx.RegisterSingleton(foundation.NotificationService);
             Mvx.RegisterSingleton(foundation.Database.IdProvider);
             Mvx.RegisterSingleton(foundation.RemoteConfigService);
-            Mvx.RegisterSingleton(foundation.SuggestionProviderContainer);
             Mvx.RegisterSingleton(foundation.UserPreferences);
             Mvx.RegisterSingleton(foundation.OnboardingStorage);
             Mvx.RegisterSingleton(foundation.AccessRestrictionStorage);

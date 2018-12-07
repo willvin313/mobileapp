@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -13,7 +12,6 @@ using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
 using Toggl.Foundation.MvvmCross.ViewModels.Reports;
 using Toggl.Foundation.Services;
-using Toggl.Foundation.Suggestions;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
@@ -48,7 +46,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IPermissionsService permissionsService,
             IMvxNavigationService navigationService,
             IRemoteConfigService remoteConfigService,
-            ISuggestionProviderContainer suggestionProviders,
             IIntentDonationService intentDonationService,
             IAccessRestrictionStorage accessRestrictionStorage,
             IStopwatchProvider stopwatchProvider)
@@ -66,7 +63,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
             Ensure.Argument.IsNotNull(permissionsService, nameof(permissionsService));
             Ensure.Argument.IsNotNull(remoteConfigService, nameof(remoteConfigService));
-            Ensure.Argument.IsNotNull(suggestionProviders, nameof(suggestionProviders));
             Ensure.Argument.IsNotNull(accessRestrictionStorage, nameof(accessRestrictionStorage));
             Ensure.Argument.IsNotNull(intentDonationService, nameof(intentDonationService));
             Ensure.Argument.IsNotNull(dialogService, nameof(dialogService));
@@ -86,7 +82,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 interactorFactory,
                 navigationService,
                 remoteConfigService,
-                suggestionProviders,
                 intentDonationService,
                 accessRestrictionStorage,
                 schedulerProvider,

@@ -4,7 +4,6 @@ using Toggl.Foundation.Analytics;
 using Toggl.Foundation.Login;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Shortcuts;
-using Toggl.Foundation.Suggestions;
 using Toggl.Foundation.Suggestions.Interfaces;
 using Toggl.Multivac;
 using Toggl.PrimeRadiant;
@@ -39,7 +38,6 @@ namespace Toggl.Foundation
         public IIntentDonationService IntentDonationService { get; }
         public IDismissedSuggestionStorage DismissedSuggestionStorage { get; }
         public IPrivateSharedStorageService PrivateSharedStorageService { get; }
-        public ISuggestionProviderContainer SuggestionProviderContainer { get; }
 
         public static Builder ForClient(UserAgent userAgent, Version version)
             => new Builder(userAgent, version);
@@ -71,7 +69,6 @@ namespace Toggl.Foundation
             IntentDonationService = builder.IntentDonationService;
             DismissedSuggestionStorage = builder.DismissedSuggestionStorage;
             PrivateSharedStorageService = builder.PrivateSharedStorageService;
-            SuggestionProviderContainer = builder.SuggestionProviderContainer;
         }
 
         public class Builder
@@ -99,7 +96,6 @@ namespace Toggl.Foundation
             public IApplicationShortcutCreator ShortcutCreator { get; internal set; }
             public IIntentDonationService IntentDonationService { get; internal set; }
             public IDismissedSuggestionStorage DismissedSuggestionStorage { get; internal set; }
-            public ISuggestionProviderContainer SuggestionProviderContainer { get; internal set; }
             public IPrivateSharedStorageService PrivateSharedStorageService { get; internal set; }
 
             public Builder(UserAgent agent, Version version)
@@ -183,12 +179,6 @@ namespace Toggl.Foundation
             public Builder WithPlatformConstants(IPlatformConstants platformConstants)
             {
                 PlatformConstants = platformConstants;
-                return this;
-            }
-
-            public Builder WithSuggestionProviderContainer(ISuggestionProviderContainer suggestionProviderContainer)
-            {
-                SuggestionProviderContainer = suggestionProviderContainer;
                 return this;
             }
 
@@ -280,10 +270,6 @@ namespace Toggl.Foundation
                 where TPlatformConstants : IPlatformConstants, new()
                 => WithPlatformConstants(new TPlatformConstants());
 
-            public Builder WithSuggestionProviderContainer<TSuggestionProviderContainer>()
-                where TSuggestionProviderContainer : ISuggestionProviderContainer, new()
-                => WithSuggestionProviderContainer(new TSuggestionProviderContainer());
-
             public Builder WithRemoteConfigService<TRemoteConfigService>()
                 where TRemoteConfigService : IRemoteConfigService, new()
                 => WithRemoteConfigService(new TRemoteConfigService());
@@ -330,7 +316,6 @@ namespace Toggl.Foundation
                 Ensure.Argument.IsNotNull(RemoteConfigService, nameof(RemoteConfigService));
                 Ensure.Argument.IsNotNull(IntentDonationService, nameof(IntentDonationService));
                 Ensure.Argument.IsNotNull(DismissedSuggestionStorage, nameof(DismissedSuggestionStorage));
-                Ensure.Argument.IsNotNull(SuggestionProviderContainer, nameof(SuggestionProviderContainer));
                 Ensure.Argument.IsNotNull(PrivateSharedStorageService, nameof(PrivateSharedStorageService));
             }
         }

@@ -75,9 +75,6 @@ namespace Toggl.Daneel
             var mailService = new MailServiceIos(topViewControllerProvider);
             var dialogService = new DialogServiceIos(topViewControllerProvider);
             var platformConstants = new PlatformConstants();
-            var suggestionProviderContainer = new SuggestionProviderContainer(
-                new MostUsedTimeEntrySuggestionProvider(database, timeService, maxNumberOfSuggestions)
-            );
             var intentDonationService = new IntentDonationServiceIos();
             var privateSharedStorageService = new PrivateSharedStorageServiceIos();
 
@@ -111,7 +108,6 @@ namespace Toggl.Daneel
                     .WithApiFactory(new ApiFactory(environment, userAgent))
                     .WithBackgroundService(new BackgroundService(timeService))
                     .WithApplicationShortcutCreator(new ApplicationShortcutCreator())
-                    .WithSuggestionProviderContainer(suggestionProviderContainer)
                     .WithIntentDonationService(intentDonationService)
                     .WithStopwatchProvider<FirebaseStopwatchProviderIos>()
                     .WithDismissedSuggestionStorage<DismissedSuggestionStorage>()

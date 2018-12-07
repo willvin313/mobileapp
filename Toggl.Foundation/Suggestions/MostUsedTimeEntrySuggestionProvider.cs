@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using Toggl.Foundation.DataSources;
 using Toggl.Multivac;
-using Toggl.PrimeRadiant;
 using Toggl.PrimeRadiant.Models;
 
 namespace Toggl.Foundation.Suggestions
@@ -13,23 +13,25 @@ namespace Toggl.Foundation.Suggestions
         private const int daysToQuery = 42;
         private static readonly TimeSpan thresholdPeriod = TimeSpan.FromDays(daysToQuery);
 
-        private readonly ITogglDatabase database;
         private readonly ITimeService timeService;
         private readonly int maxNumberOfSuggestions;
+        private readonly ITogglDataSource dataSource;
 
-        public MostUsedTimeEntrySuggestionProvider(ITogglDatabase database,
-            ITimeService timeService, int maxNumberOfSuggestions)
+        public MostUsedTimeEntrySuggestionProvider(
+            ITimeService timeService,
+            ITogglDataSource dataSource,
+            int maxNumberOfSuggestions)
         {
-            Ensure.Argument.IsNotNull(database, nameof(database));
+            Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
 
-            this.database = database;
+            this.dataSource = dataSource;
             this.timeService = timeService;
             this.maxNumberOfSuggestions = maxNumberOfSuggestions;
         }
 
         public IObservable<Suggestion> GetSuggestions()
-            => database.TimeEntries
+            => dataSource.TimeEntries
                        .GetAll(isSuitableForSuggestion)
                        .SelectMany(mostUsedTimeEntry)
                        .Take(maxNumberOfSuggestions);
