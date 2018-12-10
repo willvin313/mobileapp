@@ -7,6 +7,7 @@ using MvvmCross.UI;
 using PropertyChanged;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.MvvmCross.Helper;
+using Toggl.Foundation.MvvmCross.ViewModels.UserAccess;
 using Toggl.Multivac;
 using Toggl.PrimeRadiant.Settings;
 
@@ -118,7 +119,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             if (onboardingStorage.CompletedOnboarding())
             {
-                await navigationService.Navigate<LoginViewModel>();
+                await navigationService.Navigate<SignupOrLoginChoiceViewModel>();
             }
             else
             {
@@ -130,7 +131,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private async Task skip()
         {
             analyticsService.OnboardingSkip.Track(pageNames[CurrentPage]);
-            await navigationService.Navigate<LoginViewModel>();
+            await navigationService.Navigate<SignupOrLoginChoiceViewModel>();
         }
 
         private async Task next()
@@ -152,7 +153,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 onboardingStorage.SetCompletedOnboarding();
             }
 
-            return navigationService.Navigate<LoginViewModel>();
+            return navigationService.Navigate<SignupOrLoginChoiceViewModel>();
         }
 
         private void previous()

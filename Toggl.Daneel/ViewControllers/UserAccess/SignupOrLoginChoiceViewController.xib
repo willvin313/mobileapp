@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina5_9" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="SignupOrLoginChoiceViewController">
+            <connections>
+                <outlet property="LoginButton" destination="yBK-tG-Q4A" id="ryf-o2-rfA"/>
+                <outlet property="SignUpButton" destination="Ri4-EN-7Zg" id="5XF-UD-icf"/>
+                <outlet property="view" destination="2" id="RRd-Eg-VrN"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="2">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" hasAttributedTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="yBK-tG-Q4A">
+                    <rect key="frame" x="16" y="740" width="343" height="40"/>
+                    <color key="backgroundColor" red="0.023529411760000001" green="0.66666666669999997" blue="0.96078431369999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="40" id="ZLL-D7-HTW"/>
+                    </constraints>
+                    <state key="normal">
+                        <attributedString key="attributedTitle">
+                            <fragment content="Have an account? ">
+                                <attributes>
+                                    <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                    <font key="NSFont" metaFont="system" size="14"/>
+                                </attributes>
+                            </fragment>
+                            <fragment content="Log in">
+                                <attributes>
+                                    <color key="NSColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                    <font key="NSFont" size="14" name=".AppleSystemUIFontEmphasized"/>
+                                    <font key="NSOriginalFont" size="14" name=".AppleSystemUIFontEmphasized"/>
+                                </attributes>
+                            </fragment>
+                        </attributedString>
+                    </state>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                            <integer key="value" value="8"/>
+                        </userDefinedRuntimeAttribute>
+                    </userDefinedRuntimeAttributes>
+                </button>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ri4-EN-7Zg">
+                    <rect key="frame" x="16" y="688" width="343" height="40"/>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="40" id="iQF-7a-KV8"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" name=".AppleSystemUIFont" family=".AppleSystemUIFont" pointSize="14"/>
+                    <state key="normal" title="Sign Up">
+                        <color key="titleColor" red="0.36862745098039218" green="0.35686274509803922" blue="0.35686274509803922" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    </state>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                            <integer key="value" value="8"/>
+                        </userDefinedRuntimeAttribute>
+                    </userDefinedRuntimeAttributes>
+                </button>
+                <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="togglLogoWithText" translatesAutoresizingMaskIntoConstraints="NO" id="jdq-7j-9x3">
+                    <rect key="frame" x="93.666666666666671" y="245" width="187.66666666666663" height="122"/>
+                </imageView>
+            </subviews>
+            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstItem="yBK-tG-Q4A" firstAttribute="leading" secondItem="2" secondAttribute="leading" constant="16" id="3y2-rK-1Io"/>
+                <constraint firstItem="Ri4-EN-7Zg" firstAttribute="leading" secondItem="yBK-tG-Q4A" secondAttribute="leading" id="7RQ-Qj-HDD"/>
+                <constraint firstItem="jdq-7j-9x3" firstAttribute="centerX" secondItem="2" secondAttribute="centerX" id="Lal-WT-ncy"/>
+                <constraint firstItem="jdq-7j-9x3" firstAttribute="width" secondItem="2" secondAttribute="width" multiplier="1/2" id="WkM-ly-Cr9"/>
+                <constraint firstItem="jdq-7j-9x3" firstAttribute="centerY" secondItem="2" secondAttribute="centerY" constant="-100" id="gEb-II-mbt"/>
+                <constraint firstItem="Ri4-EN-7Zg" firstAttribute="trailing" secondItem="yBK-tG-Q4A" secondAttribute="trailing" id="gsL-pm-mYT"/>
+                <constraint firstItem="yBK-tG-Q4A" firstAttribute="top" secondItem="Ri4-EN-7Zg" secondAttribute="bottom" constant="12" id="hOF-lF-mUw"/>
+                <constraint firstAttribute="bottom" secondItem="yBK-tG-Q4A" secondAttribute="bottom" constant="32" id="rxy-6E-MEZ"/>
+                <constraint firstAttribute="trailing" secondItem="yBK-tG-Q4A" secondAttribute="trailing" constant="16" id="wTk-fR-ylH"/>
+            </constraints>
+            <point key="canvasLocation" x="53.600000000000001" y="48.125937031484263"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="togglLogoWithText" width="400" height="122"/>
+    </resources>
+</document>

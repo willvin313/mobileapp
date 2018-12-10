@@ -47,6 +47,7 @@ namespace Toggl.Foundation.MvvmCross.Helper
 
         public static class Signup
         {
+            public static readonly MvxColor EnabledButtonColor = pinkishGrey;
             public static readonly MvxColor HighlightedText = azure;
         }
 

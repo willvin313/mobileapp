@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.MvvmCross.ViewModels.UserAccess;
 using Toggl.Foundation.Tests.Generators;
 using Xunit;
 
@@ -92,11 +93,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheSkipCommand : OnboardingViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task NavigatesToTheLoginPage()
+            public async Task NavigatesToTheSignUpOrLoginScreen()
             {
                 await ViewModel.SkipCommand.ExecuteAsync();
 
-                await NavigationService.Received().Navigate<LoginViewModel>();
+                await NavigationService.Received().Navigate<SignupOrLoginChoiceViewModel>();
             }
 
             [Theory, LogIfTooSlow]
@@ -134,7 +135,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 await ViewModel.NextCommand.ExecuteAsync();
 
-                await NavigationService.Received().Navigate<LoginViewModel>();
+                await NavigationService.Received().Navigate<SignupOrLoginChoiceViewModel>();
             }
 
             [Fact, LogIfTooSlow]
@@ -184,13 +185,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task NavigatesToTheLoginPageIfUserHasCompletedOnboarding()
+            public async Task NavigatesToTheSignUpOrLoginScreenIfUserHasCompletedOnboarding()
             {
                 OnboardingStorage.CompletedOnboarding().Returns(true);
 
                 await ViewModel.Initialize();
 
-                await NavigationService.Received().Navigate<LoginViewModel>();
+                await NavigationService.Received().Navigate<SignupOrLoginChoiceViewModel>();
             }
         }
     }
