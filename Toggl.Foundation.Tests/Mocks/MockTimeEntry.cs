@@ -92,6 +92,7 @@ namespace Toggl.Foundation.Tests.Mocks
         {
             Id = entity.Id;
             WorkspaceId = entity.WorkspaceId;
+            Workspace = entity.Workspace;
             ProjectId = entity.ProjectId;
             TaskId = entity.TaskId;
             Billable = entity.Billable;

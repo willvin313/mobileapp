@@ -31,10 +31,25 @@ namespace Toggl.Foundation.Suggestions
         }
 
         public IObservable<Suggestion> GetSuggestions()
-            => dataSource.TimeEntries
-                       .GetAll(isSuitableForSuggestion)
-                       .SelectMany(mostUsedTimeEntry)
-                       .Take(maxNumberOfSuggestions);
+            => dataSource
+                .TimeEntries
+                .GetAll()
+                .SelectMany(createSuggestions);
+
+        private IEnumerable<Suggestion> createSuggestions(IEnumerable<IDatabaseTimeEntry> timeEntries)
+        {
+            var countOfAllTimeEntries = timeEntries.Count();
+
+            return timeEntries
+                .Where(isSuitableForSuggestion)
+                .GroupBy(te => new { te.Description, te.ProjectId, te.TaskId })
+                .OrderByDescending(g => g.Count())
+                .Select(grouping =>
+                    new Suggestion(
+                        grouping.First(),
+                        calculateCertainty(grouping.Count(), countOfAllTimeEntries)))
+                .Take(maxNumberOfSuggestions);
+        }
 
         private bool isSuitableForSuggestion(IDatabaseTimeEntry timeEntry)
             => string.IsNullOrEmpty(timeEntry.Description) == false
@@ -49,10 +64,7 @@ namespace Toggl.Foundation.Suggestions
                && !timeEntry.IsInaccessible
                && (timeEntry.Project?.Active ?? true);
 
-        private IEnumerable<Suggestion> mostUsedTimeEntry(IEnumerable<IDatabaseTimeEntry> timeEntries)
-            => timeEntries.GroupBy(te => new { te.Description, te.ProjectId, te.TaskId })
-                       .OrderByDescending(g => g.Count())
-                       .Select(grouping => grouping.First())
-                       .Select(timeEntry => new Suggestion(timeEntry));
+        private float calculateCertainty(int occurences, int totalCount)
+            => (float)occurences / totalCount;
     }
 }

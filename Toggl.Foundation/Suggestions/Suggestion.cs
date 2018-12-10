@@ -37,8 +37,13 @@ namespace Toggl.Foundation.Suggestions
 
         public TimeSpan? Duration { get; } = null;
 
-        internal Suggestion(IDatabaseTimeEntry timeEntry)
+        public float Certainty { get; }
+
+        internal Suggestion(IDatabaseTimeEntry timeEntry, float certainty)
         {
+            Ensure.Argument.IsInClosedRange(certainty, 0, 1, nameof(certainty));
+
+            Certainty = certainty;
             TaskId = timeEntry.TaskId;
             ProjectId = timeEntry.ProjectId;
             IsBillable = timeEntry.Billable;

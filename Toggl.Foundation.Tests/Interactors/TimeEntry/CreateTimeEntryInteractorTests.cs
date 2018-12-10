@@ -212,17 +212,20 @@ namespace Toggl.Foundation.Tests.Interactors
         {
             protected override IObservable<IDatabaseTimeEntry> CallInteractor(ITimeEntryPrototype prototype)
             {
-                var suggestion = new Suggestion(new MockTimeEntry
-                {
-                    WorkspaceId = prototype.WorkspaceId,
-                    ProjectId = prototype.ProjectId,
-                    TaskId = prototype.TaskId,
-                    Billable = prototype.IsBillable,
-                    Start = prototype.StartTime,
-                    Duration = prototype.Duration?.Ticks,
-                    Description = prototype.Description,
-                    TagIds = prototype.TagIds
-                });
+                var suggestion = new Suggestion(
+                    new MockTimeEntry
+                    {
+                        WorkspaceId = prototype.WorkspaceId,
+                        ProjectId = prototype.ProjectId,
+                        TaskId = prototype.TaskId,
+                        Billable = prototype.IsBillable,
+                        Start = prototype.StartTime,
+                        Duration = prototype.Duration?.Ticks,
+                        Description = prototype.Description,
+                        TagIds = prototype.TagIds
+                    },
+                    0.5f
+                );
 
                 return InteractorFactory.StartSuggestion(suggestion).Execute();
             }

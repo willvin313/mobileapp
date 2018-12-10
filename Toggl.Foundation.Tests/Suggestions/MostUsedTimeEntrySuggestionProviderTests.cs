@@ -11,6 +11,9 @@ using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.Suggestions;
 using Toggl.Foundation.Tests.Generators;
+using Toggl.Foundation.Tests.Mocks;
+using Toggl.Multivac.Models;
+using Toggl.PrimeRadiant;
 using Toggl.PrimeRadiant.Models;
 using Xunit;
 using TimeEntry = Toggl.Foundation.Models.TimeEntry;
@@ -58,25 +61,28 @@ namespace Toggl.Foundation.Tests.Suggestions
         {
             private IEnumerable<IThreadSafeTimeEntry> getTimeEntries(params int[] numberOfRepetitions)
             {
-                var builder = TimeEntry.Builder.Create(21)
-                    .SetUserId(10)
-                    .SetWorkspaceId(12)
-                    .SetAt(Now)
-                    .SetStart(Now);
+                var workspace = new MockWorkspace { Id = 12 };
+                var timeEntryPrototype = new MockTimeEntry()
+                {
+                    Id = 21,
+                    UserId = 10,
+                    WorkspaceId = workspace.Id,
+                    Workspace = workspace,
+                    At = Now,
+                    Start = Now
+                };
 
                 return Enumerable.Range(0, numberOfRepetitions.Length)
-                    .SelectMany(index => Enumerable
-                        .Range(0, numberOfRepetitions[index])
-                        .Select(_ => builder
-                            .SetDescription($"te{index}")
-                            .Build()));
+                .SelectMany(index => Enumerable
+                    .Range(0, numberOfRepetitions[index])
+                    .Select(_ => new MockTimeEntry(timeEntryPrototype) { Description = $"te{index}" }));
             }
 
             [Fact, LogIfTooSlow]
             public async Task ReturnsEmptyObservableIfThereAreNoTimeEntries()
             {
                 DataSource.TimeEntries
-                        .GetAll(Arg.Any<Func<IDatabaseTimeEntry, bool>>())
+                        .GetAll()
                         .Returns(Observable.Empty<IEnumerable<IThreadSafeTimeEntry>>());
 
                 var suggestions = await Provider.GetSuggestions().ToList();
@@ -93,7 +99,7 @@ namespace Toggl.Foundation.Tests.Suggestions
                 var timeEntries = getTimeEntries(2, 2, 2, 3, 3, 4, 5, 5, 6, 6, 7, 7, 7, 8, 8, 9);
 
                 DataSource.TimeEntries
-                        .GetAll(Arg.Any<Func<IDatabaseTimeEntry, bool>>())
+                        .GetAll()
                         .Returns(Observable.Return(timeEntries));
 
                 var suggestions = provider.GetSuggestions().ToList().Wait();
@@ -106,9 +112,9 @@ namespace Toggl.Foundation.Tests.Suggestions
             {
                 var timeEntries = getTimeEntries(5, 3, 2, 5, 4, 4, 5, 4, 3);
                 var expectedDescriptions = new[] { 0, 3, 6, 4, 5, 7, 1 }.Select(i => $"te{i}");
-                
+              
                 DataSource.TimeEntries
-                        .GetAll(Arg.Any<Func<IDatabaseTimeEntry, bool>>())
+                        .GetAll()
                         .Returns(Observable.Return(timeEntries));
                 
                 var suggestions = await Provider.GetSuggestions().ToList();
@@ -129,8 +135,9 @@ namespace Toggl.Foundation.Tests.Suggestions
                     .Select(_ => builder.Build());
                 var timeEntries = new List<IThreadSafeTimeEntry>(emptyTimeEntries);
                 timeEntries.AddRange(getTimeEntries(1, 2, 3, 4, 5));
+              
                 DataSource.TimeEntries
-                        .GetAll(Arg.Any<Func<IDatabaseTimeEntry, bool>>())
+                        .GetAll()
                         .Returns(Observable.Return(timeEntries));
 
                 var suggestions = await Provider.GetSuggestions().ToList();

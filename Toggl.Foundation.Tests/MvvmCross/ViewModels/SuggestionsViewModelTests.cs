@@ -135,7 +135,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .SetProjectId(projectId)
                     .SetWorkspaceId(11)
                     .SetUserId(12)
-                    .Build()
+                    .Build(),
+                0.5f
             );
 
             private Recorded<Notification<Suggestion>> createRecorded(int ticks, Suggestion suggestion)
@@ -212,7 +213,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 timeEntry.Duration.Returns((long)TimeSpan.FromMinutes(30).TotalSeconds);
                 timeEntry.Description.Returns("Testing");
                 timeEntry.WorkspaceId.Returns(10);
-                return new Suggestion(timeEntry);
+                return new Suggestion(timeEntry, 0.5f);
             }
         }
 
@@ -224,7 +225,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 public void PassingTheCurrentTime(DateTimeOffset now)
                 {
                     TimeService.CurrentDateTime.Returns(now);
-                    var suggestion = new Suggestion(new MockTimeEntry());
+                    var suggestion = new Suggestion(new MockTimeEntry(), 0.5f);
 
                     ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
 
@@ -236,7 +237,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 [Property, LogIfTooSlow]
                 public void PassingTheDescriptionFromSuggestion(string description)
                 {
-                    var suggestion = new Suggestion(new MockTimeEntry { Description = description });
+                    var suggestion = new Suggestion(new MockTimeEntry { Description = description }, 0.5f);
 
                     ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
 
@@ -248,7 +249,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 [Property, LogIfTooSlow]
                 public void PassingTheWorkspaceIdFromSuggestion(long workspaceId)
                 {
-                    var suggestion = new Suggestion(new MockTimeEntry { WorkspaceId = workspaceId });
+                    var suggestion = new Suggestion(new MockTimeEntry { WorkspaceId = workspaceId }, 0.5f);
 
                     ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
 
@@ -260,7 +261,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 [Property, LogIfTooSlow]
                 public void PassingTheProjectIdFromSuggestion(long? projectId)
                 {
-                    var suggestion = new Suggestion(new MockTimeEntry { ProjectId = projectId });
+                    var suggestion = new Suggestion(new MockTimeEntry { ProjectId = projectId }, 0.5f);
 
                     ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
 
@@ -272,7 +273,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 [Property, LogIfTooSlow]
                 public void PassingTheTaskIdFromSuggestion(long? taskId)
                 {
-                    var suggestion = new Suggestion(new MockTimeEntry { TaskId = taskId });
+                    var suggestion = new Suggestion(new MockTimeEntry { TaskId = taskId }, 0.5f);
 
                     ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
 

@@ -57,7 +57,7 @@ namespace Toggl.Foundation.Tests.Suggestions
                     TaskId = taskId
                 };
 
-                return new Suggestion(timeEntry);
+                return new Suggestion(timeEntry, 0.5f);
             }
         }
     }
