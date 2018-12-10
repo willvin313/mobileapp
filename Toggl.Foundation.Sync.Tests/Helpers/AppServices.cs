@@ -59,7 +59,6 @@ namespace Toggl.Foundation.Sync.Tests.Helpers
                     TimeService,
                     AnalyticsServiceSubstitute,
                     LastTimeUsageStorageSubstitute,
-                    retryLimit,
                     Scheduler);
 
             var togglDataSource = new TogglDataSource(

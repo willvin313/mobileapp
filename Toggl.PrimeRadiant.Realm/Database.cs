@@ -102,14 +102,8 @@ namespace Toggl.PrimeRadiant.Realm
 
                     if (oldSchemaVersion < 7)
                     {
-                        var newWorkspaces = migration.NewRealm.All<RealmWorkspace>().ToList();
-                        var oldWorkspaces = migration.OldRealm.All("RealmWorkspace").ToList();
-                        for (var i = 0; i < newWorkspaces.Count; i++)
-                        {
-                            var oldWorkspace = oldWorkspaces[i];
-                            var newWorkspace = newWorkspaces[i];
-                            newWorkspace.IsInaccessible = oldWorkspace.IsGhost;
-                        }
+                        // RealmWorkspace: IsGhost was renamed to IsInaccessible
+                        // A migration is not required because the property was not used until now
                     }
                 }
             };

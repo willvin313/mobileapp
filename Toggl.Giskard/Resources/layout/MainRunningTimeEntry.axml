@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:tools="http://schemas.android.com/tools"
+<android.support.constraint.ConstraintLayout
+    xmlns:tools="http://schemas.android.com/tools"
     xmlns:local="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/MainRunningTimeEntryFrame"
@@ -18,7 +19,7 @@
         local:layout_constraintLeft_toLeftOf="parent"
         local:layout_constraintRight_toRightOf="parent"
         local:layout_constraintBottom_toBottomOf="parent"
-        local:layout_constraintTop_toBottomOf="@id/guideline"
+        local:layout_constraintTop_toBottomOf="@+id/guideline"
         android:layout_width="0dp"
         android:layout_height="0dp" />
     <TextView
@@ -39,8 +40,9 @@
         android:textSize="15sp"
         android:singleLine="true"
         android:fontFamily="sans-serif"
-        local:layout_constraintBottom_toBottomOf="parent"
         android:textColor="@color/runningEntryDescription"
+        local:layout_constraintHorizontal_bias="0"
+        local:layout_constraintBottom_toBottomOf="parent"
         local:layout_constraintHorizontal_chainStyle="packed"
         local:layout_constraintLeft_toLeftOf="@id/MainRunningTimeEntryTimerLabel"
         local:layout_constraintTop_toBottomOf="@id/MainRunningTimeEntryTimerLabel"
@@ -73,52 +75,36 @@
         android:layout_height="wrap_content" />
     <FrameLayout
         android:id="@+id/MainRunningTimeEntryProjectDotContainer"
-        local:layout_constraintTop_toTopOf="@+id/MainRunningTimeEntryProjectLabel"
-        local:layout_constraintRight_toLeftOf="@id/MainRunningTimeEntryProjectLabel"
-        local:layout_constraintBottom_toBottomOf="@id/MainRunningTimeEntryProjectLabel"
         local:layout_constraintLeft_toRightOf="@id/MainRunningTimeEntryAddDescriptionLabel"
+        local:layout_constraintTop_toTopOf="@+id/MainRunningTimeEntryProjectClientTaskLabel"
+        local:layout_constraintRight_toLeftOf="@id/MainRunningTimeEntryProjectClientTaskLabel"
+        local:layout_constraintBottom_toBottomOf="@id/MainRunningTimeEntryProjectClientTaskLabel"
         android:layout_marginLeft="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
         <View
-            android:id="@+id/MainRunningTimeEntryProjectDotView"    
+            android:id="@+id/MainRunningTimeEntryProjectDotView"
             android:background="@drawable/SmallDot"
             android:layout_width="4dp"
             android:layout_height="4dp"
             android:layout_gravity="center" />
     </FrameLayout>
     <TextView
-        android:id="@+id/MainRunningTimeEntryProjectLabel"
+        android:id="@+id/MainRunningTimeEntryProjectClientTaskLabel"
         tools:text="Design"
         tools:textColor="#c56bff"
         android:maxLines="1"
+        android:ellipsize="end"
         android:textSize="15sp"
         android:singleLine="true"
         android:fontFamily="sans-serif-medium"
+        local:layout_constraintRight_toRightOf="parent"
         local:layout_constraintBaseline_toBaselineOf="@id/LeadingTextView"
         local:layout_constraintLeft_toRightOf="@id/MainRunningTimeEntryProjectDotContainer"
-        local:layout_constraintRight_toLeftOf="@+id/MainRunningTimeEntryClientLabel"
+        android:layout_width="0dp"
         android:layout_marginLeft="4dp"
         android:layout_marginBottom="16dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true" />
-    <TextView
-        android:id="@+id/MainRunningTimeEntryClientLabel"
-        tools:text="Toggl"
-        android:maxLines="1"
-        android:textSize="15sp"
-        android:singleLine="true"
-        android:fontFamily="sans-serif"
-        android:textColor="@color/clientName"
-        local:layout_constraintBaseline_toBaselineOf="@id/LeadingTextView"
-        local:layout_constraintLeft_toRightOf="@id/MainRunningTimeEntryProjectLabel"
-        android:layout_marginLeft="4dp"
-        android:layout_marginBottom="16dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@id/MainRunningTimeEntryProjectLabel" />
+        android:layout_height="wrap_content" />
     <View
         local:layout_constraintRight_toRightOf="parent"
         local:layout_constraintBottom_toBottomOf="parent"

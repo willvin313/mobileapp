@@ -19,7 +19,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public abstract class NotificationSettingsViewModelTest : BaseViewModelTests<NotificationSettingsViewModel>
         {
             protected override NotificationSettingsViewModel CreateViewModel()
-                => new NotificationSettingsViewModel(NavigationService, BackgroundService, PermissionsService, UserPreferences);
+                => new NotificationSettingsViewModel(NavigationService, BackgroundService, PermissionsService, UserPreferences, SchedulerProvider);
         }
 
         public sealed class TheConstructor : NotificationSettingsViewModelTest
@@ -30,14 +30,16 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 bool useNavigationService,
                 bool useBackgroundService,
                 bool usePermissionsService,
-                bool useUserPreferences)
+                bool useUserPreferences,
+                bool useSchedulerProvider)
             {
                 Action tryingToConstructWithEmptyParameters =
                     () => new NotificationSettingsViewModel(
                         useNavigationService ? NavigationService : null,
                         useBackgroundService ? BackgroundService : null,
                         usePermissionsService ? PermissionsService : null,
-                        useUserPreferences ? UserPreferences : null
+                        useUserPreferences ? UserPreferences : null,
+                        useSchedulerProvider ? SchedulerProvider : null
                     );
 
                 tryingToConstructWithEmptyParameters.Should().Throw<ArgumentNullException>();
@@ -54,10 +56,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserver<bool>();
                 PermissionsService.NotificationPermissionGranted.Returns(Observable.Return(permissionGranted));
 
-                var viewModel = new NotificationSettingsViewModel(NavigationService, BackgroundService, PermissionsService, UserPreferences);
+                var viewModel = new NotificationSettingsViewModel(NavigationService, BackgroundService, PermissionsService, UserPreferences, SchedulerProvider);
                 viewModel.PermissionGranted.Subscribe(observer);
 
                 await viewModel.Initialize();
+                TestScheduler.Start();
 
                 observer.Messages.First().Value.Value.Should().Be(permissionGranted);
             }

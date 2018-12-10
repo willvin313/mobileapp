@@ -21,10 +21,10 @@ namespace Toggl.Foundation.Tests.Sync.States.Push.BaseStates
             var state = CreateState();
 
             var transition = state.Start(null).SingleAsync().Wait();
-            var parameter = ((Transition<(Exception Reason, IThreadSafeTestModel)>)transition).Parameter;
+            var parameter = ((Transition<Exception>)transition).Parameter;
 
             transition.Result.Should().Be(state.UnknownError);
-            parameter.Reason.Should().BeOfType<ArgumentNullException>();
+            parameter.Should().BeOfType<ArgumentNullException>();
         }
 
         [Theory, LogIfTooSlow]
@@ -51,10 +51,10 @@ namespace Toggl.Foundation.Tests.Sync.States.Push.BaseStates
             PrepareApiCallFunctionToThrow(exception);
 
             var transition = state.Start(entity).SingleAsync().Wait();
-            var parameter = ((Transition<(Exception Reason, IThreadSafeTestModel)>)transition).Parameter;
+            var parameter = ((Transition<ServerErrorException>)transition).Parameter;
 
             transition.Result.Should().Be(state.ServerError);
-            parameter.Reason.Should().BeAssignableTo<ServerErrorException>();
+            parameter.Should().BeAssignableTo<ServerErrorException>();
         }
 
         [Fact, LogIfTooSlow]
@@ -65,10 +65,10 @@ namespace Toggl.Foundation.Tests.Sync.States.Push.BaseStates
             PrepareApiCallFunctionToThrow(new TestException());
 
             var transition = state.Start(entity).SingleAsync().Wait();
-            var parameter = ((Transition<(Exception Reason, IThreadSafeTestModel)>)transition).Parameter;
+            var parameter = ((Transition<Exception>)transition).Parameter;
 
             transition.Result.Should().Be(state.UnknownError);
-            parameter.Reason.Should().BeOfType<TestException>();
+            parameter.Should().BeOfType<TestException>();
         }
 
         [Fact, LogIfTooSlow]
@@ -79,10 +79,10 @@ namespace Toggl.Foundation.Tests.Sync.States.Push.BaseStates
             PrepareDatabaseOperationToThrow(new TestException());
 
             var transition = state.Start(entity).SingleAsync().Wait();
-            var parameter = ((Transition<(Exception Reason, IThreadSafeTestModel)>)transition).Parameter;
+            var parameter = ((Transition<Exception>)transition).Parameter;
 
             transition.Result.Should().Be(state.UnknownError);
-            parameter.Reason.Should().BeOfType<TestException>();
+            parameter.Should().BeOfType<TestException>();
         }
 
         [Theory, LogIfTooSlow]

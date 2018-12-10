@@ -1,11 +1,13 @@
-﻿using MvvmCross.ViewModels;
+﻿using System;
+using MvvmCross.ViewModels;
 using Toggl.Foundation.Models.Interfaces;
+using Toggl.Foundation.MvvmCross.Interfaces;
 using Toggl.Multivac;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels
 {
     [Preserve(AllMembers = true)]
-    public sealed class SelectableWorkspaceViewModel : MvxNotifyPropertyChanged
+    public sealed class SelectableWorkspaceViewModel : MvxNotifyPropertyChanged, IDiffable<SelectableWorkspaceViewModel>
     {
         public long WorkspaceId { get; set; }
 
@@ -21,5 +23,28 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             WorkspaceId = workspace.Id;
             WorkspaceName = workspace.Name;
         }
+
+        public bool Equals(SelectableWorkspaceViewModel other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return WorkspaceId == other.WorkspaceId && string.Equals(WorkspaceName, other.WorkspaceName) && Selected == other.Selected;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj is SelectableWorkspaceViewModel other && Equals(other);
+        }
+
+        public override int GetHashCode()
+            => HashCode.From(
+                WorkspaceId,
+                WorkspaceName ?? string.Empty,
+                Selected
+            );
+
+        public long Identifier => WorkspaceId;
     }
 }

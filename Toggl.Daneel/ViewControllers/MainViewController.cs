@@ -147,12 +147,12 @@ namespace Toggl.Daneel.ViewControllers
             TimeEntriesLogTableView.CustomRefreshControl = refreshControl;
 
             //Actions
-            settingsButton.Rx().BindAction(ViewModel.OpenSettings);
-            syncFailuresButton.Rx().BindAction(ViewModel.OpenSyncFailures);
-            StopTimeEntryButton.Rx().BindAction(ViewModel.StopTimeEntry, _ => TimeEntryStopOrigin.Manual);
+            settingsButton.Rx().BindAction(ViewModel.OpenSettings).DisposedBy(DisposeBag);
+            syncFailuresButton.Rx().BindAction(ViewModel.OpenSyncFailures).DisposedBy(DisposeBag);
+            StopTimeEntryButton.Rx().BindAction(ViewModel.StopTimeEntry, _ => TimeEntryStopOrigin.Manual).DisposedBy(DisposeBag);
 
-            StartTimeEntryButton.Rx().BindAction(ViewModel.StartTimeEntry, _ => true);
-            StartTimeEntryButton.Rx().BindAction(ViewModel.StartTimeEntry, _ => false, ButtonEventType.LongPress);
+            StartTimeEntryButton.Rx().BindAction(ViewModel.StartTimeEntry, _ => true).DisposedBy(DisposeBag);
+            StartTimeEntryButton.Rx().BindAction(ViewModel.StartTimeEntry, _ => false, ButtonEventType.LongPress).DisposedBy(DisposeBag);
 
             CurrentTimeEntryCard.Rx().Tap()
                 .WithLatestFrom(ViewModel.CurrentRunningTimeEntry, (_, te) => te.Id)

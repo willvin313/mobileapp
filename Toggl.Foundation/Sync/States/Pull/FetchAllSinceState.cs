@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Toggl.Multivac.Extensions;
 using Toggl.Multivac.Models;
 using Toggl.PrimeRadiant;
@@ -14,39 +15,49 @@ namespace Toggl.Foundation.Sync.States.Pull
         private readonly ITogglDatabase database;
         private readonly ITogglApi api;
         private readonly ITimeService timeService;
+        private readonly ILeakyBucket leakyBucket;
         private const int sinceDateLimitMonths = 2;
         private const int fetchTimeEntriesForMonths = 2;
         private const int timeEntriesEndDateInclusiveExtraDaysCount = 2;
 
+        public StateResult<TimeSpan> PreventOverloadingServer { get; } = new StateResult<TimeSpan>();
         public StateResult<IFetchObservables> FetchStarted { get; } = new StateResult<IFetchObservables>();
 
-        public FetchAllSinceState(ITogglDatabase database, ITogglApi api, ITimeService timeService)
+        public FetchAllSinceState(ITogglDatabase database, ITogglApi api, ITimeService timeService, ILeakyBucket leakyBucket)
         {
             this.database = database;
             this.api = api;
             this.timeService = timeService;
+            this.leakyBucket = leakyBucket;
         }
 
         public IObservable<ITransition> Start() => Observable.Create<ITransition>(observer =>
         {
+            if (!leakyBucket.TryClaimFreeSlots(
+                timeService.CurrentDateTime, numberOfSlots: 9, timeToFreeSlot: out var timeToNextFreeSlot))
+            {
+                observer.CompleteWith(PreventOverloadingServer.Transition(timeToNextFreeSlot));
+                return () => { };
+            }
+
             var since = database.SinceParameters;
-            var observables = new FetchObservables(
+            var observables = fetch(since);
+
+            observer.CompleteWith(FetchStarted.Transition(observables));
+            return () => { };
+        });
+
+        private IFetchObservables fetch(ISinceParameterRepository since)
+            => new FetchObservables(
                 api.Workspaces.GetAll().ConnectedReplay(),
                 api.WorkspaceFeatures.GetAll().ConnectedReplay(),
-                api.User.Get(),
+                api.User.Get().ConnectedReplay(),
                 getSinceOrAll(since.Get<IDatabaseClient>(), api.Clients.GetAllSince, api.Clients.GetAll).ConnectedReplay(),
                 getSinceOrAll(since.Get<IDatabaseProject>(), api.Projects.GetAllSince, api.Projects.GetAll).ConnectedReplay(),
                 getSinceOrAll(since.Get<IDatabaseTimeEntry>(), api.TimeEntries.GetAllSince, fetchTwoMonthsOfTimeEntries).ConnectedReplay(),
                 getSinceOrAll(since.Get<IDatabaseTag>(), api.Tags.GetAllSince, api.Tags.GetAll).ConnectedReplay(),
                 getSinceOrAll(since.Get<IDatabaseTask>(), api.Tasks.GetAllSince, api.Tasks.GetAll).ConnectedReplay(),
-                api.Preferences.Get().ConnectedReplay()
-            );
-
-            observer.OnNext(FetchStarted.Transition(observables));
-            observer.OnCompleted();
-
-            return () => { };
-        });
+                api.Preferences.Get().ConnectedReplay());
 
         private IObservable<List<ITimeEntry>> fetchTwoMonthsOfTimeEntries()
             => api.TimeEntries.GetAll(

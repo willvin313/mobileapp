@@ -118,7 +118,7 @@ namespace Toggl.Giskard
                     .WithStopwatchProvider<FirebaseStopwatchProviderAndroid>()
                     .WithIntentDonationService(new NoopIntentDonationServiceAndroid())
                     .WithPrivateSharedStorageService(new NoopPrivateSharedStorageServiceAndroid())
-
+                    .WithBackgroundSyncService<BackgroundSyncServiceAndroid>()
                     .StartRegisteringPlatformServices()
                     .WithDialogService(dialogService)
                     .WithFeedbackService(feedbackService)
@@ -178,8 +178,8 @@ namespace Toggl.Giskard
              * This call makes sure the ITogglDataSource singleton is registered
              * and ready to be injected during those times.
              */
-            var loginManager = Mvx.Resolve<ILoginManager>();
-            var dataSource = loginManager.GetDataSourceIfLoggedIn();
+            var userAccessManager = Mvx.Resolve<IUserAccessManager>();
+            var dataSource = userAccessManager.GetDataSourceIfLoggedIn();
         }
     }
 }

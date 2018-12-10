@@ -64,5 +64,8 @@ namespace Toggl.Foundation.Interactors
 
         public IInteractor<IObservable<IThreadSafeTimeEntry>> StopTimeEntry(DateTimeOffset currentDateTime, TimeEntryStopOrigin origin)
             => new StopTimeEntryInteractor(timeService, dataSource.TimeEntries, currentDateTime, analyticsService, origin);
+
+        public IInteractor<IObservable<Unit>> ObserveTimeEntriesChanges()
+            => new ObserveTimeEntriesChangesInteractor(dataSource);
     }
 }

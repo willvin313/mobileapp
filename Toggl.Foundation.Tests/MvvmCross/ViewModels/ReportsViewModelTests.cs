@@ -588,7 +588,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 DialogService.Select(Arg.Any<string>(), Arg.Any<IEnumerable<(string, IThreadSafeWorkspace)>>(), Arg.Any<int>())
                     .Returns(Observable.Return(mockWorkspace));
 
-                await ViewModel.SelectWorkspace();
+                await ViewModel.SelectWorkspace.Execute();
 
                 await ReportsProvider.Received().GetProjectSummary(Arg.Is(mockWorkspace.Id), Arg.Any<DateTimeOffset>(),
                     Arg.Any<DateTimeOffset>());
@@ -607,7 +607,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 await ViewModel.Initialize();
 
-                await ViewModel.SelectWorkspace();
+                await ViewModel.SelectWorkspace.Execute();
 
                 TestScheduler.Start();
                 observer.Messages.AssertEqual(
@@ -623,7 +623,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 DialogService.Select(Arg.Any<string>(), Arg.Any<IEnumerable<(string, IThreadSafeWorkspace)>>(), Arg.Any<int>())
                     .Returns(Observable.Return<IThreadSafeWorkspace>(null));
 
-                await ViewModel.SelectWorkspace();
+                await ViewModel.SelectWorkspace.Execute();
 
                 await ReportsProvider.DidNotReceive().GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(),
                     Arg.Any<DateTimeOffset>());
@@ -638,7 +638,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 DialogService.Select(Arg.Any<string>(), Arg.Any<IEnumerable<(string, IThreadSafeWorkspace)>>(), Arg.Any<int>())
                     .Returns(Observable.Return<IThreadSafeWorkspace>(mockWorkspace));
 
-                await ViewModel.SelectWorkspace();
+                await ViewModel.SelectWorkspace.Execute();
 
                 await ReportsProvider.DidNotReceive().GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(),
                     Arg.Any<DateTimeOffset>());
@@ -732,7 +732,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 prepareWorkspace(isProEnabled: false);
 
                 await ViewModel.Initialize();
-                await ViewModel.SelectWorkspace();
+                await ViewModel.SelectWorkspace.Execute();
 
                 TestScheduler.Start();
                 isEnabledObserver.Messages.Last().Value.Value.Should().BeFalse();
@@ -744,7 +744,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 prepareWorkspace(isProEnabled: true);
 
                 await ViewModel.Initialize();
-                await ViewModel.SelectWorkspace();
+                await ViewModel.SelectWorkspace.Execute();
 
                 TestScheduler.Start();
                 isEnabledObserver.Messages.Last().Value.Value.Should().BeTrue();

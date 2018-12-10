@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Threading;
+using Android.Animation;
+using Android.Speech.Tts;
 using Android.Views;
 
 namespace Toggl.Giskard.Extensions
@@ -9,7 +12,10 @@ namespace Toggl.Giskard.Extensions
         private int cx, cy, initialRadius, finalRadius;
         private int? duration;
         private AnimationType type;
+        private Animator animator;
         private Action<View> onAnimationEnd;
+        private Action onAnimationCancel;
+        private CancellationToken cancellationToken;
 
         public CircularRevealAnimation(View view)
         {
@@ -17,7 +23,7 @@ namespace Toggl.Giskard.Extensions
             setInitialBehaviour();
         }
 
-        private void setInitialBehaviour() 
+        private void setInitialBehaviour()
         {
             type = AnimationType.Appear;
 
@@ -46,7 +52,7 @@ namespace Toggl.Giskard.Extensions
             var position = new int[2];
             view.GetLocationInWindow(position);
 
-            var (centerX, centerY, initial, final) 
+            var (centerX, centerY, initial, final)
                 = behavior(position[0], position[1], view.MeasuredWidth, view.MeasuredHeight);
 
             cx = centerX;
@@ -70,8 +76,8 @@ namespace Toggl.Giskard.Extensions
             return this;
         }
 
-        public CircularRevealAnimation FromBottomLeftToTopRight() 
-        { 
+        public CircularRevealAnimation FromBottomLeftToTopRight()
+        {
             var position = new int[2];
             view.GetLocationInWindow(position);
 
@@ -85,7 +91,7 @@ namespace Toggl.Giskard.Extensions
 
         public CircularRevealAnimation SetDuration(TimeSpan span)
         {
-            duration = (int)span.TotalMilliseconds;
+            duration = (int) span.TotalMilliseconds;
 
             return this;
         }
@@ -99,8 +105,23 @@ namespace Toggl.Giskard.Extensions
 
         public CircularRevealAnimation OnAnimationEnd(Action<View> action)
         {
-            this.onAnimationEnd = action;
+            onAnimationEnd = action;
+            return this;
+        }
 
+        public CircularRevealAnimation OnAnimationCancel(Action action)
+        {
+            onAnimationCancel = action;
+            return this;
+        }
+
+        public CircularRevealAnimation WithCancellationToken(CancellationToken cancellationToken)
+        {
+            this.cancellationToken = cancellationToken;
+            this.cancellationToken.Register(() =>
+            {
+                animator?.Cancel();
+            });
             return this;
         }
 
@@ -114,7 +135,7 @@ namespace Toggl.Giskard.Extensions
                 if (type == AnimationType.Disappear)
                     (initialRadius, finalRadius) = (finalRadius, initialRadius);
 
-                var animator = ViewAnimationUtils.CreateCircularReveal(view, cx, cy, initialRadius, finalRadius);
+                animator = ViewAnimationUtils.CreateCircularReveal(view, cx, cy, initialRadius, finalRadius);
 
                 if (duration.HasValue)
                     animator.SetDuration(duration.Value);
@@ -129,12 +150,32 @@ namespace Toggl.Giskard.Extensions
                     onAnimationEnd?.Invoke(view);
                 };
 
-                animator.AnimationEnd += onEnd;
+                EventHandler onCancel = null;
+                onCancel = (o, s) =>
+                {
+                    view.Visibility = type == AnimationType.Disappear ? ViewStates.Visible : ViewStates.Invisible;
+                    animator.AnimationEnd -= onEnd;
+                    animator.AnimationCancel -= onCancel;
+                    onAnimationCancel?.Invoke();
+                };
 
-                if (type == AnimationType.Appear)
-                    view.Visibility = ViewStates.Visible;
+                animator.AnimationEnd += onEnd;
+                animator.AnimationCancel += onCancel;
+
+                animator.AnimationStart += (o, s) =>
+                {
+                    if (type == AnimationType.Appear)
+                    {
+                        view.Visibility = ViewStates.Visible;
+                    }
+                };
 
                 animator.Start();
+
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    animator.Cancel();
+                }
             });
         }
 

@@ -9,6 +9,7 @@ using Toggl.PrimeRadiant.Settings;
 using Toggl.Ultrawave.Network;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Sync;
+using Toggl.Foundation.Diagnostics;
 
 namespace Toggl.Foundation.Tests
 {
@@ -28,6 +29,7 @@ namespace Toggl.Foundation.Tests
         protected UserAgent UserAgent { get; } = new UserAgent("Tests", "0.0");
         protected ICalendarService CalendarService { get; } = Substitute.For<ICalendarService>();
         protected ISyncManager SyncManager { get; } = Substitute.For<ISyncManager>();
+        protected IStopwatchProvider StopwatchProvider { get; } = Substitute.For<IStopwatchProvider>();
 
         protected IInteractorFactory InteractorFactory { get; }
 
@@ -46,7 +48,8 @@ namespace Toggl.Foundation.Tests
                 PlatformConstants,
                 UserAgent,
                 CalendarService,
-                SyncManager
+                SyncManager,
+                StopwatchProvider
             );
         }
     }

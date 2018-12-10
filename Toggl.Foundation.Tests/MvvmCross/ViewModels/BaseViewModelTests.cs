@@ -23,7 +23,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         protected IApiFactory ApiFactory { get; } = Substitute.For<IApiFactory>();
         protected IMailService MailService { get; } = Substitute.For<IMailService>();
         protected ITogglDatabase Database { get; } = Substitute.For<ITogglDatabase>();
-        protected ILoginManager LoginManager { get; } = Substitute.For<ILoginManager>();
+        protected IUserAccessManager UserAccessManager { get; } = Substitute.For<IUserAccessManager>();
         protected UserAgent UserAgent { get; } = new UserAgent("Foundation.Tests", "1.0");
         protected IRatingService RatingService { get; } = Substitute.For<IRatingService>();
         protected IDialogService DialogService { get; } = Substitute.For<IDialogService>();

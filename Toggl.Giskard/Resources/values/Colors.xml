@@ -36,4 +36,6 @@
     <color name="popupBlueBackground">#328FFF</color>
     <color name="lightGray48Opacity">#7AFAFBFC</color>
     <color name="textEditBackgroundTint">#E2E2E2</color>
+    <color name="billableColor">#328fff</color>
+    <color name="nonBillableColor">#1e328fff</color>
 </resources>

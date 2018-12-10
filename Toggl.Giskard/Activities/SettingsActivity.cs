@@ -95,20 +95,20 @@ namespace Toggl.Giskard.Activities
                 .Subscribe(showFeedbackSuccessToast)
                 .DisposedBy(DisposeBag);
 
-            logoutView.Rx().Tap()
-                .Subscribe(_ => ViewModel.TryLogout())
+            logoutView.Rx()
+                .BindAction(ViewModel.TryLogout)
                 .DisposedBy(DisposeBag);
 
-            helpView.Rx().Tap()
-                .Subscribe(ViewModel.OpenHelpView)
+            helpView.Rx()
+                .BindAction(ViewModel.OpenHelpView)
                 .DisposedBy(DisposeBag);
 
-            aboutView.Rx().Tap()
-                .Subscribe(ViewModel.OpenAboutView)
+            aboutView.Rx()
+                .BindAction(ViewModel.OpenAboutView)
                 .DisposedBy(DisposeBag);
 
-            feedbackView.Rx().Tap()
-                .Subscribe(ViewModel.SubmitFeedback)
+            feedbackView.Rx()
+                .BindAction(ViewModel.SubmitFeedback)
                 .DisposedBy(DisposeBag);
 
             manualModeView.Rx().Tap()
@@ -127,8 +127,8 @@ namespace Toggl.Giskard.Activities
                 .VoidSubscribe(ViewModel.ToggleStoppedTimerNotifications)
                 .DisposedBy(DisposeBag);
 
-            beginningOfWeekView.Rx().Tap()
-                .Subscribe(ViewModel.SelectBeginningOfWeek)
+            beginningOfWeekView.Rx()
+                .BindAction(ViewModel.SelectBeginningOfWeek)
                 .DisposedBy(DisposeBag);
 
             setupToolbar();

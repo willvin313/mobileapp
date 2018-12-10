@@ -5,8 +5,11 @@ using Toggl.Multivac;
 
 namespace Toggl.Foundation.Login
 {
-    public interface ILoginManager
+    public interface IUserAccessManager
     {
+        IObservable<Unit> UserLoggedIn { get; }
+        IObservable<Unit> UserLoggedOut { get; }
+
         ITogglDataSource GetDataSourceIfLoggedIn();
 
         IObservable<ITogglDataSource> LoginWithGoogle();

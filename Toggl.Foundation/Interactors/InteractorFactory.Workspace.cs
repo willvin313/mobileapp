@@ -8,7 +8,7 @@ namespace Toggl.Foundation.Interactors
     public sealed partial class InteractorFactory : IInteractorFactory
     {
         public IInteractor<IObservable<IThreadSafeWorkspace>> GetDefaultWorkspace()
-            => new GetDefaultWorkspaceInteractor(dataSource);
+            => new GetDefaultWorkspaceInteractor(dataSource, analyticsService);
 
         public IInteractor<IObservable<Unit>> SetDefaultWorkspace(long workspaceId)
             => new SetDefaultWorkspaceInteractor(timeService, dataSource.User, workspaceId);
@@ -33,5 +33,11 @@ namespace Toggl.Foundation.Interactors
 
         public IInteractor<IObservable<Unit>> CreateDefaultWorkspace()
             => new CreateDefaultWorkspaceInteractor(idProvider, timeService, dataSource.User, dataSource.Workspaces);
+
+        public IInteractor<IObservable<IEnumerable<IThreadSafeWorkspace>>> ObserveAllWorkspaces()
+            => new ObserveAllWorkspacesInteractor(dataSource);
+
+        public IInteractor<IObservable<Unit>> ObserveWorkspacesChanges()
+            => new ObserveWorkspacesChangesInteractor(dataSource);
     }
 }

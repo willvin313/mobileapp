@@ -15,7 +15,6 @@
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
     <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
-    <AndroidUseLatestPlatformSdk>true</AndroidUseLatestPlatformSdk>
     <AndroidLinkMode>Full</AndroidLinkMode>
     <AndroidLinkSkip>Toggl.Giskard</AndroidLinkSkip>
     <EnableProguard>true</EnableProguard>
@@ -326,6 +325,8 @@
     <Compile Include="Activities\MainActivity.cs" />
     <Compile Include="Startup\TogglApplication.cs" />
     <Compile Include="TemplateSelectors\SelectTagsTemplateSelector.cs" />
+    <Compile Include="ViewHelpers\BarChartData.cs" />
+    <Compile Include="ViewHelpers\BarChartDayLabel.cs" />
     <Compile Include="ViewHelpers\CopyLessSpannableFactory.cs" />
     <Compile Include="ViewHelpers\MainRecyclerViewTouchCallback.cs" />
     <Compile Include="ViewHelpers\SimpleRecyclerViewScrollChangeListener.cs" />
@@ -340,6 +341,7 @@
     <Compile Include="ViewHolders\MainLogSuggestionItemViewHolder.cs" />
     <Compile Include="ViewHolders\MainLogSuggestionsListViewHolder.cs" />
     <Compile Include="ViewHolders\GuardedMvxRecyclerViewHolder.cs" />
+    <Compile Include="Views\BarChartView.cs" />
     <Compile Include="Views\SelectProjectRecyclerView.cs" />
     <Compile Include="Adapters\MainRecyclerAdapter.cs" />
     <Compile Include="Views\SelectTagsRecyclerView.cs" />
@@ -507,12 +509,14 @@
     <Compile Include="Extensions\Reactive\ImageViewExtensions.cs" />      
     <Compile Include="Extensions\TimeEntryExtensions.cs" />
     <Compile Include="Services\BackgroundSyncServiceAndroid.cs" />
+    <Compile Include="Services\BackgroundSyncJobSchedulerService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\AndroidManifest.xml" />
     <None Include="packages.config" />
     <None Include="FodyWeavers.xml" />
     <AndroidResource Include="Resources\color\BlueTextColor.xml" />
+    <AndroidResource Include="Resources\drawable\Dot.xml" />
     <AndroidResource Include="Resources\layout\AboutActivity.axml" />
     <AndroidResource Include="Resources\layout\EntityCreationActivityCell.axml">
       <SubType>Designer</SubType>
@@ -909,6 +913,12 @@
     <AndroidResource Include="Resources\drawable\ic_thumbs_up.xml" />
     <AndroidResource Include="Resources\layout\MainUserFeedbackCard.axml" />
     <AndroidResource Include="Resources\xml\RemoteConfigDefaults.xml" />
+    <AndroidResource Include="Resources\drawable-hdpi\toggl_spider.png" />
+    <AndroidResource Include="Resources\drawable-mdpi\toggl_spider.png" />
+    <AndroidResource Include="Resources\drawable-xhdpi\toggl_spider.png" />
+    <AndroidResource Include="Resources\drawable-xxhdpi\toggl_spider.png" />
+    <AndroidResource Include="Resources\drawable-xxxhdpi\toggl_spider.png" />
+    <AndroidResource Include="Resources\layout\WelcomeBackPlaceholder.axml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Toggl.Foundation\Toggl.Foundation.csproj">

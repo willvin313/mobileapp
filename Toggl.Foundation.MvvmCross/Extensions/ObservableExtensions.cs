@@ -16,9 +16,6 @@ namespace Toggl.Foundation.MvvmCross.Extensions
         public static IDisposable VoidSubscribe<T>(this IObservable<T> observable, Action onNext)
             => observable.Subscribe((T _) => onNext());
 
-        public static IDisposable Subscribe(this IObservable<Unit> observable, Func<Task> onNext)
-            => observable.Subscribe(async (Unit _) => await onNext());
-
         public static IObservable<T> DeferAndThrowIfPermissionNotGranted<T>(this IObservable<bool> permissionGrantedObservable, Func<IObservable<T>> implementation)
             => Observable.DeferAsync(async cancellationToken =>
             {

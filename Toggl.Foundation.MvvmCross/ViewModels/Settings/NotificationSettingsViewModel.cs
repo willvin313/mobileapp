@@ -22,50 +22,46 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Settings
         private readonly IMvxNavigationService navigationService;
         private readonly IPermissionsService permissionsService;
         private readonly IUserPreferences userPreferences;
+        private readonly ISchedulerProvider schedulerProvider;
 
-        private readonly ISubject<bool> permissionGrantedSubject = new BehaviorSubject<bool>(false);
-        private readonly ISubject<string> upcomingEventSubject = new BehaviorSubject<string>(Resources.Disabled);
-
-        private readonly CompositeDisposable disposeBag = new CompositeDisposable();
-
-        public IObservable<bool> PermissionGranted => permissionGrantedSubject.AsObservable().DistinctUntilChanged();
-
-        public IObservable<string> UpcomingEvents => upcomingEventSubject.AsObservable().DistinctUntilChanged();
+        public IObservable<bool> PermissionGranted;
+        public IObservable<string> UpcomingEvents;
 
         public UIAction RequestAccess { get; }
-
         public UIAction OpenUpcomingEvents { get; }
 
         public NotificationSettingsViewModel(
             IMvxNavigationService navigationService,
             IBackgroundService backgroundService,
             IPermissionsService permissionsService,
-            IUserPreferences userPreferences)
+            IUserPreferences userPreferences,
+            ISchedulerProvider schedulerProvider)
         {
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
             Ensure.Argument.IsNotNull(backgroundService, nameof(backgroundService));
             Ensure.Argument.IsNotNull(permissionsService, nameof(permissionsService));
             Ensure.Argument.IsNotNull(userPreferences, nameof(userPreferences));
+            Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
 
             this.navigationService = navigationService;
             this.permissionsService = permissionsService;
             this.userPreferences = userPreferences;
+            this.schedulerProvider = schedulerProvider;
 
-            backgroundService
-                .AppResumedFromBackground
+            PermissionGranted = backgroundService.AppResumedFromBackground
                 .SelectUnit()
-                .Subscribe(refreshPermissionGranted)
-                .DisposedBy(disposeBag);
+                .StartWith(Unit.Default)
+                .SelectMany(_ => permissionsService.NotificationPermissionGranted)
+                .DistinctUntilChanged()
+                .AsDriver(schedulerProvider);
+
+            UpcomingEvents = userPreferences.CalendarNotificationsSettings()
+                .Select(s => s.Title())
+                .DistinctUntilChanged()
+                .AsDriver(schedulerProvider);
 
             RequestAccess = UIAction.FromAction(requestAccess);
             OpenUpcomingEvents = UIAction.FromAsync(openUpcomingEvents);
-        }
-
-        public override async Task Initialize()
-        {
-            await base.Initialize();
-            await refreshPermissionGranted();
-            await refreshUpcomingEventsValue();
         }
 
         private void requestAccess()
@@ -76,19 +72,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Settings
         private async Task openUpcomingEvents()
         {
             await navigationService.Navigate<UpcomingEventsNotificationSettingsViewModel, Unit>();
-            await refreshUpcomingEventsValue();
-        }
-
-        private async Task refreshPermissionGranted()
-        {
-            var permissionGranted = await permissionsService.NotificationPermissionGranted.FirstAsync();
-            permissionGrantedSubject.OnNext(permissionGranted);
-        }
-
-        private async Task refreshUpcomingEventsValue()
-        {
-            var calendarNotificationsOption = await userPreferences.CalendarNotificationsSettings().FirstAsync();
-            upcomingEventSubject.OnNext(calendarNotificationsOption.Title());
         }
     }
 }

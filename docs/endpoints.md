@@ -63,7 +63,6 @@ These are endpoints that are prefixed with `https://mobile.toggl.com/api/v9/` (`
 
 ## Other
 
-* `GET status`
 * `GET me/features`
 
 ## Subscriptions

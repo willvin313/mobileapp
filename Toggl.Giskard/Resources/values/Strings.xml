@@ -113,6 +113,12 @@ understand and agree to Toggl\'s</string>
     <string name="Uhoh">Uh oh.</string>
     <string name="SetDefaultWorkspaceTitle">Set default workspace</string>
     <string name="SetDefaultWorkspaceDescription">Your time will be tracked automatically from this workspace. You can cange this later from the Settings.</string>
+    <string name="WelcomeBack">Welcome Back!</string>
+    <string name="WelcomeBackSubText">You haven’t tracked your time in a while.\nMake some new entries or view past activity in Reports</string>
+    <string name="ClockedHours">CLOCKED HOURS</string>
+    <string name="Billable">Billable</string>
+    <string name="NonBillable">Non-billable</string>
+    <string name="HourSymbol">h</string>
 
     <string name="ReportsCalendarShortcutsTemplateSelector" translatable="false">Toggl.Giskard.TemplateSelectors.ReportsCalendarShortcutsTemplateSelector, Toggl.Giskard</string>
     <string name="ReportsCalendarTemplateSelector" translatable="false">Toggl.Giskard.TemplateSelectors.ReportsCalendarTemplateSelector, Toggl.Giskard</string>

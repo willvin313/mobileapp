@@ -1,11 +1,12 @@
 ﻿using Android.App;
+using Android.App.Job;
 using Android.Content;
 using Android.Graphics;
+using Android.Support.V4.App;
 using Android.Util;
 using Android.Views;
 using Toggl.Giskard.Helper;
-using Android.Support.V4.App;
-
+using Toggl.Giskard.Services;
 
 namespace Toggl.Giskard.Extensions
 {
@@ -49,6 +50,23 @@ namespace Toggl.Giskard.Extensions
             var isLargeScreen = displayMetrics.WidthPixels > largeScreenThreshold.DpToPixels(context);
 
             return (displayMetrics.WidthPixels, displayMetrics.HeightPixels, isLargeScreen);
+        }
+
+        public static JobInfo CreateBackgroundSyncJobInfo(this Context context, long periodicity)
+        {
+            var javaClass = Java.Lang.Class.FromType(typeof(BackgroundSyncJobSchedulerService));
+            var component = new ComponentName(context, javaClass);
+
+            var builder = new JobInfo.Builder(BackgroundSyncJobSchedulerService.JobId, component)
+                // This job can run on any network
+                .SetRequiredNetworkType(NetworkType.Any)
+                // It will happen once every n millis, but not more than that
+                .SetPeriodic(periodicity)
+                // It should be reescheduled when the device reboots
+                .SetPersisted(true);
+
+            var jobInfo = builder.Build();
+            return jobInfo;
         }
 
         public static void SetDefaultDialogLayout(this Window window, Activity activity, Context context, int heightDp)

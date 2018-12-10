@@ -97,8 +97,8 @@ namespace Toggl.Daneel.ViewControllers
                 .DisposedBy(DisposeBag);
 
             //Commands
-            SignupCard.Rx().Tap()
-                .Subscribe(ViewModel.Signup)
+            SignupCard.Rx()
+                .BindAction(ViewModel.Signup)
                 .DisposedBy(DisposeBag);
 
             LoginButton.Rx().Tap()
@@ -109,12 +109,12 @@ namespace Toggl.Daneel.ViewControllers
                 .VoidSubscribe(ViewModel.GoogleLogin)
                 .DisposedBy(DisposeBag);
 
-            ForgotPasswordButton.Rx().Tap()
-                .Subscribe(ViewModel.ForgotPassword)
+            ForgotPasswordButton.Rx()
+                .BindAction(ViewModel.ForgotPassword)
                 .DisposedBy(DisposeBag);
 
-            PasswordManagerButton.Rx().Tap()
-                .Subscribe(ViewModel.StartPasswordManager)
+            PasswordManagerButton.Rx()
+                .BindAction(ViewModel.StartPasswordManager)
                 .DisposedBy(DisposeBag);
 
             ShowPasswordButton.Rx().Tap()

@@ -162,7 +162,7 @@ namespace Toggl.Foundation.Sync
             else
             {
                 progress.OnNext(SyncProgress.Failed);
-                analyticsService.Track(error);
+                analyticsService.TrackAnonymized(error);
             }
 
             if (error is ClientDeprecatedException

@@ -12,6 +12,7 @@ using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.DTOs;
 using Toggl.Foundation.Interactors;
+using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.Services;
@@ -115,7 +116,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             navigationFromStartTimeEntryViewModelStopwatch = stopwatchProvider.Get(MeasuredOperation.OpenCreateProjectViewFromStartTimeEntryView);
             stopwatchProvider.Remove(MeasuredOperation.OpenCreateProjectViewFromStartTimeEntryView);
 
-            var defaultWorkspace = await interactorFactory.GetDefaultWorkspace().Execute();
+            var defaultWorkspace = await interactorFactory.GetDefaultWorkspace()
+                .TrackException<InvalidOperationException, IThreadSafeWorkspace>("EditProjectViewModel.Initialize")
+                .Execute();
             var allWorkspaces = await interactorFactory.GetAllWorkspaces().Execute();
             var workspace = defaultWorkspace.IsEligibleForProjectCreation()
                 ? defaultWorkspace

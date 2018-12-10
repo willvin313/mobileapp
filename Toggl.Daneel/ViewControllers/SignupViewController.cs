@@ -103,24 +103,24 @@ namespace Toggl.Daneel.ViewControllers
                 .DisposedBy(DisposeBag);
 
             //Commands
-            LoginCard.Rx().Tap()
-                .Subscribe(ViewModel.Login)
+            LoginCard.Rx()
+                .BindAction(ViewModel.Login)
                 .DisposedBy(DisposeBag);
 
-            SignupButton.Rx().Tap()
-                .Subscribe(ViewModel.Signup)
+            SignupButton.Rx()
+                .BindAction(ViewModel.Signup)
                 .DisposedBy(DisposeBag);
 
-            GoogleSignupButton.Rx().Tap()
-                .Subscribe(ViewModel.GoogleSignup)
+            GoogleSignupButton.Rx()
+                .BindAction(ViewModel.GoogleSignup)
                 .DisposedBy(DisposeBag);
 
             ShowPasswordButton.Rx().Tap()
                 .VoidSubscribe(ViewModel.TogglePasswordVisibility)
                 .DisposedBy(DisposeBag);
 
-            SelectCountryButton.Rx().Tap()
-                .Subscribe(ViewModel.PickCountry)
+            SelectCountryButton.Rx()
+                .BindAction(ViewModel.PickCountry)
                 .DisposedBy(DisposeBag);
 
             //Color
@@ -217,7 +217,7 @@ namespace Toggl.Daneel.ViewControllers
 
             PasswordTextField.ShouldReturn += _ =>
             {
-                ViewModel.Signup();
+                ViewModel.Signup.Execute();
                 PasswordTextField.ResignFirstResponder();
                 return false;
             };

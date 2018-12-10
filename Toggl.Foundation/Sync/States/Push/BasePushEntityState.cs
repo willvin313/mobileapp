@@ -15,11 +15,11 @@ namespace Toggl.Foundation.Sync.States.Push
     {
         protected readonly IAnalyticsService AnalyticsService;
 
-        public StateResult<(Exception, T)> ServerError { get; } = new StateResult<(Exception, T)>();
+        public StateResult<ServerErrorException> ServerError { get; } = new StateResult<ServerErrorException>();
 
         public StateResult<(Exception, T)> ClientError { get; } = new StateResult<(Exception, T)>();
 
-        public StateResult<(Exception, T)> UnknownError { get; } = new StateResult<(Exception, T)>();
+        public StateResult<Exception> UnknownError { get; } = new StateResult<Exception>();
 
         protected BasePushEntityState(IAnalyticsService analyticsService)
         {
@@ -42,11 +42,11 @@ namespace Toggl.Foundation.Sync.States.Push
             => e is ApiDeprecatedException || e is ClientDeprecatedException || e is UnauthorizedException || e is OfflineException;
 
         private ITransition failTransition(T entity, Exception e)
-            => e is ServerErrorException
-                ? ServerError.Transition((e, entity))
+            => e is ServerErrorException serverError
+                ? ServerError.Transition(serverError)
                 : e is ClientErrorException
                     ? ClientError.Transition((e, entity))
-                    : UnknownError.Transition((e, entity));
+                    : (ITransition)UnknownError.Transition(e);
 
         public abstract IObservable<ITransition> Start(T entity);
     }

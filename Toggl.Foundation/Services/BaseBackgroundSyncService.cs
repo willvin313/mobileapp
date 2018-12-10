@@ -1,6 +1,4 @@
 using System;
-using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Toggl.Foundation.Login;
 using Toggl.Multivac.Extensions;
@@ -12,7 +10,9 @@ namespace Toggl.Foundation.Services
         private IDisposable loggedInDisposable;
         private IDisposable loggedOutDisposable;
 
-        public void SetupBackgroundSync(LoginManager loginManager)
+        protected static readonly TimeSpan MinimumBackgroundFetchInterval = TimeSpan.FromMinutes(15);
+
+        public void SetupBackgroundSync(IUserAccessManager loginManager)
         {
             loggedInDisposable = loginManager.UserLoggedIn
                 .Do(EnableBackgroundSync)

@@ -317,7 +317,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             startTimeEntryStopwatch = stopwatchProvider.Get(MeasuredOperation.OpenStartView);
             stopwatchProvider.Remove(MeasuredOperation.OpenStartView);
 
-            defaultWorkspace = await interactorFactory.GetDefaultWorkspace().Execute();
+            defaultWorkspace = await interactorFactory.GetDefaultWorkspace()
+                .TrackException<InvalidOperationException, IThreadSafeWorkspace>("StartTimeEntryViewModel.Initialize")
+                .Execute();
 
             shouldSuggestProjectCreation =
                 await interactorFactory.GetAllWorkspaces().Execute().Select(allWorkspaces =>

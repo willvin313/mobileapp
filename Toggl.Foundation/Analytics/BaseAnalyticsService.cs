@@ -203,13 +203,13 @@ namespace Toggl.Foundation.Analytics
         [AnalyticsEvent("Type", "Message", "StackTrace")]
         public IAnalyticsEvent<string, string, string> BackgroundSyncFailed { get; protected set; }
 
-        [AnalyticsEvent("Type", "Message", "StackTrace")]
-        public IAnalyticsEvent<string, string, string> UnknownLoginFailure { get; protected set; }
+        [AnalyticsEvent("Type", "Message")]
+        public IAnalyticsEvent<string, string> UnknownLoginFailure { get; protected set; }
 
-        [AnalyticsEvent("Type", "Message", "StackTrace")]
-        public IAnalyticsEvent<string, string, string> UnknownSignUpFailure { get; protected set; }
+        [AnalyticsEvent("Type", "Message")]
+        public IAnalyticsEvent<string, string> UnknownSignUpFailure { get; protected set; }
 
-        public void Track(Exception exception)
+        public void TrackAnonymized(Exception exception)
         {
             if (exception.IsAnonymized())
             {
@@ -220,6 +220,8 @@ namespace Toggl.Foundation.Analytics
                 HandledException.Track(exception.GetType().FullName, exception.Message);
             }
         }
+
+        public abstract void Track(Exception exception, string message);
 
         public abstract void Track(string eventName, Dictionary<string, string> parameters = null);
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using Android.Runtime;
+using Android.Support.Constraints;
 using Android.Support.V7.Widget;
 using Android.Views;
 using MvvmCross.Platforms.Android.Binding.BindingContext;
@@ -8,7 +9,7 @@ using Toggl.Foundation.MvvmCross.ViewModels.Reports;
 using Toggl.Giskard.TemplateSelectors;
 using Toggl.Giskard.Views;
 using Android.Widget;
-using static Toggl.Giskard.Resource.Id;
+using Toggl.Giskard.ViewHelpers;
 
 namespace Toggl.Giskard.Adapters
 {
@@ -17,6 +18,8 @@ namespace Toggl.Giskard.Adapters
         private const int workspaceNameCellIndex = 0;
         private const int summaryCardCellIndex = 1;
         private const int headerItemsCount = 2;
+
+        private BarChartData? currentBarChartData;
 
         public ReportsViewModel ViewModel { get; set; }
 
@@ -55,6 +58,15 @@ namespace Toggl.Giskard.Adapters
                 reportsViewHolder.RecalculateSize();
             }
 
+            if (position == summaryCardCellIndex && currentBarChartData.HasValue)
+            {
+                var barChartView = holder.ItemView.FindViewById<BarChartView>(Resource.Id.BarChartView);
+                var barChartTopLegendGroup = holder.ItemView.FindViewById<Group>(Resource.Id.WorkspaceBillableGroup);
+                var barChartData = currentBarChartData.GetValueOrDefault();
+                barChartView.BarChartData = barChartData;
+                barChartTopLegendGroup.Visibility = barChartData.WorkspaceIsBillable ? ViewStates.Visible : ViewStates.Gone;
+            }
+
             if (position == workspaceNameCellIndex)
             {
                 var workspaceNameTextView = holder.ItemView as TextView;
@@ -62,7 +74,7 @@ namespace Toggl.Giskard.Adapters
             }
         }
 
-        public override int ItemCount 
+        public override int ItemCount
             => headerItemsCount + base.ItemCount;
 
         public override object GetItem(int viewPosition)
@@ -74,6 +86,12 @@ namespace Toggl.Giskard.Adapters
                 return ViewModel;
 
             return base.GetItem(viewPosition - headerItemsCount);
+        }
+
+        public void UpdateBarChart(BarChartData barChartData)
+        {
+            currentBarChartData = barChartData;
+            NotifyItemChanged(summaryCardCellIndex);
         }
     }
 }

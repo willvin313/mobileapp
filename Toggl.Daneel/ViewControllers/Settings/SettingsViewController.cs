@@ -76,40 +76,40 @@ namespace Toggl.Daneel.ViewControllers
                 })
                 .DisposedBy(DisposeBag);
 
-            HelpView.Rx().Tap()
-                .Subscribe(ViewModel.OpenHelpView)
+            HelpView.Rx()
+                .BindAction(ViewModel.OpenHelpView)
                 .DisposedBy(DisposeBag);
 
-            LogoutButton.Rx().Tap()
-                .Subscribe(ViewModel.TryLogout)
+            LogoutButton.Rx()
+                .BindAction(ViewModel.TryLogout)
                 .DisposedBy(DisposeBag);
 
-            AboutView.Rx().Tap()
-                .Subscribe(ViewModel.OpenAboutView)
+            AboutView.Rx()
+                .BindAction(ViewModel.OpenAboutView)
                 .DisposedBy(DisposeBag);
 
-            FeedbackView.Rx().Tap()
-                .Subscribe(ViewModel.SubmitFeedback)
+            FeedbackView.Rx()
+                .BindAction(ViewModel.SubmitFeedback)
                 .DisposedBy(DisposeBag);
 
-            DateFormatView.Rx().Tap()
-                .Subscribe(ViewModel.SelectDateFormat)
+            DateFormatView.Rx()
+                .BindAction(ViewModel.SelectDateFormat)
                 .DisposedBy(DisposeBag);
 
-            WorkspaceView.Rx().Tap()
-                .Subscribe(ViewModel.PickDefaultWorkspace)
+            WorkspaceView.Rx()
+                .BindAction(ViewModel.PickDefaultWorkspace)
                 .DisposedBy(DisposeBag);
 
-            DurationFormatView.Rx().Tap()
-                .Subscribe(ViewModel.SelectDurationFormat)
+            DurationFormatView.Rx()
+                .BindAction(ViewModel.SelectDurationFormat)
                 .DisposedBy(DisposeBag);
 
             ManualModeSwitch.Rx().Changed()
                 .VoidSubscribe(ViewModel.ToggleManualMode)
                 .DisposedBy(DisposeBag);
 
-            BeginningOfWeekView.Rx().Tap()
-                .Subscribe(ViewModel.SelectBeginningOfWeek)
+            BeginningOfWeekView.Rx()
+                .BindAction(ViewModel.SelectBeginningOfWeek)
                 .DisposedBy(DisposeBag);
 
             CalendarSettingsView.Rx()

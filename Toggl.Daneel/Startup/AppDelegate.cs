@@ -17,6 +17,7 @@ using Toggl.Foundation;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Interactors;
+using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross;
 using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Foundation.MvvmCross.Parameters;
@@ -298,7 +299,10 @@ namespace Toggl.Daneel
             Task.Run(async () =>
             {
                 var calendarItem = await interactorFactory.GetCalendarItemWithId(eventId).Execute();
-                var workspace = await interactorFactory.GetDefaultWorkspace().Execute();
+                var workspace = await interactorFactory.GetDefaultWorkspace()
+                    .TrackException<InvalidOperationException, IThreadSafeWorkspace>("AppDelegate.startTimeEntryInBackground")
+                    .Execute();
+
                 var prototype = calendarItem.AsTimeEntryPrototype(workspace.Id);
                 await interactorFactory.CreateTimeEntry(prototype).Execute();
                 completionHandler();
