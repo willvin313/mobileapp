@@ -12,6 +12,8 @@ namespace Toggl.Multivac.Extensions.Reactive
             internalSubject = new BehaviorSubject<T>(value);
         }
 
+        public T Value => internalSubject.Value;
+
         public void Accept(T value)
         {
             internalSubject.OnNext(value);
