@@ -64,6 +64,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public UIAction LoginWithGoogle { get; }
 
+        public UIAction TogglePasswordVisibility { get; }
+
         public LoginViewModel(
             IUserAccessManager userAccessManager,
             IAnalyticsService analyticsService,
@@ -129,6 +131,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             LoginWithGoogle = UIAction.FromObservable(loginWithGoogle);
 
             IsLoading = LoginWithEmail.Executing.AsDriver(schedulerProvider);
+
+            TogglePasswordVisibility =
+                UIAction.FromAction(() => isPasswordMaskedSubject.OnNext(!isPasswordMaskedSubject.Value));
         }
 
         public override void Prepare(CredentialsParameter parameter)

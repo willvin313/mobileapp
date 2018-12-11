@@ -126,6 +126,14 @@ namespace Toggl.Daneel.ViewControllers
                 .BindAction(ViewModel.LoginWithEmail)
                 .DisposedBy(DisposeBag);
 
+            GoogleLoginButton.Rx()
+                .BindAction(ViewModel.LoginWithGoogle)
+                .DisposedBy(DisposeBag);
+
+            ShowPasswordButton.Rx()
+                .BindAction(ViewModel.TogglePasswordVisibility)
+                .DisposedBy(DisposeBag);
+
             ViewModel.IsLoading.Select(loginButtonTitle)
                 .Subscribe(LoginButton.Rx().AnimatedTitle())
                 .DisposedBy(DisposeBag);
