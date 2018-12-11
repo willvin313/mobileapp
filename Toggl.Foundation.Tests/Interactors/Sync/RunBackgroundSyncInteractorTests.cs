@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -6,6 +8,7 @@ using NSubstitute;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Tests.Generators;
 using Xunit;
+using Notification = Toggl.Multivac.Notification;
 using SyncOutcome = Toggl.Foundation.Models.SyncOutcome;
 using SyncState = Toggl.Foundation.Sync.SyncState;
 
@@ -17,12 +20,14 @@ namespace Toggl.Foundation.Tests.Interactors.Workspace
         {
             [Theory, LogIfTooSlow]
             [ConstructorData]
-            public void ThrowsIfAnyOfTheArgumentsIsNull(bool useSyncManager, bool useAnalyticsService, bool userStopwatchProvider)
+            public void ThrowsIfAnyOfTheArgumentsIsNull(bool useSyncManager, bool useAnalyticsService, bool userStopwatchProvider, bool useNotificationService, bool useTimeService)
             {
                 Action tryingToConstructWithNull = () => new RunBackgroundSyncInteractor(
                     useSyncManager ? SyncManager : null,
                     useAnalyticsService ? AnalyticsService : null,
-                    userStopwatchProvider ? StopwatchProvider : null
+                    userStopwatchProvider ? StopwatchProvider : null,
+                    useNotificationService ? NotificationService : null,
+                    useTimeService ? TimeService : null
                 );
 
                 tryingToConstructWithNull.Should().Throw<ArgumentNullException>();
@@ -35,7 +40,7 @@ namespace Toggl.Foundation.Tests.Interactors.Workspace
 
             public TheExecuteMethod()
             {
-                interactor = new RunBackgroundSyncInteractor(SyncManager, AnalyticsService, StopwatchProvider);
+                interactor = new RunBackgroundSyncInteractor(SyncManager, AnalyticsService, StopwatchProvider, NotificationService, TimeService);
             }
 
             [Fact, LogIfTooSlow]
@@ -72,6 +77,19 @@ namespace Toggl.Foundation.Tests.Interactors.Workspace
                 AnalyticsService.BackgroundSyncFinished.Received().Track(nameof(SyncOutcome.Failed));
                 AnalyticsService.BackgroundSyncFailed.Received()
                     .Track(exception.GetType().FullName, exception.Message, exception.StackTrace);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task SchedulesNotificationsOnSync()
+            {
+                var now = new DateTimeOffset(2020, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                SyncManager.ForceFullSync().Returns(Observable.Return(SyncState.Sleep));
+                await interactor.Execute().SingleAsync();
+                TimeService.CurrentDateTime.Returns(now);
+                UserPreferences.EnabledCalendarIds().Returns(new List<string> { "1" });
+                await NotificationService
+                    .Received()
+                    .Schedule(Arg.Any<IImmutableList<Notification>>());
             }
         }
     }
