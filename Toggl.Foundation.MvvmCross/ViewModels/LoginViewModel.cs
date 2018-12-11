@@ -34,10 +34,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         }
 
         private readonly IUserAccessManager userAccessManager;
-        private readonly IAnalyticsService analyticsService;
         private readonly IOnboardingStorage onboardingStorage;
         private readonly IForkingNavigationService navigationService;
-        private readonly IPasswordManagerService passwordManagerService;
         private readonly IErrorHandlingService errorHandlingService;
         private readonly ILastTimeUsageStorage lastTimeUsageStorage;
         private readonly ITimeService timeService;
@@ -68,9 +66,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public UIAction ForgotPassword { get; }
 
+        public UIAction ContinueToPaswordScreen { get; }
+
         public LoginViewModel(
             IUserAccessManager userAccessManager,
-            IAnalyticsService analyticsService,
             IOnboardingStorage onboardingStorage,
             IForkingNavigationService navigationService,
             IPasswordManagerService passwordManagerService,
@@ -80,7 +79,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             ISchedulerProvider schedulerProvider)
         {
             Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
-            Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(onboardingStorage, nameof(onboardingStorage));
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
             Ensure.Argument.IsNotNull(passwordManagerService, nameof(passwordManagerService));
@@ -91,12 +89,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             this.timeService = timeService;
             this.userAccessManager = userAccessManager;
-            this.analyticsService = analyticsService;
             this.onboardingStorage = onboardingStorage;
             this.navigationService = navigationService;
             this.errorHandlingService = errorHandlingService;
             this.lastTimeUsageStorage = lastTimeUsageStorage;
-            this.passwordManagerService = passwordManagerService;
             this.schedulerProvider = schedulerProvider;
 
             Shake = shakeSubject
@@ -113,23 +109,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             IsPasswordManagerAvailable = passwordManagerService.IsAvailable;
 
-            var loginEnabled = EmailRelay
-                .CombineLatest(
-                    PasswordRelay,
-                    (email, password) =>
-                        Email.From(email).IsValid && Password.From(password).IsValid)
-                .DistinctUntilChanged()
-                .AsDriver(this.schedulerProvider);
-
-            var emailObservable = EmailRelay.Select(Email.From);
-            var passwordObservable = PasswordRelay.Select(Password.From);
-
-            var loginWorkFactory = Observable
-                .CombineLatest(emailObservable, passwordObservable, (email, password) => (email, password))
-                .SelectMany(pair => login(pair.Item1, pair.Item2))
-                .ObserveOn(schedulerProvider.MainScheduler);
-
-            LoginWithEmail = UIAction.FromObservable(() => loginWorkFactory, loginEnabled);
+            LoginWithEmail = UIAction.FromObservable(login);
 
             LoginWithGoogle = UIAction.FromObservable(loginWithGoogle);
 
@@ -141,12 +121,24 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             TogglePasswordVisibility =
                 UIAction.FromAction(() => isPasswordMaskedSubject.OnNext(!isPasswordMaskedSubject.Value));
+
+            ContinueToPaswordScreen = UIAction.FromObservable(continueToPasswordScreen);
         }
 
         public override void Prepare(CredentialsParameter parameter)
         {
             EmailRelay.Accept(parameter.Email.ToString());
             PasswordRelay.Accept(parameter.Password.ToString());
+        }
+
+        private IObservable<Unit> continueToPasswordScreen()
+        {
+            if (!Email.From(EmailRelay.Value).IsValid)
+            {
+                return Observable.Throw<Unit>(new Exception(Resources.InvalidEmail));
+            }
+
+            return Observable.Return(Unit.Default);
         }
 
         private IObservable<Unit> loginWithGoogle()
@@ -156,11 +148,20 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .Catch<Unit, Exception>(e => handleException(e))
                 .ObserveOn(schedulerProvider.MainScheduler);
 
-        private IObservable<Unit> login(Email email, Password password)
-            => userAccessManager
-                .Login(email, password)
+        private IObservable<Unit> login()
+        {
+            var password = Password.From(PasswordRelay.Value);
+            if (!password.IsValid)
+            {
+                return Observable.Throw<Unit>(new Exception(Resources.PasswordTooShort));
+            }
+
+            return userAccessManager
+                .Login(Email.From(EmailRelay.Value), Password.From(PasswordRelay.Value))
                 .SelectMany(onLoginSuccessfully)
-                .Catch<Unit, Exception>(e => handleException(e));
+                .Catch<Unit, Exception>(e => handleException(e))
+                .ObserveOn(schedulerProvider.MainScheduler);
+        }
 
         private IObservable<Unit> handleException(Exception e)
         {

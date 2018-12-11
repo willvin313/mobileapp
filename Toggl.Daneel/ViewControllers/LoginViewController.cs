@@ -151,6 +151,11 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(ErrorLabel.Rx().Text())
                 .DisposedBy(DisposeBag);
 
+            ViewModel.LoginWithEmail.Errors
+                .SelectValue(true)
+                .Subscribe(ErrorLabel.Rx().AnimatedIsVisible())
+                .DisposedBy(DisposeBag);
+
             ViewModel.IsLoggingIn
                 .Subscribe(ActivityIndicator.Rx().IsVisibleWithFade())
                 .DisposedBy(DisposeBag);
