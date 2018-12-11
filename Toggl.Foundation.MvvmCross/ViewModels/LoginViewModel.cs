@@ -151,7 +151,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             => userAccessManager
                 .LoginWithGoogle()
                 .SelectMany(onLoginSuccessfully)
-                .Catch<Unit, Exception>(e => handleException(e));
+                .Catch<Unit, Exception>(e => handleException(e))
+                .ObserveOn(schedulerProvider.MainScheduler);
 
         private IObservable<Unit> login(Email email, Password password)
             => userAccessManager
@@ -173,7 +174,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 case GoogleLoginException googleEx:
                     return Observable.Throw<Unit>(new Exception(googleEx.Message));
                 default:
-                    return Observable.Throw<Unit>(new Exception());
+                    return Observable.Throw<Unit>(new Exception(Resources.GenericLoginError));
             }
         }
 
