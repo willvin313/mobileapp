@@ -41,117 +41,16 @@ namespace Toggl.Daneel.ViewControllers
         {
             base.ViewDidLoad();
 
+            prepareViews();
+
+            prepareBindings();
+
             NavigationController.NavigationBarHidden = true;
             PasswordManagerButton.Hidden = !ViewModel.IsPasswordManagerAvailable;
 
             UIKeyboard.Notifications.ObserveWillShow(KeyboardWillShow);
             UIKeyboard.Notifications.ObserveWillHide(KeyboardWillHide);
 
-            //Text
-            ViewModel.Email
-                .Subscribe(EmailTextField.Rx().TextObserver())
-                .DisposedBy(DisposeBag);
-
-            ViewModel.ErrorMessage
-                .Subscribe(ErrorLabel.Rx().Text())
-                .DisposedBy(DisposeBag);
-
-            ViewModel.Password
-                .Subscribe(PasswordTextField.Rx().TextObserver())
-                .DisposedBy(DisposeBag);
-
-            EmailTextField.Rx().Text()
-                .Select(Email.From)
-                .Subscribe(ViewModel.SetEmail)
-                .DisposedBy(DisposeBag);
-
-            PasswordTextField.Rx().Text()
-                .Select(Password.From)
-                .Subscribe(ViewModel.SetPassword)
-                .DisposedBy(DisposeBag);
-
-            ViewModel.IsLoading.Select(loginButtonTitle)
-                .Subscribe(LoginButton.Rx().AnimatedTitle())
-                .DisposedBy(DisposeBag);
-
-            //Visibility
-            ViewModel.HasError
-                .Subscribe(ErrorLabel.Rx().AnimatedIsVisible())
-                .DisposedBy(DisposeBag);
-
-            ViewModel.IsLoading
-                .Subscribe(ActivityIndicator.Rx().IsVisibleWithFade())
-                .DisposedBy(DisposeBag);
-
-            ViewModel.IsPasswordMasked
-                .Skip(1)
-                .Subscribe(PasswordTextField.Rx().SecureTextEntry())
-                .DisposedBy(DisposeBag);
-
-            ViewModel.IsShowPasswordButtonVisible
-                .Subscribe(ShowPasswordButton.Rx().IsVisible())
-                .DisposedBy(DisposeBag);
-
-            PasswordTextField.FirstResponder
-                .Subscribe(ViewModel.SetIsShowPasswordButtonVisible)
-                .DisposedBy(DisposeBag);
-
-            //Commands
-            SignupCard.Rx().Tap()
-                .Subscribe(ViewModel.Signup)
-                .DisposedBy(DisposeBag);
-
-            LoginButton.Rx().Tap()
-                .VoidSubscribe(ViewModel.Login)
-                .DisposedBy(DisposeBag);
-
-            GoogleLoginButton.Rx().Tap()
-                .VoidSubscribe(ViewModel.GoogleLogin)
-                .DisposedBy(DisposeBag);
-
-            ForgotPasswordButton.Rx().Tap()
-                .Subscribe(ViewModel.ForgotPassword)
-                .DisposedBy(DisposeBag);
-
-            PasswordManagerButton.Rx().Tap()
-                .Subscribe(ViewModel.StartPasswordManager)
-                .DisposedBy(DisposeBag);
-
-            ShowPasswordButton.Rx().Tap()
-                .VoidSubscribe(ViewModel.TogglePasswordVisibility)
-                .DisposedBy(DisposeBag);
-
-            //Color
-            ViewModel.HasError
-                .Select(loginButtonTintColor)
-                .Subscribe(LoginButton.Rx().TintColor())
-                .DisposedBy(DisposeBag);
-
-            ViewModel.LoginEnabled
-                .Select(loginButtonTitleColor)
-                .Subscribe(LoginButton.Rx().TitleColor())
-                .DisposedBy(DisposeBag);
-
-            //Animation
-            ViewModel.Shake
-                .Subscribe(shakeTargets =>
-                {
-                    if (shakeTargets.HasFlag(LoginViewModel.ShakeTargets.Email))
-                        EmailTextField.Shake();
-
-                    if (shakeTargets.HasFlag(LoginViewModel.ShakeTargets.Password))
-                        PasswordTextField.Shake();
-                })
-                .DisposedBy(DisposeBag);
-
-            prepareViews();
-
-            UIColor loginButtonTintColor(bool hasError)
-                => hasError ? UIColor.White : UIColor.Black;
-
-            UIColor loginButtonTitleColor(bool enabled) => enabled
-                ? Color.Login.EnabledButtonColor.ToNativeColor()
-                : Color.Login.DisabledButtonColor.ToNativeColor();
         }
 
         public override void ViewWillAppear(bool animated)
@@ -213,6 +112,54 @@ namespace Toggl.Daneel.ViewControllers
             UIView.Animate(Animation.Timings.EnterTiming, () => View.LayoutIfNeeded());
         }
 
+        private void prepareBindings()
+        {
+            EmailTextField.Rx().Text()
+                .Subscribe(ViewModel.EmailRelay.Accept)
+                .DisposedBy(DisposeBag);
+
+            PasswordTextField.Rx().Text()
+                .Subscribe(ViewModel.PasswordRelay.Accept)
+                .DisposedBy(DisposeBag);
+
+            LoginButton.Rx()
+                .BindAction(ViewModel.LoginWithEmail)
+                .DisposedBy(DisposeBag);
+
+            ViewModel.IsLoading.Select(loginButtonTitle)
+                .Subscribe(LoginButton.Rx().AnimatedTitle())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.LoginWithEmail.Errors
+                .Select(e => e.Message)
+                .Subscribe(ErrorLabel.Rx().Text())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.IsLoading
+                .Subscribe(ActivityIndicator.Rx().IsVisibleWithFade())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.IsPasswordMasked
+                .Skip(1)
+                .Subscribe(PasswordTextField.Rx().SecureTextEntry())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.IsShowPasswordButtonVisible
+                .Subscribe(ShowPasswordButton.Rx().IsVisible())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.Shake
+                .Subscribe(shakeTargets =>
+                {
+                    if (shakeTargets.HasFlag(LoginViewModel.ShakeTargets.Email))
+                        EmailTextField.Shake();
+
+                    if (shakeTargets.HasFlag(LoginViewModel.ShakeTargets.Password))
+                        PasswordTextField.Shake();
+                })
+                .DisposedBy(DisposeBag);
+        }
+
         private void prepareViews()
         {
             NavigationController.NavigationBarHidden = true;
@@ -230,8 +177,8 @@ namespace Toggl.Daneel.ViewControllers
 
             PasswordTextField.ShouldReturn += _ =>
             {
-                ViewModel.Login();
                 PasswordTextField.ResignFirstResponder();
+                // TODO: login here somehow
                 return false;
             };
 
