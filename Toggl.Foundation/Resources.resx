@@ -495,8 +495,8 @@ account is not set up</value>
     <data name="Calendar">
         <value>Calendar</value>
     </data>
-    <data name="InvalidEmail">
-        <value>The email is invalid.</value>
+    <data name="EnterValidEmail">
+        <value>Enter a valid email address</value>
     </data>
     <data name="PasswordTooShort">
         <value>Password should be at least 6 characters</value>

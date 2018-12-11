@@ -995,9 +995,9 @@ namespace Toggl.Foundation {
             }
         }
         
-        public static string InvalidEmail {
+        public static string EnterValidEmail {
             get {
-                return ResourceManager.GetString("InvalidEmail", resourceCulture);
+                return ResourceManager.GetString("EnterValidEmail", resourceCulture);
             }
         }
         

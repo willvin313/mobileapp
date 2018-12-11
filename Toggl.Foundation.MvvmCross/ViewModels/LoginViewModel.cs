@@ -135,7 +135,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             if (!Email.From(EmailRelay.Value).IsValid)
             {
-                return Observable.Throw<Unit>(new Exception(Resources.InvalidEmail));
+                return Observable.Throw<Unit>(new Exception(Resources.EnterValidEmail));
             }
 
             return Observable.Return(Unit.Default);
