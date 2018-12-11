@@ -126,7 +126,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             var loginWorkFactory = Observable
                 .CombineLatest(emailObservable, passwordObservable, (email, password) => (email, password))
-                .SelectMany(pair => login(pair.Item1, pair.Item2));
+                .SelectMany(pair => login(pair.Item1, pair.Item2))
+                .ObserveOn(schedulerProvider.MainScheduler);
+
             LoginWithEmail = UIAction.FromObservable(() => loginWorkFactory, loginEnabled);
 
             LoginWithGoogle = UIAction.FromObservable(loginWithGoogle);
@@ -194,7 +196,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .Navigate<ForgotPasswordViewModel, EmailParameter, EmailParameter>(emailParam)
                 .ToObservable()
                 .Do(result => PasswordRelay.Accept(result.ToString()))
-                .SelectUnit();
+                .SelectUnit()
+                .ObserveOn(schedulerProvider.MainScheduler);
         }
     }
 }
