@@ -52,7 +52,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public BehaviorRelay<string> PasswordRelay { get; } = new BehaviorRelay<string>(string.Empty);
 
-        public IObservable<bool> IsLoading { get; }
+        public IObservable<bool> IsLoggingIn { get; }
 
         public IObservable<ShakeTargets> Shake { get; }
 
@@ -65,6 +65,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public UIAction LoginWithGoogle { get; }
 
         public UIAction TogglePasswordVisibility { get; }
+
+        public UIAction ForgotPassword { get; }
 
         public LoginViewModel(
             IUserAccessManager userAccessManager,
@@ -119,18 +121,21 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .DistinctUntilChanged()
                 .AsDriver(this.schedulerProvider);
 
-            var emailAndPassword = Observable
-                .CombineLatest(EmailRelay, PasswordRelay,
-                    (email, password) => (Email.From(email), Password.From(password)));
+            var emailObservable = EmailRelay.Select(Email.From);
+            var passwordObservable = PasswordRelay.Select(Password.From);
 
-            var loginWorkFactory = emailAndPassword
+            var loginWorkFactory = Observable
+                .CombineLatest(emailObservable, passwordObservable, (email, password) => (email, password))
                 .SelectMany(pair => login(pair.Item1, pair.Item2));
-
             LoginWithEmail = UIAction.FromObservable(() => loginWorkFactory, loginEnabled);
 
             LoginWithGoogle = UIAction.FromObservable(loginWithGoogle);
 
-            IsLoading = LoginWithEmail.Executing.AsDriver(schedulerProvider);
+            IsLoggingIn = Observable
+                .CombineLatest(LoginWithEmail.Executing, LoginWithGoogle.Executing, CommonFunctions.Or)
+                .AsDriver(schedulerProvider);
+
+            ForgotPassword = UIAction.FromObservable(() => forgotPassword(EmailRelay.Value));
 
             TogglePasswordVisibility =
                 UIAction.FromAction(() => isPasswordMaskedSubject.OnNext(!isPasswordMaskedSubject.Value));
@@ -180,5 +185,15 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     onboardingStorage.SetIsNewUser(false);
                     return navigationService.ForkNavigate<MainTabBarViewModel, MainViewModel>().ToObservable();
                 });
+
+        private IObservable<Unit> forgotPassword(string email)
+        {
+            var emailParam = EmailParameter.With(Email.From(email));
+            return navigationService
+                .Navigate<ForgotPasswordViewModel, EmailParameter, EmailParameter>(emailParam)
+                .ToObservable()
+                .Do(result => PasswordRelay.Accept(result.ToString()))
+                .SelectUnit();
+        }
     }
 }

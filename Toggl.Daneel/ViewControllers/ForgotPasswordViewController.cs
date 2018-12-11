@@ -8,6 +8,7 @@ using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross.Converters;
+using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Multivac;
@@ -84,6 +85,11 @@ namespace Toggl.Daneel.ViewControllers
 
             ViewModel.Reset.Executing
                 .Subscribe(ActivityIndicator.Rx().IsVisibleWithFade())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.Email
+                .Select(email => email.ToString())
+                .Subscribe(EmailTextField.Rx().TextObserver())
                 .DisposedBy(DisposeBag);
 
             //Commands

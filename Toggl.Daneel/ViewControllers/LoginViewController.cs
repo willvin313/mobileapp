@@ -134,7 +134,15 @@ namespace Toggl.Daneel.ViewControllers
                 .BindAction(ViewModel.TogglePasswordVisibility)
                 .DisposedBy(DisposeBag);
 
-            ViewModel.IsLoading.Select(loginButtonTitle)
+            ForgotPasswordButton.Rx()
+                .BindAction(ViewModel.ForgotPassword)
+                .DisposedBy(DisposeBag);
+
+            ViewModel.EmailRelay
+                .Subscribe(EmailTextField.Rx().TextObserver())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.IsLoggingIn.Select(loginButtonTitle)
                 .Subscribe(LoginButton.Rx().AnimatedTitle())
                 .DisposedBy(DisposeBag);
 
@@ -143,7 +151,7 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(ErrorLabel.Rx().Text())
                 .DisposedBy(DisposeBag);
 
-            ViewModel.IsLoading
+            ViewModel.IsLoggingIn
                 .Subscribe(ActivityIndicator.Rx().IsVisibleWithFade())
                 .DisposedBy(DisposeBag);
 
