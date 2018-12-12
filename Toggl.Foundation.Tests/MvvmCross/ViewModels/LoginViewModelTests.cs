@@ -14,7 +14,6 @@ using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Multivac;
-using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
 using Toggl.Ultrawave.Exceptions;
 using Toggl.Ultrawave.Network;
@@ -341,8 +340,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     var observer = TestScheduler.CreateObserver<Exception>();
                     ViewModel.LoginWithGoogle.Errors.Subscribe(observer);
 
-                    TestScheduler.Start();
                     ViewModel.LoginWithGoogle.Execute();
+                    TestScheduler.Start();
 
                     observer.Messages.Last().Value.Value.Message.Should().Be(exception.Message);
                 }

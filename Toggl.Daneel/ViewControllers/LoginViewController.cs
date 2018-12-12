@@ -130,6 +130,9 @@ namespace Toggl.Daneel.ViewControllers
                 .BindAction(ViewModel.LoginWithGoogle)
                 .DisposedBy(DisposeBag);
 
+            ViewModel.LoginWithGoogle.Errors.Debug("ERROR").Subscribe()
+                .DisposedBy(DisposeBag);
+
             ShowPasswordButton.Rx()
                 .BindAction(ViewModel.TogglePasswordVisibility)
                 .DisposedBy(DisposeBag);
