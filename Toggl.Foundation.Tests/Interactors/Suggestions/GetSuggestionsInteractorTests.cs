@@ -1,6 +1,9 @@
 ﻿using System;
 using FluentAssertions;
+using NSubstitute;
+using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Interactors.Suggestions;
+using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.Tests.Generators;
 using Xunit;
 
@@ -10,14 +13,22 @@ namespace Toggl.Foundation.Tests.Interactors.Suggestions
     {
         public sealed class TheConstructor : BaseInteractorTests
         {
+            private readonly IInteractor<IObservable<IThreadSafeWorkspace>> defaultWorkspaceInteractor = Substitute.For<IInteractor<IObservable<IThreadSafeWorkspace>>>();
+
             [Theory, LogIfTooSlow]
             [ConstructorData]
-            public void ThrowsIfAnyOfTheArgumentsIsNull(bool useDataSource, bool useTimeService)
+            public void ThrowsIfAnyOfTheArgumentsIsNull(
+                bool useDataSource,
+                bool useTimeService,
+                bool useCalendarService,
+                bool useDefaultWorkspaceInteractor)
             {
                 Action createInstance = () => new GetSuggestionsInteractor(
                     3,
                     useDataSource ? DataSource : null,
-                    useTimeService ? TimeService : null);
+                    useTimeService ? TimeService : null,
+                    useCalendarService ? CalendarService : null,
+                    useDefaultWorkspaceInteractor ? defaultWorkspaceInteractor : null);
 
                 createInstance.Should().Throw<ArgumentNullException>();
             }
@@ -33,7 +44,9 @@ namespace Toggl.Foundation.Tests.Interactors.Suggestions
                 Action createInstance = () => new GetSuggestionsInteractor(
                         count,
                         DataSource,
-                        TimeService);
+                        TimeService,
+                        CalendarService,
+                        defaultWorkspaceInteractor);
 
                 createInstance.Should().Throw<ArgumentException>();
             }

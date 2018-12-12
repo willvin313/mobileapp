@@ -1,4 +1,5 @@
 using System;
+using Toggl.Foundation.Calendar;
 using Toggl.Foundation.Helper;
 using Toggl.Foundation.Models;
 using Toggl.Multivac;
@@ -62,6 +63,16 @@ namespace Toggl.Foundation.Suggestions
             if (timeEntry.Task == null) return;
 
             TaskName = timeEntry.Task.Name;
+        }
+
+        internal Suggestion(CalendarItem calendarItem, long workspaceId, float certainty)
+        {
+            Ensure.Argument.IsInClosedRange(certainty, 0, 1, nameof(certainty));
+            Ensure.Argument.IsNotNullOrWhiteSpaceString(calendarItem.Description, nameof(calendarItem.Description));
+
+            Certainty = certainty;
+            WorkspaceId = workspaceId;
+            Description = calendarItem.Description;
         }
     }
 }
