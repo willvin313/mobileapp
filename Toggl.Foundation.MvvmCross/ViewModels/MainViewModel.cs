@@ -151,8 +151,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             if (description != null)
             {
-                interactorFactory
-                    .GetDefaultWorkspace()
+                interactorFactory.GetDefaultWorkspace()
+                    .TrackException<InvalidOperationException, IThreadSafeWorkspace>("MainViewModel.Init")
                     .Execute()
                     .SelectMany(workspace => interactorFactory
                         .CreateTimeEntry(description.AsTimeEntryPrototype(TimeService.CurrentDateTime, workspace.Id))
@@ -266,8 +266,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                              .Subscribe(hasBeen => hasStopButtonEverBeenUsed = hasBeen)
                              .DisposedBy(disposeBag);
 
-            interactorFactory
-                .GetDefaultWorkspace()
+            interactorFactory.GetDefaultWorkspace()
+                .TrackException<InvalidOperationException, IThreadSafeWorkspace>("MainViewModel.Initialize")
                 .Execute()
                 .Subscribe(intentDonationService.SetDefaultShortcutSuggestions)
                 .DisposedBy(disposeBag);
@@ -275,7 +275,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             dataSource
                 .Workspaces
                 .Created
-                .VoidSubscribe(onWorkspaceCreated)
+                .Subscribe(_ => onWorkspaceCreated())
                 .DisposedBy(disposeBag);
 
             dataSource

@@ -18,16 +18,16 @@ namespace Toggl.Ultrawave.ApiClients
         }
 
         public IObservable<List<IClient>> GetAll()
-            => CreateListObservable<Client, IClient>(endPoints.Get, AuthHeader);
+            => SendRequest<Client, IClient>(endPoints.Get, AuthHeader);
 
         public IObservable<List<IClient>> GetAllSince(DateTimeOffset threshold)
-            => CreateListObservable<Client, IClient>(endPoints.GetSince(threshold), AuthHeader);
-        
+            => SendRequest<Client, IClient>(endPoints.GetSince(threshold), AuthHeader);
+
         public IObservable<IClient> Create(IClient client)
         {
             var endPoint = endPoints.Post(client.WorkspaceId);
             var clientCopy = client as Client ?? new Client(client);
-            var observable = CreateObservable(endPoint, AuthHeader, clientCopy, SerializationReason.Post);
+            var observable = SendRequest(endPoint, AuthHeader, clientCopy, SerializationReason.Post);
             return observable;
         }
     }

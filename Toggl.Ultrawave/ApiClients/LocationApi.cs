@@ -21,6 +21,6 @@ namespace Toggl.Ultrawave.ApiClients
         }
 
         public IObservable<ILocation> Get()
-            => CreateObservable<Location>(endPoints.Get, AuthHeader);
+            => SendRequest<Location>(endPoints.Get, AuthHeader);
     }
 }

@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Foundation;
+using Toggl.Foundation.MvvmCross.Calendar;
 
 namespace Toggl.Daneel.Views.Calendar
 {
@@ -8,7 +8,7 @@ namespace Toggl.Daneel.Views.Calendar
     {
         IEnumerable<NSIndexPath> IndexPathsOfCalendarItemsBetweenHours(int minHour, int maxHour);
 
-        CalendarCollectionViewItemLayoutAttributes LayoutAttributesForItemAtIndexPath(NSIndexPath indexPath);
+        CalendarItemLayoutAttributes LayoutAttributesForItemAtIndexPath(NSIndexPath indexPath);
 
         NSIndexPath IndexPathForEditingItem();
     }

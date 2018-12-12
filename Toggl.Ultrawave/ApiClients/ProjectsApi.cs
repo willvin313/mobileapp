@@ -21,16 +21,16 @@ namespace Toggl.Ultrawave.ApiClients
         }
 
         public IObservable<List<IProject>> GetAll()
-            => CreateListObservable<Project, IProject>(endPoints.Get, AuthHeader);
+            => SendRequest<Project, IProject>(endPoints.Get, AuthHeader);
 
         public IObservable<List<IProject>> GetAllSince(DateTimeOffset threshold)
-            => CreateListObservable<Project, IProject>(endPoints.GetSince(threshold), AuthHeader);
+            => SendRequest<Project, IProject>(endPoints.GetSince(threshold), AuthHeader);
 
         public IObservable<IProject> Create(IProject project)
         {
             var endPoint = endPoints.Post(project.WorkspaceId);
             var projectCopy = project as Project ?? new Project(project);
-            var observable = CreateObservable(endPoint, AuthHeader, projectCopy, SerializationReason.Post);
+            var observable = SendRequest(endPoint, AuthHeader, projectCopy, SerializationReason.Post);
             return observable;
         }
 
@@ -39,7 +39,7 @@ namespace Toggl.Ultrawave.ApiClients
             Ensure.Argument.IsNotNull(projectIds, nameof(projectIds));
 
             var json = $"{{\"ids\":[{String.Join(",", projectIds)}]}}";
-            return CreateListObservable<Project, IProject>(reportsEndPoints.Search(workspaceId), AuthHeader, json);
+            return SendRequest<Project, IProject>(reportsEndPoints.Search(workspaceId), AuthHeader, json);
         }
     }
 }

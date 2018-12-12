@@ -10,14 +10,13 @@ using Toggl.Foundation.Suggestions;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
-using Toggl.Foundation.Extensions;
 using Toggl.Foundation.MvvmCross.Parameters;
 using MvvmCross.Navigation;
 using System.Collections.Immutable;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels
 {
-    [Multivac.Preserve(AllMembers = true)]
+    [Preserve(AllMembers = true)]
     public sealed class SuggestionsViewModel : MvxViewModel
     {
         private const int suggestionCount = 3;
@@ -66,11 +65,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             await base.Initialize();
 
-            Suggestions = Observable
-                .CombineLatest(
-                    dataSource.Workspaces.ItemsChanged(), 
-                    dataSource.TimeEntries.ItemsChanged())
-                .SelectUnit()
+            Suggestions = interactorFactory.ObserveWorkspaceOrTimeEntriesChanges().Execute()
                 .StartWith(Unit.Default)
                 .SelectMany(_ => getSuggestions())
                 .AsDriver(onErrorJustReturn: ImmutableList.Create<Suggestion>(), schedulerProvider: schedulerProvider);

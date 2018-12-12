@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Toggl.Multivac;
 using Toggl.Multivac.Models;
@@ -36,83 +37,79 @@ namespace Toggl.Ultrawave.ApiClients
             AuthHeader = credentials.Header;
         }
 
-        protected IObservable<List<TInterface>> CreateListObservable<TModel, TInterface>(Endpoint endpoint, HttpHeader header, List<TModel> entities, SerializationReason serializationReason, IWorkspaceFeatureCollection features = null)
-            where TModel : class, TInterface
+        // String result
+
+        protected IObservable<string> SendRequest(Endpoint endpoint, HttpHeader header, string body = "")
+            => SendRequest(endpoint, new[] { header }, body);
+
+        protected IObservable<string> SendRequest(Endpoint endpoint, IEnumerable<HttpHeader> headers, string body = "")
         {
-            var body = serializer.Serialize(entities, serializationReason, features);
-            return CreateListObservable<TModel, TInterface>(endpoint, header, body);
+            var request = new Request(body, endpoint.Url, headers, endpoint.Method);
+            return sendRequest(request, headers)
+                .Select(response => response.RawData);
         }
 
-        protected IObservable<List<TInterface>> CreateListObservable<TModel, TInterface>(Endpoint endpoint, HttpHeader header, string body = "")
+        // Entity List result
+
+        protected IObservable<List<TInterface>> SendRequest<TModel, TInterface>(Endpoint endpoint, HttpHeader header, string body = "")
             where TModel : class, TInterface
-            => CreateListObservable<TModel, TInterface>(endpoint, new[] { header }, body);
+            => SendRequest<TModel, TInterface>(endpoint, new[] { header }, body);
 
 
-        protected IObservable<List<TInterface>> CreateListObservable<TModel, TInterface>(Endpoint endpoint, IEnumerable<HttpHeader> headers, string body = "")
+        protected IObservable<List<TInterface>> SendRequest<TModel, TInterface>(Endpoint endpoint,
+            IEnumerable<HttpHeader> headers, string body = "")
             where TModel : class, TInterface
         {
-            var observable = CreateObservable<List<TModel>>(endpoint, headers, body);
-            return observable.Select(items => items?.ToList<TInterface>());
+            return SendRequest<List<TModel>>(endpoint, headers, body)
+                .Select(items => items?.ToList<TInterface>());
         }
 
-        protected IObservable<T> CreateObservable<T>(Endpoint endpoint, HttpHeader header, T entity,
+        // Entity result
+
+        protected IObservable<T> SendRequest<T>(Endpoint endpoint, HttpHeader header, T entity,
             SerializationReason serializationReason, IWorkspaceFeatureCollection features = null)
         {
             var body = serializer.Serialize(entity, serializationReason, features);
-            return CreateObservable<T>(endpoint, header, body);
+            return SendRequest<T>(endpoint, header, body);
         }
 
-        protected IObservable<T> CreateObservable<T>(Endpoint endpoint, HttpHeader header, string body = "")
-        => CreateObservable<T>(endpoint, new[] { header }, body);
+        protected IObservable<T> SendRequest<T>(Endpoint endpoint, HttpHeader header, string body = "")
+            => SendRequest<T>(endpoint, new[] { header }, body);
 
-        protected IObservable<T> CreateObservable<T>(Endpoint endpoint, IEnumerable<HttpHeader> headers, string body = "")
-            => createObservable(endpoint, headers, body, async (rawData) =>
-                !string.IsNullOrEmpty(rawData)
-                    ? await Task.Run(() => serializer.Deserialize<T>(rawData)).ConfigureAwait(false)
-                    : default(T));
-
-        protected IObservable<string> CreateObservable(Endpoint endpoint, HttpHeader header, string body = "")
-            => createObservable(endpoint, new[] { header }, body, Task.FromResult);
-
-        protected IObservable<string> CreateObservable(Endpoint endpoint, IEnumerable<HttpHeader> headers, string body = "")
-            => createObservable(endpoint, headers, body, Task.FromResult);
-
-        private IObservable<T> createObservable<T>(Endpoint endpoint, IEnumerable<HttpHeader> headers, string body, Func<string, Task<T>> process)
+        protected IObservable<T> SendRequest<T>(Endpoint endpoint, IEnumerable<HttpHeader> headers, string body = "")
         {
-            var headerList = headers as IList<HttpHeader> ?? headers.ToList();
-            var request = new Request(body, endpoint.Url, headerList, endpoint.Method);
-
-            return Observable.Create<T>(async observer =>
-            {
-                T data;
-                try
-                {
-                    var response = await sendRequest(request).ConfigureAwait(false);
-
-                    await throwIfRequestFailed(request, response, headerList).ConfigureAwait(false);
-
-                    data = await processResponseData(request, response, process).ConfigureAwait(false);
-                }
-                catch (Exception e)
-                {
-                    observer.OnError(e);
-                    return;
-                }
-
-                observer.OnNext(data);
-                observer.OnCompleted();
-            });
+            var request = new Request(body, endpoint.Url, headers, endpoint.Method);
+            return sendRequest(request, headers)
+                .Select(response =>
+                    !string.IsNullOrEmpty(response.RawData)
+                        ? deserialize<T>(response.RawData, request, response)
+                        : default(T));
         }
 
-        private async Task<IResponse> sendRequest(IRequest request)
+        // Private methods
+
+        private IObservable<IResponse> sendRequest(IRequest request, IEnumerable<HttpHeader> headers)
+        {
+            return sendRequestAsync(request, headers).ToObservable()
+                .Catch<IResponse, HttpRequestException>(e => throw new OfflineException(e));
+        }
+
+        private async Task<IResponse> sendRequestAsync(IRequest request, IEnumerable<HttpHeader> headers)
+        {
+            var response = await apiClient.Send(request).ConfigureAwait(false);
+            await throwIfRequestFailed(request, response, headers);
+            return response;
+        }
+
+        private T deserialize<T>(string data, IRequest request, IResponse response)
         {
             try
             {
-                return await apiClient.Send(request).ConfigureAwait(false);
+                return serializer.Deserialize<T>(data);
             }
-            catch (HttpRequestException exception)
+            catch
             {
-                throw new OfflineException(exception);
+                throw new DeserializationException<T>(request, response, response.RawData);
             }
         }
 
@@ -124,22 +121,7 @@ namespace Toggl.Ultrawave.ApiClients
             throw await getExceptionFor(request, response, headers).ConfigureAwait(false);
         }
 
-        private static async Task<T> processResponseData<T>(IRequest request, IResponse response, Func<string, Task<T>> process)
-        {
-            try
-            {
-                return await process(response.RawData).ConfigureAwait(false);
-            }
-            catch
-            {
-                throw new DeserializationException<T>(request, response, response.RawData);
-            }
-        }
-
-        private async Task<Exception> getExceptionFor(
-            IRequest request,
-            IResponse response,
-            IEnumerable<HttpHeader> headers)
+        private async Task<Exception> getExceptionFor(IRequest request, IResponse response, IEnumerable<HttpHeader> headers)
         {
             try
             {

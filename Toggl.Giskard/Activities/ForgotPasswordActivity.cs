@@ -55,7 +55,7 @@ namespace Toggl.Giskard.Activities
 
             ViewModel.PasswordResetSuccessful
                 .Where(success => success)
-                .VoidSubscribe(showResetPasswordSuccessToast)
+                .Subscribe(_ => showResetPasswordSuccessToast())
                 .DisposedBy(DisposeBag);
 
             ViewModel.PasswordResetSuccessful

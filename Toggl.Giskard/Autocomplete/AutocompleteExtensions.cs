@@ -46,7 +46,7 @@ namespace Toggl.Giskard.Extensions
                 switch (tokenSpan)
                 {
                     case ProjectTokenSpan projectTokenSpan:
-                        yield return new ProjectSpan(projectTokenSpan.ProjectId, projectTokenSpan.ProjectName, projectTokenSpan.ProjectColor);
+                        yield return new ProjectSpan(projectTokenSpan.ProjectId, projectTokenSpan.ProjectName, projectTokenSpan.ProjectColor, projectTokenSpan.TaskId, projectTokenSpan.TaskName);
                         break;
                     case TagsTokenSpan tagTokenSpan:
                         yield return new TagSpan(tagTokenSpan.TagId, tagTokenSpan.TagName);
@@ -129,15 +129,23 @@ namespace Toggl.Giskard.Extensions
              * all token boundaries can't be changed by the soft input once
              * they are set. */
             var start = spannable.Length();
+            spannable.Append(unbreakableSpace);
             spannable.Append(projectSpan.ProjectName);
+            if (!string.IsNullOrEmpty(projectSpan.TaskName))
+            {
+                spannable.Append($": {projectSpan.TaskName}");
+            }
             spannable.Append(unbreakableSpace);
             var end = spannable.Length();
 
             var projectTokenSpan = new ProjectTokenSpan(
                 projectSpan.ProjectId,
                 projectSpan.ProjectName,
-                projectSpan.ProjectColor
+                projectSpan.ProjectColor,
+                projectSpan.TaskId,
+                projectSpan.TaskName
             );
+
 
             spannable.SetSpan(projectTokenSpan, start, end, SpanTypes.ExclusiveExclusive);
             spannable.SetSpan(new RelativeSizeSpan(spanSizeProportion), start, end, SpanTypes.ExclusiveExclusive);
@@ -150,6 +158,7 @@ namespace Toggl.Giskard.Extensions
              * all token boundaries can't be changed by the soft input once
              * they are set. */
             var start = spannable.Length();
+            spannable.Append(unbreakableSpace);
             spannable.Append(tagSpan.TagName);
             spannable.Append(unbreakableSpace);
             var end = spannable.Length();

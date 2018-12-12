@@ -23,19 +23,19 @@ namespace Toggl.Ultrawave.ApiClients
         }
 
         public IObservable<List<ITimeEntry>> GetAll()
-            => CreateListObservable<TimeEntry, ITimeEntry>(endPoints.Get, AuthHeader);
+            => SendRequest<TimeEntry, ITimeEntry>(endPoints.Get, AuthHeader);
 
         public IObservable<List<ITimeEntry>> GetAll(DateTimeOffset start, DateTimeOffset end)
         {
             if (start > end)
                 throw new InvalidOperationException($"Start date ({start}) must be earlier than the end date ({end}).");
 
-            return CreateListObservable<TimeEntry, ITimeEntry>(endPoints.GetBetween(start, end), AuthHeader)
+            return SendRequest<TimeEntry, ITimeEntry>(endPoints.GetBetween(start, end), AuthHeader)
                 .Select(timeEntries => timeEntries ?? new List<ITimeEntry>());
         }
 
         public IObservable<List<ITimeEntry>> GetAllSince(DateTimeOffset threshold)
-            => CreateListObservable<TimeEntry, ITimeEntry>(endPoints.GetSince(threshold), AuthHeader);
+            => SendRequest<TimeEntry, ITimeEntry>(endPoints.GetSince(threshold), AuthHeader);
 
         public IObservable<ITimeEntry> Create(ITimeEntry timeEntry)
             => pushTimeEntry(endPoints.Post(timeEntry.WorkspaceId), timeEntry, SerializationReason.Post);
@@ -44,7 +44,7 @@ namespace Toggl.Ultrawave.ApiClients
             => pushTimeEntry(endPoints.Put(timeEntry.WorkspaceId, timeEntry.Id), timeEntry, SerializationReason.Default);
 
         public IObservable<Unit> Delete(ITimeEntry timeEntry)
-            => CreateObservable<ITimeEntry>(endPoints.Delete(timeEntry.WorkspaceId, timeEntry.Id), AuthHeader)
+            => SendRequest<ITimeEntry>(endPoints.Delete(timeEntry.WorkspaceId, timeEntry.Id), AuthHeader)
                 .SingleAsync()
                 .Select(_ => Unit.Default);
 
@@ -56,7 +56,7 @@ namespace Toggl.Ultrawave.ApiClients
                 timeEntryCopy.CreatedWith = userAgent.ToString();
             }
 
-            var observable = CreateObservable(endPoint, AuthHeader, timeEntryCopy, reason);
+            var observable = SendRequest(endPoint, AuthHeader, timeEntryCopy, reason);
             return observable;
         }
     }

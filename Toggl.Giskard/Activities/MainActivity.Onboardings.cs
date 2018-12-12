@@ -203,7 +203,7 @@ namespace Toggl.Giskard.Activities
             });
 
             swipeToContinueWasUsedDisposable = mainRecyclerAdapter.ContinueTimeEntrySubject
-                .VoidSubscribe(() =>
+                .Subscribe(_ =>
                 {
                     swipeRightOnboardingStep.Dismiss();
                     swipeToContinueWasUsedDisposable.Dispose();
@@ -281,7 +281,7 @@ namespace Toggl.Giskard.Activities
             });
 
             swipeToDeleteWasUsedDisposable = mainRecyclerAdapter.DeleteTimeEntrySubject
-                .VoidSubscribe(() =>
+                .Subscribe(_ =>
                 {
                     swipeLeftOnboardingStep.Dismiss();
                     swipeToDeleteWasUsedDisposable.Dispose();

@@ -1,14 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
-using MvvmCross.Commands;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 using Toggl.Multivac;
-using Toggl.Multivac.Models;
 using Toggl.Multivac.Extensions;
-using static Toggl.Multivac.Extensions.StringExtensions;
 using Toggl.Foundation.Interactors;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels
@@ -16,19 +15,17 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
     [Preserve(AllMembers = true)]
     public sealed class SelectCountryViewModel : MvxViewModel<long?, long?>
     {
-        private readonly IMvxNavigationService navigationService;
-
-        private List<ICountry> allCountries;
         private long? selectedCountryId;
 
-        public IMvxAsyncCommand CloseCommand { get; }
+        private readonly ISubject<string> filterText = new BehaviorSubject<string>(string.Empty);
 
-        public IMvxAsyncCommand<SelectableCountryViewModel> SelectCountryCommand { get; }
+        private readonly IMvxNavigationService navigationService;
 
-        public MvxObservableCollection<SelectableCountryViewModel> Suggestions { get; }
-            = new MvxObservableCollection<SelectableCountryViewModel>();
+        public InputAction<SelectableCountryViewModel> SelectCountry { get; }
 
-        public string Text { get; set; } = "";
+        public IObservable<IEnumerable<SelectableCountryViewModel>> Countries { get; private set; }
+
+        public InputAction<string> SetFilterText { get; }
 
         public SelectCountryViewModel(IMvxNavigationService navigationService)
         {
@@ -36,15 +33,15 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             this.navigationService = navigationService;
 
-            CloseCommand = new MvxAsyncCommand(close);
-            SelectCountryCommand = new MvxAsyncCommand<SelectableCountryViewModel>(selectCountry);
+            SelectCountry = InputAction<SelectableCountryViewModel>.FromAsync(selectCountry);
+            SetFilterText = InputAction<string>.FromAction(setText);
         }
 
         public override async Task Initialize()
         {
             await base.Initialize();
 
-            allCountries = await new GetAllCountriesInteractor().Execute();
+            var allCountries = await new GetAllCountriesInteractor().Execute();
          
             var selectedElement = allCountries.Find(c => c.Id == selectedCountryId);
             if (selectedElement != null)
@@ -53,10 +50,15 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 allCountries.Insert(0, selectedElement);
             }
 
-            Suggestions.AddRange(
-                allCountries.Select(country => new SelectableCountryViewModel(
-                    country,
-                    country.Id == selectedCountryId)));
+            Countries = filterText
+                .Select(text => text.Trim())
+                .DistinctUntilChanged()
+                .Select(trimmedText =>
+                {
+                    return allCountries
+                        .Where(c => c.Name.ContainsIgnoringCase(trimmedText))
+                        .Select(c => new SelectableCountryViewModel(c, c.Id == selectedCountryId));
+                });
         }
 
         public override void Prepare(long? parameter)
@@ -64,21 +66,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             selectedCountryId = parameter;
         }
 
-        private void OnTextChanged()
-        {
-            Suggestions.Clear();
-            var text = Text.Trim();
-            Suggestions.AddRange(
-                allCountries
-                    .Where(c => c.Name.ContainsIgnoringCase(text))
-                    .Select(c => new SelectableCountryViewModel(c, c.Id == selectedCountryId))
-            );
-        }
-
-        private Task close()
-            => navigationService.Close(this, null);
-
         private async Task selectCountry(SelectableCountryViewModel selectedCountry)
             => await navigationService.Close(this, selectedCountry.Country.Id);
+
+        private void setText(string text)
+        {
+            filterText.OnNext(text ?? string.Empty);
+        }
     }
 }

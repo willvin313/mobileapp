@@ -33,7 +33,7 @@ namespace Toggl.Foundation.Sync.States.Pull
             var observables = new FetchObservables(
                 api.Workspaces.GetAll().ConnectedReplay(),
                 api.WorkspaceFeatures.GetAll().ConnectedReplay(),
-                api.User.Get(),
+                api.User.Get().ConnectedReplay(),
                 getSinceOrAll(since.Get<IDatabaseClient>(), api.Clients.GetAllSince, api.Clients.GetAll).ConnectedReplay(),
                 getSinceOrAll(since.Get<IDatabaseProject>(), api.Projects.GetAllSince, api.Projects.GetAll).ConnectedReplay(),
                 getSinceOrAll(since.Get<IDatabaseTimeEntry>(), api.TimeEntries.GetAllSince, fetchTwoMonthsOfTimeEntries).ConnectedReplay(),

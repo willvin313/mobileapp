@@ -750,7 +750,7 @@ namespace Toggl.Foundation.Tests.Sync
 
                 OrchestratorSyncComplete.OnNext(new Error(exception));
 
-                AnalyticsService.Received().Track(exception);
+                AnalyticsService.Received().TrackAnonymized(exception);
             }
 
             [Fact, LogIfTooSlow]
@@ -760,7 +760,7 @@ namespace Toggl.Foundation.Tests.Sync
 
                 OrchestratorSyncComplete.OnNext(new Error(exception));
 
-                AnalyticsService.DidNotReceive().Track(Arg.Any<OfflineException>());
+                AnalyticsService.DidNotReceive().TrackAnonymized(Arg.Any<OfflineException>());
                 AnalyticsService.OfflineModeDetected.Received().Track();
             }
 

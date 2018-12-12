@@ -41,7 +41,7 @@ namespace Toggl.Ultrawave.ApiClients
 
             return Observable.Create<ITimeEntriesTotals>(async observer =>
             {
-                var response = await CreateObservable<TotalsResponse>(endPoints.Totals(workspaceId), credentials.Header, json);
+                var response = await SendRequest<TotalsResponse>(endPoints.Totals(workspaceId), credentials.Header, json);
 
                 var totals = new TimeEntriesTotals
                 {

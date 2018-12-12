@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive.Linq;
+using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Models;
 using Toggl.Foundation.Models.Interfaces;
@@ -8,11 +9,11 @@ using Toggl.Multivac;
 
 namespace Toggl.Foundation.Interactors
 {
-    internal sealed class GetDefaultWorkspaceInteractor : IInteractor<IObservable<IThreadSafeWorkspace>>
+    internal sealed class GetDefaultWorkspaceInteractor : TrackableInteractor, IInteractor<IObservable<IThreadSafeWorkspace>>
     {
         private readonly ITogglDataSource dataSource;
 
-        public GetDefaultWorkspaceInteractor(ITogglDataSource dataSource)
+        public GetDefaultWorkspaceInteractor(ITogglDataSource dataSource, IAnalyticsService analyticsService) : base(analyticsService)
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
 

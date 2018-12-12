@@ -54,7 +54,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 await ViewModel.Initialize();
 
-                ViewModel.Suggestions.Should().HaveCount(250);
+                ViewModel.Countries.First().Count().Should().Equals(250);
             }
 
             [Theory, LogIfTooSlow]
@@ -67,7 +67,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 await ViewModel.Initialize();
 
-                ViewModel.Suggestions.Single(c => c.Selected).Country.Id.Should().Be(id);
+                ViewModel.Countries.First().Single(c => c.Selected).Country.Id.Should().Be(id);
             }
 
             [Fact, LogIfTooSlow]
@@ -77,7 +77,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 await ViewModel.Initialize();
 
-                ViewModel.Suggestions.All(suggestion => !suggestion.Selected);
+                ViewModel.Countries.First().All(suggestion => !suggestion.Selected);
             }
         }
 
@@ -100,7 +100,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 var selectableCountry = new SelectableCountryViewModel(country, true);
 
-                ViewModel.SelectCountryCommand.Execute(selectableCountry);
+                await ViewModel.SelectCountry.Execute(selectableCountry);
 
                 await NavigationService.Received()
                     .Close(Arg.Is(ViewModel), country.Id);
@@ -115,9 +115,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.Prepare(10);
                 await ViewModel.Initialize();
 
-                ViewModel.Text = "Greece";
+                ViewModel.SetFilterText.Execute("Greece");
 
-                ViewModel.Suggestions.Should().HaveCount(1);
+                ViewModel.Countries.First().Count().Should().Equals(1);
             }
         }
     }

@@ -34,6 +34,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly IDialogService dialogService;
         private readonly IInteractorFactory interactorFactory;
         private readonly IMvxNavigationService navigationService;
+        private readonly ISchedulerProvider schedulerProvider;
         private readonly IStopwatchProvider stopwatchProvider;
         private readonly Subject<string> infoSubject = new Subject<string>();
 
@@ -98,18 +99,21 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IInteractorFactory interactorFactory,
             IMvxNavigationService navigationService,
             IDialogService dialogService,
+            ISchedulerProvider schedulerProvider,
             IStopwatchProvider stopwatchProvider)
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
             Ensure.Argument.IsNotNull(dialogService, nameof(dialogService));
             Ensure.Argument.IsNotNull(interactorFactory, nameof(interactorFactory));
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
+            Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
             Ensure.Argument.IsNotNull(stopwatchProvider, nameof(stopwatchProvider));
 
             this.dataSource = dataSource;
             this.dialogService = dialogService;
             this.interactorFactory = interactorFactory;
             this.navigationService = navigationService;
+            this.schedulerProvider = schedulerProvider;
             this.stopwatchProvider = stopwatchProvider;
 
             CloseCommand = new MvxAsyncCommand(close);
@@ -145,7 +149,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             infoSubject.AsObservable()
                        .StartWith(Text)
                        .Select(text => text.SplitToQueryWords())
+                       .ObserveOn(schedulerProvider.BackgroundScheduler)
                        .SelectMany(query => interactorFactory.GetProjectsAutocompleteSuggestions(query).Execute())
+                       .SubscribeOn(schedulerProvider.MainScheduler)
                        .Select(suggestions => suggestions.Cast<ProjectSuggestion>())
                        .Select(setSelectedProject)
                        .Subscribe(onSuggestions);

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using CoreGraphics;
@@ -96,7 +96,7 @@ namespace Toggl.Daneel.ViewSources
             var cell = (TimeEntriesLogViewCell)base.GetCell(tableView, indexPath);
 
             cell.ContinueButtonTap
-                .VoidSubscribe(() => continueTapSubject.OnNext(cell.Item))
+                .Subscribe(() => continueTapSubject.OnNext(cell.Item))
                 .DisposedBy(cell.DisposeBag);
 
             if (indexPath.Row == 0 && indexPath.Section == 0)

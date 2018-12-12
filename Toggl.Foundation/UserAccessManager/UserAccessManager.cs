@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Models;
 using Toggl.Foundation.Services;
@@ -12,7 +14,7 @@ using Toggl.Ultrawave.Network;
 
 namespace Toggl.Foundation.Login
 {
-    public sealed class LoginManager : ILoginManager
+    public sealed class UserAccessManager : IUserAccessManager
     {
         private readonly IApiFactory apiFactory;
         private readonly ITogglDatabase database;
@@ -21,7 +23,14 @@ namespace Toggl.Foundation.Login
         private readonly IPrivateSharedStorageService privateSharedStorageService;
         private readonly Func<ITogglApi, ITogglDataSource> createDataSource;
 
-        public LoginManager(
+        private ITogglDataSource cachedDataSource;
+        private ISubject<Unit> userLoggedInSubject = new Subject<Unit>();
+        private ISubject<Unit> userLoggedOutSubject = new Subject<Unit>();
+
+        public IObservable<Unit> UserLoggedIn => userLoggedInSubject.AsObservable();
+        public IObservable<Unit> UserLoggedOut => userLoggedOutSubject.AsObservable();
+
+        public UserAccessManager(
             IApiFactory apiFactory,
             ITogglDatabase database,
             IGoogleService googleService,
@@ -60,7 +69,8 @@ namespace Toggl.Foundation.Login
                 .Select(User.Clean)
                 .SelectMany(database.User.Create)
                 .Select(dataSourceFromUser)
-                .Do(shortcutCreator.OnLogin);
+                .Do(shortcutCreator.OnLogin)
+                .Do(_ => userLoggedInSubject.OnNext(Unit.Default));
         }
 
         public IObservable<ITogglDataSource> LoginWithGoogle()
@@ -93,6 +103,10 @@ namespace Toggl.Foundation.Login
                 .SelectMany(_ => googleService.GetAuthToken())
                 .SelectMany(authToken => signUpWithGoogle(authToken, termsAccepted, countryId));
 
+        public IObservable<Unit> Logout()
+            => cachedDataSource.Logout()
+                .Do(_ => userLoggedOutSubject.OnNext(Unit.Default));
+
         public IObservable<string> ResetPassword(Email email)
         {
             if (!email.IsValid)
@@ -108,6 +122,7 @@ namespace Toggl.Foundation.Login
                 .Select(dataSourceFromUser)
                 .Catch(Observable.Return<ITogglDataSource>(null))
                 .Do(shortcutCreator.OnLogin)
+                .Do(_ => userLoggedInSubject.OnNext(Unit.Default))
                 .Wait();
 
         public IObservable<ITogglDataSource> RefreshToken(Password password)
@@ -124,7 +139,8 @@ namespace Toggl.Foundation.Login
                 .Select(User.Clean)
                 .SelectMany(database.User.Update)
                 .Select(dataSourceFromUser)
-                .Do(shortcutCreator.OnLogin);
+                .Do(shortcutCreator.OnLogin)
+                .Do(_ => userLoggedInSubject.OnNext(Unit.Default));
         }
 
         private ITogglDataSource dataSourceFromUser(IUser user)
@@ -134,7 +150,8 @@ namespace Toggl.Foundation.Login
 
             var newCredentials = Credentials.WithApiToken(user.ApiToken);
             var api = apiFactory.CreateApiWith(newCredentials);
-            return createDataSource(api);
+            cachedDataSource = createDataSource(api);
+            return cachedDataSource;
         }
 
         private IObservable<ITogglDataSource> loginWithGoogle(string googleToken)
@@ -147,7 +164,8 @@ namespace Toggl.Foundation.Login
                 .Select(User.Clean)
                 .SelectMany(database.User.Create)
                 .Select(dataSourceFromUser)
-                .Do(shortcutCreator.OnLogin);
+                .Do(shortcutCreator.OnLogin)
+                .Do(_ => userLoggedInSubject.OnNext(Unit.Default));
         }
 
         private IObservable<IUser> signUp(Email email, Password password, bool termsAccepted, int countryId)
@@ -167,7 +185,8 @@ namespace Toggl.Foundation.Login
                 .Select(User.Clean)
                 .SelectMany(database.User.Create)
                 .Select(dataSourceFromUser)
-                .Do(shortcutCreator.OnLogin);
+                .Do(shortcutCreator.OnLogin)
+                .Do(_ => userLoggedInSubject.OnNext(Unit.Default));
         }
     }
 }

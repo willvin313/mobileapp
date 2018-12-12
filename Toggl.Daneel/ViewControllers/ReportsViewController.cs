@@ -85,15 +85,15 @@ namespace Toggl.Daneel.ViewControllers
 
             //Commands
             titleButton.Rx().Tap()
-                .VoidSubscribe(ViewModel.ToggleCalendar)
+                .Subscribe(ViewModel.ToggleCalendar)
                 .DisposedBy(DisposeBag);
 
             ReportsTableView.Rx().Tap()
-                .VoidSubscribe(ViewModel.HideCalendar)
+                .Subscribe(ViewModel.HideCalendar)
                 .DisposedBy(DisposeBag);
 
-            WorkspaceButton.Rx().Tap()
-                .Subscribe(ViewModel.SelectWorkspace)
+            WorkspaceButton.Rx()
+                .BindAction(ViewModel.SelectWorkspace)
                 .DisposedBy(DisposeBag);
 
             var bindingSet = this.CreateBindingSet<ReportsViewController, ReportsViewModel>();

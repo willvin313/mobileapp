@@ -1,29 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:local="http://schemas.android.com/apk/res-auto"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:local="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/MainCoordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <ViewStub
+        android:id="@+id/WelcomeBackViewStub"
+        android:inflatedId="@+id/WelcomeBackView"
+        android:layout="@layout/WelcomeBackPlaceholder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize" />
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/MainSwipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize">
-        
         <android.support.v7.widget.RecyclerView
-                android:clipToPadding="false"
-                android:id="@+id/MainRecyclerView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        
+            android:id="@+id/MainRecyclerView"
+            android:clipToPadding="false"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </android.support.v4.widget.SwipeRefreshLayout>
     <include
         layout="@layout/MainRunningTimeEntry" />
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/MainPlayButton"
         local:elevation="4dp"
-        local:backgroundTint="@color/playButtonGreen"
         android:src="@drawable/play_white"
+        local:backgroundTint="@color/playButtonGreen"
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_marginRight="16dp"

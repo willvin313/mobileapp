@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Remotion.Linq.Parsing;
 using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Foundation.MvvmCross.Reactive;
 using Toggl.Multivac.Extensions;
@@ -41,7 +39,20 @@ namespace Toggl.Daneel.Extensions.Reactive
                 );
             };
 
-        public static IDisposable BindAction(this IReactive<UIButton> reactive, UIAction action, ButtonEventType eventType = ButtonEventType.Tap)
+        public static IDisposable BindAction(this IReactive<UIButton> reactive, UIAction action,
+            ButtonEventType eventType = ButtonEventType.Tap) =>
+            reactive.BindAction(action, _ => Unit.Default, eventType);
+
+        public static IDisposable BindAction<TInput>(this IReactive<UIButton> reactive, InputAction<TInput> action,
+            Func<UIButton, TInput> inputTransform, ButtonEventType eventType = ButtonEventType.Tap) =>
+            reactive.BindAction<TInput, Unit>(action, inputTransform, eventType);
+
+        public static IDisposable BindAction<TElement>(this IReactive<UIButton> reactive,
+            RxAction<Unit, TElement> action, ButtonEventType eventType = ButtonEventType.Tap) =>
+            reactive.BindAction(action, _ => Unit.Default, eventType);
+
+        public static IDisposable BindAction<TInput, TElement>(this IReactive<UIButton> reactive,
+            RxAction<TInput, TElement> action, Func<UIButton, TInput> inputTransform, ButtonEventType eventType = ButtonEventType.Tap)
         {
             IObservable<Unit> eventObservable = Observable.Empty<Unit>();
             switch (eventType)
@@ -58,27 +69,7 @@ namespace Toggl.Daneel.Extensions.Reactive
                     () => action.Enabled.Subscribe(e => { reactive.Base.Enabled = e; }),
                     _ => eventObservable
                 )
-                .Subscribe(action.Inputs);
-        }
-
-        public static IDisposable BindAction<T>(this IReactive<UIButton> reactive, InputAction<T> action, Func<UIButton, T> convert, ButtonEventType eventType = ButtonEventType.Tap)
-        {
-            IObservable<Unit> eventObservable = Observable.Empty<Unit>();
-            switch (eventType)
-            {
-                case ButtonEventType.Tap:
-                    eventObservable = reactive.Base.Rx().Tap();
-                    break;
-                case ButtonEventType.LongPress:
-                    eventObservable = reactive.Base.Rx().LongPress();
-                    break;
-            }
-
-            return Observable.Using(
-                    () => action.Enabled.Subscribe(e => { reactive.Base.Enabled = e; }),
-                    _ => eventObservable
-                )
-                .Select(_ => convert(reactive.Base))
+                .Select(_ => inputTransform(reactive.Base))
                 .Subscribe(action.Inputs);
         }
     }

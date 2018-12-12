@@ -754,7 +754,6 @@
     </Compile>
     <Compile Include="ViewSources\SelectTagsTableViewSource.cs" />
     <Compile Include="ViewSources\GroupedCollectionTableViewSource.cs" />
-    <Compile Include="Views\Calendar\CalendarCollectionViewItemLayoutAttributes.cs" />
     <Compile Include="Views\Calendar\CalendarCollectionViewLayout.cs" />
     <Compile Include="Views\Client\ClientViewCell.cs" />
     <Compile Include="Views\Client\ClientViewCell.designer.cs">

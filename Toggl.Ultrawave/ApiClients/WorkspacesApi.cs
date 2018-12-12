@@ -23,12 +23,12 @@ namespace Toggl.Ultrawave.ApiClients
         }
 
         public IObservable<List<IWorkspace>> GetAll()
-            => CreateListObservable<Workspace, IWorkspace>(endPoints.Get, AuthHeader);
+            => SendRequest<Workspace, IWorkspace>(endPoints.Get, AuthHeader);
 
         public IObservable<IWorkspace> GetById(long id)
         {
             var endpoint = endPoints.GetById(id);
-            var observable = CreateObservable<Workspace>(endpoint, AuthHeader);
+            var observable = SendRequest<Workspace>(endpoint, AuthHeader);
             return observable;
         }
 
@@ -37,7 +37,7 @@ namespace Toggl.Ultrawave.ApiClients
             var dto = new UserApi.WorkspaceParameters { Name = workspace.Name, InitialPricingPlan = PricingPlans.Free };
             var json = serializer.Serialize(dto, SerializationReason.Post, features: null);
 
-            return CreateObservable<Workspace>(endPoints.Post, AuthHeader, json);
+            return SendRequest<Workspace>(endPoints.Post, AuthHeader, json);
         }
     }
 }

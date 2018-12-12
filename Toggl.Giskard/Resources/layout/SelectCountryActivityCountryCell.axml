@@ -7,8 +7,8 @@
     android:layout_height="48dp"
     android:layout_width="match_parent">
     <TextView
-        local:MvxBind="Text Country.Name"
         tools:text="Estonia"
+        android:id="@+id/NameTextView"
         android:textSize="15sp"
         android:textStyle="normal"
         android:textColor="#000000"
@@ -18,7 +18,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent" />
     <ImageView
-        local:MvxBind="Visibility Visibility(Selected)"
+        android:id="@+id/SelectedImageView"
         android:src="@drawable/check"
         android:layout_marginRight="12dp"
         android:layout_width="wrap_content"

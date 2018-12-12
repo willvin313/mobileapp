@@ -39,7 +39,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Settings
 
             SelectCalendar
                 .Elements
-                .VoidSubscribe(onCalendarSelected);
+                .Subscribe(onCalendarSelected);
         }
 
         public async override Task Initialize()

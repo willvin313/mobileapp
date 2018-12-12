@@ -7,6 +7,7 @@ using System.Threading;
 using CoreGraphics;
 using Foundation;
 using Toggl.Foundation;
+using Toggl.Foundation.MvvmCross.Calendar;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
@@ -73,7 +74,7 @@ namespace Toggl.Daneel.Views.Calendar
                 .CurrentDateTimeObservable
                 .DistinctUntilChanged(offset => offset.Minute)
                 .ObserveOn(SynchronizationContext.Current)
-                .VoidSubscribe(InvalidateCurrentTimeLayout)
+                .Subscribe(_ => InvalidateCurrentTimeLayout())
                 .DisposedBy(disposeBag);
 
             currentTimeLayoutAttributes = UICollectionViewLayoutAttributes.CreateForSupplementaryView(CurrentTimeSupplementaryViewKind, NSIndexPath.FromItemSection(0, 0));
@@ -151,7 +152,7 @@ namespace Toggl.Daneel.Views.Calendar
 
             var attributes = UICollectionViewLayoutAttributes.CreateForCell(indexPath);
             attributes.Frame = frameForItemWithLayoutAttributes(calendarItemLayoutAttributes);
-            attributes.ZIndex = calendarItemLayoutAttributes.IsEditing ? 150 : 100;
+            attributes.ZIndex = zIndexForItemAtIndexPath(indexPath);
 
             return attributes;
         }
@@ -195,6 +196,13 @@ namespace Toggl.Daneel.Views.Calendar
             return new CGRect(x, y, width, height);
         }
 
+        private nint zIndexForItemAtIndexPath(NSIndexPath indexPath)
+        {
+            var editingIndexIndexPath = dataSource.IndexPathForEditingItem();
+            var isEditing = editingIndexIndexPath != null && editingIndexIndexPath.Item == indexPath.Item;
+            return isEditing ? 150 : 100;
+        }
+
         private UICollectionViewLayoutAttributes layoutAttributesForHourView(NSIndexPath indexPath)
             => LayoutAttributesForSupplementaryView(HourSupplementaryViewKind, indexPath);
 
@@ -228,7 +236,7 @@ namespace Toggl.Daneel.Views.Calendar
                 ? new NSIndexPath[] { NSIndexPath.FromItemSection(0, 0), NSIndexPath.FromItemSection(1, 0) }
                 : Enumerable.Empty<NSIndexPath>();
 
-        private CGRect frameForItemWithLayoutAttributes(CalendarCollectionViewItemLayoutAttributes attrs)
+        private CGRect frameForItemWithLayoutAttributes(CalendarItemLayoutAttributes attrs)
         {
             var startTime = attrs.StartTime < date ? date : attrs.StartTime;
             var endTime = attrs.EndTime > date.AddDays(1) ? date.AddDays(1) : attrs.EndTime;
@@ -237,10 +245,10 @@ namespace Toggl.Daneel.Views.Calendar
             var yHour = HourHeight * startTime.Hour;
             var yMins = HourHeight * startTime.Minute / 60;
 
-            var totalInterItemSpacing = (attrs.OverlappingItemsCount - 1) * horizontalItemSpacing;
-            var width = (CollectionViewContentSize.Width - leftPadding - rightPadding - totalInterItemSpacing) / attrs.OverlappingItemsCount;
+            var totalInterItemSpacing = (attrs.TotalColumns - 1) * horizontalItemSpacing;
+            var width = (CollectionViewContentSize.Width - leftPadding - rightPadding - totalInterItemSpacing) / attrs.TotalColumns;
             var height = Math.Max(minItemHeight, HourHeight * duration.TotalMinutes / 60) - verticalItemSpacing;
-            var x = leftPadding + (width + horizontalItemSpacing) * attrs.PositionInOverlappingGroup;
+            var x = leftPadding + (width + horizontalItemSpacing) * attrs.ColumnIndex;
             var y = yHour + yMins + verticalItemSpacing;
 
             return new CGRect(x, y, width, height);

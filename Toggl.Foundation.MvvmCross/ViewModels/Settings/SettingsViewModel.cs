@@ -5,7 +5,6 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
@@ -15,6 +14,7 @@ using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.DTOs;
 using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Interactors;
+using Toggl.Foundation.Login;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.Services;
@@ -40,8 +40,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
 
         private readonly UserAgent userAgent;
-        private readonly IMailService mailService;
         private readonly ITogglDataSource dataSource;
+        private readonly IUserAccessManager userAccessManager;
         private readonly IDialogService dialogService;
         private readonly IUserPreferences userPreferences;
         private readonly IFeedbackService feedbackService;
@@ -61,53 +61,42 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private IStopwatch navigationFromMainViewModelStopwatch;
 
         public string Title { get; private set; } = Resources.Settings;
-
-        public IObservable<string> Name { get; }
-
-        public IObservable<string> Email { get; }
-
-        public IObservable<bool> IsSynced { get; }
-
-        public IObservable<Unit> LoggingOut { get; }
-
-        public IObservable<byte[]> UserAvatar { get; }
-
-        public IObservable<string> DateFormat { get; }
-
-        public IObservable<bool> IsRunningSync { get; }
-
-        public IObservable<string> WorkspaceName { get; }
-
-        public IObservable<string> DurationFormat { get; }
-
-        public IObservable<string> BeginningOfWeek { get; }
-
-        public IObservable<bool> IsManualModeEnabled { get; }
-
-        public IObservable<bool> AreRunningTimerNotificationsEnabled { get; }
-
-        public IObservable<bool> AreStoppedTimerNotificationsEnabled { get; }
-
-        public IObservable<bool> UseTwentyFourHourFormat { get; }
-
-        public IObservable<IList<SelectableWorkspaceViewModel>> Workspaces { get; }
-
-        public IObservable<bool> IsFeedbackSuccessViewShowing { get; }
-
         public bool CalendarSettingsEnabled => onboardingStorage.CompletedCalendarOnboarding();
-
         public string Version => $"{userAgent.Version} ({platformConstants.BuildNumber})";
 
+        public IObservable<string> Name { get; }
+        public IObservable<string> Email { get; }
+        public IObservable<bool> IsSynced { get; }
+        public IObservable<Unit> LoggingOut { get; }
+        public IObservable<byte[]> UserAvatar { get; }
+        public IObservable<string> DateFormat { get; }
+        public IObservable<bool> IsRunningSync { get; }
+        public IObservable<string> WorkspaceName { get; }
+        public IObservable<string> DurationFormat { get; }
+        public IObservable<string> BeginningOfWeek { get; }
+        public IObservable<bool> IsManualModeEnabled { get; }
+        public IObservable<bool> AreRunningTimerNotificationsEnabled { get; }
+        public IObservable<bool> AreStoppedTimerNotificationsEnabled { get; }
+        public IObservable<bool> UseTwentyFourHourFormat { get; }
+        public IObservable<IList<SelectableWorkspaceViewModel>> Workspaces { get; }
+        public IObservable<bool> IsFeedbackSuccessViewShowing { get; }
+
         public UIAction OpenCalendarSettings { get; }
-
         public UIAction OpenNotificationSettings { get; }
-
         public UIAction ToggleTwentyFourHourSettings { get; }
+        public UIAction OpenHelpView { get; }
+        public UIAction TryLogout { get; }
+        public UIAction OpenAboutView { get; }
+        public UIAction SubmitFeedback { get; }
+        public UIAction SelectDateFormat { get; }
+        public UIAction PickDefaultWorkspace { get; }
+        public UIAction SelectDurationFormat { get; }
+        public UIAction SelectBeginningOfWeek { get; }
 
         public SettingsViewModel(
             UserAgent userAgent,
-            IMailService mailService,
             ITogglDataSource dataSource,
+            IUserAccessManager userAccessManager,
             IDialogService dialogService,
             IUserPreferences userPreferences,
             IFeedbackService feedbackService,
@@ -122,7 +111,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             Ensure.Argument.IsNotNull(userAgent, nameof(userAgent));
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
-            Ensure.Argument.IsNotNull(mailService, nameof(mailService));
+            Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
             Ensure.Argument.IsNotNull(dialogService, nameof(dialogService));
             Ensure.Argument.IsNotNull(userPreferences, nameof(userPreferences));
             Ensure.Argument.IsNotNull(feedbackService, nameof(feedbackService));
@@ -137,7 +126,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             this.userAgent = userAgent;
             this.dataSource = dataSource;
-            this.mailService = mailService;
+            this.userAccessManager = userAccessManager;
             this.dialogService = dialogService;
             this.userPreferences = userPreferences;
             this.feedbackService = feedbackService;
@@ -174,7 +163,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             WorkspaceName =
                 dataSource.User.Current
                     .DistinctUntilChanged(user => user.DefaultWorkspaceId)
-                    .SelectMany(_ => interactorFactory.GetDefaultWorkspace().Execute())
+                    .SelectMany(_ => interactorFactory.GetDefaultWorkspace()
+                        .TrackException<InvalidOperationException, IThreadSafeWorkspace>("SettingsViewModel.constructor")
+                        .Execute()
+                    )
                     .Select(workspace => workspace.Name);
 
             BeginningOfWeek =
@@ -233,6 +225,14 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             OpenCalendarSettings = UIAction.FromAsync(openCalendarSettings);
             OpenNotificationSettings = UIAction.FromAsync(openNotificationSettings);
             ToggleTwentyFourHourSettings = UIAction.FromAsync(toggleUseTwentyFourHourClock);
+            OpenHelpView = UIAction.FromAsync(openHelpView);
+            TryLogout = UIAction.FromAsync(tryLogout);
+            OpenAboutView = UIAction.FromAsync(openAboutView);
+            SubmitFeedback = UIAction.FromAsync(submitFeedback);
+            SelectDateFormat = UIAction.FromAsync(selectDateFormat);
+            PickDefaultWorkspace = UIAction.FromAsync(pickDefaultWorkspace);
+            SelectDurationFormat = UIAction.FromAsync(selectDurationFormat);
+            SelectBeginningOfWeek = UIAction.FromAsync(selectBeginningOfWeek);
         }
 
         public override async Task Initialize()
@@ -252,31 +252,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public void CloseFeedbackSuccessView()
         {
             isFeedbackSuccessViewShowing.OnNext(false);
-        }
-
-        public Task OpenAboutView()
-            => navigationService.Navigate<AboutViewModel>();
-
-        public Task OpenHelpView() =>
-            navigationService.Navigate<BrowserViewModel, BrowserParameters>(
-                BrowserParameters.WithUrlAndTitle(platformConstants.HelpUrl, Resources.Help)
-            );
-
-        public async Task PickDefaultWorkspace()
-        {
-            var defaultWorkspace = await interactorFactory.GetDefaultWorkspace().Execute();
-            var parameters = WorkspaceParameters.Create(defaultWorkspace.Id, Resources.SetDefaultWorkspace, allowQuerying: false);
-            var selectedWorkspaceId =
-                await navigationService
-                    .Navigate<SelectWorkspaceViewModel, WorkspaceParameters, long>(parameters);
-
-            await changeDefaultWorkspace(selectedWorkspaceId);
-        }
-
-        public async Task SubmitFeedback()
-        {
-            var sendFeedbackSucceed = await navigationService.Navigate<SendFeedbackViewModel, bool>();
-            isFeedbackSuccessViewShowing.OnNext(sendFeedbackSucceed);
         }
 
         public async Task SubmitFeedbackUsingEmail()
@@ -320,59 +295,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             userPreferences.SetStoppedTimerNotifications(newState);
         }
 
-        public async Task TryLogout()
-        {
-            var synced = !isSyncing && await isSynced();
-            if (synced)
-            {
-                await logout();
-                return;
-            }
-
-            var (title, message) = isSyncing
-                ? (Resources.SettingsSyncInProgressTitle, Resources.SettingsSyncInProgressMessage)
-                : (Resources.SettingsUnsyncedTitle, Resources.SettingsUnsyncedMessage);
-
-            await dialogService
-                .Confirm(title, message, Resources.SettingsDialogButtonSignOut, Resources.Cancel)
-                .SelectMany(shouldLogout
-                    => shouldLogout ? logout() : Observable.Return(Unit.Default));
-        }
-
-        public async Task SelectDateFormat()
-        {
-            var newDateFormat = await navigationService
-                .Navigate<SelectDateFormatViewModel, DateFormat, DateFormat>(currentPreferences.DateFormat);
-
-            if (currentPreferences.DateFormat == newDateFormat)
-                return;
-
-            await updatePreferences(dateFormat: newDateFormat);
-        }
-
-        public async Task SelectBeginningOfWeek()
-        {
-            var newBeginningOfWeek = await navigationService
-                .Navigate<SelectBeginningOfWeekViewModel, BeginningOfWeek, BeginningOfWeek>(currentUser.BeginningOfWeek);
-
-            if (currentUser.BeginningOfWeek == newBeginningOfWeek)
-                return;
-
-            await interactorFactory.UpdateUser(new EditUserDTO { BeginningOfWeek = newBeginningOfWeek }).Execute();
-            dataSource.SyncManager.InitiatePushSync();
-        }
-
-        public async Task SelectDurationFormat()
-        {
-            var newDurationFormat = await navigationService
-                .Navigate<SelectDurationFormatViewModel, DurationFormat, DurationFormat>(currentPreferences.DurationFormat);
-
-            if (currentPreferences.DurationFormat == newDurationFormat)
-                return;
-
-            await updatePreferences(newDurationFormat);
-        }
-
         private Task openCalendarSettings()
             => navigationService.Navigate<CalendarSettingsViewModel>();
 
@@ -389,7 +311,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             privateSharedStorageService.ClearAll();
             intentDonationService.ClearAll();
 
-            return dataSource.Logout().Do(_ => navigationService.Navigate<LoginViewModel>());
+            return userAccessManager.Logout().Do(_ => navigationService.Navigate<LoginViewModel>());
         }
 
         private IObservable<bool> isSynced()
@@ -435,5 +357,87 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 => workspaces
                     .Select(workspace => new SelectableWorkspaceViewModel(workspace, user.DefaultWorkspaceId == workspace.Id))
                     .ToList();
+
+        private Task openHelpView() =>
+            navigationService.Navigate<BrowserViewModel, BrowserParameters>(
+                BrowserParameters.WithUrlAndTitle(platformConstants.HelpUrl, Resources.Help)
+            );
+
+        private async Task tryLogout()
+        {
+            var synced = !isSyncing && await isSynced();
+            if (synced)
+            {
+                await logout();
+                return;
+            }
+
+            var (title, message) = isSyncing
+                ? (Resources.SettingsSyncInProgressTitle, Resources.SettingsSyncInProgressMessage)
+                : (Resources.SettingsUnsyncedTitle, Resources.SettingsUnsyncedMessage);
+
+            await dialogService
+                .Confirm(title, message, Resources.SettingsDialogButtonSignOut, Resources.Cancel)
+                .SelectMany(shouldLogout
+                    => shouldLogout ? logout() : Observable.Return(Unit.Default));
+        }
+
+        private Task openAboutView()
+            => navigationService.Navigate<AboutViewModel>();
+
+        private async Task submitFeedback()
+        {
+            var sendFeedbackSucceed = await navigationService.Navigate<SendFeedbackViewModel, bool>();
+            isFeedbackSuccessViewShowing.OnNext(sendFeedbackSucceed);
+        }
+
+        private async Task selectDateFormat()
+        {
+            var newDateFormat = await navigationService
+                .Navigate<SelectDateFormatViewModel, DateFormat, DateFormat>(currentPreferences.DateFormat);
+
+            if (currentPreferences.DateFormat == newDateFormat)
+                return;
+
+            await updatePreferences(dateFormat: newDateFormat);
+        }
+
+        private async Task pickDefaultWorkspace()
+        {
+            var defaultWorkspace = await interactorFactory.GetDefaultWorkspace()
+                .TrackException<InvalidOperationException, IThreadSafeWorkspace>("SettingsViewModel.PickDefaultWorkspace")
+                .Execute();
+
+            var parameters = WorkspaceParameters.Create(defaultWorkspace.Id, Resources.SetDefaultWorkspace, allowQuerying: false);
+            var selectedWorkspaceId =
+                await navigationService
+                    .Navigate<SelectWorkspaceViewModel, WorkspaceParameters, long>(parameters);
+
+            await changeDefaultWorkspace(selectedWorkspaceId);
+        }
+
+        private async Task selectDurationFormat()
+        {
+            var newDurationFormat = await navigationService
+                .Navigate<SelectDurationFormatViewModel, DurationFormat, DurationFormat>(currentPreferences.DurationFormat);
+
+            if (currentPreferences.DurationFormat == newDurationFormat)
+                return;
+
+            await updatePreferences(newDurationFormat);
+        }
+
+        private async Task selectBeginningOfWeek()
+        {
+            var newBeginningOfWeek = await navigationService
+                .Navigate<SelectBeginningOfWeekViewModel, BeginningOfWeek, BeginningOfWeek>(currentUser
+                    .BeginningOfWeek);
+
+            if (currentUser.BeginningOfWeek == newBeginningOfWeek)
+                return;
+
+            await interactorFactory.UpdateUser(new EditUserDTO { BeginningOfWeek = newBeginningOfWeek }).Execute();
+            dataSource.SyncManager.InitiatePushSync();
+        }
     }
 }

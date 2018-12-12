@@ -6,7 +6,7 @@
     </entry> 
     <entry> 
         <key>UserRatingDialogTrigger</key> 
-        <value>stop</value> 
+        <value>none</value> 
     </entry> 
     <entry> 
         <key>day_count</key> 
@@ -14,6 +14,6 @@
     </entry> 
     <entry> 
         <key>criterion</key> 
-        <value>stop</value> 
+        <value>none</value> 
     </entry> 
 </defaultsMap> 

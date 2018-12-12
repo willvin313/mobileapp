@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Reactive.Linq;
 using Foundation;
@@ -97,28 +97,28 @@ namespace Toggl.Daneel.ViewControllers
                 .DisposedBy(DisposeBag);
 
             //Commands
-            SignupCard.Rx().Tap()
-                .Subscribe(ViewModel.Signup)
+            SignupCard.Rx()
+                .BindAction(ViewModel.Signup)
                 .DisposedBy(DisposeBag);
 
             LoginButton.Rx().Tap()
-                .VoidSubscribe(ViewModel.Login)
+                .Subscribe(ViewModel.Login)
                 .DisposedBy(DisposeBag);
 
             GoogleLoginButton.Rx().Tap()
-                .VoidSubscribe(ViewModel.GoogleLogin)
+                .Subscribe(ViewModel.GoogleLogin)
                 .DisposedBy(DisposeBag);
 
-            ForgotPasswordButton.Rx().Tap()
-                .Subscribe(ViewModel.ForgotPassword)
+            ForgotPasswordButton.Rx()
+                .BindAction(ViewModel.ForgotPassword)
                 .DisposedBy(DisposeBag);
 
-            PasswordManagerButton.Rx().Tap()
-                .Subscribe(ViewModel.StartPasswordManager)
+            PasswordManagerButton.Rx()
+                .BindAction(ViewModel.StartPasswordManager)
                 .DisposedBy(DisposeBag);
 
             ShowPasswordButton.Rx().Tap()
-                .VoidSubscribe(ViewModel.TogglePasswordVisibility)
+                .Subscribe(ViewModel.TogglePasswordVisibility)
                 .DisposedBy(DisposeBag);
 
             //Color

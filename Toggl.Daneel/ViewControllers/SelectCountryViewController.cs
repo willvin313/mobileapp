@@ -1,17 +1,24 @@
-﻿using MvvmCross.Binding.BindingContext;
+﻿using System;
+using System.Collections.Generic;
+using System.Reactive;
 using Toggl.Daneel.ViewSources;
 using Toggl.Daneel.Presentation.Attributes;
-using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using UIKit;
 using Toggl.Daneel.Extensions;
 using System.Threading.Tasks;
+using Toggl.Daneel.Extensions.Reactive;
+using Toggl.Daneel.Views.CountrySelection;
+using Toggl.Foundation.MvvmCross.Extensions;
+using Toggl.Multivac.Extensions;
 
 namespace Toggl.Daneel.ViewControllers
 {
     [ModalCardPresentation]
     public sealed partial class SelectCountryViewController : KeyboardAwareViewController<SelectCountryViewModel>, IDismissableViewController
     {
+        private CountryTableViewSource tableViewSource = new CountryTableViewSource();
+
         public SelectCountryViewController() : base(nameof(SelectCountryViewController))
         {
         }
@@ -20,27 +27,39 @@ namespace Toggl.Daneel.ViewControllers
         {
             base.ViewDidLoad();
 
-            var source = new CountryTableViewSource(CountriesTableView);
-            CountriesTableView.Source = source;
+            CountriesTableView.SeparatorStyle = UITableViewCellSeparatorStyle.None;
+            CountriesTableView.RegisterNibForCellReuse(CountryViewCell.Nib, CountryViewCell.Identifier);
+            CountriesTableView.Source = tableViewSource;
 
-            var bindingSet = this.CreateBindingSet<SelectCountryViewController, SelectCountryViewModel>();
+            ViewModel.Countries
+                .Subscribe(replaceCountries)
+                .DisposedBy(DisposeBag);
 
-            bindingSet.Bind(source).To(vm => vm.Suggestions);
-            bindingSet.Bind(SearchTextField).To(vm => vm.Text);
-            bindingSet.Bind(CloseButton).To(vm => vm.CloseCommand);
-            bindingSet.Bind(source)
-                      .For(v => v.SelectionChangedCommand)
-                      .To(vm => vm.SelectCountryCommand);
+            CloseButton.Rx()
+                .BindAction(ViewModel.Close())
+                .DisposedBy(DisposeBag);
 
-            bindingSet.Apply();
+            SearchTextField.Rx().Text()
+                .Subscribe(ViewModel.SetFilterText.Inputs)
+                .DisposedBy(DisposeBag);
+
+            tableViewSource.CountrySelected
+                .Subscribe(ViewModel.SelectCountry.Inputs)
+                .DisposedBy(DisposeBag);
 
             SearchTextField.BecomeFirstResponder();
         }
 
         public async Task<bool> Dismiss()
         {
-            await ViewModel.CloseCommand.ExecuteAsync();
+            ViewModel.Close().Execute(Unit.Default);
             return true;
+        }
+
+        private void replaceCountries(IEnumerable<SelectableCountryViewModel> countries)
+        {
+            tableViewSource.SetNewCountries(countries);
+            CountriesTableView.ReloadData();
         }
 
         protected override void KeyboardWillShow(object sender, UIKeyboardEventArgs e)

@@ -115,7 +115,7 @@ namespace Toggl.Ultrawave.Tests.Exceptions
             {
                 var defaultMessage = "Default message";
                 var message = "Couldn't find workspace with id blah blah blah...";
-                var body = $"{{\"message\": \"{message}\"}}"; 
+                var body = $"{{\"error_message\": \"{message}\"}}";
                 var endpoint = new Uri("https://www.some.url");
                 var method = new HttpMethod("GET");
                 var request = new Request("", endpoint, new HttpHeader[0], method);
@@ -128,7 +128,8 @@ namespace Toggl.Ultrawave.Tests.Exceptions
             [Theory, LogIfTooSlow]
             [InlineData("null")]
             [InlineData("{}")]
-            [InlineData("{\"message\":null}")]
+            [InlineData("{\"error_message\":null}")]
+            [InlineData("{\"message\":\"this is the old format\"}")]
             [InlineData("{\"notAMessage\":\"hi\"}")]
             public void ReturnsFallbackLocalisedErrorMessageIfJsonErrorHasNoMessage(string noMessageJson)
             {
@@ -145,7 +146,7 @@ namespace Toggl.Ultrawave.Tests.Exceptions
             [Theory, LogIfTooSlow]
             [InlineData("{")]
             [InlineData("}")]
-            [InlineData("{\"message\":}")]
+            [InlineData("{\"error_message\":}")]
             [InlineData("\"\"")]
             [InlineData("This is an error.")]
             public void ReturnsFallbackLocalisedErrorMessageIfJsonErrorHasInvalidSyntax(string brokenJson)

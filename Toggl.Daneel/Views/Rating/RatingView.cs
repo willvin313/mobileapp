@@ -93,11 +93,11 @@ namespace Toggl.Daneel
                 .DisposedBy(DisposeBag);
 
             YesView.Rx().Tap()
-                .VoidSubscribe(() => DataContext.RegisterImpression(true))
+                .Subscribe(() => DataContext.RegisterImpression(true))
                 .DisposedBy(DisposeBag);
 
             NotReallyView.Rx().Tap()
-                .VoidSubscribe(() => DataContext.RegisterImpression(false))
+                .Subscribe(() => DataContext.RegisterImpression(false))
                 .DisposedBy(DisposeBag);
 
             CtaButton.Rx()
@@ -105,7 +105,7 @@ namespace Toggl.Daneel
                 .DisposedBy(DisposeBag);
 
             DismissButton.Rx().Tap()
-                .VoidSubscribe(DataContext.Dismiss)
+                .Subscribe(DataContext.Dismiss)
                 .DisposedBy(DisposeBag);
         }
 

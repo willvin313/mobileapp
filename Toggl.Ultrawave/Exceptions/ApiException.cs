@@ -59,7 +59,7 @@ namespace Toggl.Ultrawave.Exceptions
             try
             {
                 var error = new JsonSerializer().Deserialize<ResponseError>(response.RawData);
-                return error?.Message ?? badJsonLocalisedError;
+                return error?.ErrorMessage ?? badJsonLocalisedError;
             }
             catch (DeserializationException)
             {

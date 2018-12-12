@@ -66,24 +66,24 @@ namespace Toggl.Giskard.Activities
                 .DisposedBy(DisposeBag);
 
             //Commands
-            signupCard.Rx().Tap()
-                .Subscribe(ViewModel.Signup)
+            signupCard.Rx()
+                .BindAction(ViewModel.Signup)
                 .DisposedBy(DisposeBag);
 
             loginButton.Rx().Tap()
-                .VoidSubscribe(ViewModel.Login)
+                .Subscribe(ViewModel.Login)
                 .DisposedBy(DisposeBag);
 
             passwordEditText.Rx().EditorActionSent()
-                .VoidSubscribe(ViewModel.Login)
+                .Subscribe(ViewModel.Login)
                 .DisposedBy(DisposeBag);
 
             googleLoginButton.Rx().Tap()
-                .VoidSubscribe(ViewModel.GoogleLogin)
+                .Subscribe(ViewModel.GoogleLogin)
                 .DisposedBy(DisposeBag);
 
-            forgotPasswordView.Rx().Tap()
-                .Subscribe(ViewModel.ForgotPassword)
+            forgotPasswordView.Rx()
+                .BindAction(ViewModel.ForgotPassword)
                 .DisposedBy(DisposeBag);
 
             string loginButtonTitle(bool isLoading)

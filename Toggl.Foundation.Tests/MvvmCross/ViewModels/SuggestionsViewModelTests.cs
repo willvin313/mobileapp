@@ -19,6 +19,7 @@ using FsCheck.Xunit;
 using Toggl.Foundation.Tests.Mocks;
 using Toggl.Foundation.MvvmCross.Parameters;
 using System.Collections.Immutable;
+using Toggl.Multivac.Extensions;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 {
@@ -84,16 +85,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task ReloadsSuggestionsWhenWorkspacesUpdate()
             {
-                var workspaceUpdatedSubject = new Subject<EntityUpdate<IThreadSafeWorkspace>>();
-                DataSource.Workspaces.Updated.Returns(workspaceUpdatedSubject.AsObservable());
-                DataSource.Workspaces.Created.Returns(Observable.Empty<IThreadSafeWorkspace>());
-                DataSource.Workspaces.Deleted.Returns(Observable.Empty<long>());
+                var workspaceUpdatedSubject = new Subject<Unit>();
                 var observer = TestScheduler.CreateObserver<IImmutableList<Suggestion>>();
+                InteractorFactory.ObserveWorkspaceOrTimeEntriesChanges().Execute().Returns(workspaceUpdatedSubject.AsObservable());
 
                 await ViewModel.Initialize();
                 ViewModel.Suggestions.Subscribe(observer);
 
-                workspaceUpdatedSubject.OnNext(new EntityUpdate<IThreadSafeWorkspace>());
+                workspaceUpdatedSubject.OnNext(Unit.Default);
 
                 TestScheduler.Start();
 
@@ -105,23 +104,35 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task ReloadsSuggestionsWhenTimeEntriesUpdate()
             {
-                var timeEntriesUpdatedSubject = new Subject<EntityUpdate<IThreadSafeTimeEntry>>();
-                DataSource.TimeEntries.Updated.Returns(timeEntriesUpdatedSubject.AsObservable());
-                DataSource.TimeEntries.Created.Returns(Observable.Empty<IThreadSafeTimeEntry>());
-                DataSource.TimeEntries.Deleted.Returns(Observable.Empty<long>());
+                var provider = Substitute.For<ISuggestionProvider>();
+                var getSuggestionsInteractor = Substitute.For<IInteractor<IObservable<IImmutableList<Suggestion>>>>();
+                var changesSubject = new Subject<Unit>();
+                InteractorFactory.ObserveWorkspaceOrTimeEntriesChanges().Execute().Returns(changesSubject);
+                InteractorFactory.GetSuggestions(Arg.Any<int>()).Returns(getSuggestionsInteractor);
 
                 var observer = TestScheduler.CreateObserver<IImmutableList<Suggestion>>();
 
                 await ViewModel.Initialize();
                 ViewModel.Suggestions.Subscribe(observer);
 
-                timeEntriesUpdatedSubject.OnNext(new EntityUpdate<IThreadSafeTimeEntry>());
+                changesSubject.OnNext(Unit.Default);
 
                 TestScheduler.Start();
 
                 observer.Messages.Should().HaveCount(2);
                 observer.Messages.First().Value.Value.Should().HaveCount(0);
                 observer.Messages.Last().Value.Value.Should().HaveCount(0);
+
+                await getSuggestionsInteractor.Received(2).Execute();
+            }
+
+            private ISuggestionProvider suggestionProvider()
+            {
+                var provider = Substitute.For<ISuggestionProvider>();
+
+                provider.GetSuggestions().Returns(Observable.Empty<Suggestion>());
+
+                return provider;
             }
 
             private Suggestion createSuggestion(int index) => createSuggestion($"te{index}", 0, 0);

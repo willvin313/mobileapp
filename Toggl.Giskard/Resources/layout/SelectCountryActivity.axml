@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <ImageView
-            local:MvxBind="Click CloseCommand"
+            android:id="@+id/BackImageView"
             android:padding="16dp"
             android:clickable="true"
             android:src="@drawable/arrow_back"
@@ -21,7 +21,7 @@
             android:layout_width="56dp"
             android:layout_height="56dp" />
         <EditText
-            local:MvxBind="Text Text"
+            android:id="@+id/FilterEditText"
             android:textSize="19sp"
             android:letterSpacing="-0.01"
             android:lineSpacingExtra="5sp"
@@ -33,10 +33,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical" />
     </LinearLayout>
-    <toggl.giskard.views.SelectCountryRecyclerView
-        local:MvxBind="ItemsSource Suggestions; ItemClick SelectCountryCommand"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/RecyclerView"
         android:scrollbars="vertical"
-        local:MvxTemplateSelector="@string/SelectCountryTemplateSelector"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize" />

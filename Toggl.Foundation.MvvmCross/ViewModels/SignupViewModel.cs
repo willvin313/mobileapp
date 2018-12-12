@@ -39,7 +39,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         }
 
         private readonly IApiFactory apiFactory;
-        private readonly ILoginManager loginManager;
+        private readonly IUserAccessManager userAccessManager;
         private readonly IAnalyticsService analyticsService;
         private readonly IOnboardingStorage onboardingStorage;
         private readonly IForkingNavigationService navigationService;
@@ -65,30 +65,25 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly BehaviorSubject<bool> isCountryErrorVisibleSubject = new BehaviorSubject<bool>(false);
 
         public IObservable<string> CountryButtonTitle { get; }
-
         public IObservable<bool> IsCountryErrorVisible { get; }
-
         public IObservable<string> Email { get; }
-
         public IObservable<string> Password { get; }
-
         public IObservable<bool> HasError { get; }
-
         public IObservable<bool> IsLoading { get; }
-
         public IObservable<bool> SignupEnabled { get; }
-
         public IObservable<ShakeTargets> Shake { get; }
-
         public IObservable<string> ErrorMessage { get; }
-
         public IObservable<bool> IsPasswordMasked { get; }
-
         public IObservable<bool> IsShowPasswordButtonVisible { get; }
+
+        public UIAction Login { get; }
+        public UIAction Signup { get; }
+        public UIAction GoogleSignup { get; }
+        public UIAction PickCountry { get; }
 
         public SignupViewModel(
             IApiFactory apiFactory,
-            ILoginManager loginManager,
+            IUserAccessManager userAccessManager,
             IAnalyticsService analyticsService,
             IOnboardingStorage onboardingStorage,
             IForkingNavigationService navigationService,
@@ -98,7 +93,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             ISchedulerProvider schedulerProvider)
         {
             Ensure.Argument.IsNotNull(apiFactory, nameof(apiFactory));
-            Ensure.Argument.IsNotNull(loginManager, nameof(loginManager));
+            Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
             Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(onboardingStorage, nameof(onboardingStorage));
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
@@ -108,7 +103,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
 
             this.apiFactory = apiFactory;
-            this.loginManager = loginManager;
+            this.userAccessManager = userAccessManager;
             this.analyticsService = analyticsService;
             this.onboardingStorage = onboardingStorage;
             this.navigationService = navigationService;
@@ -116,6 +111,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             this.lastTimeUsageStorage = lastTimeUsageStorage;
             this.timeService = timeService;
             this.schedulerProvider = schedulerProvider;
+
+            Login = UIAction.FromAsync(login);
+            Signup = UIAction.FromAsync(signup);
+            GoogleSignup = UIAction.FromAsync(googleSignup);
+            PickCountry = UIAction.FromAsync(pickCountry);
 
             var emailObservable = emailSubject.Select(email => email.TrimmedEnd());
 
@@ -222,7 +222,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             isCountryErrorVisibleSubject.OnNext(true);
         }
 
-        public async Task Signup()
+        private async Task signup()
         {
             var shakeTargets = ShakeTargets.None;
             if (!emailSubject.Value.IsValid)
@@ -252,7 +252,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             errorMessageSubject.OnNext(string.Empty);
 
             signupDisposable =
-                loginManager
+                userAccessManager
                     .SignUp(emailSubject.Value, passwordSubject.Value, termsOfServiceAccepted, (int)countryId.Value)
                     .Track(analyticsService.SignUp, AuthenticationMethod.EmailAndPassword)
                     .Subscribe(onDataSource, onError, onCompleted);
@@ -290,6 +290,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     errorMessageSubject.OnNext(Resources.EmailIsAlreadyUsedError);
                     break;
                 default:
+                    analyticsService.UnknownSignUpFailure.Track(exception.GetType().FullName, exception.Message);
+                    analyticsService.TrackAnonymized(exception);
                     errorMessageSubject.OnNext(Resources.GenericSignUpError);
                     break;
             }
@@ -301,7 +303,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             signupDisposable = null;
         }
 
-        public async Task GoogleSignup()
+        private async Task googleSignup()
         {
             if (!countryId.HasValue)
             {
@@ -316,7 +318,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             isLoadingSubject.OnNext(true);
             errorMessageSubject.OnNext(string.Empty);
 
-            signupDisposable = loginManager
+            signupDisposable = userAccessManager
                 .SignUpWithGoogle(termsOfServiceAccepted, (int)countryId.Value)
                 .Track(analyticsService.SignUp, AuthenticationMethod.Google)
                 .Subscribe(onDataSource, onError, onCompleted);
@@ -325,7 +327,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public void TogglePasswordVisibility()
             => isPasswordMaskedSubject.OnNext(!isPasswordMaskedSubject.Value);
 
-        public async Task PickCountry()
+        private async Task pickCountry()
         {
             getCountrySubscription?.Dispose();
             getCountrySubscription = null;
@@ -347,7 +349,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             countryNameSubject.OnNext(selectedCountry.Name);
         }
 
-        public Task Login()
+        private Task login()
         {
             if (isLoadingSubject.Value)
                 return Task.CompletedTask;

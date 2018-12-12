@@ -27,7 +27,7 @@ namespace Toggl.Foundation.MvvmCross
         where TFirstViewModelWhenNotLoggedIn : MvxViewModel
     {
         private readonly ITimeService timeService;
-        private readonly ILoginManager loginManager;
+        private readonly IUserAccessManager userAccessManager;
         private readonly IOnboardingStorage onboardingStorage;
         private readonly IForkingNavigationService navigationService;
         private readonly IAccessRestrictionStorage accessRestrictionStorage;
@@ -35,20 +35,20 @@ namespace Toggl.Foundation.MvvmCross
         public AppStart(
             IMvxApplication app,
             ITimeService timeService,
-            ILoginManager loginManager,
+            IUserAccessManager userAccessManager,
             IOnboardingStorage onboardingStorage,
             IForkingNavigationService navigationService,
             IAccessRestrictionStorage accessRestrictionStorage)
             : base (app, navigationService)
         {
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
-            Ensure.Argument.IsNotNull(loginManager, nameof(loginManager));
+            Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
             Ensure.Argument.IsNotNull(onboardingStorage, nameof(onboardingStorage));
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
             Ensure.Argument.IsNotNull(accessRestrictionStorage, nameof(accessRestrictionStorage));
 
             this.timeService = timeService;
-            this.loginManager = loginManager;
+            this.userAccessManager = userAccessManager;
             this.onboardingStorage = onboardingStorage;
             this.navigationService = navigationService;
             this.accessRestrictionStorage = accessRestrictionStorage;
@@ -64,7 +64,7 @@ namespace Toggl.Foundation.MvvmCross
                 return;
             }
 
-            var dataSource = loginManager.GetDataSourceIfLoggedIn();
+            var dataSource = userAccessManager.GetDataSourceIfLoggedIn();
             if (dataSource == null)
             {
                 await navigationService.Navigate<TFirstViewModelWhenNotLoggedIn>();

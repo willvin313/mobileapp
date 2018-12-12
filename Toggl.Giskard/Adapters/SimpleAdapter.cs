@@ -1,12 +1,14 @@
 ﻿using System;
 using Android.Runtime;
 using Android.Views;
+using Toggl.Foundation.MvvmCross.Interfaces;
 using Toggl.Giskard.ViewHolders;
 using Toggl.Multivac;
 
 namespace Toggl.Giskard.Adapters
 {
     public sealed class SimpleAdapter<T> : BaseRecyclerAdapter<T>
+        where T : IDiffable<T>
     {
         private readonly int layoutId;
         private readonly Func<View, BaseRecyclerViewHolder<T>> createViewHolder;

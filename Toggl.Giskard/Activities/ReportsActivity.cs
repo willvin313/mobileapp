@@ -8,17 +8,18 @@ using MvvmCross.Droid.Support.V7.AppCompat;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.ViewModels.Reports;
-using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Giskard.Extensions.Reactive;
+using Toggl.Giskard.ViewHelpers;
 using Toggl.Giskard.Views;
 using Toggl.Multivac.Extensions;
+using Observable = System.Reactive.Linq.Observable;
 
 namespace Toggl.Giskard.Activities
 {
     [MvxActivityPresentation]
     [Activity(Theme = "@style/AppTheme",
-              ScreenOrientation = ScreenOrientation.Portrait,
-              ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize)]
+        ScreenOrientation = ScreenOrientation.Portrait,
+        ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize)]
     public sealed partial class ReportsActivity : MvxAppCompatActivity<ReportsViewModel>
     {
         private ReportsRecyclerView reportsRecyclerView;
@@ -38,12 +39,24 @@ namespace Toggl.Giskard.Activities
 
             initializeViews();
 
-            selectWorkspaceFAB.Rx().Tap()
-                .Subscribe(ViewModel.SelectWorkspace)
+            selectWorkspaceFAB.Rx()
+                .BindAction(ViewModel.SelectWorkspace)
                 .DisposedBy(DisposeBag);
 
             ViewModel.WorkspaceNameObservable
                 .Subscribe(workspaceName.Rx().TextObserver())
+                .DisposedBy(DisposeBag);
+
+            Observable.CombineLatest(
+                    ViewModel.StartDate,
+                    ViewModel.EndDate,
+                    ViewModel.WorkspaceHasBillableFeatureEnabled,
+                    ViewModel.BarChartViewModel.DateFormat,
+                    ViewModel.BarChartViewModel.Bars,
+                    ViewModel.BarChartViewModel.MaximumHoursPerBar,
+                    ViewModel.BarChartViewModel.HorizontalLegend,
+                    (startDate, endDate, workspaceIsBillable, dateFormat, bars, maximumHoursPerBar, horizontalLegend) => new BarChartData(startDate, endDate, workspaceIsBillable, dateFormat, bars, maximumHoursPerBar, horizontalLegend))
+                .Subscribe(reportsRecyclerView.ReportsRecyclerAdapter.UpdateBarChart)
                 .DisposedBy(DisposeBag);
 
             setupToolbar();
@@ -72,6 +85,7 @@ namespace Toggl.Giskard.Activities
 
             toolbar.NavigationClick += onNavigateBack;
         }
+
         private void onNavigateBack(object sender, Toolbar.NavigationClickEventArgs e)
         {
             Finish();

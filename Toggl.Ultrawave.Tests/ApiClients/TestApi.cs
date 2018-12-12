@@ -22,11 +22,11 @@ namespace Toggl.Ultrawave.Tests.ApiClients
 
         public IObservable<T> TestCreateObservable<T>(Endpoint endpoint, IEnumerable<HttpHeader> headers,
             string body = "")
-            => CreateObservable<T>(endpoint, headers, body);
+            => SendRequest<T>(endpoint, headers, body);
 
         public IObservable<string> Get()
         {
-            var observable = CreateObservable<string>(endpoint, AuthHeader);
+            var observable = SendRequest<string>(endpoint, AuthHeader);
             return observable;
         }
     }

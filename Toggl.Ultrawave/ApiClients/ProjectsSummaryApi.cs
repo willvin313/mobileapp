@@ -35,7 +35,7 @@ namespace Toggl.Ultrawave.ApiClients
             var json = serializer.Serialize(parameters, SerializationReason.Post, null);
             return Observable.Create<IProjectsSummary>(async observer =>
             {
-                var projectsSummaries = await CreateListObservable<ProjectSummary, IProjectSummary>(endPoints.Summary(workspaceId), credentials.Header, json);
+                var projectsSummaries = await SendRequest<ProjectSummary, IProjectSummary>(endPoints.Summary(workspaceId), credentials.Header, json);
                 var summary = new ProjectsSummary { StartDate = startDate, EndDate = endDate, ProjectsSummaries = projectsSummaries };
 
                 observer.OnNext(summary);

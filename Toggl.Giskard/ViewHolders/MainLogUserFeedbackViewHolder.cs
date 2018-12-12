@@ -84,19 +84,19 @@ namespace Toggl.Giskard.ViewHolders
                .DisposedBy(disposeBag);
 
             thumbsUpButton.Rx().Tap()
-                .VoidSubscribe(() => ratingViewModel.RegisterImpression(true))
+                .Subscribe(() => ratingViewModel.RegisterImpression(true))
                 .DisposedBy(disposeBag);
 
             yesText.Rx().Tap()
-                .VoidSubscribe(() => ratingViewModel.RegisterImpression(true))
+                .Subscribe(() => ratingViewModel.RegisterImpression(true))
                 .DisposedBy(disposeBag);
 
             thumbsDownButton.Rx().Tap()
-                .VoidSubscribe(() => ratingViewModel.RegisterImpression(false))
+                .Subscribe(() => ratingViewModel.RegisterImpression(false))
                 .DisposedBy(disposeBag);
 
             noText.Rx().Tap()
-                .VoidSubscribe(() => ratingViewModel.RegisterImpression(false))
+                .Subscribe(() => ratingViewModel.RegisterImpression(false))
                 .DisposedBy(disposeBag);
 
             rateButton.Rx().Tap()
@@ -104,7 +104,7 @@ namespace Toggl.Giskard.ViewHolders
                 .DisposedBy(disposeBag);
 
             laterButton.Rx().Tap()
-                .VoidSubscribe(ratingViewModel.Dismiss)
+                .Subscribe(ratingViewModel.Dismiss)
                 .DisposedBy(disposeBag);
         }
 

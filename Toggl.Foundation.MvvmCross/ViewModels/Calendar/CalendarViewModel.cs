@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -15,6 +16,7 @@ using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Interactors;
+using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Services;
@@ -170,7 +172,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
                 .Merge(dayChangedObservable)
                 .Merge(selectedCalendarsChangedObservable)
                 .Merge(appResumedFromBackgroundObservable)
-                .Subscribe(reloadData)
+                .SelectMany(_ => reloadData())
+                .Subscribe(CalendarItems.ReplaceWith)
                 .DisposedBy(disposeBag);
 
             selectedCalendarsChangedObservable
@@ -245,7 +248,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
                     break;
 
                 case CalendarItemSource.Calendar:
-                    var workspace = await interactorFactory.GetDefaultWorkspace().Execute();
+                    var workspace = await interactorFactory.GetDefaultWorkspace()
+                        .TrackException<InvalidOperationException, IThreadSafeWorkspace>("CalendarViewModel.handleCalendarItem")
+                        .Execute();
                     var prototype = calendarItem.AsTimeEntryPrototype(workspace.Id);
                     analyticsService.TimeEntryStarted.Track(TimeEntryStartOrigin.CalendarEvent);
                     await interactorFactory.CreateTimeEntry(prototype).Execute();
@@ -255,7 +260,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
 
         private async Task durationSelected(DateTimeOffset startTime, TimeSpan duration)
         {
-            var workspace = await interactorFactory.GetDefaultWorkspace().Execute();
+            var workspace = await interactorFactory.GetDefaultWorkspace()
+                .TrackException<InvalidOperationException, IThreadSafeWorkspace>("CalendarViewModel.durationSelected")
+                .Execute();
+
             var prototype = duration.AsTimeEntryPrototype(startTime, workspace.Id);
             var timeEntry = await interactorFactory.CreateTimeEntry(prototype).Execute();
             analyticsService.TimeEntryStarted.Track(TimeEntryStartOrigin.CalendarTapAndDrag);
@@ -295,10 +303,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
             await interactorFactory.UpdateTimeEntry(dto).Execute();
         }
 
-        private async Task reloadData()
-            => await interactorFactory
-                .GetCalendarItemsForDate(timeService.CurrentDateTime.ToLocalTime().Date)
-                .Execute()
-                .Do(CalendarItems.ReplaceWith);
+        private IObservable<IEnumerable<CalendarItem>> reloadData()
+        {
+            return interactorFactory.GetCalendarItemsForDate(timeService.CurrentDateTime.ToLocalTime().Date).Execute();
+        }
     }
 }

@@ -18,6 +18,6 @@ namespace Toggl.Ultrawave.ApiClients
         }
 
         public IObservable<List<ICountry>> GetAll()
-            => CreateListObservable<Country, ICountry>(endPoints.Get, AuthHeader);
+            => SendRequest<Country, ICountry>(endPoints.Get, AuthHeader);
     }
 }

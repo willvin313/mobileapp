@@ -1,5 +1,4 @@
 ﻿using System.Reactive;
-using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Multivac;
@@ -11,18 +10,13 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
     public sealed class CalendarPermissionDeniedViewModel : MvxViewModelResult<Unit>
     {
         private readonly IPermissionsService permissionsService;
-        private readonly IMvxNavigationService navigationService;
 
         public UIAction EnableAccess { get; }
 
-        public CalendarPermissionDeniedViewModel(
-            IPermissionsService permissionsService,
-            IMvxNavigationService navigationService)
+        public CalendarPermissionDeniedViewModel(IPermissionsService permissionsService)
         {
-            Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
             Ensure.Argument.IsNotNull(permissionsService, nameof(permissionsService));
 
-            this.navigationService = navigationService;
             this.permissionsService = permissionsService;
 
             EnableAccess = UIAction.FromAction(enableAccess);

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
-using Toggl.Foundation.Tests.Generators;
 using Xunit;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
@@ -16,21 +15,16 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             : BaseViewModelTests<CalendarPermissionDeniedViewModel>
         {
             protected override CalendarPermissionDeniedViewModel CreateViewModel()
-                => new CalendarPermissionDeniedViewModel(PermissionsService, NavigationService);
+                => new CalendarPermissionDeniedViewModel(PermissionsService);
         }
 
         public sealed class TheConstructor : CalendarPermissionDeniedViewModelTest
         {
-            [Theory, LogIfTooSlow]
-            [ConstructorData]
-            public void ThrowsIfAnyOfTheArgumentsIsNull(
-                bool usePermissionsService, bool useNavigationService)
+            [Fact, LogIfTooSlow]
+            public void ThrowsIfAnyOfTheArgumentsIsNull()
             {
                 Action tryingToConstructWithEmptyParameters =
-                    () => new CalendarPermissionDeniedViewModel(
-                        usePermissionsService ? PermissionsService : null,
-                        useNavigationService ? NavigationService : null
-                    );
+                    () => new CalendarPermissionDeniedViewModel(null);
 
                 tryingToConstructWithEmptyParameters
                     .Should()

@@ -21,12 +21,12 @@ namespace Toggl.Ultrawave.ApiClients
         }
 
         public IObservable<IPreferences> Get()
-            => CreateObservable<Preferences>(endPoints.Get, AuthHeader);
+            => SendRequest<Preferences>(endPoints.Get, AuthHeader);
 
         public IObservable<IPreferences> Update(IPreferences preferences)
         {
             var body = serializer.Serialize(preferences as Preferences ?? new Preferences(preferences), SerializationReason.Post, null);
-            return CreateObservable(endPoints.Post, new[] { AuthHeader }, body)
+            return SendRequest(endPoints.Post, new[] { AuthHeader }, body)
                 .Select(_ => preferences);
         }
     }

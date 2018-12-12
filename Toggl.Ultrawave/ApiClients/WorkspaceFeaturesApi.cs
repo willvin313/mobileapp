@@ -19,7 +19,7 @@ namespace Toggl.Ultrawave.ApiClients
         }
 
         public IObservable<List<IWorkspaceFeatureCollection>> GetAll()
-            => CreateListObservable<WorkspaceFeatureCollection, IWorkspaceFeatureCollection>(endPoints.Get, AuthHeader);
+            => SendRequest<WorkspaceFeatureCollection, IWorkspaceFeatureCollection>(endPoints.Get, AuthHeader);
 
     }
 }

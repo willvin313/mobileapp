@@ -30,7 +30,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Password = 2
         }
 
-        private readonly ILoginManager loginManager;
+        private readonly IUserAccessManager userAccessManager;
         private readonly IAnalyticsService analyticsService;
         private readonly IOnboardingStorage onboardingStorage;
         private readonly IForkingNavigationService navigationService;
@@ -51,27 +51,22 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly BehaviorSubject<Password> passwordSubject = new BehaviorSubject<Password>(Multivac.Password.Empty);
 
         public bool IsPasswordManagerAvailable { get; }
-
         public IObservable<string> Email { get; }
-
         public IObservable<string> Password { get; }
-
         public IObservable<bool> HasError { get; }
-
         public IObservable<bool> IsLoading { get; }
-
         public IObservable<bool> LoginEnabled { get; }
-
         public IObservable<ShakeTargets> Shake { get; }
-
         public IObservable<string> ErrorMessage { get; }
-
         public IObservable<bool> IsPasswordMasked { get; }
-
         public IObservable<bool> IsShowPasswordButtonVisible { get; }
 
+        public UIAction Signup { get; }
+        public UIAction ForgotPassword { get; }
+        public UIAction StartPasswordManager { get; }
+
         public LoginViewModel(
-            ILoginManager loginManager,
+            IUserAccessManager userAccessManager,
             IAnalyticsService analyticsService,
             IOnboardingStorage onboardingStorage,
             IForkingNavigationService navigationService,
@@ -81,7 +76,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             ITimeService timeService,
             ISchedulerProvider schedulerProvider)
         {
-            Ensure.Argument.IsNotNull(loginManager, nameof(loginManager));
+            Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
             Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(onboardingStorage, nameof(onboardingStorage));
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
@@ -92,7 +87,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
 
             this.timeService = timeService;
-            this.loginManager = loginManager;
+            this.userAccessManager = userAccessManager;
             this.analyticsService = analyticsService;
             this.onboardingStorage = onboardingStorage;
             this.navigationService = navigationService;
@@ -102,6 +97,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             this.schedulerProvider = schedulerProvider;
 
             var emailObservable = emailSubject.Select(email => email.TrimmedEnd());
+
+            Signup = UIAction.FromAsync(signup);
+            ForgotPassword = UIAction.FromAsync(forgotPassword);
+            StartPasswordManager = UIAction.FromAsync(startPasswordManager);
 
             Shake = shakeSubject.AsDriver(this.schedulerProvider);
 
@@ -182,13 +181,49 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             errorMessageSubject.OnNext("");
 
             loginDisposable =
-                loginManager
+                userAccessManager
                     .Login(emailSubject.Value, passwordSubject.Value)
                     .Track(analyticsService.Login, AuthenticationMethod.EmailAndPassword)
                     .Subscribe(onDataSource, onError, onCompleted);
         }
 
-        public async Task StartPasswordManager()
+        public void TogglePasswordVisibility()
+            => isPasswordMaskedSubject.OnNext(!isPasswordMaskedSubject.Value);
+
+        public void GoogleLogin()
+        {
+            if (isLoadingSubject.Value) return;
+
+            isLoadingSubject.OnNext(true);
+
+            loginDisposable = userAccessManager
+                .LoginWithGoogle()
+                .Track(analyticsService.Login, AuthenticationMethod.Google)
+                .Subscribe(onDataSource, onError, onCompleted);
+        }
+
+        private Task signup()
+        {
+            if (isLoadingSubject.Value)
+                return Task.CompletedTask;
+
+            var parameter = CredentialsParameter.With(emailSubject.Value, passwordSubject.Value);
+            return navigationService.Navigate<SignupViewModel, CredentialsParameter>(parameter);
+        }
+
+
+        private async Task forgotPassword()
+        {
+            if (isLoadingSubject.Value) return;
+
+            var emailParameter = EmailParameter.With(emailSubject.Value);
+            emailParameter = await navigationService
+                .Navigate<ForgotPasswordViewModel, EmailParameter, EmailParameter>(emailParameter);
+            if (emailParameter != null)
+                emailSubject.OnNext(emailParameter.Email);
+        }
+
+        private async Task startPasswordManager()
         {
             if (!passwordManagerService.IsAvailable) return;
             if (isLoadingSubject.Value) return;
@@ -206,41 +241,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             analyticsService.PasswordManagerContainsValidPassword.Track();
 
             Login();
-        }
-
-        public void TogglePasswordVisibility()
-            => isPasswordMaskedSubject.OnNext(!isPasswordMaskedSubject.Value);
-
-        public async Task ForgotPassword()
-        {
-            if (isLoadingSubject.Value) return;
-
-            var emailParameter = EmailParameter.With(emailSubject.Value);
-            emailParameter = await navigationService
-                .Navigate<ForgotPasswordViewModel, EmailParameter, EmailParameter>(emailParameter);
-            if (emailParameter != null)
-                emailSubject.OnNext(emailParameter.Email);
-        }
-
-        public void GoogleLogin()
-        {
-            if (isLoadingSubject.Value) return;
-
-            isLoadingSubject.OnNext(true);
-
-            loginDisposable = loginManager
-                .LoginWithGoogle()
-                .Track(analyticsService.Login, AuthenticationMethod.Google)
-                .Subscribe(onDataSource, onError, onCompleted);
-        }
-
-        public Task Signup()
-        {
-            if (isLoadingSubject.Value)
-                return Task.CompletedTask;
-
-            var parameter = CredentialsParameter.With(emailSubject.Value, passwordSubject.Value);
-            return navigationService.Navigate<SignupViewModel, CredentialsParameter>(parameter);
         }
 
         private async void onDataSource(ITogglDataSource dataSource)
@@ -271,6 +271,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     errorMessageSubject.OnNext("");
                     break;
                 default:
+                    analyticsService.UnknownLoginFailure.Track(exception.GetType().FullName, exception.Message);
+                    analyticsService.TrackAnonymized(exception);
                     errorMessageSubject.OnNext(Resources.GenericLoginError);
                     break;
             }

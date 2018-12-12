@@ -1,10 +1,18 @@
-﻿using Android.App;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Android.App;
 using Android.Content.PM;
 using Android.OS;
+using Android.Support.V7.Widget;
 using Android.Views;
-using MvvmCross.Droid.Support.V7.AppCompat;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
+using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Giskard.Adapters;
+using Toggl.Giskard.Extensions.Reactive;
+using Toggl.Giskard.ViewHolders.Country;
+using Toggl.Multivac.Extensions;
 
 namespace Toggl.Giskard.Activities
 {
@@ -12,13 +20,37 @@ namespace Toggl.Giskard.Activities
     [Activity(Theme = "@style/AppTheme.WhiteStatusBarLightIcons",
         ScreenOrientation = ScreenOrientation.Portrait,
         ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize)]
-    public sealed class SelectCountryActivity : MvxAppCompatActivity<SelectCountryViewModel>
+    public partial class SelectCountryActivity : ReactiveActivity<SelectCountryViewModel>
     {
+        private SimpleAdapter<SelectableCountryViewModel> recyclerAdapter =
+            new SimpleAdapter<SelectableCountryViewModel>(Resource.Layout.SelectCountryActivityCountryCell,
+                CountrySelectionViewHolder.Create);
+
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
             SetContentView(Resource.Layout.SelectCountryActivity);
             OverridePendingTransition(Resource.Animation.abc_slide_in_right, Resource.Animation.abc_fade_out);
+
+            InitializeViews();
+
+            setupRecyclerView(adapter: recyclerAdapter);
+
+            ViewModel.Countries
+                .Subscribe(replaceCountries)
+                .DisposedBy(DisposeBag);
+
+            backImageView.Rx()
+                .BindAction(ViewModel.Close())
+                .DisposedBy(DisposeBag);
+
+            filterEditText.Rx().Text()
+                .Subscribe(ViewModel.SetFilterText.Inputs)
+                .DisposedBy(DisposeBag);
+
+            recyclerAdapter.ItemTapObservable
+                .Subscribe(ViewModel.SelectCountry.Inputs)
+                .DisposedBy(DisposeBag);
         }
 
         public override void Finish()
@@ -31,11 +63,25 @@ namespace Toggl.Giskard.Activities
         {
             if (keyCode == Keycode.Back)
             {
-                ViewModel.CloseCommand.Execute();
+                ViewModel.Close().Execute();
                 return true;
             }
 
             return base.OnKeyDown(keyCode, e);
+        }
+
+        private void setupRecyclerView(SimpleAdapter<SelectableCountryViewModel> adapter)
+        {
+            var layoutManager = new LinearLayoutManager(this);
+            layoutManager.ItemPrefetchEnabled = true;
+            layoutManager.InitialPrefetchItemCount = 4;
+            recyclerView.SetLayoutManager(layoutManager);
+            recyclerView.SetAdapter(adapter);
+        }
+
+        private void replaceCountries(IEnumerable<SelectableCountryViewModel> countries)
+        {
+            recyclerAdapter.Items = countries.ToList();
         }
     }
 }

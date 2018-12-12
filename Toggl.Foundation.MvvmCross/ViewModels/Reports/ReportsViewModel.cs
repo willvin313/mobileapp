@@ -140,10 +140,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Reports
         public IMvxCommand<ReportsDateRangeParameter> ChangeDateRangeCommand { get; }
 
         public IObservable<DateTimeOffset> StartDate { get; }
-
         public IObservable<DateTimeOffset> EndDate { get; }
-
         public IObservable<bool> WorkspaceHasBillableFeatureEnabled { get; }
+
+        public UIAction SelectWorkspace { get; }
 
         public ReportsViewModel(ITogglDataSource dataSource,
                                 ITimeService timeService,
@@ -190,6 +190,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Reports
             StartDate = startDateSubject.AsObservable().AsDriver(schedulerProvider);
             EndDate = endDateSubject.AsObservable().AsDriver(schedulerProvider);
 
+            SelectWorkspace = UIAction.FromAsync(selectWorkspace);
+
             WorkspaceNameObservable = workspaceSubject
                 .Select(workspace => workspace?.Name ?? string.Empty)
                 .DistinctUntilChanged()
@@ -207,11 +209,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Reports
                 .DistinctUntilChanged()
                 .AsDriver(schedulerProvider);
 
-            WorkspacesObservable = dataSource.Workspaces
-                .ItemsChanged()
-                .StartWith(Unit.Default)
-                .SelectMany(_ => dataSource.Workspaces.GetAll())
-                .DistinctUntilChanged()
+            WorkspacesObservable = interactorFactory.ObserveAllWorkspaces().Execute()
                 .Select(list => list.Where(w => !w.IsInaccessible))
                 .Select(readOnlyWorkspaceNameTuples)
                 .AsDriver(schedulerProvider);
@@ -225,12 +223,15 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Reports
 
         public override async Task Initialize()
         {
-            Workspaces = await dataSource.Workspaces.GetAll().Select(readOnlyWorkspaceNameTuples);
+            Workspaces = await interactorFactory.GetAllWorkspaces().Execute()
+                .Select(readOnlyWorkspaceNameTuples);
 
             var user = await dataSource.User.Get();
             userId = user.Id;
 
-            var workspace = await interactorFactory.GetDefaultWorkspace().Execute();
+            var workspace = await interactorFactory.GetDefaultWorkspace()
+                .TrackException<InvalidOperationException, IThreadSafeWorkspace>("ReportsViewModel.Initialize")
+                .Execute();
             workspaceId = workspace.Id;
             workspaceSubject.OnNext(workspace);
 
@@ -470,7 +471,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Reports
                 .AsReadOnly();
         }
 
-        public async Task SelectWorkspace()
+        private async Task selectWorkspace()
         {
             var currentWorkspaceIndex = Workspaces.IndexOf(w => w.Item.Id == workspaceId);
 

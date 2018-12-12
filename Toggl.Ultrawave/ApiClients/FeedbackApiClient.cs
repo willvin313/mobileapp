@@ -38,7 +38,7 @@ namespace Toggl.Ultrawave.ApiClients
 
             var json = serializer.Serialize(feedback, SerializationReason.Post, null);
 
-            return CreateObservable(endPoints.Post, AuthHeader, json).SelectUnit();
+            return SendRequest(endPoints.Post, AuthHeader, json).SelectUnit();
         }
 
         [Preserve(AllMembers = true)]

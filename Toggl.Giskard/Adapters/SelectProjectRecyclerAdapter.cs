@@ -39,7 +39,7 @@ namespace Toggl.Giskard.Adapters
             get
             {
                 if (Collection.Count == 0)
-                    return base.ItemCount;
+                    return IsSuggestingCreation ? 1 : 0;
 
                 return base.ItemCount - (UseGrouping ? 0 : 1);
             }
