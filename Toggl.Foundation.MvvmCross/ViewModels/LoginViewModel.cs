@@ -43,6 +43,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private readonly Subject<ShakeTargets> shakeSubject = new Subject<ShakeTargets>();
         private readonly BehaviorSubject<bool> isPasswordMaskedSubject = new BehaviorSubject<bool>(true);
+        private readonly int errorCountBeforeShowingContactSupportSuggestion = 2;
 
         public bool IsPasswordManagerAvailable { get; }
 
@@ -57,6 +58,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public IObservable<bool> IsPasswordMasked { get; }
 
         public IObservable<bool> IsShowPasswordButtonVisible { get; }
+
+        public IObservable<bool> SuggestContactSupport { get; }
 
         public UIAction LoginWithEmail { get; }
 
@@ -123,6 +126,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 UIAction.FromAction(() => isPasswordMaskedSubject.OnNext(!isPasswordMaskedSubject.Value));
 
             ContinueToPaswordScreen = UIAction.FromObservable(continueToPasswordScreen);
+
+            SuggestContactSupport = Observable.Merge(LoginWithEmail.Errors, LoginWithGoogle.Errors)
+                .Skip(errorCountBeforeShowingContactSupportSuggestion)
+                .SelectValue(true)
+                .StartWith(false)
+                .AsDriver(false, schedulerProvider);
         }
 
         public override void Prepare(CredentialsParameter parameter)
