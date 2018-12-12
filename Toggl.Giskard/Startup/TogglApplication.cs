@@ -4,11 +4,12 @@ using Android.Runtime;
 using MvvmCross.Droid.Support.V7.AppCompat;
 using Toggl.Foundation.MvvmCross;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.MvvmCross.ViewModels.UserAccess;
 
 namespace Toggl.Giskard
 {
     [Application(AllowBackup = false)]
-    public class TogglApplication : MvxAppCompatApplication<Setup, App<LoginViewModel>>
+    public class TogglApplication : MvxAppCompatApplication<Setup, App<SignupOrLoginChoiceViewModel>>
     {
         public TogglApplication(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
         {

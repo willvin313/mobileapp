@@ -25,11 +25,11 @@ namespace Toggl.Daneel.ViewControllers.UserAccess
             SignUpButton.Layer.MasksToBounds = true;
 
             LoginButton.Rx()
-                .BindAction(ViewModel.StartLoginFlowAction)
+                .BindAction(ViewModel.StartLoginFlow)
                 .DisposedBy(DisposeBag);
 
             SignUpButton.Rx()
-                .BindAction(ViewModel.StartSignUpFlowAction)
+                .BindAction(ViewModel.StartSignUpFlow)
                 .DisposedBy(DisposeBag);
         }
     }

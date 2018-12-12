@@ -35,7 +35,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels.UserAccess
             [Fact, LogIfTooSlow]
             public async Task NavigatesToTheLoginFlow()
             {
-                await ViewModel.StartLoginFlowAction.Execute();
+                await ViewModel.StartLoginFlow.Execute();
 
                 await NavigationService.Received().Navigate<LoginViewModel>();
             }
@@ -46,7 +46,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels.UserAccess
             [Fact, LogIfTooSlow]
             public async Task NavigatesToTheSignUpFlow()
             {
-                await ViewModel.StartSignUpFlowAction.Execute();
+                await ViewModel.StartSignUpFlow.Execute();
 
                 await NavigationService.Received().Navigate<SignupViewModel>();
             }

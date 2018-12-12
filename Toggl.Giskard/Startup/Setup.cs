@@ -18,6 +18,7 @@ using Toggl.Foundation.Login;
 using Toggl.Foundation.MvvmCross;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.MvvmCross.ViewModels.UserAccess;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Suggestions;
 using Toggl.Giskard.BroadcastReceivers;
@@ -32,7 +33,7 @@ using VisibilityPlugin = MvvmCross.Plugin.Visibility.Platforms.Android.Plugin;
 
 namespace Toggl.Giskard
 {
-    public sealed partial class Setup : MvxAppCompatSetup<App<LoginViewModel>>
+    public sealed partial class Setup : MvxAppCompatSetup<App<SignupOrLoginChoiceViewModel>>
     {
         private const int maxNumberOfSuggestions = 5;
 
