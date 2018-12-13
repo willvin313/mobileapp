@@ -98,57 +98,43 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
         }
 
-        public sealed class TheContinueToPasswordScreenErrorVisible : LoginViewModelTest
+        public sealed class ClearContinueToPasswordScreenError : LoginViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public void EmitsFalseWhenEmailIsInvalidButThereIsNoError()
+            public void DoesNotEmitsTrueWhenEmailIsValid()
             {
                 ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
                 var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.ContinueToPasswordScreenErrorVisible.Subscribe(observer);
+                ViewModel.ClearContinueToPasswordScreenError.Subscribe(observer);
 
                 TestScheduler.Start();
 
-                observer.LastValue().Should().BeFalse();
+                observer.Messages.Should().BeEmpty();
             }
 
             [Fact, LogIfTooSlow]
-            public void EmitsFalseWhenEmailIsValid()
+            public void EmitsTrueWhenEmailIsValid()
             {
                 ViewModel.EmailRelay.Accept(ValidEmail.ToString());
                 var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.ContinueToPasswordScreenErrorVisible.Subscribe(observer);
+                ViewModel.ClearContinueToPasswordScreenError.Subscribe(observer);
 
-                TestScheduler.Start();
-
-                observer.LastValue().Should().BeFalse();
-            }
-
-            [Fact, LogIfTooSlow]
-            public void EmitsTrueWhenThereIsAnError()
-            {
-                ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
-                var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.ContinueToPasswordScreenErrorVisible.Subscribe(observer);
-
-                ViewModel.ContinueToPaswordScreen.Execute();
                 TestScheduler.Start();
 
                 observer.LastValue().Should().BeTrue();
             }
 
             [Fact, LogIfTooSlow]
-            public void EmitsFalseWhenThereWasAnErrorButEmailTurnValid()
+            public void EmitsTrueWhenEmailTransitionFromInvalidToValid()
             {
-                ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
                 var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.ContinueToPasswordScreenErrorVisible.Subscribe(observer);
-                ViewModel.ContinueToPaswordScreen.Execute();
+                ViewModel.ClearContinueToPasswordScreenError.Subscribe(observer);
+                ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
                 ViewModel.EmailRelay.Accept(ValidEmail.ToString());
 
                 TestScheduler.Start();
 
-                observer.LastValue().Should().BeFalse();
+                observer.LastValue().Should().BeTrue();
             }
         }
 
