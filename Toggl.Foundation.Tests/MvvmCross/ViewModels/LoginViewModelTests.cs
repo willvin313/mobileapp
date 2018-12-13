@@ -99,14 +99,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
         }
 
-        public sealed class ClearContinueToPasswordScreenError : LoginViewModelTest
+        public sealed class ClearClearEmailScreenError : LoginViewModelTest
         {
             [Fact, LogIfTooSlow]
             public void DoesNotEmitWhenEmailIsValid()
             {
                 ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
                 var observer = TestScheduler.CreateObserver<Unit>();
-                ViewModel.ClearContinueToPasswordScreenError.Subscribe(observer);
+                ViewModel.ClearEmailScreenError.Subscribe(observer);
 
                 TestScheduler.Start();
 
@@ -118,7 +118,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 ViewModel.EmailRelay.Accept(ValidEmail.ToString());
                 var observer = TestScheduler.CreateObserver<Unit>();
-                ViewModel.ClearContinueToPasswordScreenError.Subscribe(observer);
+                ViewModel.ClearEmailScreenError.Subscribe(observer);
 
                 TestScheduler.Start();
 
@@ -129,7 +129,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public void EmitsElementWhenEmailTransitionFromInvalidToValid()
             {
                 var observer = TestScheduler.CreateObserver<Unit>();
-                ViewModel.ClearContinueToPasswordScreenError.Subscribe(observer);
+                ViewModel.ClearEmailScreenError.Subscribe(observer);
                 ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
                 ViewModel.EmailRelay.Accept(ValidEmail.ToString());
 
@@ -139,7 +139,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
         }
 
-        public sealed class ClearLoginWithEmailError : LoginViewModelTest
+        public sealed class ClearPasswordScreenError : LoginViewModelTest
         {
             [Xunit.Theory]
             [InlineData(false, false, false)]
@@ -151,11 +151,27 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.EmailRelay.Accept(emailValid ? ValidEmail.ToString() : InvalidEmail.ToString());
                 ViewModel.PasswordRelay.Accept(passwordValid ? ValidPassword.ToString() : InvalidPassword.ToString());
                 var observer = TestScheduler.CreateObserver<Unit>();
-                ViewModel.ClearLoginWithEmailError.Subscribe(observer);
+                ViewModel.ClearPasswordScreenError.Subscribe(observer);
 
                 TestScheduler.Start();
 
                 observer.Messages.Should().HaveCount(shouldEmit ? 1 : 0);
+            }
+
+            [Fact, LogIfTooSlow]
+            public void EmitElementWhenVMGoesToEmailScreen()
+            {
+                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
+                var observer = TestScheduler.CreateObserver<Unit>();
+                ViewModel.ClearPasswordScreenError.Subscribe(observer);
+
+                ViewModel.ContinueToPaswordScreen.Execute();
+                ViewModel.BackToEmailScreen.Execute();
+                TestScheduler.Start();
+
+                // The first one is triggered by entering a valid email.
+                // The second one is triggered the action is executed.
+                observer.Messages.Should().HaveCount(2);
             }
         }
 
@@ -548,7 +564,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserver<bool>();
                 ViewModel.EmailFieldEdittable.Subscribe(observer);
 
-                ViewModel.BackToContinueWithEmail.Execute();
+                ViewModel.BackToEmailScreen.Execute();
                 TestScheduler.Start();
 
                 observer.LastValue().Should().BeFalse();
@@ -626,7 +642,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
         }
 
-        public sealed class TheBackToContinueWithEmailAction : LoginViewModelTest
+        public sealed class TheBackToEmailScreenAction : LoginViewModelTest
         {
             [Fact, LogIfTooSlow]
             public void ShouldBeDisabledIfLoggingInWithEmail()
@@ -636,7 +652,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
                     .Returns(Observable.Never<ITogglDataSource>());
                 var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.BackToContinueWithEmail.Enabled.Subscribe(observer);
+                ViewModel.BackToEmailScreen.Enabled.Subscribe(observer);
 
                 ViewModel.LoginWithEmail.Execute();
                 TestScheduler.Start();
@@ -650,7 +666,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 UserAccessManager.LoginWithGoogle()
                     .Returns(Observable.Never<ITogglDataSource>());
                 var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.BackToContinueWithEmail.Enabled.Subscribe(observer);
+                ViewModel.BackToEmailScreen.Enabled.Subscribe(observer);
 
                 ViewModel.LoginWithGoogle.Execute();
                 TestScheduler.Start();
@@ -662,7 +678,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public void ShouldBeEnabledByDefault()
             {
                 var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.BackToContinueWithEmail.Enabled.Subscribe(observer);
+                ViewModel.BackToEmailScreen.Enabled.Subscribe(observer);
 
                 TestScheduler.Start();
 

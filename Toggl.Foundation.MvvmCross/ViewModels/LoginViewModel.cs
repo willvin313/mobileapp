@@ -63,14 +63,14 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public IObservable<bool> IsShowPasswordButtonVisible { get; }
         public IObservable<bool> SuggestContactSupport { get; }
         public UIAction LoginWithEmail { get; }
-        public IObservable<Unit> ClearLoginWithEmailError { get; }
+        public IObservable<Unit> ClearPasswordScreenError { get; }
         public UIAction LoginWithGoogle { get; }
         public UIAction TogglePasswordVisibility { get; }
         public UIAction ForgotPassword { get; }
         public UIAction ContinueToPaswordScreen { get; }
         public UIAction BackToSignUpAndLoginChoice { get; }
-        public UIAction BackToContinueWithEmail { get; }
-        public IObservable<Unit> ClearContinueToPasswordScreenError { get; }
+        public UIAction BackToEmailScreen { get; }
+        public IObservable<Unit> ClearEmailScreenError { get; }
         public IObservable<bool> EmailFieldEdittable { get; }
 
         public LoginViewModel(
@@ -107,30 +107,32 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             var isPasswordValid = PasswordRelay
                 .Select(password => Password.From(password).IsValid);
 
+            var isEmailState = state.Select(s => s == State.Email);
+
             Shake = shakeSubject
                 .AsDriver(ShakeTargets.None, this.schedulerProvider);
 
             IsPasswordMasked = isPasswordMaskedSubject
                 .DistinctUntilChanged()
-                .AsDriver(this.schedulerProvider);
+                .AsDriver(schedulerProvider);
 
             IsShowPasswordButtonVisible = PasswordRelay
                 .Select(password => password.Length > 1)
                 .DistinctUntilChanged()
-                .AsDriver(this.schedulerProvider);
+                .AsDriver(schedulerProvider);
 
             IsPasswordManagerAvailable = passwordManagerService.IsAvailable;
 
             LoginWithEmail = UIAction.FromObservable(login);
 
-            ClearLoginWithEmailError = Observable
+            ClearPasswordScreenError = Observable
                 .CombineLatest(isEmailValid, isPasswordValid, CommonFunctions.And)
+                .Merge(isEmailState)
                 .Where(CommonFunctions.Identity)
                 .SelectUnit()
                 .ObserveOn(schedulerProvider.MainScheduler);
 
             LoginWithGoogle = UIAction.FromObservable(loginWithGoogle);
-
 
             var isLoggingIn = Observable
                 .CombineLatest(LoginWithEmail.Executing, LoginWithGoogle.Executing, CommonFunctions.Or);
@@ -145,7 +147,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             ContinueToPaswordScreen = UIAction.FromObservable(continueToPasswordScreen);
 
-            ClearContinueToPasswordScreenError = isEmailValid
+            ClearEmailScreenError = isEmailValid
                 .Where(CommonFunctions.Identity)
                 .SelectUnit()
                 .ObserveOn(schedulerProvider.MainScheduler);
@@ -156,17 +158,18 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .StartWith(false)
                 .AsDriver(false, schedulerProvider);
 
+            var incorrectPasswordExceptions = LoginWithEmail
+                .Errors
+                .Select(e => e == incorrectPasswordException);
+
             EmailFieldEdittable = Observable
-                .CombineLatest(
-                    state,
-                    LoginWithEmail.Errors,
-                    (s, e) => s == State.Email || e == incorrectPasswordException)
+                .CombineLatest(isEmailState, incorrectPasswordExceptions, CommonFunctions.Or)
                 .StartWith(false)
                 .AsDriver(schedulerProvider);
 
             BackToSignUpAndLoginChoice = UIAction.FromAction(() => navigationService.Close(this));
 
-            BackToContinueWithEmail =
+            BackToEmailScreen =
                 UIAction.FromAction(backToEmail, isLoggingIn.Invert());
         }
 
