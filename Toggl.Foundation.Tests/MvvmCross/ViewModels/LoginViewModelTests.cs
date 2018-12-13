@@ -690,13 +690,17 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 ViewModel.EmailRelay.Accept(ValidEmail.ToString());
                 var observer = TestScheduler.CreateObserver<string>();
+                ViewModel.PasswordRelay.Accept("somePassword");
                 ViewModel.PasswordRelay.Subscribe(observer);
 
                 ViewModel.ContinueToPaswordScreen.Execute();
                 ViewModel.BackToEmailScreen.Execute();
                 TestScheduler.Start();
 
-                observer.LastValue().Should().BeEmpty();
+                observer.Messages.AssertEqual(
+                   ReactiveTest.OnNext(0, "somePassword"),
+                   ReactiveTest.OnNext(0, string.Empty)
+                );
             }
         }
     }
