@@ -10,14 +10,14 @@ namespace Toggl.Multivac.Extensions.Reactive
     /// <typeparam name="T">The type of the elements processed by the subject.</typeparam>
     public class BehaviorRelay<T> : IObservable<T>
     {
-        private BehaviorSubject<T> internalSubject;
+        private BehaviorSubject<T> subject;
 
-        public BehaviorRelay(T value) => internalSubject = new BehaviorSubject<T>(value);
+        public BehaviorRelay(T value) => subject = new BehaviorSubject<T>(value);
 
-        public T Value => internalSubject.Value;
+        public T Value => subject.Value;
 
-        public void Accept(T value) => internalSubject.OnNext(value);
+        public void Accept(T value) => subject.OnNext(value);
 
-        public IDisposable Subscribe(IObserver<T> observer) => internalSubject.Subscribe(observer);
+        public IDisposable Subscribe(IObserver<T> observer) => subject.Subscribe(observer);
     }
 }
