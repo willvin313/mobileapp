@@ -684,6 +684,20 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 observer.LastValue().Should().BeTrue();
             }
+
+            [Fact, LogIfTooSlow]
+            public void ShouldClearThePassword()
+            {
+                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
+                var observer = TestScheduler.CreateObserver<string>();
+                ViewModel.PasswordRelay.Subscribe(observer);
+
+                ViewModel.ContinueToPaswordScreen.Execute();
+                ViewModel.BackToEmailScreen.Execute();
+                TestScheduler.Start();
+
+                observer.LastValue().Should().BeEmpty();
+            }
         }
     }
 }

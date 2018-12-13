@@ -271,6 +271,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private void backToEmail()
         {
             state.OnNext(State.Email);
+            PasswordRelay.Accept(string.Empty);
         }
     }
 }
