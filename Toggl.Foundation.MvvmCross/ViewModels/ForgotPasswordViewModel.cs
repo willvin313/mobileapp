@@ -1,12 +1,9 @@
-﻿using System;
+using System;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using MvvmCross.Commands;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
-using PropertyChanged;
-using Toggl.Foundation.Analytics;
 using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Login;
 using Toggl.Foundation.MvvmCross.Extensions;
@@ -20,50 +17,43 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
     [Preserve(AllMembers = true)]
     public sealed class ForgotPasswordViewModel : MvxViewModel<EmailParameter, EmailParameter>
     {
+        private readonly int errorCountBeforeShowingContactSupportSuggestion = 2;
         private readonly ITimeService timeService;
         private readonly IUserAccessManager userAccessManager;
-        private readonly IAnalyticsService analyticsService;
         private readonly IMvxNavigationService navigationService;
         private readonly ISchedulerProvider schedulerProvider;
-
         private readonly TimeSpan delayAfterPassordReset = TimeSpan.FromSeconds(4);
 
         public BehaviorSubject<Email> Email { get; } = new BehaviorSubject<Email>(Multivac.Email.Empty);
-        public IObservable<string> ErrorMessage { get; }
-        public IObservable<bool> PasswordResetSuccessful { get; }
-
         public UIAction Reset { get; }
         public UIAction Close { get; }
+        public IObservable<bool> SuggestContactSupport { get; }
 
         public ForgotPasswordViewModel(
             ITimeService timeService,
             IUserAccessManager userAccessManager,
-            IAnalyticsService analyticsService,
             IMvxNavigationService navigationService,
             ISchedulerProvider schedulerProvider)
         {
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
             Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
-            Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
 
             this.timeService = timeService;
             this.userAccessManager = userAccessManager;
-            this.analyticsService = analyticsService;
             this.navigationService = navigationService;
             this.schedulerProvider = schedulerProvider;
 
             Reset = UIAction.FromObservable(reset, Email.Select(email => email.IsValid));
-            Close = UIAction.FromAction(returnEmail, Reset.Executing.Invert());
 
-            ErrorMessage = Reset.Errors
-                .Select(toErrorString)
-                .StartWith("");
+            Close = UIAction.FromAction(returnAndFillEmail, Reset.Executing.Invert());
 
-            PasswordResetSuccessful = Reset.Elements
-                .Select(_ => true)
-                .StartWith(false);
+            SuggestContactSupport = Reset.Errors
+                .Skip(errorCountBeforeShowingContactSupportSuggestion)
+                .SelectValue(true)
+                .StartWith(false)
+                .AsDriver(false, schedulerProvider);
         }
 
         public override void Prepare(EmailParameter parameter)
@@ -76,35 +66,36 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             return userAccessManager
                 .ResetPassword(Email.Value)
                 .ObserveOn(schedulerProvider.MainScheduler)
+                .Do(closeWithDelay)
                 .SelectUnit()
-                .Do(closeWithDelay);
+                .Catch<Unit, Exception>(e => throw createUIException(e));
         }
 
         private void closeWithDelay()
         {
-            timeService.RunAfterDelay(delayAfterPassordReset, returnEmail);
+            timeService.RunAfterDelay(delayAfterPassordReset, returnAndFillEmail);
         }
 
-        private void returnEmail()
+        private void returnAndFillEmail()
         {
             navigationService.Close(this, EmailParameter.With(Email.Value));
         }
 
-        private string toErrorString(Exception exception)
+        private Exception createUIException(Exception exception)
         {
             switch (exception)
             {
                 case BadRequestException _:
-                    return Resources.PasswordResetEmailDoesNotExistError;
+                    return new Exception(Resources.PasswordResetEmailDoesNotExistError);
 
                 case OfflineException _:
-                    return Resources.PasswordResetOfflineError;
+                    return new Exception(Resources.PasswordResetOfflineError);
 
                 case ApiException apiException:
-                    return apiException.LocalizedApiErrorMessage;
+                    return new Exception(apiException.LocalizedApiErrorMessage);
 
                 default:
-                    return Resources.PasswordResetGeneralError;
+                    return new Exception(Resources.PasswordResetGeneralError);
             }
         }
     }

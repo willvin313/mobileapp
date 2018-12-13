@@ -37,10 +37,11 @@ namespace Toggl.Giskard.Activities
             InitializeViews();
             setupInputField();
 
-            ViewModel.ErrorMessage
-                .Subscribe(errorMessage =>
+            ViewModel.Reset
+                .Errors
+                .Subscribe(exception =>
                 {
-                    loginEmail.Error = errorMessage;
+                    loginEmail.Error = exception.Message;
                 })
                 .DisposedBy(DisposeBag);
 
@@ -53,18 +54,20 @@ namespace Toggl.Giskard.Activities
                 .Subscribe(loadingProgressBar.Rx().IsVisible())
                 .DisposedBy(DisposeBag);
 
-            ViewModel.PasswordResetSuccessful
-                .Where(success => success)
+            ViewModel.Reset
+                .Elements
                 .VoidSubscribe(showResetPasswordSuccessToast)
                 .DisposedBy(DisposeBag);
 
-            ViewModel.PasswordResetSuccessful
-                .Invert()
+            ViewModel.Reset
+                .Elements
+                .SelectValue(false)
                 .Subscribe(resetPasswordButton.Rx().IsVisible())
                 .DisposedBy(DisposeBag);
 
             resetPasswordButton.Rx()
-                .BindAction(ViewModel.Reset)
+                .Tap()
+                .Subscribe(ViewModel.Reset.Inputs)
                 .DisposedBy(DisposeBag);
 
             closeSubject

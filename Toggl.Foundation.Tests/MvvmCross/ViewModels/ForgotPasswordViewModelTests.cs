@@ -1,13 +1,15 @@
-﻿using System;
+using System;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using FsCheck;
 using FsCheck.Xunit;
-using Microsoft.Reactive.Testing;
 using NSubstitute;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.Tests.Extensions;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Multivac;
 using Toggl.Ultrawave.Exceptions;
@@ -24,7 +26,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             protected Email InvalidEmail { get; } = Email.From("This is not an email");
 
             protected override ForgotPasswordViewModel CreateViewModel()
-                => new ForgotPasswordViewModel(TimeService, UserAccessManager, AnalyticsService, NavigationService,
+                => new ForgotPasswordViewModel(TimeService, UserAccessManager, NavigationService,
                     SchedulerProvider);
         }
 
@@ -35,19 +37,17 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public void ThrowsIfAnyOfTheArgumentsIsNull(
                 bool useTimeService,
                 bool useUserAccessManager,
-                bool useAnalyticsService,
                 bool useNavigationService,
                 bool useSchedulerProvider)
             {
                 var timeService = useTimeService ? TimeService : null;
                 var userAccessManager = useUserAccessManager ? UserAccessManager : null;
-                var analyticsSerivce = useAnalyticsService ? AnalyticsService : null;
                 var navigationService = useNavigationService ? NavigationService : null;
                 var schedulerProvider = useSchedulerProvider ? SchedulerProvider : null;
 
                 Action tryingToConstructWithEmptyParameters =
                     () => new ForgotPasswordViewModel(
-                        timeService, userAccessManager, analyticsSerivce, navigationService, schedulerProvider);
+                        timeService, userAccessManager, navigationService, schedulerProvider);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
@@ -67,59 +67,47 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
         }
 
-        public sealed class TheResetCommand : ForgotPasswordViewModelTest
+        public sealed class TheResetAction : ForgotPasswordViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public void SetsErrorMessageToEmpty()
+            public async Task ResetsThePassword()
             {
-                ViewModel.Email.OnNext(ValidEmail);
                 UserAccessManager
                     .ResetPassword(Arg.Any<Email>())
-                    .Returns(Observable.Never<string>());
+                    .Returns(Observable.Return("Great success"));
+                var observer = TestScheduler.CreateObserver<Unit>();
+                ViewModel.Reset.Elements.Subscribe(observer);
+                TestScheduler.Start();
 
-                var observer = TestScheduler.CreateObserver<string>();
-                ViewModel.ErrorMessage.Subscribe(observer);
-
-                ViewModel.Reset.Execute();
-
-                observer.Messages.Last().Value.Value.Should().BeEmpty();
-            }
-
-            [Fact, LogIfTooSlow]
-            public void SetsPasswordResetSuccessfulToFalse()
-            {
-                ViewModel.Email.OnNext(ValidEmail);
-                UserAccessManager
-                    .ResetPassword(Arg.Any<Email>())
-                    .Returns(Observable.Never<string>());
-
-                var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.PasswordResetSuccessful.Subscribe(observer);
-
-                ViewModel.Reset.Execute();
-
-                observer.Messages.Last().Value.Value.Should().BeFalse();
-            }
-
-            [Fact, LogIfTooSlow]
-            public void ResetsThePassword()
-            {
                 ViewModel.Email.OnNext(ValidEmail);
 
-                ViewModel.Reset.Execute();
+                ViewModel.Reset.Execute(Unit.Default);
 
                 UserAccessManager.Received().ResetPassword(ValidEmail);
             }
 
             [Fact, LogIfTooSlow]
-            public void CannotExecuteWhenEmailIsNotValid()
+            public void ShouldBeEnableIfEmailIsValid()
             {
-                ViewModel.Email.OnNext(InvalidEmail);
-
                 var observer = TestScheduler.CreateObserver<bool>();
                 ViewModel.Reset.Enabled.Subscribe(observer);
+                TestScheduler.Start();
 
-                observer.Messages.Last().Value.Value.Should().BeFalse();
+                ViewModel.Email.OnNext(ValidEmail);
+
+                observer.LastValue().Should().BeTrue();
+            }
+
+            [Fact, LogIfTooSlow]
+            public void CannotExecuteWhenEmailIsNotValid()
+            {
+                var observer = TestScheduler.CreateObserver<bool>();
+                ViewModel.Reset.Enabled.Subscribe(observer);
+                TestScheduler.Start();
+
+                ViewModel.Email.OnNext(InvalidEmail);
+
+                observer.LastValue().Should().BeFalse();
             }
 
             [Fact, LogIfTooSlow]
@@ -128,90 +116,58 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserver<bool>();
                 ViewModel.Reset.Enabled.Subscribe(observer);
 
-                observer.Messages.Last().Value.Value.Should().BeFalse();
-            }
-
-            [Fact, LogIfTooSlow]
-            public void CannotExecuteIfIsLoading()
-            {
-                ViewModel.Email.OnNext(ValidEmail);
-                UserAccessManager
-                    .ResetPassword(Arg.Any<Email>())
-                    .Returns(Observable.Never<string>());
-
-                ViewModel.Reset.Execute();
-
-                var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.Reset.Enabled.Subscribe(observer);
-
-                observer.Messages.Last().Value.Value.Should().BeFalse();
+                observer.LastValue().Should().BeFalse();
             }
 
             public sealed class WhenPasswordResetSucceeds : ForgotPasswordViewModelTest
             {
                 [Fact, LogIfTooSlow]
-                public void SetsIsLoadingToFalse()
+                public async Task SetsPasswordResetSuccessfulToTrue()
                 {
                     ViewModel.Email.OnNext(ValidEmail);
                     UserAccessManager
                         .ResetPassword(Arg.Any<Email>())
                         .Returns(Observable.Return("Great success"));
 
-                    var observer = TestScheduler.CreateObserver<bool>();
-                    ViewModel.Reset.Executing.Subscribe(observer);
+                    var observer = TestScheduler.CreateObserver<Unit>();
+                    ViewModel.Reset.Elements.Subscribe(observer);
 
-                    ViewModel.Reset.Execute();
+                    ViewModel.Reset.Execute(Unit.Default);
                     TestScheduler.Start();
 
-                    observer.Messages.Last().Value.Value.Should().BeFalse();
+                    observer.Messages.Should().HaveCount(1);
                 }
 
                 [Fact, LogIfTooSlow]
-                public void SetsPasswordResetSuccessfulToTrue()
+                public async Task CallsTimeServiceToCloseViewModelAfterFourSeconds()
                 {
                     ViewModel.Email.OnNext(ValidEmail);
                     UserAccessManager
                         .ResetPassword(Arg.Any<Email>())
                         .Returns(Observable.Return("Great success"));
 
-                    var observer = TestScheduler.CreateObserver<bool>();
-                    ViewModel.PasswordResetSuccessful.Subscribe(observer);
-
-                    ViewModel.Reset.Execute();
-                    TestScheduler.Start();
-
-                    observer.Messages.Last().Value.Value.Should().BeTrue();
-                }
-
-                [Fact, LogIfTooSlow]
-                public void CallsTimeServiceToCloseViewModelAfterFourSeconds()
-                {
-                    ViewModel.Email.OnNext(ValidEmail);
-                    UserAccessManager
-                        .ResetPassword(Arg.Any<Email>())
-                        .Returns(Observable.Return("Great success"));
-
-                    ViewModel.Reset.Execute();
+                    ViewModel.Reset.Execute(Unit.Default);
                     TestScheduler.Start();
 
                     TimeService.Received().RunAfterDelay(TimeSpan.FromSeconds(4), Arg.Any<Action>());
                 }
 
                 [Fact, LogIfTooSlow]
-                public void ClosesTheViewModelAfterFourSecondDelay()
+                public async Task ClosesTheViewModelAfterFourSecondDelay()
                 {
-                    var testScheduler = new TestScheduler();
-                    var timeService = new TimeService(testScheduler);
+                    var timeService = new TimeService(TestScheduler);
                     var viewModel = new ForgotPasswordViewModel(
-                        timeService, UserAccessManager, AnalyticsService, NavigationService, SchedulerProvider);
+                        timeService, UserAccessManager, NavigationService, SchedulerProvider);
                     viewModel.Email.OnNext(ValidEmail);
+
                     UserAccessManager
                         .ResetPassword(Arg.Any<Email>())
                         .Returns(Observable.Return("Great success"));
 
-                    viewModel.Reset.Execute();
+                    viewModel.Reset.Execute(Unit.Default);
+
                     TestScheduler.Start();
-                    testScheduler.AdvanceBy(TimeSpan.FromSeconds(4).Ticks);
+                    TestScheduler.AdvanceBy(TimeSpan.FromSeconds(4).Ticks);
 
                     NavigationService
                         .Received()
@@ -225,23 +181,25 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public sealed class WhenPasswordResetFails : ForgotPasswordViewModelTest
             {
                 [Fact, LogIfTooSlow]
-                public void SetsIsLoadingToFalse()
+                public async Task EmitsFalseResultWhenItFails()
                 {
+                    var exception = new Exception();
                     ViewModel.Email.OnNext(ValidEmail);
                     UserAccessManager
                         .ResetPassword(Arg.Any<Email>())
-                        .Returns(Observable.Throw<string>(new Exception()));
+                        .Returns(Observable.Throw<string>(exception));
 
-                    var observer = TestScheduler.CreateObserver<bool>();
-                    ViewModel.PasswordResetSuccessful.Subscribe(observer);
+                    var observer = TestScheduler.CreateObserver<Exception>();
+                    ViewModel.Reset.Errors.Subscribe(observer);
 
-                    ViewModel.Reset.Execute();
+                    ViewModel.Reset.Execute(Unit.Default);
+                    TestScheduler.Start();
 
-                    observer.Messages.Last().Value.Value.Should().BeFalse();
+                    observer.Messages.Should().HaveCount(1);
                 }
 
                 [Fact, LogIfTooSlow]
-                public void SetsNoEmailErrorWhenReceivesBadRequestException()
+                public async Task SetsNoEmailErrorWhenReceivesBadRequestException()
                 {
                     ViewModel.Email.OnNext(ValidEmail);
                     var exception = new BadRequestException(
@@ -250,81 +208,122 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         .ResetPassword(Arg.Any<Email>())
                         .Returns(Observable.Throw<string>(exception));
 
-                    var observer = TestScheduler.CreateObserver<string>();
-                    ViewModel.ErrorMessage.Subscribe(observer);
+                    var observer = TestScheduler.CreateObserver<Exception>();
+                    ViewModel.Reset.Errors.Subscribe(observer);
 
-                    ViewModel.Reset.Execute();
+                    ViewModel.Reset.Execute(Unit.Default);
                     TestScheduler.Start();
 
-                    observer.Messages.Last().Value.Value.Should().Be(Resources.PasswordResetEmailDoesNotExistError);
+                    observer.LastValue().Message.Should().Be(Resources.PasswordResetEmailDoesNotExistError);
                 }
 
                 [Fact, LogIfTooSlow]
-                public void SetsOfflineErrorWhenReceivesOfflineException()
+                public async Task SetsOfflineErrorWhenReceivesOfflineException()
                 {
                     ViewModel.Email.OnNext(ValidEmail);
                     UserAccessManager
                         .ResetPassword(Arg.Any<Email>())
                         .Returns(Observable.Throw<string>(new OfflineException()));
 
-                    var observer = TestScheduler.CreateObserver<string>();
-                    ViewModel.ErrorMessage.Subscribe(observer);
+                    var observer = TestScheduler.CreateObserver<Exception>();
+                    ViewModel.Reset.Errors.Subscribe(observer);
 
-                    ViewModel.Reset.Execute();
+                    ViewModel.Reset.Execute(Unit.Default);
                     TestScheduler.Start();
 
-                    observer.Messages.Last().Value.Value.Should().Be(Resources.PasswordResetOfflineError);
+                    observer.LastValue().Message.Should().Be(Resources.PasswordResetOfflineError);
                 }
 
-                [Property]
-                public void SetsApiErrorWhenReceivesApiException(NonEmptyString errorString)
+                [Fact, LogIfTooSlow]
+                public async Task SetsApiErrorWhenReceivesApiException()
                 {
                     ViewModel.Email.OnNext(ValidEmail);
+                    var response = Substitute.For<IResponse>();
+                    var message = "Some error message";
+                    response.RawData.Returns(message);
                     var exception = new ApiException(
                         Substitute.For<IRequest>(),
-                        Substitute.For<IResponse>(),
-                        errorString.Get);
+                        response,
+                        message);
                     UserAccessManager
                         .ResetPassword(Arg.Any<Email>())
                         .Returns(Observable.Throw<string>(exception));
 
-                    var observer = TestScheduler.CreateObserver<string>();
-                    ViewModel.ErrorMessage.Subscribe(observer);
+                    var observer = TestScheduler.CreateObserver<Exception>();
+                    ViewModel.Reset.Errors.Subscribe(observer);
 
-                    ViewModel.Reset.Execute();
+                    ViewModel.Reset.Execute(Unit.Default);
                     TestScheduler.Start();
 
-                    observer.Messages.Last().Value.Value.Should().Be(exception.LocalizedApiErrorMessage);
+                    observer.LastValue().Message.Should().Be(exception.LocalizedApiErrorMessage);
                 }
 
                 [Fact, LogIfTooSlow]
-                public void SetsGeneralErrorForAnyOtherException()
+                public async Task SetsGeneralErrorForAnyOtherException()
                 {
                     ViewModel.Email.OnNext(ValidEmail);
                     UserAccessManager
                         .ResetPassword(Arg.Any<Email>())
                         .Returns(Observable.Throw<string>(new Exception()));
 
-                    var observer = TestScheduler.CreateObserver<string>();
-                    ViewModel.ErrorMessage.Subscribe(observer);
+                    var observer = TestScheduler.CreateObserver<Exception>();
+                    ViewModel.Reset.Errors.Subscribe(observer);
 
-                    ViewModel.Reset.Execute();
+                    ViewModel.Reset.Execute(Unit.Default);
                     TestScheduler.Start();
 
-                    observer.Messages.Last().Value.Value.Should().Be(Resources.PasswordResetGeneralError);
+                    observer.LastValue().Message.Should().Be(Resources.PasswordResetGeneralError);
                 }
             }
         }
 
-        public sealed class TheCloseCommand : ForgotPasswordViewModelTest
+        public sealed class TheSuggestContactSupportProperty : ForgotPasswordViewModelTest
         {
-            [Property]
-            public void ClosesTheViewModelReturningTheEmail(NonEmptyString emailString)
+            [Fact, LogIfTooSlow]
+            public async Task StartsWithFalse()
             {
-                var email = Email.From(emailString.Get);
+                var observer = TestScheduler.CreateObserver<bool>();
+                ViewModel.SuggestContactSupport.Subscribe(observer);
+                TestScheduler.Start();
+
+                observer.LastValue().Should().BeFalse();
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task EmitsTrueAfterACertainNumberOfErrors()
+            {
+                var threshold = 3;
+                ViewModel.Email.OnNext(ValidEmail);
+                UserAccessManager
+                    .ResetPassword(Arg.Any<Email>())
+                    .Returns(Observable.Throw<string>(new Exception()));
+
+                var observer = TestScheduler.CreateObserver<bool>();
+                ViewModel.SuggestContactSupport.Subscribe(observer);
+
+                Observable.Concat(
+                        Enumerable
+                            .Range(1, threshold)
+                            .Select(n
+                                => Observable.Defer(() => ViewModel.Reset.Execute(Unit.Default)).Catch(Observable.Return(Unit.Default)))
+                    )
+                    .Subscribe();
+
+                TestScheduler.Start();
+
+                observer.LastValue().Should().BeTrue();
+            }
+        }
+
+        public sealed class TheCloseAction : ForgotPasswordViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public async Task ClosesTheViewModelReturningTheEmail()
+            {
+                var email = Email.From("peterpan@pan.com");
                 ViewModel.Email.OnNext(email);
 
-                ViewModel.Close.Execute();
+                await ViewModel.Close.Execute();
 
                 NavigationService
                     .Received()
