@@ -113,7 +113,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .CombineLatest(isEmailValid, isPasswordValid, CommonFunctions.And)
                 .Where(CommonFunctions.Identity)
                 .SelectUnit()
-                .AsDriver(schedulerProvider);
+                .ObserveOn(schedulerProvider.MainScheduler);
 
             LoginWithGoogle = UIAction.FromObservable(loginWithGoogle);
 
@@ -131,7 +131,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             ClearContinueToPasswordScreenError = isEmailValid
                 .Where(CommonFunctions.Identity)
                 .SelectUnit()
-                .AsDriver(schedulerProvider);
+                .ObserveOn(schedulerProvider.MainScheduler);
 
             SuggestContactSupport = Observable.Merge(LoginWithEmail.Errors, LoginWithGoogle.Errors)
                 .Skip(errorCountBeforeShowingContactSupportSuggestion)
