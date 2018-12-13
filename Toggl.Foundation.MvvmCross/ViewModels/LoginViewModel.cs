@@ -127,7 +127,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             ClearPasswordScreenError = Observable
                 .CombineLatest(isEmailValid, isPasswordValid, CommonFunctions.And)
-                .Merge(isEmailState)
+                .Merge(isEmailState.Skip(1))
                 .Where(CommonFunctions.Identity)
                 .SelectUnit()
                 .ObserveOn(schedulerProvider.MainScheduler);

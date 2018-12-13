@@ -169,9 +169,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.BackToEmailScreen.Execute();
                 TestScheduler.Start();
 
-                // The first one is triggered by entering a valid email.
-                // The second one is triggered the action is executed.
-                observer.Messages.Should().HaveCount(2);
+                observer.Messages.Should().HaveCount(1);
             }
         }
 
