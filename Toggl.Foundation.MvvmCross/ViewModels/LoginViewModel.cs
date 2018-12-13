@@ -3,12 +3,9 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
 using MvvmCross.ViewModels;
-using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Exceptions;
-using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Login;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Parameters;
@@ -36,6 +33,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly IUserAccessManager userAccessManager;
         private readonly IOnboardingStorage onboardingStorage;
         private readonly IForkingNavigationService navigationService;
+        private readonly IPasswordManagerService passwordManagerService;
         private readonly IErrorHandlingService errorHandlingService;
         private readonly ILastTimeUsageStorage lastTimeUsageStorage;
         private readonly ITimeService timeService;
@@ -94,6 +92,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             this.userAccessManager = userAccessManager;
             this.onboardingStorage = onboardingStorage;
             this.navigationService = navigationService;
+            this.passwordManagerService = passwordManagerService;
             this.errorHandlingService = errorHandlingService;
             this.lastTimeUsageStorage = lastTimeUsageStorage;
             this.schedulerProvider = schedulerProvider;
@@ -160,15 +159,16 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private IObservable<Unit> login()
         {
             var password = Password.From(PasswordRelay.Value);
+            var email = Email.From(EmailRelay.Value);
             if (!password.IsValid)
             {
                 return Observable.Throw<Unit>(new Exception(Resources.PasswordTooShort));
             }
 
             return userAccessManager
-                .Login(Email.From(EmailRelay.Value), Password.From(PasswordRelay.Value))
+                .Login(email, password)
                 .SelectMany(onLoginSuccessfully)
-                .Catch<Unit, Exception>(e => handleException(e))
+                .Catch<Unit, Exception>(handleException)
                 .ObserveOn(schedulerProvider.MainScheduler);
         }
 

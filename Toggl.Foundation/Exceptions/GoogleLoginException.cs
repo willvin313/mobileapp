@@ -5,8 +5,8 @@ namespace Toggl.Foundation.Exceptions
     {
         public bool LoginWasCanceled { get; }
 
-        public GoogleLoginException(bool loginWasCanceled, string message = "")
-            : base(message)
+        public GoogleLoginException(bool loginWasCanceled, string message = null)
+            : base(message ?? String.Empty)
         {
             LoginWasCanceled = loginWasCanceled;
         }
