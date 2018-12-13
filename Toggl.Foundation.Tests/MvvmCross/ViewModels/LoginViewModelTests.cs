@@ -15,6 +15,7 @@ using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Tests.Extensions;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Multivac;
+using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
 using Toggl.Ultrawave.Exceptions;
 using Toggl.Ultrawave.Network;
@@ -543,18 +544,35 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
         public sealed class TheShakeTargetsProperty : LoginViewModelTest
         {
-            public void ShouldEmitEmailWhenEmailIsInvalid()
+            [Fact, LogIfTooSlow]
+            public void ShouldEmitEmailWhenEmailIsInvalidWhenContinueToPasswordScreen()
             {
                 ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
                 ViewModel.PasswordRelay.Accept(ValidPassword.ToString());
                 var observer = TestScheduler.CreateObserver<LoginViewModel.ShakeTargets>();
                 ViewModel.Shake.Subscribe(observer);
 
+                ViewModel.ContinueToPaswordScreen.Execute();
                 TestScheduler.Start();
 
                 observer.LastValue().Should().Be(LoginViewModel.ShakeTargets.Email);
             }
 
+            [Fact, LogIfTooSlow]
+            public void ShouldEmitEmailWhenEmailIsInvalidWhenLoginWithEmail()
+            {
+                ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
+                ViewModel.PasswordRelay.Accept(ValidPassword.ToString());
+                var observer = TestScheduler.CreateObserver<LoginViewModel.ShakeTargets>();
+                ViewModel.Shake.Subscribe(observer);
+
+                ViewModel.LoginWithEmail.Execute();
+                TestScheduler.Start();
+
+                observer.LastValue().Should().Be(LoginViewModel.ShakeTargets.Email);
+            }
+
+            [Fact, LogIfTooSlow]
             public void ShouldEmitPasswordWhenPasswordIsInvalid()
             {
                 ViewModel.EmailRelay.Accept(ValidEmail.ToString());
@@ -562,11 +580,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserver<LoginViewModel.ShakeTargets>();
                 ViewModel.Shake.Subscribe(observer);
 
+                ViewModel.LoginWithEmail.Execute();
                 TestScheduler.Start();
 
                 observer.LastValue().Should().Be(LoginViewModel.ShakeTargets.Password);
             }
 
+            [Fact, LogIfTooSlow]
             public void ShouldNotEmitWhenEmailAndPasswordAreValid()
             {
                 ViewModel.EmailRelay.Accept(ValidEmail.ToString());
@@ -574,6 +594,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserver<LoginViewModel.ShakeTargets>();
                 ViewModel.Shake.Subscribe(observer);
 
+                ViewModel.LoginWithEmail.Execute();
                 TestScheduler.Start();
 
                 observer.Messages.Should().BeEmpty();
