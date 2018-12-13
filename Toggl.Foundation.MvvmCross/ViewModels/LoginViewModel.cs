@@ -69,7 +69,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public UIAction ContinueToPaswordScreen { get; }
 
-        public IObservable<bool> ClearContinueToPasswordScreenError { get; }
+        public IObservable<Unit> ClearContinueToPasswordScreenError { get; }
 
         public LoginViewModel(
             IUserAccessManager userAccessManager,
@@ -129,8 +129,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             ContinueToPaswordScreen = UIAction.FromObservable(continueToPasswordScreen);
 
             ClearContinueToPasswordScreenError = EmailRelay
-                .Select(email => Email.From(email).IsValid)
-                .Where(CommonFunctions.Identity)
+                .Where(email => Email.From(email).IsValid)
+                .SelectUnit()
                 .AsDriver(schedulerProvider);
 
             SuggestContactSupport = Observable.Merge(LoginWithEmail.Errors, LoginWithGoogle.Errors)

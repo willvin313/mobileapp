@@ -101,10 +101,10 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class ClearContinueToPasswordScreenError : LoginViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public void DoesNotEmitsTrueWhenEmailIsValid()
+            public void DoesNotEmitWhenEmailIsValid()
             {
                 ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
-                var observer = TestScheduler.CreateObserver<bool>();
+                var observer = TestScheduler.CreateObserver<Unit>();
                 ViewModel.ClearContinueToPasswordScreenError.Subscribe(observer);
 
                 TestScheduler.Start();
@@ -113,28 +113,28 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public void EmitsTrueWhenEmailIsValid()
+            public void EmitsElementWhenEmailIsValid()
             {
                 ViewModel.EmailRelay.Accept(ValidEmail.ToString());
-                var observer = TestScheduler.CreateObserver<bool>();
+                var observer = TestScheduler.CreateObserver<Unit>();
                 ViewModel.ClearContinueToPasswordScreenError.Subscribe(observer);
 
                 TestScheduler.Start();
 
-                observer.LastValue().Should().BeTrue();
+                observer.Messages.Should().HaveCount(1);
             }
 
             [Fact, LogIfTooSlow]
-            public void EmitsTrueWhenEmailTransitionFromInvalidToValid()
+            public void EmitsElementWhenEmailTransitionFromInvalidToValid()
             {
-                var observer = TestScheduler.CreateObserver<bool>();
+                var observer = TestScheduler.CreateObserver<Unit>();
                 ViewModel.ClearContinueToPasswordScreenError.Subscribe(observer);
                 ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
                 ViewModel.EmailRelay.Accept(ValidEmail.ToString());
 
                 TestScheduler.Start();
 
-                observer.LastValue().Should().BeTrue();
+                observer.Messages.Should().HaveCount(1);
             }
         }
 
