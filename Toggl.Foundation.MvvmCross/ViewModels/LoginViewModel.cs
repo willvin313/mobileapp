@@ -42,6 +42,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly Subject<ShakeTargets> shakeSubject = new Subject<ShakeTargets>();
         private readonly BehaviorSubject<bool> isPasswordMaskedSubject = new BehaviorSubject<bool>(true);
         private readonly int errorCountBeforeShowingContactSupportSuggestion = 2;
+        private readonly Exception invalidEmailException = new Exception(Resources.EnterValidEmail);
+        private readonly Exception incorrectPasswordException = new Exception(Resources.IncorrectEmailOrPassword);
 
         public bool IsPasswordManagerAvailable { get; }
         public BehaviorRelay<string> EmailRelay { get; } = new BehaviorRelay<string>(string.Empty);
@@ -58,6 +60,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public UIAction ForgotPassword { get; }
         public UIAction ContinueToPaswordScreen { get; }
         public IObservable<Unit> ClearContinueToPasswordScreenError { get; }
+        public IObservable<bool> EmailFieldEdittable { get; }
 
         public LoginViewModel(
             IUserAccessManager userAccessManager,
@@ -138,6 +141,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .SelectValue(true)
                 .StartWith(false)
                 .AsDriver(false, schedulerProvider);
+
+            EmailFieldEdittable = LoginWithEmail.Errors
+                .Select(e => e == incorrectPasswordException)
+                .Where(CommonFunctions.Identity)
+                .StartWith(false)
+                .AsDriver(schedulerProvider);
         }
 
         public override void Prepare(CredentialsParameter parameter)
@@ -150,7 +159,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             if (!Email.From(EmailRelay.Value).IsValid)
             {
-                return Observable.Throw<Unit>(new Exception(Resources.EnterValidEmail));
+                return Observable.Throw<Unit>(invalidEmailException);
             }
 
             return Observable.Return(Unit.Default);
@@ -170,7 +179,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             if (!email.IsValid)
             {
-                return Observable.Throw<Unit>(new Exception(Resources.EnterValidEmail));
+                return Observable.Throw<Unit>(invalidEmailException);
             }
 
             if (!password.IsValid)
@@ -195,7 +204,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             switch (e)
             {
                 case UnauthorizedException _:
-                    return Observable.Throw<Unit>(new Exception(Resources.IncorrectEmailOrPassword));
+                    return Observable.Throw<Unit>(incorrectPasswordException);
                 case GoogleLoginException googleEx:
                     return Observable.Throw<Unit>(new Exception(googleEx.Message));
                 default:

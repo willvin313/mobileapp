@@ -12,6 +12,7 @@ using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Exceptions;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.Tests.Extensions;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Multivac;
 using Toggl.PrimeRadiant.Settings;
@@ -137,7 +138,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
         }
 
-
         public sealed class ClearLoginWithEmailError : LoginViewModelTest
         {
             [Xunit.Theory]
@@ -157,6 +157,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 observer.Messages.Should().HaveCount(shouldEmit ? 1 : 0);
             }
         }
+
         public sealed class TheContinueToPasswordScreenAction : LoginViewModelTest
         {
             [Fact, LogIfTooSlow]
@@ -505,6 +506,38 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 TestScheduler.Start();
                 CollectionAssert.AreEqual(expectedValues, actualValues);
+            }
+        }
+
+        public sealed class TheEmailFieldEdittable : LoginViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public void ShouldStartWithFalse()
+            {
+                var observer = TestScheduler.CreateObserver<bool>();
+                ViewModel.EmailFieldEdittable.Subscribe(observer);
+
+                TestScheduler.Start();
+
+                observer.LastValue().Should().BeFalse();
+            }
+
+            [Fact, LogIfTooSlow]
+            public void EmitsTrueWhenReceiveUnauthorizedException()
+            {
+                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
+                ViewModel.PasswordRelay.Accept(ValidPassword.ToString());
+                var exception = new UnauthorizedException(
+                    Substitute.For<IRequest>(), Substitute.For<IResponse>());
+                UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
+                    .Returns(Observable.Throw<ITogglDataSource>(exception));
+                var observer = TestScheduler.CreateObserver<bool>();
+                ViewModel.EmailFieldEdittable.Subscribe(observer);
+
+                ViewModel.LoginWithEmail.Execute();
+                TestScheduler.Start();
+
+                observer.LastValue().Should().BeTrue();
             }
         }
     }
