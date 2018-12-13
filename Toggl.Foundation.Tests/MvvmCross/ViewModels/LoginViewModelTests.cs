@@ -540,5 +540,44 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 observer.LastValue().Should().BeTrue();
             }
         }
+
+        public sealed class TheShakeTargetsProperty : LoginViewModelTest
+        {
+            public void ShouldEmitEmailWhenEmailIsInvalid()
+            {
+                ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
+                ViewModel.PasswordRelay.Accept(ValidPassword.ToString());
+                var observer = TestScheduler.CreateObserver<LoginViewModel.ShakeTargets>();
+                ViewModel.Shake.Subscribe(observer);
+
+                TestScheduler.Start();
+
+                observer.LastValue().Should().Be(LoginViewModel.ShakeTargets.Email);
+            }
+
+            public void ShouldEmitPasswordWhenPasswordIsInvalid()
+            {
+                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
+                ViewModel.PasswordRelay.Accept(InvalidPassword.ToString());
+                var observer = TestScheduler.CreateObserver<LoginViewModel.ShakeTargets>();
+                ViewModel.Shake.Subscribe(observer);
+
+                TestScheduler.Start();
+
+                observer.LastValue().Should().Be(LoginViewModel.ShakeTargets.Password);
+            }
+
+            public void ShouldNotEmitWhenEmailAndPasswordAreValid()
+            {
+                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
+                ViewModel.PasswordRelay.Accept(ValidPassword.ToString());
+                var observer = TestScheduler.CreateObserver<LoginViewModel.ShakeTargets>();
+                ViewModel.Shake.Subscribe(observer);
+
+                TestScheduler.Start();
+
+                observer.Messages.Should().BeEmpty();
+            }
+        }
     }
 }

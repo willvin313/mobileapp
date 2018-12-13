@@ -159,7 +159,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             if (!Email.From(EmailRelay.Value).IsValid)
             {
-                return Observable.Throw<Unit>(invalidEmailException);
+                return Observable.Return(Unit.Default).Do(_ =>
+                {
+                    shakeSubject.OnNext(ShakeTargets.Email);
+                    throw invalidEmailException;
+                });
             }
 
             return Observable.Return(Unit.Default);
@@ -179,12 +183,20 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             if (!email.IsValid)
             {
-                return Observable.Throw<Unit>(invalidEmailException);
+                return Observable.Return(Unit.Default).Do(_ =>
+                {
+                    shakeSubject.OnNext(ShakeTargets.Email);
+                    throw invalidEmailException;
+                });
             }
 
             if (!password.IsValid)
             {
-                return Observable.Throw<Unit>(new Exception(Resources.PasswordTooShort));
+                return Observable.Return(Unit.Default).Do(_ =>
+                {
+                    shakeSubject.OnNext(ShakeTargets.Password);
+                    throw new Exception(Resources.PasswordTooShort);
+                });
             }
 
             return userAccessManager
