@@ -69,6 +69,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public UIAction ContinueToPaswordScreen { get; }
 
+        public IObservable<bool> ContinueToPasswordScreenErrorVisible { get; }
+
         public LoginViewModel(
             IUserAccessManager userAccessManager,
             IOnboardingStorage onboardingStorage,
@@ -124,7 +126,22 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             TogglePasswordVisibility =
                 UIAction.FromAction(() => isPasswordMaskedSubject.OnNext(!isPasswordMaskedSubject.Value));
 
+            var isEmailValid = EmailRelay
+                .Select(email => Email.From(email).IsValid);
+
             ContinueToPaswordScreen = UIAction.FromObservable(continueToPasswordScreen);
+
+            var hasContinueToPasswordScreenError = ContinueToPaswordScreen.Errors
+                .SelectValue(true)
+                .StartWith(false)
+                .DistinctUntilChanged();
+
+            ContinueToPasswordScreenErrorVisible = Observable
+                .CombineLatest(
+                    hasContinueToPasswordScreenError,
+                    isEmailValid,
+                    (hasError, emailValid) => hasError && !emailValid)
+                .AsDriver(schedulerProvider);
 
             SuggestContactSupport = Observable.Merge(LoginWithEmail.Errors, LoginWithGoogle.Errors)
                 .Skip(errorCountBeforeShowingContactSupportSuggestion)
