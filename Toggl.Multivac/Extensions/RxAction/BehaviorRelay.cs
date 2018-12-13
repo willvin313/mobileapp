@@ -12,21 +12,12 @@ namespace Toggl.Multivac.Extensions.Reactive
     {
         private BehaviorSubject<T> internalSubject;
 
-        public BehaviorRelay(T value)
-        {
-            internalSubject = new BehaviorSubject<T>(value);
-        }
+        public BehaviorRelay(T value) => internalSubject = new BehaviorSubject<T>(value);
 
         public T Value => internalSubject.Value;
 
-        public void Accept(T value)
-        {
-            internalSubject.OnNext(value);
-        }
+        public void Accept(T value) => internalSubject.OnNext(value);
 
-        public IDisposable Subscribe(IObserver<T> observer)
-        {
-            return internalSubject.Subscribe(observer);
-        }
+        public IDisposable Subscribe(IObserver<T> observer) => internalSubject.Subscribe(observer);
     }
 }
