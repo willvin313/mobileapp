@@ -101,6 +101,14 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             this.lastTimeUsageStorage = lastTimeUsageStorage;
             this.schedulerProvider = schedulerProvider;
 
+            var isEmailValid = EmailRelay
+                .Do(a => Console.WriteLine(a))
+                .Select(email => Email.From(email).IsValid);
+
+            var isPasswordValid = PasswordRelay
+                .Do(a => Console.WriteLine(a))
+                .Select(password => Password.From(password).IsValid);
+
             Shake = shakeSubject
                 .AsDriver(ShakeTargets.None, this.schedulerProvider);
 
@@ -117,6 +125,14 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             LoginWithEmail = UIAction.FromObservable(login);
 
+            ClearLoginWithEmailError = isEmailValid
+                .CombineLatest(isPasswordValid, CommonFunctions.And)
+                .Where(CommonFunctions.Identity)
+                .DistinctUntilChanged()
+                .SelectUnit()
+                .Do(CommonFunctions.DoNothing, e => throw e)
+                .AsDriver(schedulerProvider);
+
             LoginWithGoogle = UIAction.FromObservable(loginWithGoogle);
 
             IsLoggingIn = Observable
@@ -130,8 +146,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             ContinueToPaswordScreen = UIAction.FromObservable(continueToPasswordScreen);
 
-            ClearContinueToPasswordScreenError = EmailRelay
-                .Where(email => Email.From(email).IsValid)
+            ClearContinueToPasswordScreenError = isEmailValid
+                .Where(CommonFunctions.Identity)
                 .SelectUnit()
                 .AsDriver(schedulerProvider);
 

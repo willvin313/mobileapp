@@ -12,7 +12,6 @@ using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Exceptions;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
-using Toggl.Foundation.Tests.Extensions;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Multivac;
 using Toggl.PrimeRadiant.Settings;
@@ -138,6 +137,26 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
         }
 
+
+        public sealed class ClearLoginWithEmailError : LoginViewModelTest
+        {
+            [Xunit.Theory]
+//            [InlineData(false, false, false)]
+//            [InlineData(false, true, false)]
+            [InlineData(true, false, false)]
+//            [InlineData(true, true, true)]
+            public void EmitAppropriateValue(bool emailValid, bool passwordValid, bool shouldEmit)
+            {
+                ViewModel.EmailRelay.Accept(emailValid ? ValidEmail.ToString() : InvalidEmail.ToString());
+                ViewModel.PasswordRelay.Accept(passwordValid ? ValidPassword.ToString() : InvalidPassword.ToString());
+                var observer = TestScheduler.CreateObserver<Unit>();
+                ViewModel.ClearContinueToPasswordScreenError.Subscribe(observer);
+
+                TestScheduler.Start();
+
+                observer.Messages.Should().HaveCount(shouldEmit ? 1 : 0);
+            }
+        }
         public sealed class TheContinueToPasswordScreenAction : LoginViewModelTest
         {
             [Fact, LogIfTooSlow]
