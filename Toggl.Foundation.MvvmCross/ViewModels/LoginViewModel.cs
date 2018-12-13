@@ -108,6 +108,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .Select(password => Password.From(password).IsValid);
 
             var isEmailState = state.Select(s => s == State.Email);
+            var isReturningToEmail = isEmailState.Skip(1);
 
             Shake = shakeSubject
                 .AsDriver(ShakeTargets.None, this.schedulerProvider);
@@ -127,7 +128,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             ClearPasswordScreenError = Observable
                 .CombineLatest(isEmailValid, isPasswordValid, CommonFunctions.And)
-                .Merge(isEmailState.Skip(1))
+                .Merge(isReturningToEmail)
                 .Where(CommonFunctions.Identity)
                 .SelectUnit()
                 .ObserveOn(schedulerProvider.MainScheduler);
