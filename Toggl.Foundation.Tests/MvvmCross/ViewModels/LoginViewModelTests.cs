@@ -141,16 +141,16 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class ClearLoginWithEmailError : LoginViewModelTest
         {
             [Xunit.Theory]
-//            [InlineData(false, false, false)]
-//            [InlineData(false, true, false)]
+            [InlineData(false, false, false)]
+            [InlineData(false, true, false)]
             [InlineData(true, false, false)]
-//            [InlineData(true, true, true)]
+            [InlineData(true, true, true)]
             public void EmitAppropriateValue(bool emailValid, bool passwordValid, bool shouldEmit)
             {
                 ViewModel.EmailRelay.Accept(emailValid ? ValidEmail.ToString() : InvalidEmail.ToString());
                 ViewModel.PasswordRelay.Accept(passwordValid ? ValidPassword.ToString() : InvalidPassword.ToString());
                 var observer = TestScheduler.CreateObserver<Unit>();
-                ViewModel.ClearContinueToPasswordScreenError.Subscribe(observer);
+                ViewModel.ClearLoginWithEmailError.Subscribe(observer);
 
                 TestScheduler.Start();
 

@@ -44,33 +44,19 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly int errorCountBeforeShowingContactSupportSuggestion = 2;
 
         public bool IsPasswordManagerAvailable { get; }
-
         public BehaviorRelay<string> EmailRelay { get; } = new BehaviorRelay<string>(string.Empty);
-
         public BehaviorRelay<string> PasswordRelay { get; } = new BehaviorRelay<string>(string.Empty);
-
         public IObservable<bool> IsLoggingIn { get; }
-
         public IObservable<ShakeTargets> Shake { get; }
-
         public IObservable<bool> IsPasswordMasked { get; }
-
         public IObservable<bool> IsShowPasswordButtonVisible { get; }
-
         public IObservable<bool> SuggestContactSupport { get; }
-
         public UIAction LoginWithEmail { get; }
-
         public IObservable<Unit> ClearLoginWithEmailError { get; }
-
         public UIAction LoginWithGoogle { get; }
-
         public UIAction TogglePasswordVisibility { get; }
-
         public UIAction ForgotPassword { get; }
-
         public UIAction ContinueToPaswordScreen { get; }
-
         public IObservable<Unit> ClearContinueToPasswordScreenError { get; }
 
         public LoginViewModel(
@@ -102,11 +88,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             this.schedulerProvider = schedulerProvider;
 
             var isEmailValid = EmailRelay
-                .Do(a => Console.WriteLine(a))
                 .Select(email => Email.From(email).IsValid);
 
             var isPasswordValid = PasswordRelay
-                .Do(a => Console.WriteLine(a))
                 .Select(password => Password.From(password).IsValid);
 
             Shake = shakeSubject
@@ -125,12 +109,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             LoginWithEmail = UIAction.FromObservable(login);
 
-            ClearLoginWithEmailError = isEmailValid
-                .CombineLatest(isPasswordValid, CommonFunctions.And)
+            ClearLoginWithEmailError = Observable
+                .CombineLatest(isEmailValid, isPasswordValid, CommonFunctions.And)
                 .Where(CommonFunctions.Identity)
-                .DistinctUntilChanged()
                 .SelectUnit()
-                .Do(CommonFunctions.DoNothing, e => throw e)
                 .AsDriver(schedulerProvider);
 
             LoginWithGoogle = UIAction.FromObservable(loginWithGoogle);
