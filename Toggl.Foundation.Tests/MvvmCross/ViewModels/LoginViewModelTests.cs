@@ -600,5 +600,17 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 observer.Messages.Should().BeEmpty();
             }
         }
+
+        public sealed class TheBackToSignUpOrLoginAction : LoginViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public void ShouldCallNavigationServiceClose()
+            {
+                ViewModel.BackToSignUpAndLoginChoice.Execute();
+                TestScheduler.Start();
+
+                NavigationService.Received().Close(ViewModel);
+            }
+        }
     }
 }

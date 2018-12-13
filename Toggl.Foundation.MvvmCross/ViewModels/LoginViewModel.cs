@@ -3,6 +3,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
+using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Exceptions;
@@ -10,6 +11,7 @@ using Toggl.Foundation.Login;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.Services;
+using Toggl.Foundation.MvvmCross.ViewModels.UserAccess;
 using Toggl.Foundation.Services;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
@@ -59,6 +61,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public UIAction TogglePasswordVisibility { get; }
         public UIAction ForgotPassword { get; }
         public UIAction ContinueToPaswordScreen { get; }
+        public UIAction BackToSignUpAndLoginChoice { get; }
         public IObservable<Unit> ClearContinueToPasswordScreenError { get; }
         public IObservable<bool> EmailFieldEdittable { get; }
 
@@ -147,6 +150,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .Where(CommonFunctions.Identity)
                 .StartWith(false)
                 .AsDriver(schedulerProvider);
+
+            BackToSignUpAndLoginChoice = UIAction.FromAction(() => navigationService.Close(this));
         }
 
         public override void Prepare(CredentialsParameter parameter)
