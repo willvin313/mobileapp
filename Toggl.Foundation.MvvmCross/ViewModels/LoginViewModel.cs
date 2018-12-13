@@ -133,14 +133,14 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             var hasContinueToPasswordScreenError = ContinueToPaswordScreen.Errors
                 .SelectValue(true)
-                .StartWith(false)
-                .DistinctUntilChanged();
+                .StartWith(false);
 
             ContinueToPasswordScreenErrorVisible = Observable
                 .CombineLatest(
                     hasContinueToPasswordScreenError,
                     isEmailValid,
                     (hasError, emailValid) => hasError && !emailValid)
+                .DistinctUntilChanged()
                 .AsDriver(schedulerProvider);
 
             SuggestContactSupport = Observable.Merge(LoginWithEmail.Errors, LoginWithGoogle.Errors)
