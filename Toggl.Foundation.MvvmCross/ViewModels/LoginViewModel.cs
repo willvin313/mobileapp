@@ -32,6 +32,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Password = 2
         }
 
+        public enum State
+        {
+            Email,
+            EmailAndPassword
+        }
+
         private readonly IUserAccessManager userAccessManager;
         private readonly IOnboardingStorage onboardingStorage;
         private readonly IForkingNavigationService navigationService;
@@ -46,6 +52,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly int errorCountBeforeShowingContactSupportSuggestion = 2;
         private readonly Exception invalidEmailException = new Exception(Resources.EnterValidEmail);
         private readonly Exception incorrectPasswordException = new Exception(Resources.IncorrectEmailOrPassword);
+        private readonly BehaviorSubject<State> state = new BehaviorSubject<State>(State.Email);
 
         public bool IsPasswordManagerAvailable { get; }
         public BehaviorRelay<string> EmailRelay { get; } = new BehaviorRelay<string>(string.Empty);
@@ -62,6 +69,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public UIAction ForgotPassword { get; }
         public UIAction ContinueToPaswordScreen { get; }
         public UIAction BackToSignUpAndLoginChoice { get; }
+        public UIAction BackToContinueWithEmail { get; }
         public IObservable<Unit> ClearContinueToPasswordScreenError { get; }
         public IObservable<bool> EmailFieldEdittable { get; }
 
@@ -123,8 +131,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             LoginWithGoogle = UIAction.FromObservable(loginWithGoogle);
 
-            IsLoggingIn = Observable
-                .CombineLatest(LoginWithEmail.Executing, LoginWithGoogle.Executing, CommonFunctions.Or)
+
+            var isLoggingIn = Observable
+                .CombineLatest(LoginWithEmail.Executing, LoginWithGoogle.Executing, CommonFunctions.Or);
+
+            IsLoggingIn = isLoggingIn
                 .AsDriver(schedulerProvider);
 
             ForgotPassword = UIAction.FromObservable(() => forgotPassword(EmailRelay.Value));
@@ -145,13 +156,18 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .StartWith(false)
                 .AsDriver(false, schedulerProvider);
 
-            EmailFieldEdittable = LoginWithEmail.Errors
-                .Select(e => e == incorrectPasswordException)
-                .Where(CommonFunctions.Identity)
+            EmailFieldEdittable = Observable
+                .CombineLatest(
+                    state,
+                    LoginWithEmail.Errors,
+                    (s, e) => s == State.Email || e == incorrectPasswordException)
                 .StartWith(false)
                 .AsDriver(schedulerProvider);
 
             BackToSignUpAndLoginChoice = UIAction.FromAction(() => navigationService.Close(this));
+
+            BackToContinueWithEmail =
+                UIAction.FromAction(backToEmail, isLoggingIn.Invert());
         }
 
         public override void Prepare(CredentialsParameter parameter)
@@ -171,7 +187,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 });
             }
 
-            return Observable.Return(Unit.Default);
+            return Observable.Return(Unit.Default).Do(_ => state.OnNext(State.EmailAndPassword));
         }
 
         private IObservable<Unit> loginWithGoogle()
@@ -247,6 +263,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .Do(result => PasswordRelay.Accept(result.ToString()))
                 .SelectUnit()
                 .ObserveOn(schedulerProvider.MainScheduler);
+        }
+
+        private void backToEmail()
+        {
+            state.OnNext(State.Email);
         }
     }
 }

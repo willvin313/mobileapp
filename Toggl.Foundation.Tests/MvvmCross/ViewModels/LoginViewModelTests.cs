@@ -540,6 +540,19 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 observer.LastValue().Should().BeTrue();
             }
+
+            [Fact, LogIfTooSlow]
+            public void EmitsFalseWhenVMGoesToEmailScreen()
+            {
+                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
+                var observer = TestScheduler.CreateObserver<bool>();
+                ViewModel.EmailFieldEdittable.Subscribe(observer);
+
+                ViewModel.BackToContinueWithEmail.Execute();
+                TestScheduler.Start();
+
+                observer.LastValue().Should().BeFalse();
+            }
         }
 
         public sealed class TheShakeTargetsProperty : LoginViewModelTest
@@ -610,6 +623,50 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 TestScheduler.Start();
 
                 NavigationService.Received().Close(ViewModel);
+            }
+        }
+
+        public sealed class TheBackToContinueWithEmailAction : LoginViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public void ShouldBeDisabledIfLoggingInWithEmail()
+            {
+                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
+                ViewModel.PasswordRelay.Accept(ValidPassword.ToString());
+                UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
+                    .Returns(Observable.Never<ITogglDataSource>());
+                var observer = TestScheduler.CreateObserver<bool>();
+                ViewModel.BackToContinueWithEmail.Enabled.Subscribe(observer);
+
+                ViewModel.LoginWithEmail.Execute();
+                TestScheduler.Start();
+
+                observer.LastValue().Should().BeFalse();
+            }
+
+            [Fact, LogIfTooSlow]
+            public void ShouldBeDisabledIfLoggingInWithGoogle()
+            {
+                UserAccessManager.LoginWithGoogle()
+                    .Returns(Observable.Never<ITogglDataSource>());
+                var observer = TestScheduler.CreateObserver<bool>();
+                ViewModel.BackToContinueWithEmail.Enabled.Subscribe(observer);
+
+                ViewModel.LoginWithGoogle.Execute();
+                TestScheduler.Start();
+
+                observer.LastValue().Should().BeFalse();
+            }
+
+            [Fact, LogIfTooSlow]
+            public void ShouldBeEnabledByDefault()
+            {
+                var observer = TestScheduler.CreateObserver<bool>();
+                ViewModel.BackToContinueWithEmail.Enabled.Subscribe(observer);
+
+                TestScheduler.Start();
+
+                observer.LastValue().Should().BeTrue();
             }
         }
     }
