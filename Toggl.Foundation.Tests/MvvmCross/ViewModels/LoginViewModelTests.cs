@@ -181,6 +181,33 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 UserAccessManager.Received().Login(Arg.Is(ValidEmail), Arg.Is(ValidPassword));
             }
 
+            [Fact, LogIfTooSlow]
+            public void EmitErrorWhenEmailIsInvalid()
+            {
+                var observer = TestScheduler.CreateObserver<Exception>();
+                ViewModel.LoginWithEmail.Errors.Subscribe(observer);
+                ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
+
+                ViewModel.LoginWithEmail.Execute();
+                TestScheduler.Start();
+
+                observer.Messages.Last().Value.Value.Message.Should().Be(Resources.EnterValidEmail);
+            }
+
+            [Fact, LogIfTooSlow]
+            public void EmitErrorWhenPasswordIsTooShort()
+            {
+                var observer = TestScheduler.CreateObserver<Exception>();
+                ViewModel.LoginWithEmail.Errors.Subscribe(observer);
+                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
+                ViewModel.PasswordRelay.Accept(InvalidPassword.ToString());
+
+                ViewModel.LoginWithEmail.Execute();
+                TestScheduler.Start();
+
+                observer.Messages.Last().Value.Value.Message.Should().Be(Resources.PasswordTooShort);
+            }
+
             public sealed class WhenLoginSucceeds : LoginViewModelTest
             {
                 public WhenLoginSucceeds()

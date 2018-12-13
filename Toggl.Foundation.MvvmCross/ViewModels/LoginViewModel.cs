@@ -61,6 +61,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public UIAction LoginWithEmail { get; }
 
+        public IObservable<Unit> ClearLoginWithEmailError { get; }
+
         public UIAction LoginWithGoogle { get; }
 
         public UIAction TogglePasswordVisibility { get; }
@@ -167,6 +169,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             var password = Password.From(PasswordRelay.Value);
             var email = Email.From(EmailRelay.Value);
+
+            if (!email.IsValid)
+            {
+                return Observable.Throw<Unit>(new Exception(Resources.EnterValidEmail));
+            }
+
             if (!password.IsValid)
             {
                 return Observable.Throw<Unit>(new Exception(Resources.PasswordTooShort));
