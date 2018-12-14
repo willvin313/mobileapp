@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reactive.Linq;
+using CoreGraphics;
 using Foundation;
 using MvvmCross.Platforms.Ios.Presenters.Attributes;
 using MvvmCross.Platforms.Ios.Views;
@@ -23,16 +24,6 @@ namespace Toggl.Daneel.ViewControllers
     [MvxFromStoryboard("Login")]
     public sealed partial class LoginViewController : ReactiveViewController<LoginViewModel>
     {
-        private const int iPhoneSeScreenHeight = 568;
-
-        private bool keyboardIsOpen = false;
-
-        private const int topConstraintForBiggerScreens = 72;
-        private const int topConstraintForBiggerScreensWithKeyboard = 40;
-
-        private const int emailTopConstraint = 42;
-        private const int emailTopConstraintWithKeyboard = 12;
-
         public LoginViewController(IntPtr handle) : base(handle)
         {
         }
@@ -44,82 +35,12 @@ namespace Toggl.Daneel.ViewControllers
             prepareViews();
 
             prepareBindings();
-
-            NavigationController.NavigationBarHidden = true;
-            PasswordManagerButton.Hidden = !ViewModel.IsPasswordManagerAvailable;
-
-            UIKeyboard.Notifications.ObserveWillShow(KeyboardWillShow);
-            UIKeyboard.Notifications.ObserveWillHide(KeyboardWillHide);
-
-        }
-
-        public override void ViewWillAppear(bool animated)
-        {
-            base.ViewWillAppear(animated);
-            NavigationController?.SetNavigationBarHidden(true, true);
-        }
-
-        public override void ViewWillDisappear(bool animated)
-        {
-            base.ViewWillDisappear(animated);
-            NavigationController?.SetNavigationBarHidden(false, true);
-        }
-
-        public override void ViewDidLayoutSubviews()
-        {
-            base.ViewDidLayoutSubviews();
-
-            if (View.Frame.Height > iPhoneSeScreenHeight && !keyboardIsOpen)
-                TopConstraint.Constant = topConstraintForBiggerScreens;
-
-            SignupCard.SetupBottomCard();
-            GoogleLoginButton.SetupGoogleButton();
-        }
-
-        public override void ViewDidAppear(bool animated)
-        {
-            base.ViewDidAppear(animated);
-            ActivityIndicator.Alpha = 0;
-            ActivityIndicator.StartSpinning();
-            PasswordTextField.ResignFirstResponder();
-        }
-
-        private void KeyboardWillShow(object sender, UIKeyboardEventArgs e)
-        {
-            keyboardIsOpen = true;
-            if (View.Frame.Height > iPhoneSeScreenHeight)
-            {
-                TopConstraint.Constant = topConstraintForBiggerScreensWithKeyboard;
-            }
-            else
-            {
-                EmailFieldTopConstraint.Constant = emailTopConstraintWithKeyboard;
-            }
-            UIView.Animate(Animation.Timings.EnterTiming, () => View.LayoutIfNeeded());
-        }
-
-        private void KeyboardWillHide(object sender, UIKeyboardEventArgs e)
-        {
-            keyboardIsOpen = false;
-            if (View.Frame.Height > iPhoneSeScreenHeight)
-            {
-                TopConstraint.Constant = topConstraintForBiggerScreens;
-            }
-            else
-            {
-                EmailFieldTopConstraint.Constant = emailTopConstraint;
-            }
-            UIView.Animate(Animation.Timings.EnterTiming, () => View.LayoutIfNeeded());
         }
 
         private void prepareBindings()
         {
             EmailTextField.Rx().Text()
                 .Subscribe(ViewModel.EmailRelay.Accept)
-                .DisposedBy(DisposeBag);
-
-            PasswordTextField.Rx().Text()
-                .Subscribe(ViewModel.PasswordRelay.Accept)
                 .DisposedBy(DisposeBag);
 
             LoginButton.Rx()
@@ -131,14 +52,6 @@ namespace Toggl.Daneel.ViewControllers
                 .DisposedBy(DisposeBag);
 
             ViewModel.LoginWithGoogle.Errors.Debug("ERROR").Subscribe()
-                .DisposedBy(DisposeBag);
-
-            ShowPasswordButton.Rx()
-                .BindAction(ViewModel.TogglePasswordVisibility)
-                .DisposedBy(DisposeBag);
-
-            ForgotPasswordButton.Rx()
-                .BindAction(ViewModel.ForgotPassword)
                 .DisposedBy(DisposeBag);
 
             ViewModel.EmailRelay
@@ -163,71 +76,27 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(ActivityIndicator.Rx().IsVisibleWithFade())
                 .DisposedBy(DisposeBag);
 
-            ViewModel.IsPasswordMasked
-                .Skip(1)
-                .Subscribe(PasswordTextField.Rx().SecureTextEntry())
-                .DisposedBy(DisposeBag);
-
-            ViewModel.IsShowPasswordButtonVisible
-                .Subscribe(ShowPasswordButton.Rx().IsVisible())
-                .DisposedBy(DisposeBag);
-
             ViewModel.Shake
                 .Subscribe(shakeTargets =>
                 {
                     if (shakeTargets.HasFlag(LoginViewModel.ShakeTargets.Email))
                         EmailTextField.Shake();
-
-                    if (shakeTargets.HasFlag(LoginViewModel.ShakeTargets.Password))
-                        PasswordTextField.Shake();
                 })
                 .DisposedBy(DisposeBag);
         }
 
         private void prepareViews()
         {
-            NavigationController.NavigationBarHidden = true;
-
-            LoginButton.SetTitleColor(
-                Color.Login.DisabledButtonColor.ToNativeColor(),
-                UIControlState.Disabled
-            );
-
-            EmailTextField.ShouldReturn += _ =>
-            {
-                PasswordTextField.BecomeFirstResponder();
-                return false;
-            };
-
-            PasswordTextField.ShouldReturn += _ =>
-            {
-                PasswordTextField.ResignFirstResponder();
-                // TODO: login here somehow
-                return false;
-            };
-
-            View.AddGestureRecognizer(new UITapGestureRecognizer(() =>
-            {
-                EmailTextField.ResignFirstResponder();
-                PasswordTextField.ResignFirstResponder();
-            }));
-
-            prepareForgotPasswordButton();
-            ShowPasswordButton.SetupShowPasswordButton();
+            setupGoogleButton();
         }
 
-        private void prepareForgotPasswordButton()
+        private void setupGoogleButton()
         {
-            var boldFont = UIFont.SystemFontOfSize(12, UIFontWeight.Medium);
-            var color = Color.Login.ForgotPassword.ToNativeColor();
-            var text = new NSMutableAttributedString(
-                Resources.LoginForgotPassword, foregroundColor: color);
-            var boldText = new NSAttributedString(
-                Resources.LoginGetHelpLoggingIn,
-                foregroundColor: color,
-                font: boldFont);
-            text.Append(boldText);
-            ForgotPasswordButton.SetAttributedTitle(text, UIControlState.Normal);
+            var layer = GoogleLoginButton.Layer;
+            layer.MasksToBounds = true;
+            layer.CornerRadius = 8;
+            layer.BorderColor = Color.Signup.EnabledButtonColor.ToNativeColor().CGColor;
+            layer.BorderWidth = 1;
         }
 
         private string loginButtonTitle(bool isLoading)

@@ -494,9 +494,6 @@
     <ImageAsset Include="Resources\Images.xcassets\togglLogoBig.imageset\logo%402x.png" />
     <ImageAsset Include="Resources\Images.xcassets\togglLogoBig.imageset\logo%403x.png" />
     <ImageAsset Include="Resources\Images.xcassets\icGoogleColored.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icGoogleColored.imageset\google.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icGoogleColored.imageset\google%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icGoogleColored.imageset\google%403x.png" />
     <ImageAsset Include="Resources\Images.xcassets\icOnePassword.imageset\passwordman.png" />
     <ImageAsset Include="Resources\Images.xcassets\icOnePassword.imageset\passwordman%402x.png" />
     <ImageAsset Include="Resources\Images.xcassets\icOnePassword.imageset\passwordman%403x.png" />
@@ -560,6 +557,7 @@
     <ImageAsset Include="Resources\Images.xcassets\togglLogoWithoutTextRed.imageset\togglLogoRed.pdf" />
     <ImageAsset Include="Resources\Images.xcassets\togglLogoWithText.imageset\Contents.json" />
     <ImageAsset Include="Resources\Images.xcassets\togglLogoWithText.imageset\Toggl-logo.pdf" />
+    <ImageAsset Include="Resources\Images.xcassets\icGoogleColored.imageset\icGoogleColored.pdf" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="LaunchScreen.storyboard" />

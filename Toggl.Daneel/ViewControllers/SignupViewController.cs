@@ -165,9 +165,6 @@ namespace Toggl.Daneel.ViewControllers
 
             if (View.Frame.Height > iPhoneSeScreenHeight && !keyboardIsOpen)
                 TopConstraint.Constant = topConstraintForBiggerScreens;
-
-            LoginCard.SetupBottomCard();
-            GoogleSignupButton.SetupGoogleButton();
         }
 
         private void KeyboardWillShow(object sender, UIKeyboardEventArgs e)
