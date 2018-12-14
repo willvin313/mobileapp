@@ -501,4 +501,7 @@ account is not set up</value>
     <data name="PasswordTooShort">
         <value>Password should be at least 6 characters</value>
     </data>
+    <data name="LoginWithEmail">
+        <value>Log in with email</value>
+    </data>
 </root>

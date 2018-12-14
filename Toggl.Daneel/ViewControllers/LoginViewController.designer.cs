@@ -16,17 +16,16 @@ namespace Toggl.Daneel.ViewControllers
 		Toggl.Daneel.Views.ActivityIndicatorView ActivityIndicator { get; set; }
 
 		[Outlet]
-		[GeneratedCode ("iOS Designer", "1.0")]
-		Toggl.Daneel.Views.LoginTextField EmailTextField { get; set; }
-
-		[Outlet]
-		UIKit.UILabel ErrorLabel { get; set; }
-
-		[Outlet]
 		UIKit.UIButton GoogleLoginButton { get; set; }
 
 		[Outlet]
-		UIKit.UIButton LoginButton { get; set; }
+		UIKit.UIButton LoginWithEmailButton { get; set; }
+
+		[Outlet]
+		UIKit.UILabel LoginWithEmailErrorLabel { get; set; }
+
+		[Outlet]
+		Toggl.Daneel.Views.LoginTextField LoginWithEmailTextField { get; set; }
 		
 		void ReleaseDesignerOutlets ()
 		{
@@ -35,14 +34,14 @@ namespace Toggl.Daneel.ViewControllers
 				ActivityIndicator = null;
 			}
 
-			if (EmailTextField != null) {
-				EmailTextField.Dispose ();
-				EmailTextField = null;
+			if (LoginWithEmailTextField != null) {
+				LoginWithEmailTextField.Dispose ();
+				LoginWithEmailTextField = null;
 			}
 
-			if (ErrorLabel != null) {
-				ErrorLabel.Dispose ();
-				ErrorLabel = null;
+			if (LoginWithEmailErrorLabel != null) {
+				LoginWithEmailErrorLabel.Dispose ();
+				LoginWithEmailErrorLabel = null;
 			}
 
 			if (GoogleLoginButton != null) {
@@ -50,9 +49,9 @@ namespace Toggl.Daneel.ViewControllers
 				GoogleLoginButton = null;
 			}
 
-			if (LoginButton != null) {
-				LoginButton.Dispose ();
-				LoginButton = null;
+			if (LoginWithEmailButton != null) {
+				LoginWithEmailButton.Dispose ();
+				LoginWithEmailButton = null;
 			}
 		}
 	}

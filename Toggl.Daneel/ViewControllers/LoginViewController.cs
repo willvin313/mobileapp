@@ -20,10 +20,11 @@ using static Toggl.Daneel.Extensions.ViewExtensions;
 
 namespace Toggl.Daneel.ViewControllers
 {
-    [MvxRootPresentation(WrapInNavigationController = true)]
     [MvxFromStoryboard("Login")]
     public sealed partial class LoginViewController : ReactiveViewController<LoginViewModel>
     {
+        private readonly UIImageView titleImage = new UIImageView(UIImage.FromBundle("togglLogo"));
+
         public LoginViewController(IntPtr handle) : base(handle)
         {
         }
@@ -37,50 +38,65 @@ namespace Toggl.Daneel.ViewControllers
             prepareBindings();
         }
 
+        public override void ViewWillAppear(bool animated)
+        {
+            base.ViewWillAppear(animated);
+            NavigationItem.TitleView = titleImage;
+            LoginWithEmailTextField.BecomeFirstResponder();
+        }
+
         private void prepareBindings()
         {
-            EmailTextField.Rx().Text()
+            LoginWithEmailTextField.Rx().Text()
                 .Subscribe(ViewModel.EmailRelay.Accept)
                 .DisposedBy(DisposeBag);
 
-            LoginButton.Rx()
-                .BindAction(ViewModel.LoginWithEmail)
+            LoginWithEmailButton
+                .Rx()
+                .BindAction(ViewModel.ContinueToPaswordScreen)
                 .DisposedBy(DisposeBag);
 
             GoogleLoginButton.Rx()
                 .BindAction(ViewModel.LoginWithGoogle)
                 .DisposedBy(DisposeBag);
 
-            ViewModel.LoginWithGoogle.Errors.Debug("ERROR").Subscribe()
+            ViewModel.LoginWithGoogle.Errors
+                .Select(e => e.Message)
+                .Subscribe(LoginWithEmailErrorLabel.Rx().Text())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.ClearEmailScreenError
+                .Select(_ => string.Empty)
+                .Subscribe(LoginWithEmailErrorLabel.Rx().Text())
                 .DisposedBy(DisposeBag);
 
             ViewModel.EmailRelay
-                .Subscribe(EmailTextField.Rx().TextObserver())
+                .Subscribe(LoginWithEmailTextField.Rx().TextObserver())
                 .DisposedBy(DisposeBag);
 
-            ViewModel.IsLoggingIn.Select(loginButtonTitle)
-                .Subscribe(LoginButton.Rx().AnimatedTitle())
-                .DisposedBy(DisposeBag);
-
-            ViewModel.LoginWithEmail.Errors
+            ViewModel.ContinueToPaswordScreen.Errors
                 .Select(e => e.Message)
-                .Subscribe(ErrorLabel.Rx().Text())
+                .Subscribe(LoginWithEmailErrorLabel.Rx().Text())
                 .DisposedBy(DisposeBag);
 
-            ViewModel.LoginWithEmail.Errors
+            ViewModel.ContinueToPaswordScreen.Errors
                 .SelectValue(true)
-                .Subscribe(ErrorLabel.Rx().AnimatedIsVisible())
+                .Subscribe(LoginWithEmailErrorLabel.Rx().AnimatedIsVisible())
                 .DisposedBy(DisposeBag);
 
             ViewModel.IsLoggingIn
                 .Subscribe(ActivityIndicator.Rx().IsVisibleWithFade())
                 .DisposedBy(DisposeBag);
 
+            ViewModel.IsLoggingIn.Select(loginButtonTitle)
+                .Subscribe(LoginWithEmailButton.Rx().AnimatedTitle())
+                .DisposedBy(DisposeBag);
+
             ViewModel.Shake
                 .Subscribe(shakeTargets =>
                 {
                     if (shakeTargets.HasFlag(LoginViewModel.ShakeTargets.Email))
-                        EmailTextField.Shake();
+                        LoginWithEmailTextField.Shake();
                 })
                 .DisposedBy(DisposeBag);
         }
@@ -100,7 +116,7 @@ namespace Toggl.Daneel.ViewControllers
         }
 
         private string loginButtonTitle(bool isLoading)
-            => isLoading ? "" : Resources.LoginTitle;
+            => isLoading ? "" : Resources.LoginWithEmail;
     }
 }
 
