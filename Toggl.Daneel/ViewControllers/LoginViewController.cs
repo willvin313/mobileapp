@@ -65,6 +65,11 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(LoginWithEmailErrorLabel.Rx().Text())
                 .DisposedBy(DisposeBag);
 
+            ViewModel.LoginWithGoogle.Errors
+                .SelectValue(true)
+                .Subscribe(LoginWithEmailErrorLabel.Rx().AnimatedIsVisible())
+                .DisposedBy(DisposeBag);
+
             ViewModel.ClearEmailScreenError
                 .Select(_ => string.Empty)
                 .Subscribe(LoginWithEmailErrorLabel.Rx().Text())
