@@ -495,4 +495,10 @@ account is not set up</value>
     <data name="Calendar">
         <value>Calendar</value>
     </data>
+    <data name="ContactUs">
+        <value>Contact Us</value>
+    </data>
+    <data name="ContactUsUrl">
+        <value>https://support.toggl.com/</value>
+    </data>
 </root>

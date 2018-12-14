@@ -333,5 +333,28 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                             parameter => parameter.Email.Equals(email)));
             }
         }
+
+        public sealed class TheContactUsAction : ForgotPasswordViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public async Task OpensTheBrowserWithTheAppropriateTitle()
+            {
+                await ViewModel.ContactUs.Execute();
+
+                await NavigationService.Received().Navigate<BrowserViewModel, BrowserParameters>(
+                    Arg.Is<BrowserParameters>(parameter => parameter.Title == Resources.ContactUs)
+                );
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task OpensTheBrowserWithTheCorrectURL()
+            {
+                await ViewModel.ContactUs.Execute();
+
+                await NavigationService.Received().Navigate<BrowserViewModel, BrowserParameters>(
+                    Arg.Is<BrowserParameters>(parameter => parameter.Url == Resources.ContactUsUrl)
+                );
+            }
+        }
     }
 }

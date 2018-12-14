@@ -10,7 +10,6 @@
 
 namespace Toggl.Foundation {
     using System;
-    using System.Reflection;
     
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
@@ -992,6 +991,18 @@ namespace Toggl.Foundation {
         public static string Calendar {
             get {
                 return ResourceManager.GetString("Calendar", resourceCulture);
+            }
+        }
+        
+        public static string ContactUs {
+            get {
+                return ResourceManager.GetString("ContactUs", resourceCulture);
+            }
+        }
+        
+        public static string ContactUsUrl {
+            get {
+                return ResourceManager.GetString("ContactUsUrl", resourceCulture);
             }
         }
     }

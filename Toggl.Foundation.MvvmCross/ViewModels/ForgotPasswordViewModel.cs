@@ -2,11 +2,10 @@ using System;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading.Tasks;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
-using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Login;
-using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
@@ -27,6 +26,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public BehaviorSubject<Email> Email { get; } = new BehaviorSubject<Email>(Multivac.Email.Empty);
         public UIAction Reset { get; }
         public UIAction Close { get; }
+        public UIAction ContactUs { get; }
         public IObservable<bool> SuggestContactSupport { get; }
 
         public ForgotPasswordViewModel(
@@ -48,6 +48,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Reset = UIAction.FromObservable(reset, Email.Select(email => email.IsValid));
 
             Close = UIAction.FromAction(returnAndFillEmail, Reset.Executing.Invert());
+
+            ContactUs = UIAction.FromAsync(contactUs);
 
             SuggestContactSupport = Reset.Errors
                 .Skip(errorCountBeforeShowingContactSupportSuggestion)
@@ -80,6 +82,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             navigationService.Close(this, EmailParameter.With(Email.Value));
         }
+
+        private Task contactUs() =>
+            navigationService
+                .Navigate<BrowserViewModel, BrowserParameters>(
+                    BrowserParameters.WithUrlAndTitle(Resources.ContactUsUrl, Resources.ContactUs));
 
         private Exception createUIException(Exception exception)
         {

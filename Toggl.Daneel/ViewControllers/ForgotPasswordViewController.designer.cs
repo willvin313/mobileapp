@@ -16,6 +16,9 @@ namespace Toggl.Daneel.ViewControllers
 		Toggl.Daneel.Views.ActivityIndicatorView ActivityIndicator { get; set; }
 
 		[Outlet]
+		UIKit.UIButton ContactUsButton { get; set; }
+
+		[Outlet]
 		UIKit.UIView DoneCard { get; set; }
 
 		[Outlet]
@@ -35,6 +38,11 @@ namespace Toggl.Daneel.ViewControllers
 		
 		void ReleaseDesignerOutlets ()
 		{
+			if (ActivityIndicator != null) {
+				ActivityIndicator.Dispose ();
+				ActivityIndicator = null;
+			}
+
 			if (DoneCard != null) {
 				DoneCard.Dispose ();
 				DoneCard = null;
@@ -65,9 +73,9 @@ namespace Toggl.Daneel.ViewControllers
 				TopConstraint = null;
 			}
 
-			if (ActivityIndicator != null) {
-				ActivityIndicator.Dispose ();
-				ActivityIndicator = null;
+			if (ContactUsButton != null) {
+				ContactUsButton.Dispose ();
+				ContactUsButton = null;
 			}
 		}
 	}

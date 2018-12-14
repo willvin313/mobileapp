@@ -89,6 +89,15 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(updateErrorMessage)
                 .DisposedBy(DisposeBag);
 
+            ViewModel.SuggestContactSupport
+                .Subscribe(ContactUsButton.Rx().IsVisible())
+                .DisposedBy(DisposeBag);
+
+            ContactUsButton.Rx()
+                .BindAction(ViewModel.ContactUs)
+                .DisposedBy(DisposeBag);
+
+            // Indicators
             ViewModel.Reset.Executing
                 .Subscribe(loading =>
                 {
@@ -147,6 +156,7 @@ namespace Toggl.Daneel.ViewControllers
             ActivityIndicator.StartSpinning();
 
             ErrorLabel.Hidden = true;
+            ContactUsButton.Hidden = true;
 
             prepareBackbutton();
         }
