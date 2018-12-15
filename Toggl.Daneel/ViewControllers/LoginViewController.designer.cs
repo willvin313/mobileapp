@@ -19,7 +19,13 @@ namespace Toggl.Daneel.ViewControllers
         UIKit.UIView FirstScreenWrapperView { get; set; }
 
         [Outlet]
+        UIKit.UIButton ForgotPasswordButton { get; set; }
+
+        [Outlet]
         UIKit.UIButton GoogleLoginButton { get; set; }
+
+        [Outlet]
+        UIKit.UIButton LoginButton { get; set; }
 
         [Outlet]
         UIKit.UIButton LoginWithEmailButton { get; set; }
@@ -31,6 +37,15 @@ namespace Toggl.Daneel.ViewControllers
         Toggl.Daneel.Views.LoginTextField LoginWithEmailTextField { get; set; }
 
         [Outlet]
+        Toggl.Daneel.Views.LoginTextField PasswordTextField { get; set; }
+
+        [Outlet]
+        Toggl.Daneel.Views.LoginTextField SecondScreenEmailTextField { get; set; }
+
+        [Outlet]
+        UIKit.UILabel SecondScreenErrorLabel { get; set; }
+
+        [Outlet]
         UIKit.UIView SecondScreenWrapperView { get; set; }
         
         void ReleaseDesignerOutlets ()
@@ -40,9 +55,24 @@ namespace Toggl.Daneel.ViewControllers
                 ActivityIndicator = null;
             }
 
+            if (FirstScreenWrapperView != null) {
+                FirstScreenWrapperView.Dispose ();
+                FirstScreenWrapperView = null;
+            }
+
+            if (ForgotPasswordButton != null) {
+                ForgotPasswordButton.Dispose ();
+                ForgotPasswordButton = null;
+            }
+
             if (GoogleLoginButton != null) {
                 GoogleLoginButton.Dispose ();
                 GoogleLoginButton = null;
+            }
+
+            if (LoginButton != null) {
+                LoginButton.Dispose ();
+                LoginButton = null;
             }
 
             if (LoginWithEmailButton != null) {
@@ -60,14 +90,24 @@ namespace Toggl.Daneel.ViewControllers
                 LoginWithEmailTextField = null;
             }
 
-            if (FirstScreenWrapperView != null) {
-                FirstScreenWrapperView.Dispose ();
-                FirstScreenWrapperView = null;
+            if (PasswordTextField != null) {
+                PasswordTextField.Dispose ();
+                PasswordTextField = null;
+            }
+
+            if (SecondScreenEmailTextField != null) {
+                SecondScreenEmailTextField.Dispose ();
+                SecondScreenEmailTextField = null;
             }
 
             if (SecondScreenWrapperView != null) {
                 SecondScreenWrapperView.Dispose ();
                 SecondScreenWrapperView = null;
+            }
+
+            if (SecondScreenErrorLabel != null) {
+                SecondScreenErrorLabel.Dispose ();
+                SecondScreenErrorLabel = null;
             }
         }
     }

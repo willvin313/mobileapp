@@ -549,13 +549,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
                 ViewModel.PasswordRelay.Accept(ValidPassword.ToString());
-                var observer = TestScheduler.CreateObserver<LoginViewModel.ShakeTargets>();
+                var observer = TestScheduler.CreateObserver<LoginViewModel.ShakeTarget>();
                 ViewModel.Shake.Subscribe(observer);
 
                 ViewModel.ContinueToPaswordScreen.Execute();
                 TestScheduler.Start();
 
-                observer.LastValue().Should().Be(LoginViewModel.ShakeTargets.Email);
+                observer.LastValue().Should().Be(LoginViewModel.ShakeTarget.Email);
             }
 
             [Fact, LogIfTooSlow]
@@ -563,13 +563,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
                 ViewModel.PasswordRelay.Accept(ValidPassword.ToString());
-                var observer = TestScheduler.CreateObserver<LoginViewModel.ShakeTargets>();
+                var observer = TestScheduler.CreateObserver<LoginViewModel.ShakeTarget>();
                 ViewModel.Shake.Subscribe(observer);
 
                 ViewModel.LoginWithEmail.Execute();
                 TestScheduler.Start();
 
-                observer.LastValue().Should().Be(LoginViewModel.ShakeTargets.Email);
+                observer.LastValue().Should().Be(LoginViewModel.ShakeTarget.Email);
             }
 
             [Fact, LogIfTooSlow]
@@ -577,13 +577,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 ViewModel.EmailRelay.Accept(ValidEmail.ToString());
                 ViewModel.PasswordRelay.Accept(InvalidPassword.ToString());
-                var observer = TestScheduler.CreateObserver<LoginViewModel.ShakeTargets>();
+                var observer = TestScheduler.CreateObserver<LoginViewModel.ShakeTarget>();
                 ViewModel.Shake.Subscribe(observer);
 
                 ViewModel.LoginWithEmail.Execute();
                 TestScheduler.Start();
 
-                observer.LastValue().Should().Be(LoginViewModel.ShakeTargets.Password);
+                observer.LastValue().Should().Be(LoginViewModel.ShakeTarget.Password);
             }
 
             [Fact, LogIfTooSlow]
@@ -591,7 +591,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 ViewModel.EmailRelay.Accept(ValidEmail.ToString());
                 ViewModel.PasswordRelay.Accept(ValidPassword.ToString());
-                var observer = TestScheduler.CreateObserver<LoginViewModel.ShakeTargets>();
+                var observer = TestScheduler.CreateObserver<LoginViewModel.ShakeTarget>();
                 ViewModel.Shake.Subscribe(observer);
 
                 ViewModel.LoginWithEmail.Execute();
@@ -669,6 +669,48 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                    ReactiveTest.OnNext(0, "somePassword"),
                    ReactiveTest.OnNext(0, string.Empty)
                 );
+            }
+        }
+
+        public sealed class TheForgotPasswordAction : LoginViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public void ShouldBeDisabledWhenIsLoggingIn()
+            {
+                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
+                ViewModel.PasswordRelay.Accept(ValidPassword.ToString());
+                UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
+                    .Returns(Observable.Never<ITogglDataSource>());
+                var observer = TestScheduler.CreateObserver<bool>();
+                ViewModel.ForgotPassword.Enabled.Subscribe(observer);
+
+                ViewModel.LoginWithEmail.Execute();
+                TestScheduler.Start();
+
+                observer.LastValue().Should().BeFalse();
+            }
+
+            [Fact, LogIfTooSlow]
+            public void ShouldBeEnabledByDefault()
+            {
+                var observer = TestScheduler.CreateObserver<bool>();
+                ViewModel.ForgotPassword.Enabled.Subscribe(observer);
+
+                TestScheduler.Start();
+
+                observer.LastValue().Should().BeTrue();
+            }
+
+            [Fact, LogIfTooSlow]
+            public void ShouldCallsNavigationService()
+            {
+                var emailParam = EmailParameter.With(Email.From(ValidEmail.ToString()));
+                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
+                ViewModel.PasswordRelay.Accept(ValidPassword.ToString());
+
+                ViewModel.ForgotPassword.Execute();
+
+                NavigationService.Received().Navigate<ForgotPasswordViewModel, EmailParameter, EmailParameter>(emailParam);
             }
         }
     }

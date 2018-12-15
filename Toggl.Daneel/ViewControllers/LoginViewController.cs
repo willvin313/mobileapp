@@ -24,7 +24,8 @@ namespace Toggl.Daneel.ViewControllers
     public sealed partial class LoginViewController : ReactiveViewController<LoginViewModel>
     {
         private readonly UIImageView titleImage = new UIImageView(UIImage.FromBundle("togglLogo"));
-        private readonly UIBarButtonItem backButton = new UIBarButtonItem("CUSTOM BCK", UIBarButtonItemStyle.Plain, null);
+        private readonly UIBarButtonItem backButton = new UIBarButtonItem(Resources.Back, UIBarButtonItemStyle.Plain, null);
+        private readonly UIImage backIndicatorImage = UIImage.FromBundle("icBackNoPadding");
 
         public LoginViewController(IntPtr handle) : base(handle)
         {
@@ -44,10 +45,16 @@ namespace Toggl.Daneel.ViewControllers
             base.ViewWillAppear(animated);
             NavigationItem.TitleView = titleImage;
             LoginWithEmailTextField.BecomeFirstResponder();
+            ActivityIndicator.StartSpinning();
         }
 
         private void prepareBindings()
         {
+            backButton.Rx()
+                .BindAction(ViewModel.Back)
+                .DisposedBy(DisposeBag);
+
+            // First Screen
             LoginWithEmailTextField.Rx().Text()
                 .Subscribe(ViewModel.EmailRelay.Accept)
                 .DisposedBy(DisposeBag);
@@ -61,8 +68,39 @@ namespace Toggl.Daneel.ViewControllers
                 .BindAction(ViewModel.LoginWithGoogle)
                 .DisposedBy(DisposeBag);
 
-            backButton.Rx()
-                .BindAction(ViewModel.Back)
+            // Second Screen
+            ForgotPasswordButton.Rx()
+                .BindAction(ViewModel.ForgotPassword)
+                .DisposedBy(DisposeBag);
+
+            LoginButton.Rx()
+                .BindAction(ViewModel.LoginWithEmail)
+                .DisposedBy(DisposeBag);
+
+            SecondScreenEmailTextField.Rx().Text()
+                .Subscribe(ViewModel.EmailRelay.Accept)
+                .DisposedBy(DisposeBag);
+
+            ViewModel.EmailRelay
+                .Subscribe(SecondScreenEmailTextField.Rx().TextObserver())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.EmailFieldEdittable
+                .Subscribe(SecondScreenEmailTextField.Rx().Enabled())
+                .DisposedBy(DisposeBag);
+
+            PasswordTextField.Rx().Text()
+                .Subscribe(ViewModel.PasswordRelay.Accept)
+                .DisposedBy(DisposeBag);
+
+            ViewModel.ClearPasswordScreenError
+                .Select(_ => string.Empty)
+                .Subscribe(SecondScreenErrorLabel.Rx().Text())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.LoginWithEmail.Errors
+                .Select(e => e.Message)
+                .Subscribe(SecondScreenErrorLabel.Rx().Text())
                 .DisposedBy(DisposeBag);
 
             ViewModel.LoginWithGoogle.Errors
@@ -79,6 +117,10 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(LoginWithEmailTextField.Rx().TextObserver())
                 .DisposedBy(DisposeBag);
 
+            ViewModel.PasswordRelay
+                .Subscribe(PasswordTextField.Rx().TextObserver())
+                .DisposedBy(DisposeBag);
+
             ViewModel.ContinueToPaswordScreen.Errors
                 .Select(e => e.Message)
                 .Subscribe(LoginWithEmailErrorLabel.Rx().Text())
@@ -89,7 +131,7 @@ namespace Toggl.Daneel.ViewControllers
                 .DisposedBy(DisposeBag);
 
             ViewModel.IsLoggingIn.Select(loginButtonTitle)
-                .Subscribe(LoginWithEmailButton.Rx().AnimatedTitle())
+                .Subscribe(LoginButton.Rx().AnimatedTitle())
                 .DisposedBy(DisposeBag);
 
             ViewModel.IsInSecondScreen
@@ -100,10 +142,19 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(SecondScreenWrapperView.Rx().AnimatedIsVisible());
 
             ViewModel.Shake
-                .Subscribe(shakeTargets =>
+                .Subscribe(shakeTarget =>
                 {
-                    if (shakeTargets.HasFlag(LoginViewModel.ShakeTargets.Email))
-                        LoginWithEmailTextField.Shake();
+                    switch (shakeTarget)
+                    {
+                        case LoginViewModel.ShakeTarget.Email:
+                            LoginWithEmailTextField.Shake();
+                            LoginWithEmailTextField.BecomeFirstResponder();
+                            break;
+                        case LoginViewModel.ShakeTarget.Password:
+                            PasswordTextField.Shake();
+                            PasswordTextField.BecomeFirstResponder();
+                            break;
+                    }
                 })
                 .DisposedBy(DisposeBag);
         }
@@ -112,7 +163,10 @@ namespace Toggl.Daneel.ViewControllers
         {
             setupGoogleButton();
             NavigationItem.LeftBarButtonItem = backButton;
+            NavigationController.NavigationBar.BackIndicatorImage = backIndicatorImage;
+            NavigationController.NavigationBar.BackIndicatorTransitionMaskImage = backIndicatorImage;
             LoginWithEmailErrorLabel.Text = string.Empty;
+            SecondScreenErrorLabel.Text = string.Empty;
         }
 
         private void setupGoogleButton()
@@ -125,7 +179,7 @@ namespace Toggl.Daneel.ViewControllers
         }
 
         private string loginButtonTitle(bool isLoading)
-            => isLoading ? "" : Resources.LoginWithEmail;
+            => isLoading ? "" : Resources.LoginTitle;
     }
 }
 

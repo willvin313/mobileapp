@@ -22,8 +22,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
     [Preserve(AllMembers = true)]
     public sealed class LoginViewModel : MvxViewModel<CredentialsParameter>
     {
-        [Flags]
-        public enum ShakeTargets
+        public enum ShakeTarget
         {
             None = 0,
             Email = 1,
@@ -45,7 +44,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly ITimeService timeService;
         private readonly ISchedulerProvider schedulerProvider;
 
-        private readonly Subject<ShakeTargets> shakeSubject = new Subject<ShakeTargets>();
+        private readonly Subject<ShakeTarget> shakeSubject = new Subject<ShakeTarget>();
         private readonly BehaviorSubject<bool> isPasswordMaskedSubject = new BehaviorSubject<bool>(true);
         private readonly int errorCountBeforeShowingContactSupportSuggestion = 2;
         private readonly Exception invalidEmailException = new Exception(Resources.EnterValidEmail);
@@ -56,7 +55,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public BehaviorRelay<string> EmailRelay { get; } = new BehaviorRelay<string>(string.Empty);
         public BehaviorRelay<string> PasswordRelay { get; } = new BehaviorRelay<string>(string.Empty);
         public IObservable<bool> IsLoggingIn { get; }
-        public IObservable<ShakeTargets> Shake { get; }
+        public IObservable<ShakeTarget> Shake { get; }
         public IObservable<bool> IsPasswordMasked { get; }
         public IObservable<bool> IsShowPasswordButtonVisible { get; }
         public IObservable<bool> SuggestContactSupport { get; }
@@ -109,7 +108,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             var isReturningToEmail = isEmailState.Skip(1);
 
             Shake = shakeSubject
-                .AsDriver(ShakeTargets.None, this.schedulerProvider);
+                .AsDriver(ShakeTarget.None, this.schedulerProvider);
 
             IsPasswordMasked = isPasswordMaskedSubject
                 .DistinctUntilChanged()
@@ -139,7 +138,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IsLoggingIn = isLoggingIn
                 .AsDriver(schedulerProvider);
 
-            ForgotPassword = UIAction.FromObservable(() => forgotPassword(EmailRelay.Value));
+            ForgotPassword = UIAction.FromObservable(() => forgotPassword(EmailRelay.Value), isLoggingIn.Invert());
 
             TogglePasswordVisibility =
                 UIAction.FromAction(() => isPasswordMaskedSubject.OnNext(!isPasswordMaskedSubject.Value));
@@ -186,7 +185,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             {
                 return Observable.Return(Unit.Default).Do(_ =>
                 {
-                    shakeSubject.OnNext(ShakeTargets.Email);
+                    shakeSubject.OnNext(ShakeTarget.Email);
                     throw invalidEmailException;
                 });
             }
@@ -210,7 +209,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             {
                 return Observable.Return(Unit.Default).Do(_ =>
                 {
-                    shakeSubject.OnNext(ShakeTargets.Email);
+                    shakeSubject.OnNext(ShakeTarget.Email);
                     throw invalidEmailException;
                 });
             }
@@ -219,7 +218,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             {
                 return Observable.Return(Unit.Default).Do(_ =>
                 {
-                    shakeSubject.OnNext(ShakeTargets.Password);
+                    shakeSubject.OnNext(ShakeTarget.Password);
                     throw new Exception(Resources.PasswordTooShort);
                 });
             }
