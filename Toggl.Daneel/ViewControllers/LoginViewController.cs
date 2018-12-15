@@ -24,6 +24,7 @@ namespace Toggl.Daneel.ViewControllers
     public sealed partial class LoginViewController : ReactiveViewController<LoginViewModel>
     {
         private readonly UIImageView titleImage = new UIImageView(UIImage.FromBundle("togglLogo"));
+        private readonly UIBarButtonItem backButton = new UIBarButtonItem("CUSTOM BCK", UIBarButtonItemStyle.Plain, null);
 
         public LoginViewController(IntPtr handle) : base(handle)
         {
@@ -60,14 +61,13 @@ namespace Toggl.Daneel.ViewControllers
                 .BindAction(ViewModel.LoginWithGoogle)
                 .DisposedBy(DisposeBag);
 
-            ViewModel.LoginWithGoogle.Errors
-                .Select(e => e.Message)
-                .Subscribe(LoginWithEmailErrorLabel.Rx().Text())
+            backButton.Rx()
+                .BindAction(ViewModel.Back)
                 .DisposedBy(DisposeBag);
 
             ViewModel.LoginWithGoogle.Errors
-                .SelectValue(true)
-                .Subscribe(LoginWithEmailErrorLabel.Rx().AnimatedIsVisible())
+                .Select(e => e.Message)
+                .Subscribe(LoginWithEmailErrorLabel.Rx().Text())
                 .DisposedBy(DisposeBag);
 
             ViewModel.ClearEmailScreenError
@@ -84,11 +84,6 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(LoginWithEmailErrorLabel.Rx().Text())
                 .DisposedBy(DisposeBag);
 
-            ViewModel.ContinueToPaswordScreen.Errors
-                .SelectValue(true)
-                .Subscribe(LoginWithEmailErrorLabel.Rx().AnimatedIsVisible())
-                .DisposedBy(DisposeBag);
-
             ViewModel.IsLoggingIn
                 .Subscribe(ActivityIndicator.Rx().IsVisibleWithFade())
                 .DisposedBy(DisposeBag);
@@ -96,6 +91,13 @@ namespace Toggl.Daneel.ViewControllers
             ViewModel.IsLoggingIn.Select(loginButtonTitle)
                 .Subscribe(LoginWithEmailButton.Rx().AnimatedTitle())
                 .DisposedBy(DisposeBag);
+
+            ViewModel.IsInSecondScreen
+                .Invert()
+                .Subscribe(FirstScreenWrapperView.Rx().AnimatedIsVisible());
+
+            ViewModel.IsInSecondScreen
+                .Subscribe(SecondScreenWrapperView.Rx().AnimatedIsVisible());
 
             ViewModel.Shake
                 .Subscribe(shakeTargets =>
@@ -109,6 +111,8 @@ namespace Toggl.Daneel.ViewControllers
         private void prepareViews()
         {
             setupGoogleButton();
+            NavigationItem.LeftBarButtonItem = backButton;
+            LoginWithEmailErrorLabel.Text = string.Empty;
         }
 
         private void setupGoogleButton()

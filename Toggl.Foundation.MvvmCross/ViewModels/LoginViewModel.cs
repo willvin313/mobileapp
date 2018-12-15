@@ -66,10 +66,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public UIAction TogglePasswordVisibility { get; }
         public UIAction ForgotPassword { get; }
         public UIAction ContinueToPaswordScreen { get; }
-        public UIAction BackToSignUpAndLoginChoice { get; }
-        public UIAction BackToEmailScreen { get; }
+        public UIAction Back { get; }
         public IObservable<Unit> ClearEmailScreenError { get; }
         public IObservable<bool> EmailFieldEdittable { get; }
+        public IObservable<bool> IsInSecondScreen { get; }
 
         public LoginViewModel(
             IUserAccessManager userAccessManager,
@@ -166,10 +166,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .StartWith(false)
                 .AsDriver(schedulerProvider);
 
-            BackToSignUpAndLoginChoice = UIAction.FromAction(() => navigationService.Close(this));
+            Back = UIAction.FromAction(back, isLoggingIn.Invert());
 
-            BackToEmailScreen =
-                UIAction.FromAction(backToEmail, isLoggingIn.Invert());
+            IsInSecondScreen = state
+                .Select(s => s == State.EmailAndPassword)
+                .AsObservable()
+                .AsDriver(schedulerProvider);
         }
 
         public override void Prepare(CredentialsParameter parameter)
@@ -267,10 +269,18 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .ObserveOn(schedulerProvider.MainScheduler);
         }
 
-        private void backToEmail()
+        private void back()
         {
-            state.OnNext(State.Email);
-            PasswordRelay.Accept(string.Empty);
+            switch (state.Value)
+            {
+                case State.Email:
+                    navigationService.Close(this);
+                    break;
+                case State.EmailAndPassword:
+                    state.OnNext(State.Email);
+                    PasswordRelay.Accept(string.Empty);
+                    break;
+            }
         }
     }
 }

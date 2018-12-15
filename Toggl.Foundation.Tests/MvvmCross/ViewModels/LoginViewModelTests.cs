@@ -157,20 +157,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 observer.Messages.Should().HaveCount(shouldEmit ? 1 : 0);
             }
-
-            [Fact, LogIfTooSlow]
-            public void EmitElementWhenVMGoesToEmailScreen()
-            {
-                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
-                var observer = TestScheduler.CreateObserver<Unit>();
-                ViewModel.ClearPasswordScreenError.Subscribe(observer);
-
-                ViewModel.ContinueToPaswordScreen.Execute();
-                ViewModel.BackToEmailScreen.Execute();
-                TestScheduler.Start();
-
-                observer.Messages.Should().HaveCount(1);
-            }
         }
 
         public sealed class TheContinueToPasswordScreenAction : LoginViewModelTest
@@ -554,19 +540,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 observer.LastValue().Should().BeTrue();
             }
-
-            [Fact, LogIfTooSlow]
-            public void EmitsFalseWhenVMGoesToEmailScreen()
-            {
-                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
-                var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.EmailFieldEdittable.Subscribe(observer);
-
-                ViewModel.BackToEmailScreen.Execute();
-                TestScheduler.Start();
-
-                observer.LastValue().Should().BeFalse();
-            }
         }
 
         public sealed class TheShakeTargetsProperty : LoginViewModelTest
@@ -628,20 +601,17 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
         }
 
-        public sealed class TheBackToSignUpOrLoginAction : LoginViewModelTest
+        public sealed class TheBackAction : LoginViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public void ShouldCallNavigationServiceClose()
+            public void ShouldCallNavigationServiceCloseWhenInTheFirstScreen()
             {
-                ViewModel.BackToSignUpAndLoginChoice.Execute();
+                ViewModel.Back.Execute();
                 TestScheduler.Start();
 
                 NavigationService.Received().Close(ViewModel);
             }
-        }
 
-        public sealed class TheBackToEmailScreenAction : LoginViewModelTest
-        {
             [Fact, LogIfTooSlow]
             public void ShouldBeDisabledIfLoggingInWithEmail()
             {
@@ -650,7 +620,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
                     .Returns(Observable.Never<ITogglDataSource>());
                 var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.BackToEmailScreen.Enabled.Subscribe(observer);
+                ViewModel.Back.Enabled.Subscribe(observer);
 
                 ViewModel.LoginWithEmail.Execute();
                 TestScheduler.Start();
@@ -664,7 +634,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 UserAccessManager.LoginWithGoogle()
                     .Returns(Observable.Never<ITogglDataSource>());
                 var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.BackToEmailScreen.Enabled.Subscribe(observer);
+                ViewModel.Back.Enabled.Subscribe(observer);
 
                 ViewModel.LoginWithGoogle.Execute();
                 TestScheduler.Start();
@@ -676,7 +646,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public void ShouldBeEnabledByDefault()
             {
                 var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.BackToEmailScreen.Enabled.Subscribe(observer);
+                ViewModel.Back.Enabled.Subscribe(observer);
 
                 TestScheduler.Start();
 
@@ -692,7 +662,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.PasswordRelay.Subscribe(observer);
 
                 ViewModel.ContinueToPaswordScreen.Execute();
-                ViewModel.BackToEmailScreen.Execute();
+                ViewModel.Back.Execute();
                 TestScheduler.Start();
 
                 observer.Messages.AssertEqual(

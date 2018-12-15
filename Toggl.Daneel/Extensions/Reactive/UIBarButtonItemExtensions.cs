@@ -16,5 +16,15 @@ namespace Toggl.Daneel.Extensions
             => Observable
                 .FromEventPattern(e => reactive.Base.Clicked += e, e => reactive.Base.Clicked -= e)
                 .SelectUnit();
+
+        public static IDisposable BindAction(this IReactive<UIBarButtonItem> reactive, UIAction action)
+        {
+            IObservable<Unit> eventObservable =  reactive.Base.Rx().Tap();
+            return Observable.Using(
+                    () => action.Enabled.Subscribe(e => { reactive.Base.Enabled = e; }),
+                    _ => eventObservable
+                )
+                .Subscribe(action.Inputs);
+        }
     }
 }
