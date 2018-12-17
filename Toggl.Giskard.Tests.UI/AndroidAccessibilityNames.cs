@@ -23,7 +23,7 @@ namespace Toggl.Tests.UI
         public static readonly Func<AppQuery, AppQuery> ErrorLabel = x => x.Id("InfoTextField");
         public static readonly Func<AppQuery, AppQuery> PasswordText = x => x.Id("LoginPasswordTextField");
         public const string ShowPasswordButton = "";
-        public const string ForgotPasswordButton = "";
+        public const string ForgotPasswordButton = "LoginForgotPassword";
         public const string BackButton = "Back Button";
         public static readonly Func<AppQuery, AppQuery> NextButton = x => x.Id("LoginNextButton");
     }
