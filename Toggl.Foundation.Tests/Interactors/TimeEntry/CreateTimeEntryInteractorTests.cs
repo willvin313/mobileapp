@@ -224,7 +224,8 @@ namespace Toggl.Foundation.Tests.Interactors
                         Description = prototype.Description,
                         TagIds = prototype.TagIds
                     },
-                    0.5f
+                    0.5f,
+                    SuggestionProviderType.Calendar
                 );
 
                 return InteractorFactory.StartSuggestion(suggestion).Execute();

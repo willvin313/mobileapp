@@ -40,11 +40,15 @@ namespace Toggl.Foundation.Suggestions
 
         public float Certainty { get; }
 
-        internal Suggestion(IDatabaseTimeEntry timeEntry, float certainty)
+        public SuggestionProviderType ProviderName { get; }
+
+        internal Suggestion(IDatabaseTimeEntry timeEntry, float certainty, SuggestionProviderType providerName)
         {
             Ensure.Argument.IsInClosedRange(certainty, 0, 1, nameof(certainty));
 
             Certainty = certainty;
+            ProviderName = providerName;
+
             TaskId = timeEntry.TaskId;
             ProjectId = timeEntry.ProjectId;
             IsBillable = timeEntry.Billable;
@@ -65,13 +69,14 @@ namespace Toggl.Foundation.Suggestions
             TaskName = timeEntry.Task.Name;
         }
 
-        internal Suggestion(CalendarItem calendarItem, long workspaceId, float certainty)
+        internal Suggestion(CalendarItem calendarItem, long workspaceId, float certainty, SuggestionProviderType providerType)
         {
             Ensure.Argument.IsInClosedRange(certainty, 0, 1, nameof(certainty));
             Ensure.Argument.IsNotNullOrWhiteSpaceString(calendarItem.Description, nameof(calendarItem.Description));
 
             Certainty = certainty;
             WorkspaceId = workspaceId;
+            ProviderName = providerType;
             Description = calendarItem.Description;
         }
     }

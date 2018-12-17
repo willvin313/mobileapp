@@ -13,6 +13,7 @@ using Toggl.PrimeRadiant.Settings;
 using Toggl.Foundation.MvvmCross.Parameters;
 using MvvmCross.Navigation;
 using System.Collections.Immutable;
+using Toggl.Foundation.Analytics;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels
 {
@@ -30,6 +31,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private readonly ITimeService timeService;
         private readonly ITogglDataSource dataSource;
+        private readonly IAnalyticsService analyticsService;
         private readonly IOnboardingStorage onboardingStorage;
         private readonly ISchedulerProvider schedulerProvider;
         private readonly IInteractorFactory interactorFactory;
@@ -38,6 +40,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public SuggestionsViewModel(
             ITimeService timeService,
             ITogglDataSource dataSource,
+            IAnalyticsService analyticsService,
             IInteractorFactory interactorFactory,
             IOnboardingStorage onboardingStorage,
             ISchedulerProvider schedulerProvider,
@@ -45,6 +48,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
+            Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(interactorFactory, nameof(interactorFactory));
             Ensure.Argument.IsNotNull(onboardingStorage, nameof(onboardingStorage));
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
@@ -52,6 +56,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             this.dataSource = dataSource;
             this.timeService = timeService;
+            this.analyticsService = analyticsService;
             this.interactorFactory = interactorFactory;
             this.onboardingStorage = onboardingStorage;
             this.schedulerProvider = schedulerProvider;
@@ -68,6 +73,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Suggestions = interactorFactory.ObserveWorkspaceOrTimeEntriesChanges().Execute()
                 .StartWith(Unit.Default)
                 .SelectMany(_ => getSuggestions())
+                .Do(trackShownSuggestions)
                 .AsDriver(onErrorJustReturn: ImmutableList.Create<Suggestion>(), schedulerProvider: schedulerProvider);
 
             IsEmpty = Suggestions
@@ -80,9 +86,21 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             => interactorFactory.GetSuggestions(suggestionCount).Execute()
                 .Select(suggestions => suggestions.ToImmutableList());
 
+        private void trackShownSuggestions(IImmutableList<Suggestion> suggestions)
+        {
+            var count = suggestions.Count;
+            for (int i = 0; i < count; i++)
+            {
+                var suggestion = suggestions[i];
+                analyticsService.SuggestionPresented.Track(suggestion.ProviderName.ToString(), suggestion.Certainty, i);
+            }
+        }
+
         private async Task startTimeEntry(Suggestion suggestion)
         {
             onboardingStorage.SetTimeEntryContinued();
+
+            analyticsService.SuggestionStarted.Track(suggestion.ProviderName.ToString(), suggestion.Certainty);
 
             await interactorFactory
                 .StartSuggestion(suggestion)

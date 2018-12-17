@@ -20,6 +20,7 @@ using Toggl.Foundation.Tests.Mocks;
 using Toggl.Foundation.MvvmCross.Parameters;
 using System.Collections.Immutable;
 using Toggl.Multivac.Extensions;
+using FsCheck;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 {
@@ -28,7 +29,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public abstract class SuggestionsViewModelTest : BaseViewModelTests<SuggestionsViewModel>
         {
             protected override SuggestionsViewModel CreateViewModel()
-                => new SuggestionsViewModel(TimeService, DataSource, InteractorFactory, OnboardingStorage, SchedulerProvider, NavigationService);
+                => new SuggestionsViewModel(TimeService, DataSource, AnalyticsService, InteractorFactory, OnboardingStorage, SchedulerProvider, NavigationService);
 
             protected override void AdditionalViewModelSetup()
             {
@@ -46,6 +47,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public void ThrowsIfAnyOfTheArgumentsIsNull(
                 bool useDataSource,
                 bool useTimeService,
+                bool useAnalyticsService,
                 bool useNavigationService,
                 bool useOnboardingStorage,
                 bool useInteractorFactory,
@@ -53,13 +55,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 var dataSource = useDataSource ? DataSource : null;
                 var timeService = useTimeService ? TimeService : null;
+                var analyticsService = useAnalyticsService ? AnalyticsService : null;
                 var navigationService = useNavigationService ? NavigationService : null;
                 var onboardingStorage = useOnboardingStorage ? OnboardingStorage : null;
                 var interactorFactory = useInteractorFactory ? InteractorFactory : null;
                 var schedulerProvider = useSchedulerProvider ? SchedulerProvider : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new SuggestionsViewModel(timeService, dataSource, interactorFactory, onboardingStorage, schedulerProvider, navigationService);
+                    () => new SuggestionsViewModel(timeService, dataSource, analyticsService, interactorFactory, onboardingStorage, schedulerProvider, navigationService);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
@@ -147,7 +150,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .SetWorkspaceId(11)
                     .SetUserId(12)
                     .Build(),
-                0.5f
+                0.5f,
+                SuggestionProviderType.Calendar
             );
 
             private Recorded<Notification<Suggestion>> createRecorded(int ticks, Suggestion suggestion)
@@ -218,13 +222,25 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 OnboardingStorage.Received().SetTimeEntryContinued();
             }
 
+            [Theory, LogIfTooSlow]
+            [InlineData(SuggestionProviderType.MostUsedTimeEntries, 0.3f)]
+            [InlineData(SuggestionProviderType.Calendar, 0.8f)]
+            public void TracksStartedSuggestion(SuggestionProviderType providerType, float certainty)
+            {
+                var suggestion = new Suggestion(new MockTimeEntry(), certainty, providerType);
+
+                ViewModel.StartTimeEntry.Execute(suggestion);
+
+                AnalyticsService.SuggestionStarted.Received().Track(providerType.ToString(), certainty);
+            }
+
             private Suggestion createSuggestion()
             {
                 var timeEntry = Substitute.For<IThreadSafeTimeEntry>();
                 timeEntry.Duration.Returns((long)TimeSpan.FromMinutes(30).TotalSeconds);
                 timeEntry.Description.Returns("Testing");
                 timeEntry.WorkspaceId.Returns(10);
-                return new Suggestion(timeEntry, 0.5f);
+                return new Suggestion(timeEntry, 0.5f, SuggestionProviderType.Calendar);
             }
         }
 
@@ -236,7 +252,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 public void PassingTheCurrentTime(DateTimeOffset now)
                 {
                     TimeService.CurrentDateTime.Returns(now);
-                    var suggestion = new Suggestion(new MockTimeEntry(), 0.5f);
+                    var suggestion = new Suggestion(new MockTimeEntry(), 0.5f, SuggestionProviderType.Calendar);
 
                     ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
 
@@ -248,7 +264,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 [Property, LogIfTooSlow]
                 public void PassingTheDescriptionFromSuggestion(string description)
                 {
-                    var suggestion = new Suggestion(new MockTimeEntry { Description = description }, 0.5f);
+                    var suggestion = new Suggestion(new MockTimeEntry { Description = description }, 0.5f, SuggestionProviderType.Calendar);
 
                     ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
 
@@ -260,7 +276,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 [Property, LogIfTooSlow]
                 public void PassingTheWorkspaceIdFromSuggestion(long workspaceId)
                 {
-                    var suggestion = new Suggestion(new MockTimeEntry { WorkspaceId = workspaceId }, 0.5f);
+                    var suggestion = new Suggestion(new MockTimeEntry { WorkspaceId = workspaceId }, 0.5f, SuggestionProviderType.Calendar);
 
                     ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
 
@@ -272,7 +288,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 [Property, LogIfTooSlow]
                 public void PassingTheProjectIdFromSuggestion(long? projectId)
                 {
-                    var suggestion = new Suggestion(new MockTimeEntry { ProjectId = projectId }, 0.5f);
+                    var suggestion = new Suggestion(new MockTimeEntry { ProjectId = projectId }, 0.5f, SuggestionProviderType.Calendar);
 
                     ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
 
@@ -284,7 +300,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 [Property, LogIfTooSlow]
                 public void PassingTheTaskIdFromSuggestion(long? taskId)
                 {
-                    var suggestion = new Suggestion(new MockTimeEntry { TaskId = taskId }, 0.5f);
+                    var suggestion = new Suggestion(new MockTimeEntry { TaskId = taskId }, 0.5f, SuggestionProviderType.Calendar);
 
                     ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
 

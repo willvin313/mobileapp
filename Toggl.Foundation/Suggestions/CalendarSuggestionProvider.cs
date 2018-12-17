@@ -52,7 +52,7 @@ namespace Toggl.Foundation.Suggestions
         }
 
         private Suggestion suggestionFromEvent(CalendarItem calendarItem, long workspaceId)
-            => new Suggestion(calendarItem, workspaceId, calculateCertainty(calendarItem));
+            => new Suggestion(calendarItem, workspaceId, calculateCertainty(calendarItem), SuggestionProviderType.Calendar);
 
         private bool eventHasDescription(CalendarItem calendarItem)
             => !string.IsNullOrEmpty(calendarItem.Description);

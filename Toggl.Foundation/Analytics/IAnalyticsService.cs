@@ -130,6 +130,10 @@ namespace Toggl.Foundation.Analytics
 
         IAnalyticsEvent<string, string> UnknownSignUpFailure { get; }
 
+        IAnalyticsEvent<string, float> SuggestionStarted { get; }
+
+        IAnalyticsEvent<string, float, int> SuggestionPresented { get; }
+
         void Track(string eventName, Dictionary<string, string> parameters = null);
 
         void TrackAnonymized(Exception exception);

@@ -47,7 +47,8 @@ namespace Toggl.Foundation.Suggestions
                 .Select(grouping =>
                     new Suggestion(
                         grouping.First(),
-                        calculateCertainty(grouping.Count(), countOfAllTimeEntries)))
+                        calculateCertainty(grouping.Count(), countOfAllTimeEntries),
+                        SuggestionProviderType.MostUsedTimeEntries))
                 .Take(maxNumberOfSuggestions);
         }
 

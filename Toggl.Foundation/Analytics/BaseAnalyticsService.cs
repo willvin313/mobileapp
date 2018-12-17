@@ -200,6 +200,12 @@ namespace Toggl.Foundation.Analytics
         [AnalyticsEvent("Type", "Message")]
         public IAnalyticsEvent<string, string> UnknownSignUpFailure { get; protected set; }
 
+        [AnalyticsEvent("Type", "Certainty")]
+        public IAnalyticsEvent<string, float> SuggestionStarted { get; protected set; }
+
+        [AnalyticsEvent("Type", "Certainty", "Index")]
+        public IAnalyticsEvent<string, float, int> SuggestionPresented { get; protected set; }
+
         public void TrackAnonymized(Exception exception)
         {
             if (exception.IsAnonymized())
