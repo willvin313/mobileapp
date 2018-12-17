@@ -93,6 +93,10 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(PasswordTextField.Rx().SecureTextEntry())
                 .DisposedBy(DisposeBag);
 
+            ViewModel.IsShowPasswordButtonVisible
+                .Subscribe(PasswordMaskingControl.Rx().IsVisible())
+                .DisposedBy(DisposeBag);
+
             ViewModel.IsPasswordMasked
                 .Subscribe(setMaskingIcon)
                 .DisposedBy(DisposeBag);
