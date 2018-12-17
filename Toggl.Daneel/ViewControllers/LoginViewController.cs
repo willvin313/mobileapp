@@ -143,6 +143,10 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(ActivityIndicator.Rx().IsVisibleWithFade())
                 .DisposedBy(DisposeBag);
 
+            ViewModel.IsLoggingIn
+                .Subscribe(UIApplication.SharedApplication.Rx().NetworkActivityIndicatorVisible())
+                .DisposedBy(DisposeBag);
+
             ViewModel.IsLoggingIn.Select(loginButtonTitle)
                 .Subscribe(LoginButton.Rx().AnimatedTitle())
                 .DisposedBy(DisposeBag);
