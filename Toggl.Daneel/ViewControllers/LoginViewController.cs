@@ -61,7 +61,7 @@ namespace Toggl.Daneel.ViewControllers
 
             LoginWithEmailButton
                 .Rx()
-                .BindAction(ViewModel.ContinueToPaswordScreen)
+                .BindAction(ViewModel.LoginWithEmail)
                 .DisposedBy(DisposeBag);
 
             GoogleLoginButton.Rx()
@@ -74,7 +74,7 @@ namespace Toggl.Daneel.ViewControllers
                 .DisposedBy(DisposeBag);
 
             LoginButton.Rx()
-                .BindAction(ViewModel.LoginWithEmail)
+                .BindAction(ViewModel.Login)
                 .DisposedBy(DisposeBag);
 
             SecondScreenEmailTextField.Rx().Text()
@@ -98,7 +98,7 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(SecondScreenErrorLabel.Rx().Text())
                 .DisposedBy(DisposeBag);
 
-            ViewModel.LoginWithEmail.Errors
+            ViewModel.Login.Errors
                 .Select(e => e.Message)
                 .Subscribe(SecondScreenErrorLabel.Rx().Text())
                 .DisposedBy(DisposeBag);
@@ -121,7 +121,7 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(PasswordTextField.Rx().TextObserver())
                 .DisposedBy(DisposeBag);
 
-            ViewModel.ContinueToPaswordScreen.Errors
+            ViewModel.LoginWithEmail.Errors
                 .Select(e => e.Message)
                 .Subscribe(LoginWithEmailErrorLabel.Rx().Text())
                 .DisposedBy(DisposeBag);

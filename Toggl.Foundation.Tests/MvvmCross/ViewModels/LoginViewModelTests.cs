@@ -159,17 +159,17 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
         }
 
-        public sealed class TheContinueToPasswordScreenAction : LoginViewModelTest
+        public sealed class TheLoginWithEmailAction : LoginViewModelTest
         {
             [Fact, LogIfTooSlow]
             public void EmitsErrorWhenEmailIsInvalid()
             {
                 ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
                 var observer = TestScheduler.CreateObserver<Exception>();
-                ViewModel.ContinueToPaswordScreen.Errors.Subscribe(observer);
+                ViewModel.LoginWithEmail.Errors.Subscribe(observer);
 
                 TestScheduler.Start();
-                ViewModel.ContinueToPaswordScreen.Execute();
+                ViewModel.LoginWithEmail.Execute();
 
                 observer.Messages.Should().HaveCount(1);
                 observer.Messages.Last().Value.Value.Message.Should().Be(Resources.EnterValidEmail);
@@ -180,16 +180,16 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 ViewModel.EmailRelay.Accept(ValidEmail.ToString());
                 var observer = TestScheduler.CreateObserver<Unit>();
-                ViewModel.ContinueToPaswordScreen.Elements.Subscribe(observer);
+                ViewModel.LoginWithEmail.Elements.Subscribe(observer);
 
                 TestScheduler.Start();
-                ViewModel.ContinueToPaswordScreen.Execute();
+                ViewModel.LoginWithEmail.Execute();
 
                 observer.Messages.Should().HaveCount(1);
             }
         }
 
-        public sealed class TheLoginWithEmailAction : LoginViewModelTest
+        public sealed class TheLoginAction : LoginViewModelTest
         {
             [Fact, LogIfTooSlow]
             public void CallsTheUserAccessManagerWhenTheEmailAndPasswordAreValid()
@@ -197,7 +197,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.EmailRelay.Accept(ValidEmail.ToString());
                 ViewModel.PasswordRelay.Accept(ValidPassword.ToString());
 
-                ViewModel.LoginWithEmail.Execute();
+                ViewModel.Login.Execute();
 
                 UserAccessManager.Received().Login(Arg.Is(ValidEmail), Arg.Is(ValidPassword));
             }
@@ -206,10 +206,10 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public void EmitErrorWhenEmailIsInvalid()
             {
                 var observer = TestScheduler.CreateObserver<Exception>();
-                ViewModel.LoginWithEmail.Errors.Subscribe(observer);
+                ViewModel.Login.Errors.Subscribe(observer);
                 ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
 
-                ViewModel.LoginWithEmail.Execute();
+                ViewModel.Login.Execute();
                 TestScheduler.Start();
 
                 observer.Messages.Last().Value.Value.Message.Should().Be(Resources.EnterValidEmail);
@@ -219,11 +219,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public void EmitErrorWhenPasswordIsTooShort()
             {
                 var observer = TestScheduler.CreateObserver<Exception>();
-                ViewModel.LoginWithEmail.Errors.Subscribe(observer);
+                ViewModel.Login.Errors.Subscribe(observer);
                 ViewModel.EmailRelay.Accept(ValidEmail.ToString());
                 ViewModel.PasswordRelay.Accept(InvalidPassword.ToString());
 
-                ViewModel.LoginWithEmail.Execute();
+                ViewModel.Login.Execute();
                 TestScheduler.Start();
 
                 observer.Messages.Last().Value.Value.Message.Should().Be(Resources.PasswordTooShort);
@@ -242,7 +242,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 [Fact, LogIfTooSlow]
                 public async Task StartsSyncing()
                 {
-                    ViewModel.LoginWithEmail.Execute();
+                    ViewModel.Login.Execute();
 
                     await DataSource.Received().StartSyncing();
                 }
@@ -250,7 +250,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 [Fact, LogIfTooSlow]
                 public void SetsIsNewUserToFalse()
                 {
-                    ViewModel.LoginWithEmail.Execute();
+                    ViewModel.Login.Execute();
 
                     OnboardingStorage.Received().SetIsNewUser(false);
                 }
@@ -258,7 +258,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 [Fact, LogIfTooSlow]
                 public void NavigatesToTheTimeEntriesViewModel()
                 {
-                    ViewModel.LoginWithEmail.Execute();
+                    ViewModel.Login.Execute();
 
                     NavigationService.Received().ForkNavigate<MainTabBarViewModel, MainViewModel>();
                 }
@@ -271,7 +271,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     viewModel.EmailRelay.Accept(ValidEmail.ToString());
                     viewModel.PasswordRelay.Accept(ValidPassword.ToString());
 
-                    viewModel.LoginWithEmail.Execute();
+                    viewModel.Login.Execute();
 
                     LastTimeUsageStorage.Received().SetLogin(Arg.Is(now));
                 }
@@ -291,7 +291,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
                         .Returns(Observable.Throw<ITogglDataSource>(new Exception()));
 
-                    ViewModel.LoginWithEmail.Execute();
+                    ViewModel.Login.Execute();
 
                     NavigationService.DidNotReceive().Navigate<MainViewModel>();
                 }
@@ -300,13 +300,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 public void SetsTheErrorMessageToIncorrectEmailOrPasswordWhenReceivedUnauthorizedException()
                 {
                     var observer = TestScheduler.CreateObserver<Exception>();
-                    ViewModel.LoginWithEmail.Errors.Subscribe(observer);
+                    ViewModel.Login.Errors.Subscribe(observer);
                     var exception = new UnauthorizedException(
                         Substitute.For<IRequest>(), Substitute.For<IResponse>());
                     UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
                         .Returns(Observable.Throw<ITogglDataSource>(exception));
 
-                    ViewModel.LoginWithEmail.Execute();
+                    ViewModel.Login.Execute();
                     TestScheduler.Start();
 
                     observer.Messages.Last().Value.Value.Message.Should().Be(Resources.IncorrectEmailOrPassword);
@@ -317,11 +317,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     var exception = new Exception();
                     var observer = TestScheduler.CreateObserver<Exception>();
-                    ViewModel.LoginWithEmail.Errors.Subscribe(observer);
+                    ViewModel.Login.Errors.Subscribe(observer);
                     UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
                         .Returns(Observable.Throw<ITogglDataSource>(exception));
 
-                    ViewModel.LoginWithEmail.Execute();
+                    ViewModel.Login.Execute();
 
                     TestScheduler.Start();
                     observer.Messages.Last().Value.Value.Message.Should().Be(Resources.GenericLoginError);
@@ -332,13 +332,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     var exception = new Exception();
                     var observer = TestScheduler.CreateObserver<Exception>();
-                    ViewModel.LoginWithEmail.Errors.Subscribe(observer);
+                    ViewModel.Login.Errors.Subscribe(observer);
                     UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
                         .Returns(Observable.Throw<ITogglDataSource>(exception));
                     ErrorHandlingService.TryHandleDeprecationError(Arg.Any<Exception>())
                         .Returns(true);
 
-                    ViewModel.LoginWithEmail.Execute();
+                    ViewModel.Login.Execute();
                     TestScheduler.Start();
 
                     observer.Messages.Should().BeEmpty();
@@ -401,7 +401,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     viewModel.EmailRelay.Accept(ValidEmail.ToString());
                     viewModel.PasswordRelay.Accept(ValidPassword.ToString());
 
-                    viewModel.LoginWithEmail.Execute();
+                    viewModel.Login.Execute();
 
                     LastTimeUsageStorage.Received().SetLogin(Arg.Is(now));
                 }
@@ -535,7 +535,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserver<bool>();
                 ViewModel.EmailFieldEdittable.Subscribe(observer);
 
-                ViewModel.LoginWithEmail.Execute();
+                ViewModel.Login.Execute();
                 TestScheduler.Start();
 
                 observer.LastValue().Should().BeTrue();
@@ -552,7 +552,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserver<LoginViewModel.ShakeTarget>();
                 ViewModel.Shake.Subscribe(observer);
 
-                ViewModel.ContinueToPaswordScreen.Execute();
+                ViewModel.LoginWithEmail.Execute();
                 TestScheduler.Start();
 
                 observer.LastValue().Should().Be(LoginViewModel.ShakeTarget.Email);
@@ -566,7 +566,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserver<LoginViewModel.ShakeTarget>();
                 ViewModel.Shake.Subscribe(observer);
 
-                ViewModel.LoginWithEmail.Execute();
+                ViewModel.Login.Execute();
                 TestScheduler.Start();
 
                 observer.LastValue().Should().Be(LoginViewModel.ShakeTarget.Email);
@@ -580,7 +580,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserver<LoginViewModel.ShakeTarget>();
                 ViewModel.Shake.Subscribe(observer);
 
-                ViewModel.LoginWithEmail.Execute();
+                ViewModel.Login.Execute();
                 TestScheduler.Start();
 
                 observer.LastValue().Should().Be(LoginViewModel.ShakeTarget.Password);
@@ -594,7 +594,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserver<LoginViewModel.ShakeTarget>();
                 ViewModel.Shake.Subscribe(observer);
 
-                ViewModel.LoginWithEmail.Execute();
+                ViewModel.Login.Execute();
                 TestScheduler.Start();
 
                 observer.Messages.Should().BeEmpty();
@@ -622,7 +622,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserver<bool>();
                 ViewModel.Back.Enabled.Subscribe(observer);
 
-                ViewModel.LoginWithEmail.Execute();
+                ViewModel.Login.Execute();
                 TestScheduler.Start();
 
                 observer.LastValue().Should().BeFalse();
@@ -661,7 +661,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.PasswordRelay.Accept("somePassword");
                 ViewModel.PasswordRelay.Subscribe(observer);
 
-                ViewModel.ContinueToPaswordScreen.Execute();
+                ViewModel.LoginWithEmail.Execute();
                 ViewModel.Back.Execute();
                 TestScheduler.Start();
 
@@ -684,7 +684,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserver<bool>();
                 ViewModel.ForgotPassword.Enabled.Subscribe(observer);
 
-                ViewModel.LoginWithEmail.Execute();
+                ViewModel.Login.Execute();
                 TestScheduler.Start();
 
                 observer.LastValue().Should().BeFalse();
