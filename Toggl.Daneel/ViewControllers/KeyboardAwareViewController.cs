@@ -1,4 +1,5 @@
-﻿using Foundation;
+﻿using System;
+using Foundation;
 using MvvmCross.ViewModels;
 using UIKit;
 
@@ -12,6 +13,9 @@ namespace Toggl.Daneel.ViewControllers
 
         protected KeyboardAwareViewController(string nibName)
             : base(nibName) { }
+
+        protected KeyboardAwareViewController(IntPtr handle)
+            : base(handle) { }
 
         public override void ViewDidLoad()
         {

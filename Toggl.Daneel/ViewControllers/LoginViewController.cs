@@ -17,7 +17,7 @@ using UIKit;
 namespace Toggl.Daneel.ViewControllers
 {
     [MvxFromStoryboard("Login")]
-    public sealed partial class LoginViewController : ReactiveViewController<LoginViewModel>
+    public sealed partial class LoginViewController : KeyboardAwareViewController<LoginViewModel>
     {
         private readonly UIImageView titleImage = new UIImageView(UIImage.FromBundle("togglLogo"));
         private readonly UIBarButtonItem backButton =
@@ -35,6 +35,24 @@ namespace Toggl.Daneel.ViewControllers
             prepareViews();
 
             prepareBindings();
+        }
+
+        protected override void KeyboardWillShow(object sender, UIKeyboardEventArgs e)
+        {
+            UIView.Animate(e.AnimationDuration, () =>
+            {
+                BottomToSafeAreaConstraint.Constant = e.FrameEnd.Height;
+                View.LayoutIfNeeded();
+            });
+        }
+
+        protected override void KeyboardWillHide(object sender, UIKeyboardEventArgs e)
+        {
+            UIView.Animate(e.AnimationDuration, () =>
+            {
+                BottomToSafeAreaConstraint.Constant = 0;
+                View.LayoutIfNeeded();
+            });
         }
 
         public override void ViewWillAppear(bool animated)
@@ -203,6 +221,7 @@ namespace Toggl.Daneel.ViewControllers
             var imageName = masked ? "icPasswordMasked" : "icPasswordUnmasked";
             PasswordMaskingImageView.Image = UIImage.FromBundle(imageName);
         }
+
     }
 }
 

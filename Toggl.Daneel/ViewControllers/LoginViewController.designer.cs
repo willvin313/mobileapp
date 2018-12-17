@@ -16,6 +16,9 @@ namespace Toggl.Daneel.ViewControllers
 		Toggl.Daneel.Views.ActivityIndicatorView ActivityIndicator { get; set; }
 
 		[Outlet]
+		UIKit.NSLayoutConstraint BottomToSafeAreaConstraint { get; set; }
+
+		[Outlet]
 		UIKit.UIView FirstScreenWrapperView { get; set; }
 
 		[Outlet]
@@ -96,6 +99,16 @@ namespace Toggl.Daneel.ViewControllers
 				LoginWithEmailTextField = null;
 			}
 
+			if (PasswordMaskingControl != null) {
+				PasswordMaskingControl.Dispose ();
+				PasswordMaskingControl = null;
+			}
+
+			if (PasswordMaskingImageView != null) {
+				PasswordMaskingImageView.Dispose ();
+				PasswordMaskingImageView = null;
+			}
+
 			if (PasswordTextField != null) {
 				PasswordTextField.Dispose ();
 				PasswordTextField = null;
@@ -116,14 +129,9 @@ namespace Toggl.Daneel.ViewControllers
 				SecondScreenWrapperView = null;
 			}
 
-			if (PasswordMaskingControl != null) {
-				PasswordMaskingControl.Dispose ();
-				PasswordMaskingControl = null;
-			}
-
-			if (PasswordMaskingImageView != null) {
-				PasswordMaskingImageView.Dispose ();
-				PasswordMaskingImageView = null;
+			if (BottomToSafeAreaConstraint != null) {
+				BottomToSafeAreaConstraint.Dispose ();
+				BottomToSafeAreaConstraint = null;
 			}
 		}
 	}
