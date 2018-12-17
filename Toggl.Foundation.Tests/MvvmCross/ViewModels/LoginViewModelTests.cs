@@ -704,13 +704,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public void ShouldCallsNavigationService()
             {
-                var emailParam = EmailParameter.With(Email.From(ValidEmail.ToString()));
                 ViewModel.EmailRelay.Accept(ValidEmail.ToString());
                 ViewModel.PasswordRelay.Accept(ValidPassword.ToString());
 
                 ViewModel.ForgotPassword.Execute();
 
-                NavigationService.Received().Navigate<ForgotPasswordViewModel, EmailParameter, EmailParameter>(emailParam);
+                NavigationService.Received()
+                    .Navigate<ForgotPasswordViewModel, EmailParameter, EmailParameter>(
+                        Arg.Any<EmailParameter>());
             }
         }
     }
