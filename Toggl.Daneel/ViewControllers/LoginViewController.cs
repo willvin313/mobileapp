@@ -93,6 +93,10 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(PasswordTextField.Rx().SecureTextEntry())
                 .DisposedBy(DisposeBag);
 
+            ViewModel.IsPasswordMasked
+                .Subscribe(setMaskingIcon)
+                .DisposedBy(DisposeBag);
+
             PasswordTextField.Rx().Text()
                 .Subscribe(ViewModel.PasswordRelay.Accept)
                 .DisposedBy(DisposeBag);
@@ -184,6 +188,12 @@ namespace Toggl.Daneel.ViewControllers
 
         private string loginButtonTitle(bool isLoading)
             => isLoading ? "" : Resources.LoginTitle;
+
+        private void setMaskingIcon(bool masked)
+        {
+            var imageName = masked ? "icPasswordMasked" : "icPasswordUnmasked";
+            PasswordMaskingImageView.Image = UIImage.FromBundle(imageName);
+        }
     }
 }
 

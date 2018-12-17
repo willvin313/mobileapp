@@ -158,7 +158,7 @@
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="iDB-Xo-SZQ" userLabel="PasswordMaskingControl" customClass="UIControl">
                                         <rect key="frame" x="319" y="82" width="40" height="56"/>
                                         <subviews>
-                                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="icPasswordUnmasked" translatesAutoresizingMaskIntoConstraints="NO" id="40g-vt-OaG">
+                                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="icPasswordUnmasked" translatesAutoresizingMaskIntoConstraints="NO" id="40g-vt-OaG">
                                                 <rect key="frame" x="10.5" y="20" width="19" height="16"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="16" id="3N8-6h-7hh"/>
@@ -301,6 +301,6 @@
     <resources>
         <image name="icAdd" width="10" height="10"/>
         <image name="icGoogleColored" width="18" height="18"/>
-        <image name="icPasswordUnmasked" width="512" height="384"/>
+        <image name="icPasswordUnmasked" width="19" height="13"/>
     </resources>
 </document>
