@@ -74,6 +74,11 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(ViewModel.EmailRelay.Accept)
                 .DisposedBy(DisposeBag);
 
+            LoginWithEmailTextField.Rx().ShouldReturn()
+                .SelectUnit()
+                .Subscribe(ViewModel.LoginWithEmail.Inputs)
+                .DisposedBy(DisposeBag);
+
             LoginWithEmailButton
                 .Rx()
                 .BindAction(ViewModel.LoginWithEmail)
@@ -94,6 +99,15 @@ namespace Toggl.Daneel.ViewControllers
 
             LoginButton.Rx()
                 .BindAction(ViewModel.Login)
+                .DisposedBy(DisposeBag);
+
+            PasswordTextField.Rx().ShouldReturn()
+                .SelectUnit()
+                .Subscribe(ViewModel.Login.Inputs)
+                .DisposedBy(DisposeBag);
+
+            SecondScreenEmailTextField.Rx().ShouldReturn()
+                .Subscribe(_ => PasswordTextField.BecomeFirstResponder())
                 .DisposedBy(DisposeBag);
 
             SecondScreenEmailTextField.Rx().Text()
@@ -182,6 +196,7 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(FirstScreenWrapperView.Rx().AnimatedIsVisible());
 
             ViewModel.IsInSecondScreen
+                .Do(_ => PasswordTextField.BecomeFirstResponder())
                 .Subscribe(SecondScreenWrapperView.Rx().AnimatedIsVisible());
 
             ViewModel.Shake
