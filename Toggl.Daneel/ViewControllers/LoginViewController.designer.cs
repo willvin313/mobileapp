@@ -19,6 +19,9 @@ namespace Toggl.Daneel.ViewControllers
 		UIKit.NSLayoutConstraint BottomToSafeAreaConstraint { get; set; }
 
 		[Outlet]
+		UIKit.UIButton ContactUsButton { get; set; }
+
+		[Outlet]
 		UIKit.UIView FirstScreenWrapperView { get; set; }
 
 		[Outlet]
@@ -62,6 +65,11 @@ namespace Toggl.Daneel.ViewControllers
 			if (ActivityIndicator != null) {
 				ActivityIndicator.Dispose ();
 				ActivityIndicator = null;
+			}
+
+			if (BottomToSafeAreaConstraint != null) {
+				BottomToSafeAreaConstraint.Dispose ();
+				BottomToSafeAreaConstraint = null;
 			}
 
 			if (FirstScreenWrapperView != null) {
@@ -129,9 +137,9 @@ namespace Toggl.Daneel.ViewControllers
 				SecondScreenWrapperView = null;
 			}
 
-			if (BottomToSafeAreaConstraint != null) {
-				BottomToSafeAreaConstraint.Dispose ();
-				BottomToSafeAreaConstraint = null;
+			if (ContactUsButton != null) {
+				ContactUsButton.Dispose ();
+				ContactUsButton = null;
 			}
 		}
 	}

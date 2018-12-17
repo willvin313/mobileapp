@@ -100,6 +100,10 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(ViewModel.EmailRelay.Accept)
                 .DisposedBy(DisposeBag);
 
+            ContactUsButton.Rx()
+                .BindAction(ViewModel.ContactUs)
+                .DisposedBy(DisposeBag);
+
             ViewModel.EmailRelay
                 .Subscribe(SecondScreenEmailTextField.Rx().TextObserver())
                 .DisposedBy(DisposeBag);
@@ -122,6 +126,10 @@ namespace Toggl.Daneel.ViewControllers
 
             PasswordTextField.Rx().Text()
                 .Subscribe(ViewModel.PasswordRelay.Accept)
+                .DisposedBy(DisposeBag);
+
+            ViewModel.SuggestContactSupport
+                .Subscribe(ContactUsButton.Rx().AnimatedIsVisible())
                 .DisposedBy(DisposeBag);
 
             ViewModel.ClearPasswordScreenError
@@ -202,6 +210,7 @@ namespace Toggl.Daneel.ViewControllers
             NavigationController.NavigationBar.BackIndicatorTransitionMaskImage = backIndicatorImage;
             LoginWithEmailErrorLabel.Text = string.Empty;
             SecondScreenErrorLabel.Text = string.Empty;
+            ContactUsButton.Hidden = true;
         }
 
         private void setupGoogleButton()

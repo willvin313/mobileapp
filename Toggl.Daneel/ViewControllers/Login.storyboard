@@ -136,6 +136,29 @@
                             <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LGF-xC-VLz">
                                 <rect key="frame" x="0.0" y="32" width="320" height="536"/>
                                 <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" hasAttributedTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zrF-Xc-Gmc">
+                                        <rect key="frame" x="16" y="163" width="124" height="26"/>
+                                        <state key="normal">
+                                            <attributedString key="attributedTitle">
+                                                <fragment content="Need help? ">
+                                                    <attributes>
+                                                        <color key="NSColor" red="0.36862745098039218" green="0.35686274509803922" blue="0.35686274509803922" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                        <font key="NSFont" size="12" name=".SFNSText"/>
+                                                        <paragraphStyle key="NSParagraphStyle" alignment="natural" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
+                                                    </attributes>
+                                                </fragment>
+                                                <fragment content="Contact us">
+                                                    <attributes>
+                                                        <color key="NSColor" red="0.36862745098039218" green="0.35686274509803922" blue="0.35686274509803922" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                        <font key="NSFont" size="12" name=".SFNSText-Bold"/>
+                                                        <font key="NSOriginalFont" size="12" name=".SFNSText-Bold"/>
+                                                        <paragraphStyle key="NSParagraphStyle" alignment="natural" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
+                                                        <integer key="NSUnderline" value="1"/>
+                                                    </attributes>
+                                                </fragment>
+                                            </attributedString>
+                                        </state>
+                                    </button>
                                     <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Logging in with" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="cN3-2j-ihW" customClass="LoginTextField">
                                         <rect key="frame" x="16" y="0.0" width="288" height="56"/>
                                         <constraints>
@@ -249,6 +272,7 @@
                                     <constraint firstItem="t53-NP-5k0" firstAttribute="leading" secondItem="cN3-2j-ihW" secondAttribute="leading" id="GqB-jj-c54"/>
                                     <constraint firstAttribute="trailing" secondItem="cN3-2j-ihW" secondAttribute="trailing" constant="16" id="Lpa-gf-8vy"/>
                                     <constraint firstItem="cN3-2j-ihW" firstAttribute="leading" secondItem="LGF-xC-VLz" secondAttribute="leading" constant="16" id="NoA-6H-FlV"/>
+                                    <constraint firstItem="zrF-Xc-Gmc" firstAttribute="leading" secondItem="uyS-pK-50z" secondAttribute="leading" id="Z1b-xH-Q8I"/>
                                     <constraint firstItem="t53-NP-5k0" firstAttribute="trailing" secondItem="cN3-2j-ihW" secondAttribute="trailing" id="aVC-61-KmC"/>
                                     <constraint firstItem="uyS-pK-50z" firstAttribute="top" secondItem="t53-NP-5k0" secondAttribute="bottom" constant="6" id="cTC-DI-kEW"/>
                                     <constraint firstItem="iDB-Xo-SZQ" firstAttribute="height" secondItem="t53-NP-5k0" secondAttribute="height" id="fld-Pb-lWA"/>
@@ -257,6 +281,7 @@
                                     <constraint firstItem="uyS-pK-50z" firstAttribute="leading" secondItem="cN3-2j-ihW" secondAttribute="leading" id="r7p-Ss-i6N"/>
                                     <constraint firstItem="cN3-2j-ihW" firstAttribute="top" secondItem="LGF-xC-VLz" secondAttribute="top" id="tFY-JC-gc6"/>
                                     <constraint firstItem="M81-7Q-VfX" firstAttribute="leading" secondItem="t53-NP-5k0" secondAttribute="leading" id="tL2-35-6fn"/>
+                                    <constraint firstItem="zrF-Xc-Gmc" firstAttribute="top" secondItem="uyS-pK-50z" secondAttribute="bottom" constant="4" id="xko-et-3Ih"/>
                                 </constraints>
                             </view>
                             <view userInteractionEnabled="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="HHj-fS-xZV">
@@ -288,6 +313,7 @@
                     <connections>
                         <outlet property="ActivityIndicator" destination="vII-aI-heA" id="zAg-iM-fFv"/>
                         <outlet property="BottomToSafeAreaConstraint" destination="a61-2O-HXd" id="Fn8-qv-43h"/>
+                        <outlet property="ContactUsButton" destination="zrF-Xc-Gmc" id="FOv-oe-3ag"/>
                         <outlet property="FirstScreenWrapperView" destination="n5i-71-xr8" id="kcQ-Ao-0fv"/>
                         <outlet property="ForgotPasswordButton" destination="Cqd-S6-RyF" id="ScU-i0-W8D"/>
                         <outlet property="GoogleLoginButton" destination="3cI-Sa-w2L" id="LAI-yE-h3k"/>

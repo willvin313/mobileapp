@@ -3,6 +3,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
+using System.Threading.Tasks;
 using MvvmCross.ViewModels;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Exceptions;
@@ -66,6 +67,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public UIAction ForgotPassword { get; }
         public UIAction LoginWithEmail { get; }
         public UIAction Back { get; }
+        public UIAction ContactUs { get; }
         public IObservable<Unit> ClearEmailScreenError { get; }
         public IObservable<bool> IsEmailFieldEdittable { get; }
         public IObservable<bool> IsInSecondScreen { get; }
@@ -171,6 +173,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .Select(s => s == State.EmailAndPassword)
                 .AsObservable()
                 .AsDriver(schedulerProvider);
+
+            ContactUs = UIAction.FromAsync(contactUs);
         }
 
         public override void Prepare(CredentialsParameter parameter)
@@ -281,5 +285,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     break;
             }
         }
+
+        private Task contactUs() =>
+            navigationService
+                .Navigate<BrowserViewModel, BrowserParameters>(
+                    BrowserParameters.WithUrlAndTitle(Resources.ContactUsUrl, Resources.ContactUs));
     }
 }
