@@ -193,10 +193,23 @@ namespace Toggl.Daneel.ViewControllers
 
             ViewModel.IsInSecondScreen
                 .Invert()
+                .Do(isGoingBack =>
+                {
+                    if (isGoingBack)
+                    {
+                        LoginWithEmailTextField.BecomeFirstResponder();
+                    }
+                })
                 .Subscribe(FirstScreenWrapperView.Rx().AnimatedIsVisible());
 
             ViewModel.IsInSecondScreen
-                .Do(_ => PasswordTextField.BecomeFirstResponder())
+                .Do(isSecondScreen =>
+                {
+                    if (isSecondScreen)
+                    {
+                        PasswordTextField.BecomeFirstResponder();
+                    }
+                })
                 .Subscribe(SecondScreenWrapperView.Rx().AnimatedIsVisible());
 
             ViewModel.Shake
