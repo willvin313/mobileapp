@@ -9,14 +9,10 @@ using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Foundation;
-using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Foundation.MvvmCross.ViewModels;
-using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using UIKit;
-using static Toggl.Daneel.Extensions.LoginSignupViewExtensions;
-using static Toggl.Daneel.Extensions.ViewExtensions;
 
 namespace Toggl.Daneel.ViewControllers
 {
@@ -68,6 +64,10 @@ namespace Toggl.Daneel.ViewControllers
                 .BindAction(ViewModel.LoginWithGoogle)
                 .DisposedBy(DisposeBag);
 
+            PasswordMaskingControl.Rx().Tap()
+                .Subscribe(ViewModel.TogglePasswordVisibility.Inputs)
+                .DisposedBy(DisposeBag);
+
             // Second Screen
             ForgotPasswordButton.Rx()
                 .BindAction(ViewModel.ForgotPassword)
@@ -87,6 +87,10 @@ namespace Toggl.Daneel.ViewControllers
 
             ViewModel.EmailFieldEdittable
                 .Subscribe(SecondScreenEmailTextField.Rx().Enabled())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.IsPasswordMasked
+                .Subscribe(PasswordTextField.Rx().SecureTextEntry())
                 .DisposedBy(DisposeBag);
 
             PasswordTextField.Rx().Text()

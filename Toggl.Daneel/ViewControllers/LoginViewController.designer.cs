@@ -9,106 +9,122 @@ using System.CodeDom.Compiler;
 
 namespace Toggl.Daneel.ViewControllers
 {
-    [Register ("LoginView")]
-    partial class LoginViewController
-    {
-        [Outlet]
-        Toggl.Daneel.Views.ActivityIndicatorView ActivityIndicator { get; set; }
+	[Register ("LoginView")]
+	partial class LoginViewController
+	{
+		[Outlet]
+		Toggl.Daneel.Views.ActivityIndicatorView ActivityIndicator { get; set; }
 
-        [Outlet]
-        UIKit.UIView FirstScreenWrapperView { get; set; }
+		[Outlet]
+		UIKit.UIView FirstScreenWrapperView { get; set; }
 
-        [Outlet]
-        UIKit.UIButton ForgotPasswordButton { get; set; }
+		[Outlet]
+		UIKit.UIButton ForgotPasswordButton { get; set; }
 
-        [Outlet]
-        UIKit.UIButton GoogleLoginButton { get; set; }
+		[Outlet]
+		UIKit.UIButton GoogleLoginButton { get; set; }
 
-        [Outlet]
-        UIKit.UIButton LoginButton { get; set; }
+		[Outlet]
+		UIKit.UIButton LoginButton { get; set; }
 
-        [Outlet]
-        UIKit.UIButton LoginWithEmailButton { get; set; }
+		[Outlet]
+		UIKit.UIButton LoginWithEmailButton { get; set; }
 
-        [Outlet]
-        UIKit.UILabel LoginWithEmailErrorLabel { get; set; }
+		[Outlet]
+		UIKit.UILabel LoginWithEmailErrorLabel { get; set; }
 
-        [Outlet]
-        Toggl.Daneel.Views.LoginTextField LoginWithEmailTextField { get; set; }
+		[Outlet]
+		Toggl.Daneel.Views.LoginTextField LoginWithEmailTextField { get; set; }
 
-        [Outlet]
-        Toggl.Daneel.Views.LoginTextField PasswordTextField { get; set; }
+		[Outlet]
+		UIKit.UIControl PasswordMaskingControl { get; set; }
 
-        [Outlet]
-        Toggl.Daneel.Views.LoginTextField SecondScreenEmailTextField { get; set; }
+		[Outlet]
+		UIKit.UIImageView PasswordMaskingImageView { get; set; }
 
-        [Outlet]
-        UIKit.UILabel SecondScreenErrorLabel { get; set; }
+		[Outlet]
+		Toggl.Daneel.Views.LoginTextField PasswordTextField { get; set; }
 
-        [Outlet]
-        UIKit.UIView SecondScreenWrapperView { get; set; }
-        
-        void ReleaseDesignerOutlets ()
-        {
-            if (ActivityIndicator != null) {
-                ActivityIndicator.Dispose ();
-                ActivityIndicator = null;
-            }
+		[Outlet]
+		Toggl.Daneel.Views.LoginTextField SecondScreenEmailTextField { get; set; }
 
-            if (FirstScreenWrapperView != null) {
-                FirstScreenWrapperView.Dispose ();
-                FirstScreenWrapperView = null;
-            }
+		[Outlet]
+		UIKit.UILabel SecondScreenErrorLabel { get; set; }
 
-            if (ForgotPasswordButton != null) {
-                ForgotPasswordButton.Dispose ();
-                ForgotPasswordButton = null;
-            }
+		[Outlet]
+		UIKit.UIView SecondScreenWrapperView { get; set; }
+		
+		void ReleaseDesignerOutlets ()
+		{
+			if (ActivityIndicator != null) {
+				ActivityIndicator.Dispose ();
+				ActivityIndicator = null;
+			}
 
-            if (GoogleLoginButton != null) {
-                GoogleLoginButton.Dispose ();
-                GoogleLoginButton = null;
-            }
+			if (FirstScreenWrapperView != null) {
+				FirstScreenWrapperView.Dispose ();
+				FirstScreenWrapperView = null;
+			}
 
-            if (LoginButton != null) {
-                LoginButton.Dispose ();
-                LoginButton = null;
-            }
+			if (ForgotPasswordButton != null) {
+				ForgotPasswordButton.Dispose ();
+				ForgotPasswordButton = null;
+			}
 
-            if (LoginWithEmailButton != null) {
-                LoginWithEmailButton.Dispose ();
-                LoginWithEmailButton = null;
-            }
+			if (GoogleLoginButton != null) {
+				GoogleLoginButton.Dispose ();
+				GoogleLoginButton = null;
+			}
 
-            if (LoginWithEmailErrorLabel != null) {
-                LoginWithEmailErrorLabel.Dispose ();
-                LoginWithEmailErrorLabel = null;
-            }
+			if (LoginButton != null) {
+				LoginButton.Dispose ();
+				LoginButton = null;
+			}
 
-            if (LoginWithEmailTextField != null) {
-                LoginWithEmailTextField.Dispose ();
-                LoginWithEmailTextField = null;
-            }
+			if (LoginWithEmailButton != null) {
+				LoginWithEmailButton.Dispose ();
+				LoginWithEmailButton = null;
+			}
 
-            if (PasswordTextField != null) {
-                PasswordTextField.Dispose ();
-                PasswordTextField = null;
-            }
+			if (LoginWithEmailErrorLabel != null) {
+				LoginWithEmailErrorLabel.Dispose ();
+				LoginWithEmailErrorLabel = null;
+			}
 
-            if (SecondScreenEmailTextField != null) {
-                SecondScreenEmailTextField.Dispose ();
-                SecondScreenEmailTextField = null;
-            }
+			if (LoginWithEmailTextField != null) {
+				LoginWithEmailTextField.Dispose ();
+				LoginWithEmailTextField = null;
+			}
 
-            if (SecondScreenWrapperView != null) {
-                SecondScreenWrapperView.Dispose ();
-                SecondScreenWrapperView = null;
-            }
+			if (PasswordTextField != null) {
+				PasswordTextField.Dispose ();
+				PasswordTextField = null;
+			}
 
-            if (SecondScreenErrorLabel != null) {
-                SecondScreenErrorLabel.Dispose ();
-                SecondScreenErrorLabel = null;
-            }
-        }
-    }
+			if (SecondScreenEmailTextField != null) {
+				SecondScreenEmailTextField.Dispose ();
+				SecondScreenEmailTextField = null;
+			}
+
+			if (SecondScreenErrorLabel != null) {
+				SecondScreenErrorLabel.Dispose ();
+				SecondScreenErrorLabel = null;
+			}
+
+			if (SecondScreenWrapperView != null) {
+				SecondScreenWrapperView.Dispose ();
+				SecondScreenWrapperView = null;
+			}
+
+			if (PasswordMaskingControl != null) {
+				PasswordMaskingControl.Dispose ();
+				PasswordMaskingControl = null;
+			}
+
+			if (PasswordMaskingImageView != null) {
+				PasswordMaskingImageView.Dispose ();
+				PasswordMaskingImageView = null;
+			}
+		}
+	}
 }

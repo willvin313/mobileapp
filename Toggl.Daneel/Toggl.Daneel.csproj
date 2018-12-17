@@ -310,11 +310,6 @@
     <ImageAsset Include="Resources\Images.xcassets\togglCronometer.imageset\illustration2.png" />
     <ImageAsset Include="Resources\Images.xcassets\togglCronometer.imageset\illustration2%402x.png" />
     <ImageAsset Include="Resources\Images.xcassets\togglCronometer.imageset\illustration2%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icOnePassword.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icPassword.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icPassword.imageset\icPassword.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icPassword.imageset\icPassword%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icPassword.imageset\icPassword%403x.png" />
     <ImageAsset Include="Resources\Images.xcassets\togglLogo.imageset\Contents.json" />
     <ImageAsset Include="Resources\Images.xcassets\togglLogo.imageset\togglLogo.png" />
     <ImageAsset Include="Resources\Images.xcassets\togglLogo.imageset\togglLogo%402x.png" />
@@ -494,9 +489,6 @@
     <ImageAsset Include="Resources\Images.xcassets\togglLogoBig.imageset\logo%402x.png" />
     <ImageAsset Include="Resources\Images.xcassets\togglLogoBig.imageset\logo%403x.png" />
     <ImageAsset Include="Resources\Images.xcassets\icGoogleColored.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icOnePassword.imageset\passwordman.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icOnePassword.imageset\passwordman%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icOnePassword.imageset\passwordman%403x.png" />
     <ImageAsset Include="Resources\Images.xcassets\thumbsup.imageset\Contents.json" />
     <ImageAsset Include="Resources\Images.xcassets\thumbsup.imageset\thumbsup.png" />
     <ImageAsset Include="Resources\Images.xcassets\thumbsup.imageset\thumbsup%402x.png" />
@@ -558,6 +550,10 @@
     <ImageAsset Include="Resources\Images.xcassets\togglLogoWithText.imageset\Contents.json" />
     <ImageAsset Include="Resources\Images.xcassets\togglLogoWithText.imageset\Toggl-logo.pdf" />
     <ImageAsset Include="Resources\Images.xcassets\icGoogleColored.imageset\icGoogleColored.pdf" />
+    <ImageAsset Include="Resources\Images.xcassets\icPasswordMasked.imageset\Contents.json" />
+    <ImageAsset Include="Resources\Images.xcassets\icPasswordMasked.imageset\icPasswordMasked.pdf" />
+    <ImageAsset Include="Resources\Images.xcassets\icPasswordUnmasked.imageset\Contents.json" />
+    <ImageAsset Include="Resources\Images.xcassets\icPasswordUnmasked.imageset\icPasswordUnmasked.pdf" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="LaunchScreen.storyboard" />
@@ -1034,7 +1030,6 @@
     <Compile Include="ViewControllers\SignupViewController.designer.cs">
       <DependentUpon>SignupViewController.cs</DependentUpon>
     </Compile>
-    <Compile Include="Extensions\LoginSignupViewExtensions.cs" />
     <Compile Include="ViewControllers\TermsOfServiceViewController.cs" />
     <Compile Include="ViewControllers\TermsOfServiceViewController.designer.cs">
       <DependentUpon>TermsOfServiceViewController.cs</DependentUpon>
