@@ -11,17 +11,17 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.UserAccess
     {
         private readonly IMvxNavigationService navigationService;
 
-        public UIAction StartLoginFlowAction { get; }
+        public UIAction StartLoginFlow { get; }
 
-        public UIAction StartSignUpFlowAction { get; }
+        public UIAction StartSignUpFlow { get; }
 
         public SignupOrLoginChoiceViewModel(IMvxNavigationService navigationService)
         {
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
             this.navigationService = navigationService;
 
-            StartLoginFlowAction = UIAction.FromAsync(startLoginFlow);
-            StartSignUpFlowAction = UIAction.FromAsync(startSignUpFlow);
+            StartLoginFlow = UIAction.FromAsync(startLoginFlow);
+            StartSignUpFlow = UIAction.FromAsync(startSignUpFlow);
         }
 
         private Task startLoginFlow() => navigationService.Navigate<LoginViewModel>();

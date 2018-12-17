@@ -72,6 +72,7 @@ your app to continue.</string>
     <string name="SignUpWithGoogle">Sign up with Google</string>
     <string name="SignInWithGoogle">Sign in With Google</string>
     <string name="AlreadyHaveAnAccount">Already have an account?</string>
+    <string name="HaveAnAccountLogin">Already have an account? <b>Log in</b></string>
     <string name="DontHaveAnAccount">Don\'t have an account?</string>
     <string name="Or">Or</string>
     <string name="ForgotPasswordEmailExplanation">Please enter your email to reset your password</string>

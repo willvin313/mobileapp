@@ -1011,5 +1011,17 @@ namespace Toggl.Foundation {
                 return ResourceManager.GetString("LoginWithEmail", resourceCulture);
             }
         }
+        
+        public static string ContactUs {
+            get {
+                return ResourceManager.GetString("ContactUs", resourceCulture);
+            }
+        }
+        
+        public static string ContactUsUrl {
+            get {
+                return ResourceManager.GetString("ContactUsUrl", resourceCulture);
+            }
+        }
     }
 }

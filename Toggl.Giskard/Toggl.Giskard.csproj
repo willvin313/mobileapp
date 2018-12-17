@@ -506,6 +506,10 @@
     <Compile Include="ViewHolders\MainLogUserFeedbackViewHolder.cs" />
     <Compile Include="Extensions\Reactive\ImageViewExtensions.cs" />      
     <Compile Include="Extensions\TimeEntryExtensions.cs" />
+    <Compile Include="Activities\SignupOrLoginChoiceActivity.cs" />
+    <Compile Include="Activities\SignupOrLoginChoiceActivity.ViewBinds.cs">
+      <DependentUpon>SignupOrLoginChoiceActivity.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\AndroidManifest.xml" />
@@ -908,6 +912,10 @@
     <AndroidResource Include="Resources\drawable\ic_thumbs_up.xml" />
     <AndroidResource Include="Resources\layout\MainUserFeedbackCard.axml" />
     <AndroidResource Include="Resources\xml\RemoteConfigDefaults.xml" />
+    <AndroidResource Include="Resources\drawable\TogglRedLogoBlackText.xml" />
+    <AndroidResource Include="Resources\drawable\GrayBorderButton.xml" />
+    <AndroidResource Include="Resources\drawable\RoundedBlueButton.xml" />
+    <AndroidResource Include="Resources\layout\SignupOrLoginChoiceActivity.axml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Toggl.Foundation\Toggl.Foundation.csproj">

@@ -7,6 +7,7 @@ using MvvmCross.Navigation;
 using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.MvvmCross.ViewModels.UserAccess;
 using Toggl.Giskard.Helper;
 using static Android.Content.Intent;
 
@@ -27,7 +28,7 @@ namespace Toggl.Giskard
         new[] { "android.intent.action.PROCESS_TEXT" },
         Categories = new[] { "android.intent.category.DEFAULT" },
         DataMimeType = "text/plain")]
-    public class SplashScreen : MvxSplashScreenAppCompatActivity<Setup, App<LoginViewModel>>
+    public class SplashScreen : MvxSplashScreenAppCompatActivity<Setup, App<SignupOrLoginChoiceViewModel>>
     {
         public SplashScreen()
             : base(Resource.Layout.SplashScreen)

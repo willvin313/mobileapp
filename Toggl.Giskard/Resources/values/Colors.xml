@@ -6,6 +6,7 @@
     <color name="lightToolbarBackground">#FFFFFF</color>
     <color name="darkToolbarBackground">#323232</color>
     <color name="placeholderText">#CECECE</color>
+    <color name="buttonGrayText">#CECECE</color>
     <color name="defaultText">#959595</color>
     <color name="defaultIcon">#959595</color>
     <color name="defaultEditText">#5E5B5B</color>
