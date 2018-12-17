@@ -134,7 +134,7 @@
                                     <constraint firstItem="mES-7Q-qsS" firstAttribute="leading" secondItem="Lsa-g7-i4M" secondAttribute="leading" id="fse-nY-11A"/>
                                 </constraints>
                             </view>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LGF-xC-VLz">
+                            <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LGF-xC-VLz">
                                 <rect key="frame" x="0.0" y="32" width="375" height="635"/>
                                 <subviews>
                                     <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Logging in with" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="cN3-2j-ihW" customClass="LoginTextField">
