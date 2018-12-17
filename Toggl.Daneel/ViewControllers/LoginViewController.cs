@@ -20,7 +20,8 @@ namespace Toggl.Daneel.ViewControllers
     public sealed partial class LoginViewController : ReactiveViewController<LoginViewModel>
     {
         private readonly UIImageView titleImage = new UIImageView(UIImage.FromBundle("togglLogo"));
-        private readonly UIBarButtonItem backButton = new UIBarButtonItem(Resources.Back, UIBarButtonItemStyle.Plain, null);
+        private readonly UIBarButtonItem backButton =
+            new UIBarButtonItem(UIImage.FromBundle("icBackNoPadding"), UIBarButtonItemStyle.Plain, null);
         private readonly UIImage backIndicatorImage = UIImage.FromBundle("icBackNoPadding");
 
         public LoginViewController(IntPtr handle) : base(handle)
