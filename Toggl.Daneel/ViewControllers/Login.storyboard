@@ -136,23 +136,21 @@
                             <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LGF-xC-VLz">
                                 <rect key="frame" x="0.0" y="32" width="320" height="536"/>
                                 <subviews>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" hasAttributedTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zrF-Xc-Gmc">
-                                        <rect key="frame" x="16" y="163" width="124" height="26"/>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" hasAttributedTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2Sc-8G-Q7R">
+                                        <rect key="frame" x="16" y="163" width="135" height="26.5"/>
                                         <state key="normal">
                                             <attributedString key="attributedTitle">
-                                                <fragment content="Need help? ">
+                                                <fragment content="Need Help? ">
                                                     <attributes>
-                                                        <color key="NSColor" red="0.36862745098039218" green="0.35686274509803922" blue="0.35686274509803922" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                        <font key="NSFont" size="12" name=".SFNSText"/>
-                                                        <paragraphStyle key="NSParagraphStyle" alignment="natural" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
+                                                        <color key="NSColor" red="0.36862745098039218" green="0.35686274509803922" blue="0.35686274509803922" alpha="1" colorSpace="calibratedRGB"/>
+                                                        <font key="NSFont" size="12" name=".AppleSystemUIFont"/>
                                                     </attributes>
                                                 </fragment>
-                                                <fragment content="Contact us">
+                                                <fragment content="Contact Us">
                                                     <attributes>
                                                         <color key="NSColor" red="0.36862745098039218" green="0.35686274509803922" blue="0.35686274509803922" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                        <font key="NSFont" size="12" name=".SFNSText-Bold"/>
-                                                        <font key="NSOriginalFont" size="12" name=".SFNSText-Bold"/>
-                                                        <paragraphStyle key="NSParagraphStyle" alignment="natural" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
+                                                        <font key="NSFont" size="12" name=".AppleSystemUIFontEmphasized"/>
+                                                        <font key="NSOriginalFont" size="15" name=".AppleSystemUIFontEmphasized"/>
                                                         <integer key="NSUnderline" value="1"/>
                                                     </attributes>
                                                 </fragment>
@@ -267,12 +265,13 @@
                                 </subviews>
                                 <color key="backgroundColor" red="0.98039215690000003" green="0.98431372549999996" blue="0.98823529409999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
+                                    <constraint firstItem="2Sc-8G-Q7R" firstAttribute="top" secondItem="uyS-pK-50z" secondAttribute="bottom" constant="4" id="0V6-YU-Sj3"/>
                                     <constraint firstItem="t53-NP-5k0" firstAttribute="top" secondItem="cN3-2j-ihW" secondAttribute="bottom" constant="26" id="5iG-NS-BnN"/>
                                     <constraint firstItem="iDB-Xo-SZQ" firstAttribute="centerY" secondItem="t53-NP-5k0" secondAttribute="centerY" id="9Wp-sF-JTh"/>
                                     <constraint firstItem="t53-NP-5k0" firstAttribute="leading" secondItem="cN3-2j-ihW" secondAttribute="leading" id="GqB-jj-c54"/>
                                     <constraint firstAttribute="trailing" secondItem="cN3-2j-ihW" secondAttribute="trailing" constant="16" id="Lpa-gf-8vy"/>
                                     <constraint firstItem="cN3-2j-ihW" firstAttribute="leading" secondItem="LGF-xC-VLz" secondAttribute="leading" constant="16" id="NoA-6H-FlV"/>
-                                    <constraint firstItem="zrF-Xc-Gmc" firstAttribute="leading" secondItem="uyS-pK-50z" secondAttribute="leading" id="Z1b-xH-Q8I"/>
+                                    <constraint firstItem="2Sc-8G-Q7R" firstAttribute="leading" secondItem="uyS-pK-50z" secondAttribute="leading" id="Wzl-td-qhG"/>
                                     <constraint firstItem="t53-NP-5k0" firstAttribute="trailing" secondItem="cN3-2j-ihW" secondAttribute="trailing" id="aVC-61-KmC"/>
                                     <constraint firstItem="uyS-pK-50z" firstAttribute="top" secondItem="t53-NP-5k0" secondAttribute="bottom" constant="6" id="cTC-DI-kEW"/>
                                     <constraint firstItem="iDB-Xo-SZQ" firstAttribute="height" secondItem="t53-NP-5k0" secondAttribute="height" id="fld-Pb-lWA"/>
@@ -281,7 +280,6 @@
                                     <constraint firstItem="uyS-pK-50z" firstAttribute="leading" secondItem="cN3-2j-ihW" secondAttribute="leading" id="r7p-Ss-i6N"/>
                                     <constraint firstItem="cN3-2j-ihW" firstAttribute="top" secondItem="LGF-xC-VLz" secondAttribute="top" id="tFY-JC-gc6"/>
                                     <constraint firstItem="M81-7Q-VfX" firstAttribute="leading" secondItem="t53-NP-5k0" secondAttribute="leading" id="tL2-35-6fn"/>
-                                    <constraint firstItem="zrF-Xc-Gmc" firstAttribute="top" secondItem="uyS-pK-50z" secondAttribute="bottom" constant="4" id="xko-et-3Ih"/>
                                 </constraints>
                             </view>
                             <view userInteractionEnabled="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="HHj-fS-xZV">
@@ -313,7 +311,7 @@
                     <connections>
                         <outlet property="ActivityIndicator" destination="vII-aI-heA" id="zAg-iM-fFv"/>
                         <outlet property="BottomToSafeAreaConstraint" destination="a61-2O-HXd" id="Fn8-qv-43h"/>
-                        <outlet property="ContactUsButton" destination="zrF-Xc-Gmc" id="FOv-oe-3ag"/>
+                        <outlet property="ContactUsButton" destination="2Sc-8G-Q7R" id="P7V-WT-pQH"/>
                         <outlet property="FirstScreenWrapperView" destination="n5i-71-xr8" id="kcQ-Ao-0fv"/>
                         <outlet property="ForgotPasswordButton" destination="Cqd-S6-RyF" id="ScU-i0-W8D"/>
                         <outlet property="GoogleLoginButton" destination="3cI-Sa-w2L" id="LAI-yE-h3k"/>
