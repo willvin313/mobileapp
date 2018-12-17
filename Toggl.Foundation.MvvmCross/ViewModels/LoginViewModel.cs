@@ -67,7 +67,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public UIAction LoginWithEmail { get; }
         public UIAction Back { get; }
         public IObservable<Unit> ClearEmailScreenError { get; }
-        public IObservable<bool> EmailFieldEdittable { get; }
+        public IObservable<bool> IsEmailFieldEdittable { get; }
         public IObservable<bool> IsInSecondScreen { get; }
 
         public LoginViewModel(
@@ -160,7 +160,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .Errors
                 .Select(e => e == incorrectPasswordException);
 
-            EmailFieldEdittable = Observable
+            IsEmailFieldEdittable = Observable
                 .CombineLatest(isEmailState, incorrectPasswordExceptions, CommonFunctions.Or)
                 .StartWith(false)
                 .AsDriver(schedulerProvider);

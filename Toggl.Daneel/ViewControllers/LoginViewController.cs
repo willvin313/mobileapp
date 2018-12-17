@@ -85,7 +85,7 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(SecondScreenEmailTextField.Rx().TextObserver())
                 .DisposedBy(DisposeBag);
 
-            ViewModel.EmailFieldEdittable
+            ViewModel.IsEmailFieldEdittable
                 .Subscribe(SecondScreenEmailTextField.Rx().Enabled())
                 .DisposedBy(DisposeBag);
 

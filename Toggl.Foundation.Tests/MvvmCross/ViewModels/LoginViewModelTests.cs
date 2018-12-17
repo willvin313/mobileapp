@@ -516,7 +516,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public void ShouldStartWithFalse()
             {
                 var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.EmailFieldEdittable.Subscribe(observer);
+                ViewModel.IsEmailFieldEdittable.Subscribe(observer);
 
                 TestScheduler.Start();
 
@@ -533,7 +533,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
                     .Returns(Observable.Throw<ITogglDataSource>(exception));
                 var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.EmailFieldEdittable.Subscribe(observer);
+                ViewModel.IsEmailFieldEdittable.Subscribe(observer);
 
                 ViewModel.Login.Execute();
                 TestScheduler.Start();
