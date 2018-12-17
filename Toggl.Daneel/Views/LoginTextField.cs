@@ -41,6 +41,16 @@ namespace Toggl.Daneel.Views
 
         public LoginTextField(IntPtr handle) : base(handle)  { }
 
+        public override bool Enabled
+        {
+            get => base.Enabled;
+            set
+            {
+                underlineLayer.Hidden = !value;
+                base.Enabled = value;
+            }
+        }
+
         public override string Text
         {
             get => base.Text;
