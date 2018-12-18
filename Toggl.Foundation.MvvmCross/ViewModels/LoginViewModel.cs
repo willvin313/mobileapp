@@ -250,13 +250,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         }
 
         private IObservable<Unit> onLoginSuccessfully(ITogglDataSource dataSource)
-        {
-            return Observable.Return(Unit.Default)
+            => Observable.Return(Unit.Default)
                 .Do(_ => { lastTimeUsageStorage.SetLogin(timeService.CurrentDateTime); })
                 .SelectMany(_ => dataSource.StartSyncing())
                 .Do(_ => { onboardingStorage.SetIsNewUser(false); })
                 .SelectMany(_ => navigationService.ForkNavigate<MainTabBarViewModel, MainViewModel>().ToObservable());
-        }
 
         private IObservable<Unit> forgotPassword()
         {
@@ -283,10 +281,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             }
         }
 
-        private void togglePasswordVisibility()
-        {
-            isPasswordMaskedSubject.OnNext(!isPasswordMaskedSubject.Value);
-        }
+        private void togglePasswordVisibility() => isPasswordMaskedSubject.OnNext(!isPasswordMaskedSubject.Value);
 
         private Task contactUs() =>
             navigationService
