@@ -200,7 +200,8 @@ namespace Toggl.Daneel.ViewControllers
                         LoginWithEmailTextField.BecomeFirstResponder();
                     }
                 })
-                .Subscribe(FirstScreenWrapperView.Rx().AnimatedIsVisible());
+                .Subscribe(FirstScreenWrapperView.Rx().AnimatedIsVisible())
+                .DisposedBy(DisposeBag);
 
             ViewModel.IsInSecondScreen
                 .Do(isSecondScreen =>
@@ -210,7 +211,8 @@ namespace Toggl.Daneel.ViewControllers
                         PasswordTextField.BecomeFirstResponder();
                     }
                 })
-                .Subscribe(SecondScreenWrapperView.Rx().AnimatedIsVisible());
+                .Subscribe(SecondScreenWrapperView.Rx().AnimatedIsVisible())
+                .DisposedBy(DisposeBag);
 
             ViewModel.Shake
                 .Subscribe(shakeTarget =>
