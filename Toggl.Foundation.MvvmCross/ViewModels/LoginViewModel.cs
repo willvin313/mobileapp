@@ -250,13 +250,13 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         }
 
         private IObservable<Unit> onLoginSuccessfully(ITogglDataSource dataSource)
-            => Observable.Defer(async () =>
-                {
-                    lastTimeUsageStorage.SetLogin(timeService.CurrentDateTime);
-                    await dataSource.StartSyncing();
-                    onboardingStorage.SetIsNewUser(false);
-                    return navigationService.ForkNavigate<MainTabBarViewModel, MainViewModel>().ToObservable();
-                });
+        {
+            return Observable.Return(Unit.Default)
+                .Do(_ => { lastTimeUsageStorage.SetLogin(timeService.CurrentDateTime); })
+                .SelectMany(_ => dataSource.StartSyncing())
+                .Do(_ => { onboardingStorage.SetIsNewUser(false); })
+                .SelectMany(_ => navigationService.ForkNavigate<MainTabBarViewModel, MainViewModel>().ToObservable());
+        }
 
         private IObservable<Unit> forgotPassword()
         {

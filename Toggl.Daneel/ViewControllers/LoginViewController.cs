@@ -79,8 +79,7 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(ViewModel.LoginWithEmail.Inputs)
                 .DisposedBy(DisposeBag);
 
-            LoginWithEmailButton
-                .Rx()
+            LoginWithEmailButton.Rx()
                 .BindAction(ViewModel.LoginWithEmail)
                 .DisposedBy(DisposeBag);
 
