@@ -13,117 +13,61 @@ namespace Toggl.Daneel.ViewControllers
 	partial class SignupViewController
 	{
 		[Outlet]
-		Toggl.Daneel.Views.ActivityIndicatorView ActivityIndicator { get; set; }
+		UIKit.NSLayoutConstraint BottomToSafeAreaConstraint { get; set; }
 
 		[Outlet]
-		UIKit.UIImageView CountryDropDownCaretImageView { get; set; }
+		UIKit.UIView CountrySelectionScreenWrapperView { get; set; }
 
 		[Outlet]
-		UIKit.UIImageView CountryNotSelectedImageView { get; set; }
+		UIKit.UIView EmailAndPasswordScreenWrapperView { get; set; }
 
 		[Outlet]
-		UIKit.NSLayoutConstraint EmailFieldTopConstraint { get; set; }
+		UIKit.UILabel EmailScreenErrorLabel { get; set; }
 
 		[Outlet]
-		Toggl.Daneel.Views.LoginTextField EmailTextField { get; set; }
+		UIKit.UIView EmailScreenWrapperView { get; set; }
 
 		[Outlet]
-		UIKit.UILabel ErrorLabel { get; set; }
+		UIKit.UIButton GoogleSignUpButton { get; set; }
 
 		[Outlet]
-		UIKit.UIButton GoogleSignupButton { get; set; }
-
-		[Outlet]
-		UIKit.UIView LoginCard { get; set; }
-
-		[Outlet]
-		Toggl.Daneel.Views.LoginTextField PasswordTextField { get; set; }
-
-		[Outlet]
-		UIKit.UIButton SelectCountryButton { get; set; }
-
-		[Outlet]
-		UIKit.UIButton ShowPasswordButton { get; set; }
-
-		[Outlet]
-		UIKit.UIButton SignupButton { get; set; }
-
-		[Outlet]
-		UIKit.UIButton SignupShakeTriggerButton { get; set; }
-
-		[Outlet]
-		UIKit.NSLayoutConstraint TopConstraint { get; set; }
+		UIKit.UIButton SignUpWithEmailButton { get; set; }
 		
 		void ReleaseDesignerOutlets ()
 		{
-			if (ActivityIndicator != null) {
-				ActivityIndicator.Dispose ();
-				ActivityIndicator = null;
+			if (BottomToSafeAreaConstraint != null) {
+				BottomToSafeAreaConstraint.Dispose ();
+				BottomToSafeAreaConstraint = null;
 			}
 
-			if (CountryDropDownCaretImageView != null) {
-				CountryDropDownCaretImageView.Dispose ();
-				CountryDropDownCaretImageView = null;
+			if (CountrySelectionScreenWrapperView != null) {
+				CountrySelectionScreenWrapperView.Dispose ();
+				CountrySelectionScreenWrapperView = null;
 			}
 
-			if (CountryNotSelectedImageView != null) {
-				CountryNotSelectedImageView.Dispose ();
-				CountryNotSelectedImageView = null;
+			if (EmailAndPasswordScreenWrapperView != null) {
+				EmailAndPasswordScreenWrapperView.Dispose ();
+				EmailAndPasswordScreenWrapperView = null;
 			}
 
-			if (EmailTextField != null) {
-				EmailTextField.Dispose ();
-				EmailTextField = null;
+			if (EmailScreenWrapperView != null) {
+				EmailScreenWrapperView.Dispose ();
+				EmailScreenWrapperView = null;
 			}
 
-			if (ErrorLabel != null) {
-				ErrorLabel.Dispose ();
-				ErrorLabel = null;
+			if (EmailScreenErrorLabel != null) {
+				EmailScreenErrorLabel.Dispose ();
+				EmailScreenErrorLabel = null;
 			}
 
-			if (GoogleSignupButton != null) {
-				GoogleSignupButton.Dispose ();
-				GoogleSignupButton = null;
+			if (GoogleSignUpButton != null) {
+				GoogleSignUpButton.Dispose ();
+				GoogleSignUpButton = null;
 			}
 
-			if (LoginCard != null) {
-				LoginCard.Dispose ();
-				LoginCard = null;
-			}
-
-			if (PasswordTextField != null) {
-				PasswordTextField.Dispose ();
-				PasswordTextField = null;
-			}
-
-			if (SelectCountryButton != null) {
-				SelectCountryButton.Dispose ();
-				SelectCountryButton = null;
-			}
-
-			if (ShowPasswordButton != null) {
-				ShowPasswordButton.Dispose ();
-				ShowPasswordButton = null;
-			}
-
-			if (SignupButton != null) {
-				SignupButton.Dispose ();
-				SignupButton = null;
-			}
-
-			if (SignupShakeTriggerButton != null) {
-				SignupShakeTriggerButton.Dispose ();
-				SignupShakeTriggerButton = null;
-			}
-
-			if (TopConstraint != null) {
-				TopConstraint.Dispose ();
-				TopConstraint = null;
-			}
-
-			if (EmailFieldTopConstraint != null) {
-				EmailFieldTopConstraint.Dispose ();
-				EmailFieldTopConstraint = null;
+			if (SignUpWithEmailButton != null) {
+				SignUpWithEmailButton.Dispose ();
+				SignUpWithEmailButton = null;
 			}
 		}
 	}
