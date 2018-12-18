@@ -52,22 +52,23 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly Exception incorrectPasswordException = new Exception(Resources.IncorrectEmailOrPassword);
         private readonly BehaviorSubject<State> state = new BehaviorSubject<State>(State.Email);
 
-        public bool IsPasswordManagerAvailable { get; }
         public BehaviorRelay<string> EmailRelay { get; } = new BehaviorRelay<string>(string.Empty);
         public BehaviorRelay<string> PasswordRelay { get; } = new BehaviorRelay<string>(string.Empty);
-        public IObservable<bool> IsLoggingIn { get; }
-        public IObservable<ShakeTarget> Shake { get; }
-        public IObservable<bool> IsPasswordMasked { get; }
-        public IObservable<bool> IsShowPasswordButtonVisible { get; }
-        public IObservable<bool> SuggestContactSupport { get; }
         public UIAction Login { get; }
-        public IObservable<Unit> ClearPasswordScreenError { get; }
         public UIAction LoginWithGoogle { get; }
         public UIAction TogglePasswordVisibility { get; }
         public UIAction ForgotPassword { get; }
         public UIAction LoginWithEmail { get; }
         public UIAction Back { get; }
         public UIAction ContactUs { get; }
+
+        public bool IsPasswordManagerAvailable { get; }
+        public IObservable<bool> IsLoggingIn { get; }
+        public IObservable<ShakeTarget> Shake { get; }
+        public IObservable<bool> IsPasswordMasked { get; }
+        public IObservable<bool> IsShowPasswordButtonVisible { get; }
+        public IObservable<bool> SuggestContactSupport { get; }
+        public IObservable<Unit> ClearPasswordScreenError { get; }
         public IObservable<Unit> ClearEmailScreenError { get; }
         public IObservable<bool> IsEmailFieldEdittable { get; }
         public IObservable<bool> IsInSecondScreen { get; }
