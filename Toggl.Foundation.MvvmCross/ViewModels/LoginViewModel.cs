@@ -141,12 +141,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IsLoggingIn = isLoggingIn
                 .AsDriver(schedulerProvider);
 
-            ForgotPassword = UIAction.FromObservable(() => forgotPassword(EmailRelay.Value), isLoggingIn.Invert());
+            ForgotPassword = UIAction.FromObservable(forgotPassword, isLoggingIn.Invert());
 
-            TogglePasswordVisibility =
-                UIAction.FromAction(() => isPasswordMaskedSubject.OnNext(!isPasswordMaskedSubject.Value));
+            TogglePasswordVisibility = UIAction.FromAction(togglePasswordVisibility);
 
-            LoginWithEmail = UIAction.FromObservable(loginWithEmail);
+            LoginWithEmail = UIAction.FromAction(loginWithEmail);
 
             ClearEmailScreenError = isEmailValid
                 .Where(CommonFunctions.Identity)
@@ -184,18 +183,15 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             PasswordRelay.Accept(parameter.Password.ToString());
         }
 
-        private IObservable<Unit> loginWithEmail()
+        private void loginWithEmail()
         {
             if (!Email.From(EmailRelay.Value).IsValid)
             {
-                return Observable.Return(Unit.Default).Do(_ =>
-                {
-                    shakeSubject.OnNext(ShakeTarget.Email);
-                    throw invalidEmailException;
-                });
+                shakeSubject.OnNext(ShakeTarget.Email);
+                throw invalidEmailException;
             }
 
-            return Observable.Return(Unit.Default).Do(_ => state.OnNext(State.EmailAndPassword));
+            state.OnNext(State.EmailAndPassword);
         }
 
         private IObservable<Unit> loginWithGoogle()
@@ -262,9 +258,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     return navigationService.ForkNavigate<MainTabBarViewModel, MainViewModel>().ToObservable();
                 });
 
-        private IObservable<Unit> forgotPassword(string email)
+        private IObservable<Unit> forgotPassword()
         {
-            var emailParam = EmailParameter.With(Email.From(email));
+            var emailParam = EmailParameter.With(Email.From(EmailRelay.Value));
             return navigationService
                 .Navigate<ForgotPasswordViewModel, EmailParameter, EmailParameter>(emailParam)
                 .ToObservable()
@@ -285,6 +281,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     PasswordRelay.Accept(string.Empty);
                     break;
             }
+        }
+
+        private void togglePasswordVisibility()
+        {
+            isPasswordMaskedSubject.OnNext(!isPasswordMaskedSubject.Value);
         }
 
         private Task contactUs() =>
