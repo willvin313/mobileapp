@@ -13,10 +13,16 @@ namespace Toggl.Daneel.ViewControllers
 	partial class SignupViewController
 	{
 		[Outlet]
+		Toggl.Daneel.Views.ActivityIndicatorView ActivityIndicator { get; set; }
+
+		[Outlet]
 		UIKit.NSLayoutConstraint BottomToSafeAreaConstraint { get; set; }
 
 		[Outlet]
 		UIKit.UIView CountrySelectionScreenWrapperView { get; set; }
+
+		[Outlet]
+		UIKit.UILabel EmailAndPasswordErrorLabel { get; set; }
 
 		[Outlet]
 		UIKit.UIView EmailAndPasswordScreenWrapperView { get; set; }
@@ -31,10 +37,28 @@ namespace Toggl.Daneel.ViewControllers
 		UIKit.UIButton GoogleSignUpButton { get; set; }
 
 		[Outlet]
+		UIKit.UIButton NextButton { get; set; }
+
+		[Outlet]
+		UIKit.UIControl PasswordMaskingControl { get; set; }
+
+		[Outlet]
+		UIKit.UIImageView PasswordMaskingImageView { get; set; }
+
+		[Outlet]
+		Toggl.Daneel.Views.LoginTextField PasswordTextField { get; set; }
+
+		[Outlet]
+		Toggl.Daneel.Views.LoginTextField SigningUpWithEmailTextField { get; set; }
+
+		[Outlet]
 		UIKit.UIButton SignUpWithEmailButton { get; set; }
 
 		[Outlet]
 		Toggl.Daneel.Views.LoginTextField SignUpWithEmailTextField { get; set; }
+
+		[Outlet]
+		UIKit.UILabel UseSixCharactersLabel { get; set; }
 		
 		void ReleaseDesignerOutlets ()
 		{
@@ -76,6 +100,46 @@ namespace Toggl.Daneel.ViewControllers
 			if (SignUpWithEmailTextField != null) {
 				SignUpWithEmailTextField.Dispose ();
 				SignUpWithEmailTextField = null;
+			}
+
+			if (UseSixCharactersLabel != null) {
+				UseSixCharactersLabel.Dispose ();
+				UseSixCharactersLabel = null;
+			}
+
+			if (NextButton != null) {
+				NextButton.Dispose ();
+				NextButton = null;
+			}
+
+			if (ActivityIndicator != null) {
+				ActivityIndicator.Dispose ();
+				ActivityIndicator = null;
+			}
+
+			if (EmailAndPasswordErrorLabel != null) {
+				EmailAndPasswordErrorLabel.Dispose ();
+				EmailAndPasswordErrorLabel = null;
+			}
+
+			if (SigningUpWithEmailTextField != null) {
+				SigningUpWithEmailTextField.Dispose ();
+				SigningUpWithEmailTextField = null;
+			}
+
+			if (PasswordTextField != null) {
+				PasswordTextField.Dispose ();
+				PasswordTextField = null;
+			}
+
+			if (PasswordMaskingControl != null) {
+				PasswordMaskingControl.Dispose ();
+				PasswordMaskingControl = null;
+			}
+
+			if (PasswordMaskingImageView != null) {
+				PasswordMaskingImageView.Dispose ();
+				PasswordMaskingImageView = null;
 			}
 		}
 	}
