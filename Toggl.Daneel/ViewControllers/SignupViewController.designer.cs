@@ -32,6 +32,9 @@ namespace Toggl.Daneel.ViewControllers
 
 		[Outlet]
 		UIKit.UIButton SignUpWithEmailButton { get; set; }
+
+		[Outlet]
+		Toggl.Daneel.Views.LoginTextField SignUpWithEmailTextField { get; set; }
 		
 		void ReleaseDesignerOutlets ()
 		{
@@ -68,6 +71,11 @@ namespace Toggl.Daneel.ViewControllers
 			if (SignUpWithEmailButton != null) {
 				SignUpWithEmailButton.Dispose ();
 				SignUpWithEmailButton = null;
+			}
+
+			if (SignUpWithEmailTextField != null) {
+				SignUpWithEmailTextField.Dispose ();
+				SignUpWithEmailTextField = null;
 			}
 		}
 	}

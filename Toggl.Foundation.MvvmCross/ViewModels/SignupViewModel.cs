@@ -61,6 +61,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public BehaviorRelay<string> PasswordRelay { get; } = new BehaviorRelay<string>(string.Empty);
         public UIAction SignupWithGoogle { get; }
         public UIAction SignupWithEmail { get; }
+        public UIAction SignUp { get; }
+        public UIAction Back { get; }
 
         public IObservable<string> CountryButtonTitle { get; }
         public IObservable<bool> IsLoading { get; }
@@ -70,6 +72,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public IObservable<bool> SuggestContactSupport { get; }
         public IObservable<Unit> ClearPasswordScreenError { get; }
         public IObservable<Unit> ClearEmailScreenError { get; }
+        public IObservable<bool> IsEmailScreenVisible { get; }
+        public IObservable<bool> IsEmailAndPasswordScreenVisible { get; }
+        public IObservable<bool> IsCountrySelectionScreenVisible { get; }
 
         public SignupViewModel(
             IApiFactory apiFactory,
@@ -115,10 +120,32 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             SignupWithEmail = UIAction.FromAction(signUpWithEmail);
 
+            SignUp = UIAction.FromAction(() => throw new Exception());
+
+            var isLoggingIn = Observable
+                .CombineLatest(SignUp.Executing, SignupWithGoogle.Executing, CommonFunctions.Or);
+
+            Back = UIAction.FromAction(back, isLoggingIn.Invert());
+
             ClearEmailScreenError = isEmailValid
                 .Where(CommonFunctions.Identity)
                 .SelectUnit()
                 .ObserveOn(schedulerProvider.MainScheduler);
+
+            IsEmailScreenVisible = state
+                .Select(s => s == State.Email)
+                .AsObservable()
+                .AsDriver(schedulerProvider);
+
+            IsEmailAndPasswordScreenVisible = state
+                .Select(s => s == State.EmailAndPassword)
+                .AsObservable()
+                .AsDriver(schedulerProvider);
+
+            IsCountrySelectionScreenVisible = state
+                .Select(s => s == State.CountrySelection)
+                .AsObservable()
+                .AsDriver(schedulerProvider);
         }
 
         public override void Prepare(CredentialsParameter parameter)
@@ -151,6 +178,23 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             }
 
             state.OnNext(State.EmailAndPassword);
+        }
+
+        private void back()
+        {
+            switch (state.Value)
+            {
+                case State.Email:
+                    navigationService.Close(this);
+                    break;
+                case State.EmailAndPassword:
+                    state.OnNext(State.Email);
+                    PasswordRelay.Accept(string.Empty);
+                    break;
+                case State.CountrySelection:
+                    state.OnNext(State.EmailAndPassword);
+                    break;
+            }
         }
     }
 }

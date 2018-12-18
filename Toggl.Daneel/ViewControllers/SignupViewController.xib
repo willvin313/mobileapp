@@ -19,6 +19,7 @@
                 <outlet property="EmailScreenWrapperView" destination="k2t-cV-PrG" id="BPa-iP-ImE"/>
                 <outlet property="GoogleSignUpButton" destination="ObX-OL-MDg" id="qs9-S0-dk8"/>
                 <outlet property="SignUpWithEmailButton" destination="BeL-on-TZJ" id="Hb0-IP-JdN"/>
+                <outlet property="SignUpWithEmailTextField" destination="Snc-tS-Cts" id="1bX-F7-xKM"/>
                 <outlet property="view" destination="2" id="RRd-Eg-VrN"/>
             </connections>
         </placeholder>
@@ -147,7 +148,7 @@
                             <nil key="highlightedColor"/>
                         </label>
                     </subviews>
-                    <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <color key="backgroundColor" red="0.98039215686274506" green="0.98431372549019602" blue="0.9882352941176471" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <constraints>
                         <constraint firstAttribute="trailing" secondItem="Snc-tS-Cts" secondAttribute="trailing" constant="16" id="00l-EU-ymy"/>
                         <constraint firstItem="5Gj-Eq-WaL" firstAttribute="trailing" secondItem="Snc-tS-Cts" secondAttribute="trailing" id="Jwy-Kv-qBD"/>
