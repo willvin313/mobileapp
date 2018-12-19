@@ -121,31 +121,6 @@ namespace Toggl.Foundation.Tests.Suggestions
 
                 suggestions.Should().OnlyContain(suggestion => expectedDescriptions.Contains(suggestion.Description));
             }
-
-            [Fact, LogIfTooSlow]
-            public async Task DoesNotReturnTimeEntriesWithoutDescription()
-            {
-                var builder = TimeEntry.Builder.Create(12)
-                                       .SetUserId(9)
-                                       .SetWorkspaceId(2)
-                                       .SetAt(Now)
-                                       .SetStart(Now)
-                                       .SetDescription("");
-                var emptyTimeEntries = Enumerable.Range(20, 0)
-                    .Select(_ => builder.Build());
-                var timeEntries = new List<IThreadSafeTimeEntry>(emptyTimeEntries);
-                timeEntries.AddRange(getTimeEntries(1, 2, 3, 4, 5));
-              
-                DataSource.TimeEntries
-                        .GetAll()
-                        .Returns(Observable.Return(timeEntries));
-
-                var suggestions = await Provider.GetSuggestions().ToList();
-
-                suggestions.Should().OnlyContain(
-                    suggestion => !string.IsNullOrEmpty(suggestion.Description)
-                );
-            }
         }
     }
 }

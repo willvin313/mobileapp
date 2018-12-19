@@ -53,8 +53,7 @@ namespace Toggl.Foundation.Suggestions
         }
 
         private bool isSuitableForSuggestion(IDatabaseTimeEntry timeEntry)
-            => string.IsNullOrEmpty(timeEntry.Description) == false
-               && calculateDelta(timeEntry) <= thresholdPeriod
+            => calculateDelta(timeEntry) <= thresholdPeriod
                && isActive(timeEntry);
 
         private TimeSpan calculateDelta(IDatabaseTimeEntry timeEntry)
