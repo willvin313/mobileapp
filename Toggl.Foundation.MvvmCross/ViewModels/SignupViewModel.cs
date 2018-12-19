@@ -5,11 +5,14 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using MvvmCross.ViewModels;
+using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Interactors.Location;
 using Toggl.Foundation.Login;
+using Toggl.Foundation.Models;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.Services;
@@ -19,6 +22,7 @@ using Toggl.Multivac.Extensions;
 using Toggl.Multivac.Extensions.Reactive;
 using Toggl.Multivac.Models;
 using Toggl.PrimeRadiant.Settings;
+using Toggl.Ultrawave.Exceptions;
 using Toggl.Ultrawave.Network;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels
@@ -58,6 +62,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly Exception invalidEmailException = new Exception(Resources.EnterValidEmail);
         private readonly BehaviorSubject<State> state = new BehaviorSubject<State>(State.Email);
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
+        private readonly Exception incorrectPasswordException = new Exception(Resources.IncorrectEmailOrPassword);
+        private readonly Exception emailIsAlreadyUsedException = new Exception(Resources.EmailIsAlreadyUsedError);
 
         public BehaviorRelay<string> EmailRelay { get; } = new BehaviorRelay<string>(string.Empty);
         public BehaviorRelay<string> PasswordRelay { get; } = new BehaviorRelay<string>(string.Empty);
@@ -127,7 +133,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             SignupWithEmail = UIAction.FromAction(signUpWithEmail);
 
-            SignUp = UIAction.FromAction(() => throw new Exception());
+            SignUp = UIAction.FromObservable(signup);
 
             var isLoading = Observable
                 .CombineLatest(SignUp.Executing, SignupWithGoogle.Executing, CommonFunctions.Or);
@@ -260,5 +266,51 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     break;
             }
         }
+
+        private IObservable<Unit> signup()
+        {
+            if (CountryRelay.Value == null)
+            {
+                //TODO: Throw proper error here
+                throw new Exception();
+            }
+
+            if (!TermsAccepted.Value)
+            {
+                //TODO: Throw proper error here
+                throw new Exception();
+            }
+
+            return userAccessManager
+                .SignUp(Email.From(EmailRelay.Value), Password.From(PasswordRelay.Value), true, CountryRelay.Value.Id)
+                .SelectMany(onSignupSuccessfully)
+                .Catch<Unit, Exception>(handleException)
+                .ObserveOn(schedulerProvider.MainScheduler);
+        }
+
+        private IObservable<Unit> handleException(Exception e)
+        {
+            if (errorHandlingService.TryHandleDeprecationError(e))
+            {
+                return Observable.Return(Unit.Default);
+            }
+
+            switch (e)
+            {
+                case UnauthorizedException _:
+                    return Observable.Throw<Unit>(incorrectPasswordException);
+                case EmailIsAlreadyUsedException _:
+                    return Observable.Throw<Unit>(emailIsAlreadyUsedException);
+                default:
+                    return Observable.Throw<Unit>(new Exception(Resources.GenericSignUpError));
+            }
+        }
+
+        private IObservable<Unit> onSignupSuccessfully(ITogglDataSource dataSource) => Observable.Return(Unit.Default)
+            .Do(_ => lastTimeUsageStorage.SetLogin(timeService.CurrentDateTime))
+            .SelectMany(_ => dataSource.StartSyncing())
+            .Do(_ => onboardingStorage.SetIsNewUser(true))
+            .Do(_ => onboardingStorage.SetUserSignedUp())
+            .SelectMany(_ => navigationService.ForkNavigate<MainTabBarViewModel, MainViewModel>().ToObservable());
     }
 }
