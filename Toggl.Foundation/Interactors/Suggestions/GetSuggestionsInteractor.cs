@@ -43,8 +43,19 @@ namespace Toggl.Foundation.Interactors.Suggestions
             => getSuggestionProviders()
                 .Select(provider => provider.GetSuggestions())
                 .Aggregate(Observable.Concat)
+                .ToList()
+                .Select(removingDuplicates)
+                .SelectMany(s => s)
                 .Take(suggestionCount)
                 .ToList();
+
+        private IList<Suggestion> removingDuplicates(IList<Suggestion> suggestions)
+        {
+            return suggestions
+                .GroupBy(suggestion => suggestion.Description)
+                .Select(group => group.First())
+                .ToList();
+        }
 
         private IReadOnlyList<ISuggestionProvider> getSuggestionProviders()
         {
