@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
@@ -56,10 +57,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly int errorCountBeforeShowingContactSupportSuggestion = 2;
         private readonly Exception invalidEmailException = new Exception(Resources.EnterValidEmail);
         private readonly BehaviorSubject<State> state = new BehaviorSubject<State>(State.Email);
+        private readonly CompositeDisposable disposeBag = new CompositeDisposable();
 
         public BehaviorRelay<string> EmailRelay { get; } = new BehaviorRelay<string>(string.Empty);
         public BehaviorRelay<string> PasswordRelay { get; } = new BehaviorRelay<string>(string.Empty);
         public BehaviorRelay<bool> TermsAccepted { get; } = new BehaviorRelay<bool>(false);
+        public BehaviorRelay<ICountry> CountryRelay { get; } = new BehaviorRelay<ICountry>(null);
         public UIAction SignupWithGoogle { get; }
         public UIAction SignupWithEmail { get; }
         public UIAction SignUp { get; }
@@ -78,6 +81,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public IObservable<bool> IsEmailScreenVisible { get; }
         public IObservable<bool> IsEmailAndPasswordScreenVisible { get; }
         public IObservable<bool> IsCountrySelectionScreenVisible { get; }
+        public IObservable<bool> IsPasswordRuleMessageVisible { get; }
 
         public SignupViewModel(
             IApiFactory apiFactory,
@@ -184,6 +188,21 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             await base.Initialize();
 
             allCountries = await new GetAllCountriesInteractor().Execute();
+            var api = apiFactory.CreateApiWith(Credentials.None);
+            var interactor = new GetCurrentLocationInteractor(api);
+
+            interactor
+                .Execute()
+                .Select(location => allCountries.Single(country => country.CountryCode == location.CountryCode))
+                .Take(1)
+                .Subscribe(CountryRelay.Accept)
+                .DisposedBy(disposeBag);
+        }
+
+        public override void ViewDisappeared()
+        {
+            base.ViewDisappeared();
+            disposeBag.Dispose();
         }
 
         private void togglePasswordVisibility()

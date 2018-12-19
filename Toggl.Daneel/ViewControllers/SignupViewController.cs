@@ -190,6 +190,7 @@ namespace Toggl.Daneel.ViewControllers
             NavigationController.NavigationBar.BackIndicatorTransitionMaskImage = backIndicatorImage;
             EmailScreenErrorLabel.Text = String.Empty;
             SigningUpWithEmailTextField.Text = String.Empty;
+            SigningUpWithEmailTextField.Enabled = false;
             setupGoogleButton();
         }
 
