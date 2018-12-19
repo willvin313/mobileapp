@@ -21,7 +21,7 @@ namespace Toggl.Giskard.Adapters
         public const int SectionViewType = 0;
         public const int ItemViewType = 1;
 
-        private readonly object collectionUpdateLock = new object();
+        protected readonly object CollectionUpdateLock = new object();
         private bool isUpdateRunning;
         private bool hasPendingUpdate;
 
@@ -60,7 +60,7 @@ namespace Toggl.Giskard.Adapters
 
         public void UpdateCollection(ICollectionChange change)
         {
-            lock (collectionUpdateLock)
+            lock (CollectionUpdateLock)
             {
                 if (isUpdateRunning)
                 {
@@ -101,7 +101,7 @@ namespace Toggl.Giskard.Adapters
             currentItems = newImmutableItems;
             diffResult.DispatchUpdatesTo(this);
 
-            lock (collectionUpdateLock)
+            lock (CollectionUpdateLock)
             {
                 if (hasPendingUpdate)
                 {

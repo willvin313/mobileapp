@@ -134,9 +134,8 @@ namespace Toggl.Giskard.Activities
                 .Subscribe(onSyncChanged)
                 .DisposedBy(DisposeBag);
 
-            mainRecyclerAdapter = new MainRecyclerAdapter(ViewModel.TimeEntries, ViewModel.TimeService)
+            mainRecyclerAdapter = new MainRecyclerAdapter(ViewModel.TimeEntries, ViewModel.TimeService, ViewModel.SuggestionsViewModel)
             {
-                SuggestionsViewModel = ViewModel.SuggestionsViewModel,
                 RatingViewModel = ViewModel.RatingViewModel,
                 StopwatchProvider = localStopwatchProvider
             };
@@ -152,6 +151,10 @@ namespace Toggl.Giskard.Activities
 
             mainRecyclerAdapter.DeleteTimeEntrySubject
                 .Subscribe(ViewModel.TimeEntriesViewModel.DelayDeleteTimeEntry.Inputs)
+                .DisposedBy(DisposeBag);
+
+            mainRecyclerAdapter.SuggestionTappedObservable
+                .Subscribe(ViewModel.SuggestionsViewModel.StartTimeEntry.Inputs)
                 .DisposedBy(DisposeBag);
 
             ViewModel.TimeEntriesViewModel.ShouldShowUndo

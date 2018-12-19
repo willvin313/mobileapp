@@ -339,7 +339,6 @@
     <Compile Include="ViewHolders\Country\CountrySelectionViewHolder.cs" />
     <Compile Include="ViewHolders\MainLogCellViewHolder.cs" />
     <Compile Include="ViewHolders\MainLogSuggestionItemViewHolder.cs" />
-    <Compile Include="ViewHolders\MainLogSuggestionsListViewHolder.cs" />
     <Compile Include="ViewHolders\GuardedMvxRecyclerViewHolder.cs" />
     <Compile Include="Views\BarChartView.cs" />
     <Compile Include="Views\SelectProjectRecyclerView.cs" />
@@ -470,7 +469,6 @@
     <Compile Include="Services\NotificationServiceAndroid.cs" />
     <Compile Include="ViewHolders\MainLogSectionViewHolder.cs" />
     <Compile Include="Adapters\ReactiveSectionedRecyclerAdapter.cs" />
-    <Compile Include="Adapters\MainSuggestionsRecyclerAdapter.cs" />
     <Compile Include="Activities\SignUpActivity.ViewBinds.cs">
       <DependentUpon>SignUpActivity.cs</DependentUpon>
     </Compile>
@@ -508,6 +506,7 @@
     <Compile Include="ViewHolders\MainLogUserFeedbackViewHolder.cs" />
     <Compile Include="Extensions\Reactive\ImageViewExtensions.cs" />      
     <Compile Include="Extensions\TimeEntryExtensions.cs" />
+    <Compile Include="ViewHolders\MainSuggestionsHeaderViewHolder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\AndroidManifest.xml" />
@@ -911,6 +910,7 @@
     <AndroidResource Include="Resources\drawable\ic_thumbs_up.xml" />
     <AndroidResource Include="Resources\layout\MainUserFeedbackCard.axml" />
     <AndroidResource Include="Resources\xml\RemoteConfigDefaults.xml" />
+    <AndroidResource Include="Resources\layout\MainSuggestionsHeader.axml" />
     <AndroidResource Include="Resources\drawable-hdpi\toggl_spider.png" />
     <AndroidResource Include="Resources\drawable-mdpi\toggl_spider.png" />
     <AndroidResource Include="Resources\drawable-xhdpi\toggl_spider.png" />

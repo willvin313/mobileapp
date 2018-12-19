@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Toggl.Foundation.Calendar;
 using Toggl.Foundation.Helper;
 using Toggl.Foundation.Models;
@@ -8,7 +9,7 @@ using Toggl.PrimeRadiant.Models;
 namespace Toggl.Foundation.Suggestions
 {
     [Preserve(AllMembers = true)]
-    public sealed class Suggestion : ITimeEntryPrototype
+    public sealed class Suggestion : ITimeEntryPrototype, IEquatable<Suggestion>
     {
         public string Description { get; } = "";
 
@@ -78,6 +79,27 @@ namespace Toggl.Foundation.Suggestions
             WorkspaceId = workspaceId;
             ProviderName = providerType;
             Description = calendarItem.Description;
+        }
+
+        public bool Equals(Suggestion other)
+        {
+            if (other == null) return false;
+
+            if (Description != other.Description) return false;
+            if (ProjectId != other.ProjectId) return false;
+            if (TaskId != other.TaskId) return false;
+            if (ClientId != other.ClientId) return false;
+            if (ProjectColor != other.ProjectColor) return false;
+            if (ProjectName != other.ProjectName) return false;
+            if (TaskName != other.TaskName) return false;
+            if (ClientName != other.ClientName) return false;
+            if (WorkspaceId != other.WorkspaceId) return false;
+            if (IsBillable != other.IsBillable) return false;
+            if (!TagIds.SequenceEqual(other.TagIds)) return false;
+            if (StartTime != other.StartTime) return false;
+            if (Duration != other.Duration) return false;
+
+            return true;
         }
     }
 }

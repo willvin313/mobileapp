@@ -13,6 +13,9 @@ using Toggl.Giskard.ViewHolders;
 using Toggl.Multivac.Extensions;
 using Toggl.Foundation;
 using Toggl.Giskard.ViewHelpers;
+using System.Collections.Immutable;
+using Toggl.Foundation.Suggestions;
+using Android.Support.V7.Util;
 
 namespace Toggl.Giskard.Adapters
 {
@@ -20,6 +23,7 @@ namespace Toggl.Giskard.Adapters
     {
         public const int SuggestionViewType = 2;
         public const int UserFeedbackViewType = 3;
+        public const int SuggestionHeaderViewType = 4;
 
         private readonly ITimeService timeService;
 
@@ -34,6 +38,9 @@ namespace Toggl.Giskard.Adapters
         public IObservable<TimeEntryViewModel> DeleteTimeEntrySubject
             => deleteTimeEntrySubject.AsObservable();
 
+        public IObservable<Suggestion> SuggestionTappedObservable
+            => suggestionTappedSubject.AsObservable();
+
         public SuggestionsViewModel SuggestionsViewModel { get; set; }
         public RatingViewModel RatingViewModel { get; set; }
 
@@ -42,13 +49,43 @@ namespace Toggl.Giskard.Adapters
         private Subject<TimeEntryViewData> timeEntryTappedSubject = new Subject<TimeEntryViewData>();
         private Subject<TimeEntryViewModel> continueTimeEntrySubject = new Subject<TimeEntryViewModel>();
         private Subject<TimeEntryViewModel> deleteTimeEntrySubject = new Subject<TimeEntryViewModel>();
+        private Subject<Suggestion> suggestionTappedSubject = new Subject<Suggestion>();
+
+        private IImmutableList<Suggestion> currentSuggestions;
+
+        private IDisposable suggestionsSubscription;
+
+        private bool haveSuggestions => currentSuggestions?.Any() ?? false;
 
         public MainRecyclerAdapter(
             ObservableGroupedOrderedCollection<TimeEntryViewModel> items,
-            ITimeService timeService)
+            ITimeService timeService,
+            SuggestionsViewModel suggestionsViewModel)
             : base(items)
         {
             this.timeService = timeService;
+
+            SuggestionsViewModel = suggestionsViewModel;
+
+            suggestionsSubscription = SuggestionsViewModel.Suggestions.Subscribe(suggestions =>
+            {
+                lock(CollectionUpdateLock)
+                {
+                    var diffCallback = new SuggestionsDiffCallback(currentSuggestions, suggestions);
+                    currentSuggestions = suggestions;
+                    var diff = DiffUtil.CalculateDiff(diffCallback);
+                    diff.DispatchUpdatesTo(this);
+                }
+            });
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            if (!disposing) return;
+
+            suggestionsSubscription.Dispose();
         }
 
         public void ContinueTimeEntry(int position)
@@ -64,24 +101,48 @@ namespace Toggl.Giskard.Adapters
             deleteTimeEntrySubject.OnNext(deletedTimeEntry);
         }
 
-        public override int HeaderOffset => isRatingViewVisible ? 2 : 1; 
+        public override int HeaderOffset
+        {
+            get
+            {
+                var headerOffset = currentSuggestions?.Count ?? 0;
+
+                //+1 for the suggestion header
+                if (haveSuggestions)
+                    headerOffset++;
+
+                if (isRatingViewVisible)
+                    headerOffset++;
+                return headerOffset;
+            }
+        }
 
         protected override bool TryBindCustomViewType(RecyclerView.ViewHolder holder, int position)
         {
-            return holder is MainLogSuggestionsListViewHolder
-                || holder is MainLogUserFeedbackViewHolder;
+            if (holder is MainLogSuggestionItemViewHolder suggestionviewHolder)
+            {
+                suggestionviewHolder.Item = currentSuggestions[position - 1];
+                return true;
+            }
+
+            return holder is MainLogUserFeedbackViewHolder
+                || holder is MainSuggestionsHeaderViewHolder;
         }
 
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
         {
+            if (viewType == SuggestionHeaderViewType)
+            {
+                var view = LayoutInflater.FromContext(parent.Context).Inflate(Resource.Layout.MainSuggestionsHeader, parent, false);
+                return new MainSuggestionsHeaderViewHolder(view);
+            }
+
             if (viewType == SuggestionViewType)
             {
-                var mainLogSuggestionsStopwatch = StopwatchProvider.Create(MeasuredOperation.CreateMainLogSuggestionsViewHolder);
-                mainLogSuggestionsStopwatch.Start();
-                var suggestionsView = LayoutInflater.FromContext(parent.Context).Inflate(Resource.Layout.MainSuggestions, parent, false);
-                var mainLogSuggestionsListViewHolder = new MainLogSuggestionsListViewHolder(suggestionsView, SuggestionsViewModel);
-                mainLogSuggestionsStopwatch.Stop();
-                return mainLogSuggestionsListViewHolder;
+                var view = LayoutInflater.FromContext(parent.Context).Inflate(Resource.Layout.MainSuggestionsCard, parent, false);
+                var suggestionViewHolder = new MainLogSuggestionItemViewHolder(view);
+                suggestionViewHolder.TappedSubject = suggestionTappedSubject;
+                return suggestionViewHolder;
             }
 
             if (viewType == UserFeedbackViewType)
@@ -122,10 +183,17 @@ namespace Toggl.Giskard.Adapters
 
         public override int GetItemViewType(int position)
         {
-            if (position == 0)
-                return SuggestionViewType;
+            var suggestionCount = currentSuggestions?.Count ?? 0;
+            if (haveSuggestions)
+            {
+                if (position == 0)
+                    return SuggestionHeaderViewType;
 
-            if (isRatingViewVisible && position == 1)
+                if (position <= suggestionCount)
+                    return SuggestionViewType;
+            }
+
+            if (isRatingViewVisible && position == suggestionCount + 1)
                 return UserFeedbackViewType;
 
             return base.GetItemViewType(position);
@@ -186,6 +254,73 @@ namespace Toggl.Giskard.Adapters
             return (oneFirst != null || otherFirst != null)
                    && oneFirst == otherFirst
                    && one.ContainsExactlyAll(other);
+        }
+
+        private sealed class SuggestionsDiffCallback : DiffUtil.Callback
+        {
+            private readonly IImmutableList<Suggestion> oldSuggestions;
+            private readonly IImmutableList<Suggestion> newSuggestions;
+
+            //To account for suggestion header
+            private const int headerOffset = 1;
+
+            public override int NewListSize
+            {
+                get
+                {
+                    var suggestionCount = newSuggestions.Count;
+                    if (suggestionCount > 0)
+                        suggestionCount++;
+                    return suggestionCount;
+                }
+            }
+
+            public override int OldListSize
+            {
+                get
+                {
+                    if (oldSuggestions == null)
+                        return 0;
+                    return oldSuggestions.Count + headerOffset;
+                }
+            }
+
+            public SuggestionsDiffCallback(IImmutableList<Suggestion> oldSuggestions, IImmutableList<Suggestion> newSuggestions)
+            {
+                this.oldSuggestions = oldSuggestions;
+                this.newSuggestions = newSuggestions;
+            }
+
+            public override bool AreContentsTheSame(int oldItemPosition, int newItemPosition)
+            {
+                if (oldItemPosition < headerOffset || newItemPosition < headerOffset)
+                {
+                    return oldItemPosition == newItemPosition;
+                }
+
+                var oldItem = oldSuggestions[oldItemPosition - headerOffset];
+                var newItem = newSuggestions[newItemPosition - headerOffset];
+
+                //Compare just the fields that we display in UI
+                return oldItem.Description == newItem.Description
+                    && oldItem.ProjectName == newItem.ProjectName
+                    && oldItem.TaskName == newItem.TaskName
+                    && oldItem.ClientName == newItem.ClientName
+                    && oldItem.ProjectColor == newItem.ProjectColor;
+            }
+
+            public override bool AreItemsTheSame(int oldItemPosition, int newItemPosition)
+            {
+                if (oldItemPosition < headerOffset || newItemPosition < headerOffset)
+                {
+                    return oldItemPosition == newItemPosition;
+                }
+
+                var oldItem = oldSuggestions[oldItemPosition - headerOffset];
+                var newItem = newSuggestions[newItemPosition - headerOffset];
+
+                return oldItem.Equals(newItem);
+            }
         }
     }
 }
