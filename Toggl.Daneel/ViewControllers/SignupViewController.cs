@@ -97,6 +97,10 @@ namespace Toggl.Daneel.ViewControllers
                 .BindAction(ViewModel.OpenCountryPicker)
                 .DisposedBy(DisposeBag);
 
+            TOSButton.Rx()
+                .BindAction(ViewModel.ToggleTOSAgreement)
+                .DisposedBy(DisposeBag);
+
             ViewModel.EmailRelay
                 .Subscribe(SignUpWithEmailTextField.Rx().TextObserver())
                 .DisposedBy(DisposeBag);
@@ -173,6 +177,14 @@ namespace Toggl.Daneel.ViewControllers
 
             ViewModel.IsLoading.Select(signupButtonTitle)
                 .Subscribe(SignUpButton.Rx().AnimatedTitle())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.CountryErrorLabelVisible
+                .Subscribe(CountryErrorLabel.Rx().AnimatedIsVisible())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.TOSErrorLabelVisible
+                .Subscribe(TOSErrorLabel.Rx().AnimatedIsVisible())
                 .DisposedBy(DisposeBag);
 
             ViewModel.IsEmailScreenVisible

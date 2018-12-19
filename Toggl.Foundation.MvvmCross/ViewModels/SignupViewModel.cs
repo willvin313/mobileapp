@@ -64,7 +64,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
         private readonly Exception incorrectPasswordException = new Exception(Resources.IncorrectEmailOrPassword);
         private readonly Exception emailIsAlreadyUsedException = new Exception(Resources.EmailIsAlreadyUsedError);
-        private readonly BehaviorSubject<bool> termAccepted = new BehaviorSubject<bool>(false);
+        private readonly BehaviorSubject<bool> tosAccepted = new BehaviorSubject<bool>(false);
         private readonly BehaviorSubject<ICountry> selectedCountry = new BehaviorSubject<ICountry>(null);
 
         public BehaviorRelay<string> EmailRelay { get; } = new BehaviorRelay<string>(string.Empty);
@@ -90,6 +90,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public IObservable<bool> IsCountrySelectionScreenVisible { get; }
         public IObservable<bool> IsPasswordRuleMessageVisible { get; }
         public IObservable<string> CountryNameLabel { get; }
+        public IObservable<bool> CountryErrorLabelVisible { get; }
+        public IObservable<bool> TOSErrorLabelVisible { get; }
 
         public SignupViewModel(
             IApiFactory apiFactory,
@@ -191,6 +193,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .AsDriver(string.Empty, schedulerProvider);
 
             OpenCountryPicker = UIAction.FromObservable(openCountryPicker);
+
+            CountryErrorLabelVisible = selectedCountry
+                .Select(country => country == null)
+                .AsDriver(schedulerProvider);
+
+            TOSErrorLabelVisible = tosAccepted.Invert().AsDriver(schedulerProvider);
         }
 
         public override void Prepare(CredentialsParameter parameter)
@@ -261,7 +269,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private void toggleTOSAgreement()
         {
-            termAccepted.OnNext(!termAccepted.Value);
+            tosAccepted.OnNext(!tosAccepted.Value);
         }
 
         private void back()
@@ -296,7 +304,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 return Observable.Throw<Unit>(new Exception(Resources.SignUpCountryRequired));
             }
 
-            if (!termAccepted.Value)
+            if (!tosAccepted.Value)
             {
                 return Observable.Throw<Unit>(new Exception(Resources.TOSAgreeRequired));
             }
