@@ -19,6 +19,12 @@ namespace Toggl.Daneel.ViewControllers
 		UIKit.NSLayoutConstraint BottomToSafeAreaConstraint { get; set; }
 
 		[Outlet]
+		UIKit.UILabel CountryErrorLabel { get; set; }
+
+		[Outlet]
+		UIKit.UILabel CountryNameLabel { get; set; }
+
+		[Outlet]
 		UIKit.UIView CountrySelectionScreenWrapperView { get; set; }
 
 		[Outlet]
@@ -49,7 +55,13 @@ namespace Toggl.Daneel.ViewControllers
 		Toggl.Daneel.Views.LoginTextField PasswordTextField { get; set; }
 
 		[Outlet]
+		UIKit.UIButton SelectCountryButton { get; set; }
+
+		[Outlet]
 		Toggl.Daneel.Views.LoginTextField SigningUpWithEmailTextField { get; set; }
+
+		[Outlet]
+		UIKit.UIButton SignUpButton { get; set; }
 
 		[Outlet]
 		UIKit.UIButton SignUpWithEmailButton { get; set; }
@@ -58,10 +70,21 @@ namespace Toggl.Daneel.ViewControllers
 		Toggl.Daneel.Views.LoginTextField SignUpWithEmailTextField { get; set; }
 
 		[Outlet]
+		UIKit.UIButton TOSButton { get; set; }
+
+		[Outlet]
+		UIKit.UILabel TOSErrorLabel { get; set; }
+
+		[Outlet]
 		UIKit.UILabel UseSixCharactersLabel { get; set; }
 		
 		void ReleaseDesignerOutlets ()
 		{
+			if (ActivityIndicator != null) {
+				ActivityIndicator.Dispose ();
+				ActivityIndicator = null;
+			}
+
 			if (BottomToSafeAreaConstraint != null) {
 				BottomToSafeAreaConstraint.Dispose ();
 				BottomToSafeAreaConstraint = null;
@@ -72,14 +95,14 @@ namespace Toggl.Daneel.ViewControllers
 				CountrySelectionScreenWrapperView = null;
 			}
 
+			if (EmailAndPasswordErrorLabel != null) {
+				EmailAndPasswordErrorLabel.Dispose ();
+				EmailAndPasswordErrorLabel = null;
+			}
+
 			if (EmailAndPasswordScreenWrapperView != null) {
 				EmailAndPasswordScreenWrapperView.Dispose ();
 				EmailAndPasswordScreenWrapperView = null;
-			}
-
-			if (EmailScreenWrapperView != null) {
-				EmailScreenWrapperView.Dispose ();
-				EmailScreenWrapperView = null;
 			}
 
 			if (EmailScreenErrorLabel != null) {
@@ -87,9 +110,39 @@ namespace Toggl.Daneel.ViewControllers
 				EmailScreenErrorLabel = null;
 			}
 
+			if (EmailScreenWrapperView != null) {
+				EmailScreenWrapperView.Dispose ();
+				EmailScreenWrapperView = null;
+			}
+
 			if (GoogleSignUpButton != null) {
 				GoogleSignUpButton.Dispose ();
 				GoogleSignUpButton = null;
+			}
+
+			if (NextButton != null) {
+				NextButton.Dispose ();
+				NextButton = null;
+			}
+
+			if (PasswordMaskingControl != null) {
+				PasswordMaskingControl.Dispose ();
+				PasswordMaskingControl = null;
+			}
+
+			if (PasswordMaskingImageView != null) {
+				PasswordMaskingImageView.Dispose ();
+				PasswordMaskingImageView = null;
+			}
+
+			if (PasswordTextField != null) {
+				PasswordTextField.Dispose ();
+				PasswordTextField = null;
+			}
+
+			if (SigningUpWithEmailTextField != null) {
+				SigningUpWithEmailTextField.Dispose ();
+				SigningUpWithEmailTextField = null;
 			}
 
 			if (SignUpWithEmailButton != null) {
@@ -107,39 +160,34 @@ namespace Toggl.Daneel.ViewControllers
 				UseSixCharactersLabel = null;
 			}
 
-			if (NextButton != null) {
-				NextButton.Dispose ();
-				NextButton = null;
+			if (CountryNameLabel != null) {
+				CountryNameLabel.Dispose ();
+				CountryNameLabel = null;
 			}
 
-			if (ActivityIndicator != null) {
-				ActivityIndicator.Dispose ();
-				ActivityIndicator = null;
+			if (SelectCountryButton != null) {
+				SelectCountryButton.Dispose ();
+				SelectCountryButton = null;
 			}
 
-			if (EmailAndPasswordErrorLabel != null) {
-				EmailAndPasswordErrorLabel.Dispose ();
-				EmailAndPasswordErrorLabel = null;
+			if (TOSButton != null) {
+				TOSButton.Dispose ();
+				TOSButton = null;
 			}
 
-			if (SigningUpWithEmailTextField != null) {
-				SigningUpWithEmailTextField.Dispose ();
-				SigningUpWithEmailTextField = null;
+			if (CountryErrorLabel != null) {
+				CountryErrorLabel.Dispose ();
+				CountryErrorLabel = null;
 			}
 
-			if (PasswordTextField != null) {
-				PasswordTextField.Dispose ();
-				PasswordTextField = null;
+			if (TOSErrorLabel != null) {
+				TOSErrorLabel.Dispose ();
+				TOSErrorLabel = null;
 			}
 
-			if (PasswordMaskingControl != null) {
-				PasswordMaskingControl.Dispose ();
-				PasswordMaskingControl = null;
-			}
-
-			if (PasswordMaskingImageView != null) {
-				PasswordMaskingImageView.Dispose ();
-				PasswordMaskingImageView = null;
+			if (SignUpButton != null) {
+				SignUpButton.Dispose ();
+				SignUpButton = null;
 			}
 		}
 	}

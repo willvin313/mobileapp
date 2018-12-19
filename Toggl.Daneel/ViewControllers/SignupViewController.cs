@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Extensions.Reactive;
+using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Multivac.Extensions;
@@ -149,6 +150,22 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(EmailAndPasswordErrorLabel.Rx().Text())
                 .DisposedBy(DisposeBag);
 
+            ViewModel.CountryNameLabel
+                .Subscribe(CountryNameLabel.Rx().Text())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.IsLoading
+                .Subscribe(ActivityIndicator.Rx().IsVisibleWithFade())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.IsLoading
+                .Subscribe(UIApplication.SharedApplication.Rx().NetworkActivityIndicatorVisible())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.IsLoading.Select(signupButtonTitle)
+                .Subscribe(SignUpButton.Rx().AnimatedTitle())
+                .DisposedBy(DisposeBag);
+
             ViewModel.IsEmailScreenVisible
                 .DoIf(CommonFunctions.Identity, _ => setFirstResponder(SignUpWithEmailTextField))
                 .Subscribe(EmailScreenWrapperView.Rx().AnimatedIsVisible())
@@ -202,6 +219,8 @@ namespace Toggl.Daneel.ViewControllers
             layer.BorderColor = Color.Signup.EnabledButtonColor.ToNativeColor().CGColor;
             layer.BorderWidth = 1;
         }
+
+        private string signupButtonTitle(bool isLoading) => isLoading ? "" : Resources.SignUpTitle;
 
         private void shake(UIView view) => view?.Shake();
 

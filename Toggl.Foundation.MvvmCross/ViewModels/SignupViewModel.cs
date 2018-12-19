@@ -75,6 +75,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public UIAction Back { get; }
         public UIAction TogglePasswordVisibility { get; }
         public UIAction GotoCountrySelection { get; }
+        public UIAction ToggleTOSAgreement { get; }
+        public UIAction OpenCountryPicker { get; }
 
         public IObservable<string> CountryButtonTitle { get; }
         public IObservable<bool> IsLoading { get; }
@@ -88,6 +90,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public IObservable<bool> IsEmailAndPasswordScreenVisible { get; }
         public IObservable<bool> IsCountrySelectionScreenVisible { get; }
         public IObservable<bool> IsPasswordRuleMessageVisible { get; }
+        public IObservable<string> CountryNameLabel { get; }
 
         public SignupViewModel(
             IApiFactory apiFactory,
@@ -142,6 +145,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             Back = UIAction.FromAction(back, isLoading.Invert());
 
+            ToggleTOSAgreement = UIAction.FromAction(toggleTOSAgreement);
+
             IsShowPasswordButtonVisible = PasswordRelay
                 .Select(password => password.Length > 1)
                 .DistinctUntilChanged()
@@ -181,6 +186,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .ObserveOn(schedulerProvider.MainScheduler);
 
             GotoCountrySelection = UIAction.FromAction(gotoCountrySelection);
+
+            CountryNameLabel = CountryRelay
+                .Select(country => country.Name)
+                .AsDriver(string.Empty, schedulerProvider);
         }
 
         public override void Prepare(CredentialsParameter parameter)
@@ -250,6 +259,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             state.OnNext(State.EmailAndPassword);
         }
 
+        private void toggleTOSAgreement()
+        {
+            TermsAccepted.Accept(!TermsAccepted.Value);
+        }
+
         private void back()
         {
             switch (state.Value)
@@ -271,18 +285,16 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             if (CountryRelay.Value == null)
             {
-                //TODO: Throw proper error here
-                throw new Exception();
+                throw new Exception(Resources.SignUpCountryRequired);
             }
 
             if (!TermsAccepted.Value)
             {
-                //TODO: Throw proper error here
-                throw new Exception();
+                throw new Exception(Resources.TOSAgreeRequired);
             }
 
             return userAccessManager
-                .SignUp(Email.From(EmailRelay.Value), Password.From(PasswordRelay.Value), true, CountryRelay.Value.Id)
+                .SignUp(Email.From(EmailRelay.Value), Password.From(PasswordRelay.Value), true, (int)CountryRelay.Value.Id)
                 .SelectMany(onSignupSuccessfully)
                 .Catch<Unit, Exception>(handleException)
                 .ObserveOn(schedulerProvider.MainScheduler);

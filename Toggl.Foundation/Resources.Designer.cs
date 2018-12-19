@@ -1023,5 +1023,11 @@ namespace Toggl.Foundation {
                 return ResourceManager.GetString("ContactUsUrl", resourceCulture);
             }
         }
+        
+        public static string TOSAgreeRequired {
+            get {
+                return ResourceManager.GetString("TOSAgreeRequired", resourceCulture);
+            }
+        }
     }
 }
