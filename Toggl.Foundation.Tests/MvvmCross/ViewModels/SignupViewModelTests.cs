@@ -11,6 +11,7 @@ using NUnit.Framework;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Exceptions;
 using Toggl.Foundation.Interactors;
+using Toggl.Foundation.Login;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Tests.Generators;
@@ -28,6 +29,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
     {
         public abstract class SignupViewModelTest : BaseViewModelTests<SignupViewModel>
         {
+            protected GoogleAccountData googleAccountData = new GoogleAccountData("someguy", "someguy@email.com", "sometoken");
+
             protected Email ValidEmail { get; } = Email.From("susancalvin@psychohistorian.museum");
             protected Email InvalidEmail { get; } = Email.From("foo@");
 
@@ -254,7 +257,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 await ViewModel.GoogleSignup();
 
-                UserAccessManager.DidNotReceive().SignUpWithGoogle(Arg.Any<bool>(), Arg.Any<int>());
+                UserAccessManager.DidNotReceive().SignUpWithGoogle(Arg.Any<GoogleAccountData>(), Arg.Any<bool>(), Arg.Any<int>());
             }
 
             [Fact, LogIfTooSlow]
@@ -262,7 +265,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 NavigationService.Navigate<TermsOfServiceViewModel, bool>().Returns(true);
                 UserAccessManager
-                    .SignUpWithGoogle(Arg.Any<bool>(), Arg.Any<int>())
+                    .SignUpWithGoogle(Arg.Any<GoogleAccountData>(), Arg.Any<bool>(), Arg.Any<int>())
                     .Returns(Observable.Throw<ITogglDataSource>(new Exception()));
 
                 await ViewModel.GoogleSignup();
@@ -291,18 +294,18 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     await ViewModel.GoogleSignup();
 
-                    UserAccessManager.Received().SignUpWithGoogle(true, Arg.Any<int>());
+                    UserAccessManager.Received().SignUpWithGoogle(Arg.Any<GoogleAccountData>(), true, Arg.Any<int>());
                 }
 
                 [Fact, LogIfTooSlow]
                 public async Task DoesNothingWhenThePageIsCurrentlyLoading()
                 {
                     var never = Observable.Never<ITogglDataSource>();
-                    UserAccessManager.SignUpWithGoogle(Arg.Any<bool>(), Arg.Any<int>()).Returns(never);
+                    UserAccessManager.SignUpWithGoogle(Arg.Any<GoogleAccountData>(), Arg.Any<bool>(), Arg.Any<int>()).Returns(never);
                     await ViewModel.GoogleSignup();
                     await ViewModel.GoogleSignup();
 
-                    UserAccessManager.Received(1).SignUpWithGoogle(Arg.Any<bool>(), Arg.Any<int>());
+                    UserAccessManager.Received(1).SignUpWithGoogle(Arg.Any<GoogleAccountData>(), Arg.Any<bool>(), Arg.Any<int>());
                 }
 
                 [Fact, LogIfTooSlow]
@@ -311,7 +314,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     var observer = TestScheduler.CreateObserver<bool>();
                     ViewModel.IsLoading.Subscribe(observer);
 
-                    UserAccessManager.SignUpWithGoogle(true, Arg.Any<int>()).Returns(
+                    UserAccessManager.SignUpWithGoogle(Arg.Any<GoogleAccountData>(), true, Arg.Any<int>()).Returns(
                         Observable.Never<ITogglDataSource>());
 
                     await ViewModel.GoogleSignup();
@@ -329,7 +332,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     var observer = TestScheduler.CreateObserver<bool>();
                     ViewModel.IsLoading.Subscribe(observer);
 
-                    UserAccessManager.SignUpWithGoogle(Arg.Any<bool>(), Arg.Any<int>()).Returns(
+                    UserAccessManager.SignUpWithGoogle(Arg.Any<GoogleAccountData>(), Arg.Any<bool>(), Arg.Any<int>()).Returns(
                         Observable.Throw<ITogglDataSource>(new GoogleLoginException(false)));
 
                     await ViewModel.GoogleSignup();
@@ -345,7 +348,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 [Fact, LogIfTooSlow]
                 public async Task DoesNotNavigateWhenTheLoginFails()
                 {
-                    UserAccessManager.SignUpWithGoogle(Arg.Any<bool>(), Arg.Any<int>()).Returns(
+                    UserAccessManager.SignUpWithGoogle(Arg.Any<GoogleAccountData>(), Arg.Any<bool>(), Arg.Any<int>()).Returns(
                         Observable.Throw<ITogglDataSource>(new GoogleLoginException(false)));
 
                     await ViewModel.GoogleSignup();
@@ -361,7 +364,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     var errorTextObserver = TestScheduler.CreateObserver<string>();
                     ViewModel.ErrorMessage.Subscribe(errorTextObserver);
 
-                    UserAccessManager.SignUpWithGoogle(Arg.Any<bool>(), Arg.Any<int>()).Returns(
+                    UserAccessManager.SignUpWithGoogle(Arg.Any<GoogleAccountData>(), Arg.Any<bool>(), Arg.Any<int>()).Returns(
                         Observable.Throw<ITogglDataSource>(new GoogleLoginException(true)));
 
                     await ViewModel.GoogleSignup();
@@ -391,7 +394,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         ViewModel.Initialize().Wait();
 
                         UserAccessManager
-                            .SignUpWithGoogle(true, Arg.Any<int>())
+                            .SignUpWithGoogle(Arg.Any<GoogleAccountData>(), true, Arg.Any<int>())
                             .Returns(Observable.Return(DataSource));
 
                         NavigationService.Navigate<TermsOfServiceViewModel, bool>().Returns(true);

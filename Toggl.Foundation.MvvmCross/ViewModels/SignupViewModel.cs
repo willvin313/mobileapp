@@ -312,7 +312,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             errorMessageSubject.OnNext(string.Empty);
 
             signupDisposable = userAccessManager
-                .SignUpWithGoogle(termsOfServiceAccepted, (int)countryId.Value)
+                .GetGoogleAccountData()
+                .SelectMany(googleAccountData => userAccessManager.SignUpWithGoogle(googleAccountData, termsOfServiceAccepted, (int)countryId.Value))
                 .Subscribe(onDataSource, onError, onCompleted);
         }
 

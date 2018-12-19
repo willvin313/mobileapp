@@ -18,11 +18,10 @@ namespace Toggl.Giskard.Services
 {
     public sealed class GoogleServiceAndroid : MvxAndroidTask, IGoogleService
     {
-        private const int googleSignInResult = 123;
         private readonly object lockable = new object();
 
         private bool isLoggingIn;
-        private Subject<string> loginSubject = new Subject<string>();
+        private Subject<GoogleAccountData> loginSubject = new Subject<GoogleAccountData>();
         private Subject<Unit> logoutSubject = new Subject<Unit>();
         private readonly string scope = $"oauth2:{Scopes.Profile}";
 
@@ -31,7 +30,6 @@ namespace Toggl.Giskard.Services
         public GoogleServiceAndroid()
         {
             var signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DefaultSignIn)
-                .RequestIdToken("{TOGGL_DROID_GOOGLE_SERVICES_CLIENT_ID}")
                 .RequestEmail()
                 .Build();
 
@@ -62,7 +60,7 @@ namespace Toggl.Giskard.Services
             }
         }
 
-        public IObservable<string> GetAuthToken()
+        public IObservable<GoogleAccountData> GetGoogleAccountData()
         {
             lock (lockable)
             {
@@ -70,7 +68,7 @@ namespace Toggl.Giskard.Services
                     return loginSubject.AsObservable();
 
                 isLoggingIn = true;
-                loginSubject = new Subject<string>();
+                loginSubject = new Subject<GoogleAccountData>();
 
                 if (googleApiClient.IsConnected)
                 {
@@ -89,10 +87,10 @@ namespace Toggl.Giskard.Services
         {
             base.ProcessMvxIntentResult(result);
 
-            if (result.RequestCode != googleSignInResult)
+            if (result.RequestCode != IntentResultRequestCodes.SignIn)
                 return;
 
-            lock(lockable)
+            lock (lockable)
             {
                 var signInData = Auth.GoogleSignInApi.GetSignInResultFromIntent(result.Data);
                 if (signInData.IsSuccess)
@@ -101,8 +99,9 @@ namespace Toggl.Giskard.Services
                     {
                         try
                         {
+                            var account = signInData.SignInAccount;
                             var token = GoogleAuthUtil.GetToken(Application.Context, signInData.SignInAccount.Account, scope);
-                            loginSubject.OnNext(token);
+                            loginSubject.OnNext(new GoogleAccountData(account.GivenName + " " + account.FamilyName, token, account.Email));
                             loginSubject.OnCompleted();
                         }
                         catch (Exception e)
@@ -133,7 +132,7 @@ namespace Toggl.Giskard.Services
             }
 
             var intent = Auth.GoogleSignInApi.GetSignInIntent(googleApiClient);
-            StartActivityForResult(googleSignInResult, intent);
+            StartActivityForResult(IntentResultRequestCodes.SignIn, intent);
         }
 
         private void onError(ConnectionResult result)

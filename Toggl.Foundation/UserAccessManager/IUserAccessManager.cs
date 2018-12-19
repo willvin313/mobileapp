@@ -13,14 +13,17 @@ namespace Toggl.Foundation.Login
 
         IObservable<ITogglDataSource> Login(Email email, Password password);
 
-        IObservable<ITogglDataSource> SignUpWithGoogle(bool termsAccepted, int countryId);
+        IObservable<ITogglDataSource> SignUpWithGoogle(GoogleAccountData googleAccountData, bool termsAccepted, int countryId);
 
         IObservable<ITogglDataSource> SignUp(Email email, Password password, bool termsAccepted, int countryId);
 
         IObservable<Unit> Logout();
 
+        IObservable<GoogleAccountData> GetGoogleAccountData();
+
         IObservable<ITogglDataSource> RefreshToken(Password password);
 
         IObservable<string> ResetPassword(Email email);
     }
+
 }

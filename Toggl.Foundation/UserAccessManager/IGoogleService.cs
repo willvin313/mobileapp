@@ -5,7 +5,8 @@ namespace Toggl.Foundation.Login
 {
     public interface IGoogleService
     {
-        IObservable<string> GetAuthToken();
+        IObservable<GoogleAccountData> GetGoogleAccountData();
+
         IObservable<Unit> LogOutIfNeeded();
     }
 }
