@@ -1,5 +1,6 @@
 using System;
 using System.Reactive.Linq;
+using MvvmCross.Binding.BindingContext;
 using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Extensions.Reactive;
@@ -86,6 +87,14 @@ namespace Toggl.Daneel.ViewControllers
 
             NextButton.Rx()
                 .BindAction(ViewModel.GotoCountrySelection)
+                .DisposedBy(DisposeBag);
+
+            SignUpButton.Rx()
+                .BindAction(ViewModel.SignUp)
+                .DisposedBy(DisposeBag);
+
+            SelectCountryButton.Rx()
+                .BindAction(ViewModel.OpenCountryPicker)
                 .DisposedBy(DisposeBag);
 
             ViewModel.EmailRelay

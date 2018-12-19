@@ -64,11 +64,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
         private readonly Exception incorrectPasswordException = new Exception(Resources.IncorrectEmailOrPassword);
         private readonly Exception emailIsAlreadyUsedException = new Exception(Resources.EmailIsAlreadyUsedError);
+        private readonly BehaviorSubject<bool> termAccepted = new BehaviorSubject<bool>(false);
+        private readonly BehaviorSubject<ICountry> selectedCountry = new BehaviorSubject<ICountry>(null);
 
         public BehaviorRelay<string> EmailRelay { get; } = new BehaviorRelay<string>(string.Empty);
         public BehaviorRelay<string> PasswordRelay { get; } = new BehaviorRelay<string>(string.Empty);
-        public BehaviorRelay<bool> TermsAccepted { get; } = new BehaviorRelay<bool>(false);
-        public BehaviorRelay<ICountry> CountryRelay { get; } = new BehaviorRelay<ICountry>(null);
         public UIAction SignupWithGoogle { get; }
         public UIAction SignupWithEmail { get; }
         public UIAction SignUp { get; }
@@ -85,7 +85,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public IObservable<bool> IsShowPasswordButtonVisible { get; }
         public IObservable<Unit> ClearPasswordScreenError { get; }
         public IObservable<Unit> ClearEmailScreenError { get; }
-        public IObservable<bool> IsEmailFieldEdittable { get; }
         public IObservable<bool> IsEmailScreenVisible { get; }
         public IObservable<bool> IsEmailAndPasswordScreenVisible { get; }
         public IObservable<bool> IsCountrySelectionScreenVisible { get; }
@@ -187,9 +186,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             GotoCountrySelection = UIAction.FromAction(gotoCountrySelection);
 
-            CountryNameLabel = CountryRelay
+            CountryNameLabel = selectedCountry
                 .Select(country => country.Name)
+                .Do(a => { }, () => Console.WriteLine("ASD"))
                 .AsDriver(string.Empty, schedulerProvider);
+
+            OpenCountryPicker = UIAction.FromObservable(openCountryPicker);
         }
 
         public override void Prepare(CredentialsParameter parameter)
@@ -209,8 +211,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             interactor
                 .Execute()
                 .Select(location => allCountries.Single(country => country.CountryCode == location.CountryCode))
-                .Take(1)
-                .Subscribe(CountryRelay.Accept)
+                .Subscribe(a => selectedCountry.OnNext(a))
                 .DisposedBy(disposeBag);
         }
 
@@ -261,7 +262,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private void toggleTOSAgreement()
         {
-            TermsAccepted.Accept(!TermsAccepted.Value);
+            termAccepted.OnNext(!termAccepted.Value);
         }
 
         private void back()
@@ -281,20 +282,28 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             }
         }
 
+        private IObservable<Unit> openCountryPicker() => navigationService
+            .Navigate<SelectCountryViewModel, long?, long?>(selectedCountry.Value.Id)
+            .ToObservable()
+            .Do(selectedCountryId =>
+                selectedCountry.OnNext(allCountries.Single(country => country.Id == selectedCountryId.Value)))
+            .SelectUnit()
+            .ObserveOn(schedulerProvider.MainScheduler);
+
         private IObservable<Unit> signup()
         {
-            if (CountryRelay.Value == null)
+            if (selectedCountry.Value == null)
             {
-                throw new Exception(Resources.SignUpCountryRequired);
+                return Observable.Throw<Unit>(new Exception(Resources.SignUpCountryRequired));
             }
 
-            if (!TermsAccepted.Value)
+            if (!termAccepted.Value)
             {
-                throw new Exception(Resources.TOSAgreeRequired);
+                return Observable.Throw<Unit>(new Exception(Resources.TOSAgreeRequired));
             }
 
             return userAccessManager
-                .SignUp(Email.From(EmailRelay.Value), Password.From(PasswordRelay.Value), true, (int)CountryRelay.Value.Id)
+                .SignUp(Email.From(EmailRelay.Value), Password.From(PasswordRelay.Value), true, (int)selectedCountry.Value.Id)
                 .SelectMany(onSignupSuccessfully)
                 .Catch<Unit, Exception>(handleException)
                 .ObserveOn(schedulerProvider.MainScheduler);
