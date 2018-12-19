@@ -87,7 +87,7 @@ namespace Toggl.Foundation.Login
             => database
                 .Clear()
                 .SelectMany(_ => googleService.LogOutIfNeeded())
-                .SelectMany(_ => googleService.GetAuthToken())
+                .SelectMany(_ => googleService.GetGoogleAccountData())
                 .SelectMany(loginWithGoogle);
 
         public IObservable<ITogglDataSource> SignUp(Email email, Password password, bool termsAccepted, int countryId)
@@ -106,11 +106,11 @@ namespace Toggl.Foundation.Login
                 .Do(shortcutCreator.OnLogin);
         }
 
-        public IObservable<ITogglDataSource> SignUpWithGoogle(bool termsAccepted, int countryId)
+        public IObservable<ITogglDataSource> SignUpWithGoogle(GoogleAccountData googleAccountData, bool termsAccepted, int countryId)
             => database
                 .Clear()
                 .SelectMany(_ => googleService.LogOutIfNeeded())
-                .SelectMany(_ => googleService.GetAuthToken())
+                .SelectValue(googleAccountData)
                 .SelectMany(authToken => signUpWithGoogle(authToken, termsAccepted, countryId));
 
         public IObservable<Unit> Logout()
@@ -167,9 +167,9 @@ namespace Toggl.Foundation.Login
             return cachedDataSource;
         }
 
-        private IObservable<ITogglDataSource> loginWithGoogle(string googleToken)
+        private IObservable<ITogglDataSource> loginWithGoogle(GoogleAccountData googleAccountData)
         {
-            var credentials = Credentials.WithGoogleToken(googleToken);
+            var credentials = Credentials.WithGoogleToken(googleAccountData.Token);
 
             return Observable
                 .Return(apiFactory.CreateApiWith(credentials))
@@ -194,11 +194,14 @@ namespace Toggl.Foundation.Login
         }
 
 
-        private IObservable<ITogglDataSource> signUpWithGoogle(string googleToken, bool termsAccepted, int countryId)
+        private IObservable<ITogglDataSource> signUpWithGoogle(
+            GoogleAccountData googleAccountData, 
+            bool termsAccepted, 
+            int countryId)
         {
             var api = apiFactory.CreateApiWith(Credentials.None);
             return api.User
-                .SignUpWithGoogle(googleToken, termsAccepted, countryId)
+                .SignUpWithGoogle(googleAccountData.Token, termsAccepted, countryId)
                 .Select(User.Clean)
                 .SelectMany(database.User.Create)
                 .Select(dataSourceFromUser)
@@ -236,5 +239,8 @@ namespace Toggl.Foundation.Login
                     break;
             }
         }
+
+        public IObservable<GoogleAccountData> GetGoogleAccountData()
+            => googleService.GetGoogleAccountData();
     }
 }

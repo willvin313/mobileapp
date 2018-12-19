@@ -18,7 +18,7 @@ namespace Toggl.Daneel.Services
         private const int cancelErrorCode = -5;
 
         private bool loggingIn;
-        private Subject<string> tokenSubject = new Subject<string>();
+        private Subject<GoogleAccountData> tokenSubject = new Subject<GoogleAccountData>();
 
         public void DidSignIn(SignIn signIn, GoogleUser user, NSError error)
         {
@@ -26,7 +26,7 @@ namespace Toggl.Daneel.Services
             {
                 var token = user.Authentication.AccessToken;
                 signIn.DisconnectUser();
-                tokenSubject.OnNext(token);
+                tokenSubject.OnNext(new GoogleAccountData(user.Profile.Name, token, user.Profile.Description));
             }
             else
             {
@@ -34,12 +34,12 @@ namespace Toggl.Daneel.Services
             }
 
             tokenSubject.OnCompleted();
-
-            tokenSubject = new Subject<string>();
+                    
+            tokenSubject = new Subject<GoogleAccountData>();
             loggingIn = false;
         }
 
-        public IObservable<string> GetAuthToken()
+        public IObservable<GoogleAccountData> GetGoogleAccountData()
         {
             if (!loggingIn)
             {

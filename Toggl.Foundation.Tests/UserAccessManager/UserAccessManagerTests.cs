@@ -36,6 +36,7 @@ namespace Toggl.Foundation.Tests.Login
             protected static readonly Email Email = "susancalvin@psychohistorian.museum".ToEmail();
             protected static readonly bool TermsAccepted = true;
             protected static readonly int CountryId = 237;
+            protected GoogleAccountData googleAccountData = new GoogleAccountData("Some Guy", "someguy@email.com", "sometoken");
 
             protected IUser User { get; } = new User { Id = 10, ApiToken = "ABCDEFG" };
             protected ITogglApi Api { get; } = Substitute.For<ITogglApi>();
@@ -303,7 +304,7 @@ namespace Toggl.Foundation.Tests.Login
             [Fact, LogIfTooSlow]
             public async Task LogsOutAfterGoogleLogin()
             {
-                GoogleService.GetAuthToken().Returns(Observable.Return("sometoken"));
+                GoogleService.GetGoogleAccountData().Returns(Observable.Return(googleAccountData));
                 await UserAccessManager.LoginWithGoogle();
                 await UserAccessManager.Logout();
                 await DataSource.Received().Logout();
@@ -530,7 +531,7 @@ namespace Toggl.Foundation.Tests.Login
         {
             public TheLoginWithGoogleMethod()
             {
-                GoogleService.GetAuthToken().Returns(Observable.Return("sometoken"));
+                GoogleService.GetGoogleAccountData().Returns(Observable.Return(googleAccountData));
             }
 
             [Fact, LogIfTooSlow]
@@ -546,11 +547,11 @@ namespace Toggl.Foundation.Tests.Login
             }
 
             [Fact, LogIfTooSlow]
-            public async Task UsesTheGoogleServiceToGetTheToken()
+            public async Task UsesTheGoogleServiceToGetTheGoogleAccountData()
             {
                 await UserAccessManager.LoginWithGoogle();
 
-                await GoogleService.Received().GetAuthToken();
+                await GoogleService.Received().GetGoogleAccountData();
             }
 
             [Fact, LogIfTooSlow]
@@ -642,13 +643,13 @@ namespace Toggl.Foundation.Tests.Login
         {
             public TheSignupWithGoogleMethod()
             {
-                GoogleService.GetAuthToken().Returns(Observable.Return("sometoken"));
+                GoogleService.GetGoogleAccountData().Returns(Observable.Return(googleAccountData));
             }
 
             [Fact, LogIfTooSlow]
             public async Task CallsAnalyticsService()
             {
-                await UserAccessManager.SignUpWithGoogle(true, 0);
+                await UserAccessManager.SignUpWithGoogle(googleAccountData, true, 0);
 
                 AnalyticsService.Received().SignUp.Track(AuthenticationMethod.Google);
             }
@@ -662,7 +663,7 @@ namespace Toggl.Foundation.Tests.Login
 
                 try
                 {
-                    await UserAccessManager.SignUpWithGoogle(true, 0);
+                    await UserAccessManager.SignUpWithGoogle(googleAccountData, true, 0);
                 }
                 catch
                 {

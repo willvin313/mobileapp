@@ -509,6 +509,7 @@
     <Compile Include="Activities\SignupOrLoginChoiceActivity.ViewBinds.cs">
       <DependentUpon>SignupOrLoginChoiceActivity.cs</DependentUpon>
     </Compile>
+    <Compile Include="Services\IntentResultRequestCodes.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\AndroidManifest.xml" />
