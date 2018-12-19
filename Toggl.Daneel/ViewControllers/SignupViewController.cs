@@ -41,21 +41,54 @@ namespace Toggl.Daneel.ViewControllers
                 .BindAction(ViewModel.Back)
                 .DisposedBy(DisposeBag);
 
-            SignUpWithEmailTextField.Rx().Text()
+            SignUpWithEmailTextField.Rx()
+                .Text()
                 .Subscribe(ViewModel.EmailRelay.Accept)
                 .DisposedBy(DisposeBag);
 
-            SignUpWithEmailTextField.Rx().ShouldReturn()
+            SignUpWithEmailTextField.Rx()
+                .ShouldReturn()
                 .SelectUnit()
                 .Subscribe(ViewModel.SignupWithEmail.Inputs)
                 .DisposedBy(DisposeBag);
 
-            ViewModel.EmailRelay
-                .Subscribe(SignUpWithEmailTextField.Rx().TextObserver())
-                .DisposedBy(DisposeBag);
-
             SignUpWithEmailButton.Rx()
                 .BindAction(ViewModel.SignupWithEmail)
+                .DisposedBy(DisposeBag);
+
+            SigningUpWithEmailTextField.Rx()
+                .ShouldReturn()
+                .Do(_ => setFirstResponder(PasswordTextField))
+                .Subscribe()
+                .DisposedBy(DisposeBag);
+
+            SigningUpWithEmailTextField.Rx()
+                .Text()
+                .Subscribe(ViewModel.EmailRelay.Accept)
+                .DisposedBy(DisposeBag);
+
+            PasswordMaskingControl.Rx()
+                .Tap()
+                .Subscribe(ViewModel.TogglePasswordVisibility.Inputs)
+                .DisposedBy(DisposeBag);
+
+            PasswordTextField.Rx()
+                .Text()
+                .Subscribe(ViewModel.PasswordRelay.Accept)
+                .DisposedBy(DisposeBag);
+
+            PasswordTextField.Rx()
+                .ShouldReturn()
+                .SelectUnit()
+                .Subscribe(ViewModel.GotoCountrySelection.Inputs)
+                .DisposedBy(DisposeBag);
+
+            NextButton.Rx()
+                .BindAction(ViewModel.GotoCountrySelection)
+                .DisposedBy(DisposeBag);
+
+            ViewModel.EmailRelay
+                .Subscribe(SignUpWithEmailTextField.Rx().TextObserver())
                 .DisposedBy(DisposeBag);
 
             ViewModel.ClearEmailScreenError
@@ -76,7 +109,7 @@ namespace Toggl.Daneel.ViewControllers
                         case SignupViewModel.ShakeTarget.Email:
                             return SignUpWithEmailTextField;
                         case SignupViewModel.ShakeTarget.Password:
-                            return new UIView();
+                            return PasswordTextField;
                         default:
                             return null;
                     }
@@ -86,12 +119,43 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe()
                 .DisposedBy(DisposeBag);
 
+            ViewModel.PasswordRelay
+                .Subscribe(PasswordTextField.Rx().TextObserver())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.EmailRelay
+                .Subscribe(SigningUpWithEmailTextField.Rx().TextObserver())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.IsShowPasswordButtonVisible
+                .Subscribe(PasswordMaskingControl.Rx().IsVisible())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.IsPasswordMasked
+                .Subscribe(PasswordTextField.Rx().SecureTextEntry())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.IsPasswordMasked
+                .Subscribe(setMaskingIcon)
+                .DisposedBy(DisposeBag);
+
+            ViewModel.ClearPasswordScreenError
+                .Select(_ => string.Empty)
+                .Subscribe(EmailAndPasswordErrorLabel.Rx().Text())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.GotoCountrySelection.Errors
+                .Select(e => e.Message)
+                .Subscribe(EmailAndPasswordErrorLabel.Rx().Text())
+                .DisposedBy(DisposeBag);
+
             ViewModel.IsEmailScreenVisible
                 .DoIf(CommonFunctions.Identity, _ => setFirstResponder(SignUpWithEmailTextField))
                 .Subscribe(EmailScreenWrapperView.Rx().AnimatedIsVisible())
                 .DisposedBy(DisposeBag);
 
             ViewModel.IsEmailAndPasswordScreenVisible
+                .DoIf(CommonFunctions.Identity, _ => setFirstResponder(PasswordTextField))
                 .Subscribe(EmailAndPasswordScreenWrapperView.Rx().AnimatedIsVisible())
                 .DisposedBy(DisposeBag);
 
@@ -125,6 +189,7 @@ namespace Toggl.Daneel.ViewControllers
             NavigationController.NavigationBar.BackIndicatorImage = backIndicatorImage;
             NavigationController.NavigationBar.BackIndicatorTransitionMaskImage = backIndicatorImage;
             EmailScreenErrorLabel.Text = String.Empty;
+            SigningUpWithEmailTextField.Text = String.Empty;
             setupGoogleButton();
         }
 
@@ -140,6 +205,12 @@ namespace Toggl.Daneel.ViewControllers
         private void shake(UIView view) => view?.Shake();
 
         private void setFirstResponder(UIView view) => view?.BecomeFirstResponder();
+
+        private void setMaskingIcon(bool masked)
+        {
+            var imageName = masked ? "icPasswordMasked" : "icPasswordUnmasked";
+            PasswordMaskingImageView.Image = UIImage.FromBundle(imageName);
+        }
     }
 }
 

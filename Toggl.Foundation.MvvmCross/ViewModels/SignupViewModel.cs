@@ -59,19 +59,22 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public BehaviorRelay<string> EmailRelay { get; } = new BehaviorRelay<string>(string.Empty);
         public BehaviorRelay<string> PasswordRelay { get; } = new BehaviorRelay<string>(string.Empty);
+        public BehaviorRelay<bool> TermsAccepted { get; } = new BehaviorRelay<bool>(false);
         public UIAction SignupWithGoogle { get; }
         public UIAction SignupWithEmail { get; }
         public UIAction SignUp { get; }
         public UIAction Back { get; }
+        public UIAction TogglePasswordVisibility { get; }
+        public UIAction GotoCountrySelection { get; }
 
         public IObservable<string> CountryButtonTitle { get; }
         public IObservable<bool> IsLoading { get; }
         public IObservable<ShakeTarget> Shake { get; }
         public IObservable<bool> IsPasswordMasked { get; }
         public IObservable<bool> IsShowPasswordButtonVisible { get; }
-        public IObservable<bool> SuggestContactSupport { get; }
         public IObservable<Unit> ClearPasswordScreenError { get; }
         public IObservable<Unit> ClearEmailScreenError { get; }
+        public IObservable<bool> IsEmailFieldEdittable { get; }
         public IObservable<bool> IsEmailScreenVisible { get; }
         public IObservable<bool> IsEmailAndPasswordScreenVisible { get; }
         public IObservable<bool> IsCountrySelectionScreenVisible { get; }
@@ -110,7 +113,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             var isPasswordValid = PasswordRelay
                 .Select(password => Password.From(password).IsValid);
 
-            Shake = shakeSubject.AsDriver(this.schedulerProvider);
+            Shake = shakeSubject.AsDriver(ShakeTarget.None, this.schedulerProvider);
 
             IsPasswordMasked = isPasswordMaskedSubject
                 .DistinctUntilChanged()
@@ -122,10 +125,19 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             SignUp = UIAction.FromAction(() => throw new Exception());
 
-            var isLoggingIn = Observable
+            var isLoading = Observable
                 .CombineLatest(SignUp.Executing, SignupWithGoogle.Executing, CommonFunctions.Or);
 
-            Back = UIAction.FromAction(back, isLoggingIn.Invert());
+            IsLoading = isLoading.AsDriver(schedulerProvider);
+
+            Back = UIAction.FromAction(back, isLoading.Invert());
+
+            IsShowPasswordButtonVisible = PasswordRelay
+                .Select(password => password.Length > 1)
+                .DistinctUntilChanged()
+                .AsDriver(schedulerProvider);
+
+            TogglePasswordVisibility = UIAction.FromAction(togglePasswordVisibility);
 
             ClearEmailScreenError = isEmailValid
                 .Where(CommonFunctions.Identity)
@@ -134,18 +146,31 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             IsEmailScreenVisible = state
                 .Select(s => s == State.Email)
-                .AsObservable()
+                .DistinctUntilChanged()
                 .AsDriver(schedulerProvider);
 
             IsEmailAndPasswordScreenVisible = state
                 .Select(s => s == State.EmailAndPassword)
-                .AsObservable()
+                .DistinctUntilChanged()
                 .AsDriver(schedulerProvider);
 
             IsCountrySelectionScreenVisible = state
                 .Select(s => s == State.CountrySelection)
-                .AsObservable()
+                .DistinctUntilChanged()
                 .AsDriver(schedulerProvider);
+
+            IsPasswordMasked = isPasswordMaskedSubject
+                .DistinctUntilChanged()
+                .AsDriver(schedulerProvider);
+
+            ClearPasswordScreenError = Observable
+                .CombineLatest(isEmailValid, isPasswordValid, CommonFunctions.And)
+                .Merge(IsEmailScreenVisible)
+                .Where(CommonFunctions.Identity)
+                .SelectUnit()
+                .ObserveOn(schedulerProvider.MainScheduler);
+
+            GotoCountrySelection = UIAction.FromAction(gotoCountrySelection);
         }
 
         public override void Prepare(CredentialsParameter parameter)
@@ -163,6 +188,26 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private void togglePasswordVisibility()
             => isPasswordMaskedSubject.OnNext(!isPasswordMaskedSubject.Value);
+
+        private void gotoCountrySelection()
+        {
+            var password = Password.From(PasswordRelay.Value);
+            var email = Email.From(EmailRelay.Value);
+
+            if (!email.IsValid)
+            {
+                shakeSubject.OnNext(ShakeTarget.Email);
+                throw invalidEmailException;
+            }
+
+            if (!password.IsValid)
+            {
+                shakeSubject.OnNext(ShakeTarget.Password);
+                throw new Exception(Resources.PasswordTooShort);
+            }
+
+            state.OnNext(State.CountrySelection);
+        }
 
         private IObservable<Unit> signupWithGoogle()
         {
