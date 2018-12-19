@@ -187,8 +187,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             GotoCountrySelection = UIAction.FromAction(gotoCountrySelection);
 
             CountryNameLabel = selectedCountry
-                .Select(country => country.Name)
-                .Do(a => { }, () => Console.WriteLine("ASD"))
+                .Select(country => country?.Name ?? "")
                 .AsDriver(string.Empty, schedulerProvider);
 
             OpenCountryPicker = UIAction.FromObservable(openCountryPicker);
