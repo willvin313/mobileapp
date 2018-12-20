@@ -143,7 +143,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
         }
 
-        public sealed class ClearPasswordScreenError : SignupViewModelTest
+        public sealed class TheClearPasswordScreenError : SignupViewModelTest
         {
             [Theory]
             [InlineData(false, false, false)]
@@ -334,5 +334,48 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
         }
 
+        public sealed class TheGoToCountrySelectionAction : SignupViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public void EmitErrorWhenEmailIsInvalid()
+            {
+                var observer = TestScheduler.CreateObserver<Exception>();
+                ViewModel.GotoCountrySelection.Errors.Subscribe(observer);
+                ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
+
+                ViewModel.GotoCountrySelection.Execute();
+                TestScheduler.Start();
+
+                observer.LastValue().Message.Should().Be(Resources.EnterValidEmail);
+            }
+
+            [Fact, LogIfTooSlow]
+            public void EmitErrorWhenPasswordIsTooShort()
+            {
+                var observer = TestScheduler.CreateObserver<Exception>();
+                ViewModel.GotoCountrySelection.Errors.Subscribe(observer);
+                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
+                ViewModel.PasswordRelay.Accept(InvalidPassword.ToString());
+
+                ViewModel.GotoCountrySelection.Execute();
+                TestScheduler.Start();
+
+                observer.LastValue().Message.Should().Be(Resources.PasswordTooShort);
+            }
+
+            [Fact, LogIfTooSlow]
+            public void ShouldChangeStateToCountrySelection()
+            {
+                var observer = TestScheduler.CreateObserver<bool>();
+                ViewModel.IsCountrySelectionScreenVisible.Subscribe(observer);
+                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
+                ViewModel.PasswordRelay.Accept(ValidEmail.ToString());
+
+                ViewModel.GotoCountrySelection.Execute();
+                TestScheduler.Start();
+
+                observer.LastValue().Should().BeTrue();
+            }
+        }
     }
 }
