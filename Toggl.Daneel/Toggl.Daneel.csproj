@@ -554,6 +554,12 @@
     <ImageAsset Include="Resources\Images.xcassets\icPasswordMasked.imageset\icPasswordMasked.pdf" />
     <ImageAsset Include="Resources\Images.xcassets\icPasswordUnmasked.imageset\Contents.json" />
     <ImageAsset Include="Resources\Images.xcassets\icPasswordUnmasked.imageset\icPasswordUnmasked.pdf" />
+    <ImageAsset Include="Resources\Images.xcassets\icCheckboxSquareChecked.imageset\Contents.json" />
+    <ImageAsset Include="Resources\Images.xcassets\icCheckboxSquareChecked.imageset\unchecked.pdf" />
+    <ImageAsset Include="Resources\Images.xcassets\icCheckboxSquareErrored.imageset\Contents.json" />
+    <ImageAsset Include="Resources\Images.xcassets\icCheckboxSquareErrored.imageset\unchecked.pdf" />
+    <ImageAsset Include="Resources\Images.xcassets\icCheckboxSquareUnchecked.imageset\Contents.json" />
+    <ImageAsset Include="Resources\Images.xcassets\icCheckboxSquareUnchecked.imageset\unchecked.pdf" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="LaunchScreen.storyboard" />

@@ -22,9 +22,6 @@ namespace Toggl.Daneel.ViewControllers
 		UIKit.UILabel CountryErrorLabel { get; set; }
 
 		[Outlet]
-		UIKit.UILabel CountryNameLabel { get; set; }
-
-		[Outlet]
 		UIKit.UIView CountrySelectionScreenWrapperView { get; set; }
 
 		[Outlet]
@@ -55,7 +52,7 @@ namespace Toggl.Daneel.ViewControllers
 		Toggl.Daneel.Views.LoginTextField PasswordTextField { get; set; }
 
 		[Outlet]
-		UIKit.UIButton SelectCountryButton { get; set; }
+		Toggl.Daneel.Views.LoginTextField SelectCountryTextField { get; set; }
 
 		[Outlet]
 		Toggl.Daneel.Views.LoginTextField SigningUpWithEmailTextField { get; set; }
@@ -88,6 +85,11 @@ namespace Toggl.Daneel.ViewControllers
 			if (BottomToSafeAreaConstraint != null) {
 				BottomToSafeAreaConstraint.Dispose ();
 				BottomToSafeAreaConstraint = null;
+			}
+
+			if (CountryErrorLabel != null) {
+				CountryErrorLabel.Dispose ();
+				CountryErrorLabel = null;
 			}
 
 			if (CountrySelectionScreenWrapperView != null) {
@@ -145,6 +147,11 @@ namespace Toggl.Daneel.ViewControllers
 				SigningUpWithEmailTextField = null;
 			}
 
+			if (SignUpButton != null) {
+				SignUpButton.Dispose ();
+				SignUpButton = null;
+			}
+
 			if (SignUpWithEmailButton != null) {
 				SignUpWithEmailButton.Dispose ();
 				SignUpWithEmailButton = null;
@@ -155,29 +162,9 @@ namespace Toggl.Daneel.ViewControllers
 				SignUpWithEmailTextField = null;
 			}
 
-			if (UseSixCharactersLabel != null) {
-				UseSixCharactersLabel.Dispose ();
-				UseSixCharactersLabel = null;
-			}
-
-			if (CountryNameLabel != null) {
-				CountryNameLabel.Dispose ();
-				CountryNameLabel = null;
-			}
-
-			if (SelectCountryButton != null) {
-				SelectCountryButton.Dispose ();
-				SelectCountryButton = null;
-			}
-
 			if (TOSButton != null) {
 				TOSButton.Dispose ();
 				TOSButton = null;
-			}
-
-			if (CountryErrorLabel != null) {
-				CountryErrorLabel.Dispose ();
-				CountryErrorLabel = null;
 			}
 
 			if (TOSErrorLabel != null) {
@@ -185,9 +172,14 @@ namespace Toggl.Daneel.ViewControllers
 				TOSErrorLabel = null;
 			}
 
-			if (SignUpButton != null) {
-				SignUpButton.Dispose ();
-				SignUpButton = null;
+			if (UseSixCharactersLabel != null) {
+				UseSixCharactersLabel.Dispose ();
+				UseSixCharactersLabel = null;
+			}
+
+			if (SelectCountryTextField != null) {
+				SelectCountryTextField.Dispose ();
+				SelectCountryTextField = null;
 			}
 		}
 	}

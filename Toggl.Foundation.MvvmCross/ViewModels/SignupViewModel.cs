@@ -93,6 +93,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public IObservable<string> CountryNameLabel { get; }
         public IObservable<bool> CountryErrorLabelVisible { get; }
         public IObservable<bool> TOSErrorLabelVisible { get; }
+        public IObservable<bool> TOSAccepted { get; }
 
         public SignupViewModel(
             IApiFactory apiFactory,
@@ -201,6 +202,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             TOSErrorLabelVisible = SignUp.Errors
                 .Select(exception => exception == tosNotAcceptedException)
+                .AsDriver(schedulerProvider);
+
+            TOSAccepted = tosAccepted
                 .AsDriver(schedulerProvider);
         }
 

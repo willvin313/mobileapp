@@ -19,6 +19,10 @@ namespace Toggl.Daneel.ViewControllers
             new UIBarButtonItem(UIImage.FromBundle("icBackNoPadding"), UIBarButtonItemStyle.Plain, null);
         private readonly UIImage backIndicatorImage = UIImage.FromBundle("icBackNoPadding");
 
+        private readonly UIImage tosErrorButtonImage = UIImage.FromBundle("icCheckboxSquareErrored");
+        private readonly UIImage tosUncheckedButtonImage = UIImage.FromBundle("icCheckboxSquareUnchecked");
+        private readonly UIImage tosCheckedButtonImage = UIImage.FromBundle("icCheckboxSquareChecked");
+
         public SignupViewController()
             : base(nameof(SignupViewController))
         {
@@ -93,7 +97,7 @@ namespace Toggl.Daneel.ViewControllers
                 .BindAction(ViewModel.SignUp)
                 .DisposedBy(DisposeBag);
 
-            SelectCountryButton.Rx()
+            SelectCountryTextField.Rx()
                 .BindAction(ViewModel.OpenCountryPicker)
                 .DisposedBy(DisposeBag);
 
@@ -164,7 +168,7 @@ namespace Toggl.Daneel.ViewControllers
                 .DisposedBy(DisposeBag);
 
             ViewModel.CountryNameLabel
-                .Subscribe(CountryNameLabel.Rx().Text())
+                .Subscribe(SelectCountryTextField.Rx().TextObserver())
                 .DisposedBy(DisposeBag);
 
             ViewModel.IsLoading
@@ -184,7 +188,13 @@ namespace Toggl.Daneel.ViewControllers
                 .DisposedBy(DisposeBag);
 
             ViewModel.TOSErrorLabelVisible
+                .DoIf(CommonFunctions.Identity, _ => TOSButton.SetImage(tosErrorButtonImage, UIControlState.Normal))
                 .Subscribe(TOSErrorLabel.Rx().AnimatedIsVisible())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.TOSAccepted
+                .Subscribe(accepted => TOSButton.SetImage(accepted ? tosCheckedButtonImage : tosUncheckedButtonImage,
+                    UIControlState.Normal))
                 .DisposedBy(DisposeBag);
 
             ViewModel.IsEmailScreenVisible
@@ -229,6 +239,7 @@ namespace Toggl.Daneel.ViewControllers
             EmailScreenErrorLabel.Text = String.Empty;
             SigningUpWithEmailTextField.Text = String.Empty;
             SigningUpWithEmailTextField.Enabled = false;
+            SelectCountryTextField.Enabled = false;
             setupGoogleButton();
         }
 
