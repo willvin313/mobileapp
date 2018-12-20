@@ -14,6 +14,7 @@ using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.MvvmCross.ViewModels.Settings;
+using Toggl.Foundation.MvvmCross.ViewModels.UserAccess;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Sync;
 using Toggl.Foundation.Tests.Generators;
@@ -272,12 +273,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task NavigatesToTheLoginScreen()
+            public async Task NavigatesToSignUpOrLoginChoiceScreen()
             {
                 doNotShowConfirmationDialog();
                 await ViewModel.TryLogout();
 
-                await NavigationService.Received().Navigate<LoginViewModel>();
+                await NavigationService.Received().Navigate<SignupOrLoginChoiceViewModel>();
             }
 
             [Fact, LogIfTooSlow]
@@ -335,7 +336,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 await ViewModel.TryLogout();
 
                 await UserAccessManager.DidNotReceive().Logout();
-                await NavigationService.DidNotReceive().Navigate<LoginViewModel>();
+                await NavigationService.DidNotReceive().Navigate<SignupOrLoginChoiceViewModel>();
             }
 
             [Fact, LogIfTooSlow]
@@ -351,7 +352,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 await ViewModel.TryLogout();
 
                 await UserAccessManager.Received().Logout();
-                await NavigationService.Received().Navigate<LoginViewModel>();
+                await NavigationService.Received().Navigate<SignupOrLoginChoiceViewModel>();
             }
 
             [Fact, LogIfTooSlow]

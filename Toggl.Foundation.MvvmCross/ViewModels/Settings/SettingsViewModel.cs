@@ -20,6 +20,7 @@ using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.MvvmCross.Transformations;
 using Toggl.Foundation.MvvmCross.ViewModels.Settings;
+using Toggl.Foundation.MvvmCross.ViewModels.UserAccess;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Sync;
 using Toggl.Multivac;
@@ -395,7 +396,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             privateSharedStorageService.ClearAll();
             intentDonationService.ClearAll();
 
-            return userAccessManager.Logout().Do(_ => navigationService.Navigate<LoginViewModel>());
+            return userAccessManager.Logout().Do(_ => navigationService.Navigate<SignupOrLoginChoiceViewModel>());
         }
 
         private IObservable<bool> isSynced()
