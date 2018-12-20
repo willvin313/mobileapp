@@ -64,6 +64,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
         private readonly Exception incorrectPasswordException = new Exception(Resources.IncorrectEmailOrPassword);
         private readonly Exception emailIsAlreadyUsedException = new Exception(Resources.EmailIsAlreadyUsedError);
+        private readonly Exception missingCountryException = new Exception(Resources.SignUpCountryRequired);
+        private readonly Exception tosNotAcceptedException = new Exception(Resources.TOSAgreeRequired);
         private readonly BehaviorSubject<bool> tosAccepted = new BehaviorSubject<bool>(false);
         private readonly BehaviorSubject<ICountry> selectedCountry = new BehaviorSubject<ICountry>(null);
 
@@ -194,11 +196,13 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             OpenCountryPicker = UIAction.FromObservable(openCountryPicker);
 
-            CountryErrorLabelVisible = selectedCountry
-                .Select(country => country == null)
+            CountryErrorLabelVisible = SignUp.Errors
+                .Select(exception => exception == missingCountryException)
                 .AsDriver(schedulerProvider);
 
-            TOSErrorLabelVisible = tosAccepted.Invert().AsDriver(schedulerProvider);
+            TOSErrorLabelVisible = SignUp.Errors
+                .Select(exception => exception == tosNotAcceptedException)
+                .AsDriver(schedulerProvider);
         }
 
         public override void Prepare(CredentialsParameter parameter)
@@ -301,12 +305,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             if (selectedCountry.Value == null)
             {
-                return Observable.Throw<Unit>(new Exception(Resources.SignUpCountryRequired));
+                return Observable.Throw<Unit>(missingCountryException);
             }
 
             if (!tosAccepted.Value)
             {
-                return Observable.Throw<Unit>(new Exception(Resources.TOSAgreeRequired));
+                return Observable.Throw<Unit>(tosNotAcceptedException);
             }
 
             return userAccessManager
