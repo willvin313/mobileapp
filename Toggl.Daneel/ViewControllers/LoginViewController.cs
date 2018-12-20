@@ -74,7 +74,7 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(ViewModel.EmailRelay.Accept)
                 .DisposedBy(DisposeBag);
 
-            LoginWithEmailTextField.Rx().ShouldReturn()
+            LoginWithEmailTextField.Rx().ShouldReturn(false)
                 .SelectUnit()
                 .Subscribe(ViewModel.LoginWithEmail.Inputs)
                 .DisposedBy(DisposeBag);
@@ -96,7 +96,7 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(ViewModel.PasswordRelay.Accept)
                 .DisposedBy(DisposeBag);
 
-            PasswordTextField.Rx().ShouldReturn()
+            PasswordTextField.Rx().ShouldReturn(false)
                 .SelectUnit()
                 .Subscribe(ViewModel.Login.Inputs)
                 .DisposedBy(DisposeBag);
@@ -109,7 +109,7 @@ namespace Toggl.Daneel.ViewControllers
                 .BindAction(ViewModel.Login)
                 .DisposedBy(DisposeBag);
 
-            SecondScreenEmailTextField.Rx().ShouldReturn()
+            SecondScreenEmailTextField.Rx().ShouldReturn(false)
                 .Subscribe(_ => PasswordTextField.BecomeFirstResponder())
                 .DisposedBy(DisposeBag);
 
@@ -143,7 +143,7 @@ namespace Toggl.Daneel.ViewControllers
                 .DisposedBy(DisposeBag);
 
             ViewModel.SuggestContactSupport
-                .Subscribe(ContactUsButton.Rx().AnimatedIsVisible())
+                .Subscribe(ContactUsButton.Rx().IsVisibleWithFade())
                 .DisposedBy(DisposeBag);
 
             ViewModel.ClearPasswordScreenError
@@ -200,7 +200,7 @@ namespace Toggl.Daneel.ViewControllers
                         LoginWithEmailTextField.BecomeFirstResponder();
                     }
                 })
-                .Subscribe(FirstScreenWrapperView.Rx().AnimatedIsVisible())
+                .Subscribe(FirstScreenWrapperView.Rx().IsVisibleWithFade())
                 .DisposedBy(DisposeBag);
 
             ViewModel.IsInSecondScreen
@@ -211,7 +211,7 @@ namespace Toggl.Daneel.ViewControllers
                         PasswordTextField.BecomeFirstResponder();
                     }
                 })
-                .Subscribe(SecondScreenWrapperView.Rx().AnimatedIsVisible())
+                .Subscribe(SecondScreenWrapperView.Rx().IsVisibleWithFade())
                 .DisposedBy(DisposeBag);
 
             ViewModel.Shake

@@ -41,11 +41,9 @@ namespace Toggl.Daneel.Extensions.Reactive
                 var alpha = isVisible ? 1 : 0;
                 AnimationExtensions.Animate(
                     Animation.Timings.EnterTiming,
-                    Animation.Curves.EaseIn,
-                    () =>
-                    {
-                        reactive.Base.Alpha = alpha;
-                    });
+                    isVisible ? Animation.Curves.EaseOut : Animation.Curves.EaseOut,
+                    () => { reactive.Base.Alpha = alpha; },
+                    () => { reactive.Base.Hidden = !isVisible; });
             };
 
         public static Action<UIColor> TintColor(this IReactive<UIView> reactive)
