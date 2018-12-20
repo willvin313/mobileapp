@@ -80,7 +80,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public UIAction ToggleTOSAgreement { get; }
         public UIAction OpenCountryPicker { get; }
 
-        public IObservable<string> CountryButtonTitle { get; }
         public IObservable<bool> IsLoading { get; }
         public IObservable<ShakeTarget> Shake { get; }
         public IObservable<bool> IsPasswordMasked { get; }
@@ -183,7 +182,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             ClearPasswordScreenError = Observable
                 .CombineLatest(isEmailValid, isPasswordValid, CommonFunctions.And)
-                .Merge(IsEmailScreenVisible)
+                .Merge(IsEmailScreenVisible.Skip(1))
                 .Where(CommonFunctions.Identity)
                 .SelectUnit()
                 .ObserveOn(schedulerProvider.MainScheduler);
@@ -196,8 +195,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             OpenCountryPicker = UIAction.FromObservable(openCountryPicker);
 
-            CountryErrorLabelVisible = SignUp.Errors
-                .Select(exception => exception == missingCountryException)
+            CountryErrorLabelVisible = selectedCountry
+                .Select(country => country == null)
                 .AsDriver(schedulerProvider);
 
             TOSErrorLabelVisible = SignUp.Errors

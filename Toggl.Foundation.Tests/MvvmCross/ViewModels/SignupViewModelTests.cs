@@ -1,26 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
-using FsCheck;
 using Microsoft.Reactive.Testing;
 using NSubstitute;
-using NUnit.Framework;
 using Toggl.Foundation.DataSources;
-using Toggl.Foundation.Exceptions;
-using Toggl.Foundation.Interactors;
-using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.Tests.Extensions;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Multivac;
 using Toggl.Multivac.Models;
 using Toggl.PrimeRadiant.Settings;
-using Toggl.Ultrawave.Exceptions;
 using Toggl.Ultrawave.Network;
 using Xunit;
-using static Toggl.Foundation.MvvmCross.ViewModels.SignupViewModel;
+using Unit = System.Reactive.Unit;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 {
@@ -107,321 +101,107 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 await Api.Location.Received().Get();
             }
+        }
 
+        public sealed class TheClearEmailScreenError : SignupViewModelTest
+        {
             [Fact, LogIfTooSlow]
-            public async Task SetsTheCountryButtonTitleToCountryNameWhenApiCallSucceeds()
+            public void DoesNotEmitWhenEmailIsInValid()
             {
-                var observer = TestScheduler.CreateObserver<string>();
-                ViewModel.CountryButtonTitle.Subscribe(observer);
-
-                await ViewModel.Initialize();
+                ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
+                var observer = TestScheduler.CreateObserver<Unit>();
+                ViewModel.ClearEmailScreenError.Subscribe(observer);
 
                 TestScheduler.Start();
-                observer.Messages.AssertEqual(
-                    ReactiveTest.OnNext(1, Resources.SelectCountry),
-                    ReactiveTest.OnNext(2, Location.CountryName)
-                );
+
+                observer.Messages.Should().BeEmpty();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task SetsTheCountryButtonTitleToSelectCountryWhenApiCallFails()
+            public void EmitsElementWhenEmailIsValid()
             {
-                var observer = TestScheduler.CreateObserver<string>();
-                ViewModel.CountryButtonTitle.Subscribe(observer);
-
-                Api.Location.Get().Returns(Observable.Throw<ILocation>(new Exception()));
-
-                await ViewModel.Initialize();
+                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
+                var observer = TestScheduler.CreateObserver<Unit>();
+                ViewModel.ClearEmailScreenError.Subscribe(observer);
 
                 TestScheduler.Start();
-                observer.Messages.AssertEqual(
-                    ReactiveTest.OnNext(1, Resources.SelectCountry)
-                );
+
+                observer.Messages.Should().HaveCount(1);
             }
 
             [Fact, LogIfTooSlow]
-            public async Task SetsFailedToGetCountryToTrueWhenApiCallFails()
+            public void EmitsElementWhenEmailTransitionFromInvalidToValid()
             {
-                var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.IsCountryErrorVisible.Subscribe(observer);
-
-                Api.Location.Get().Returns(Observable.Throw<ILocation>(new Exception()));
-
-                await ViewModel.Initialize();
+                var observer = TestScheduler.CreateObserver<Unit>();
+                ViewModel.ClearEmailScreenError.Subscribe(observer);
+                ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
+                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
 
                 TestScheduler.Start();
-                observer.Messages.AssertEqual(
-                    ReactiveTest.OnNext(1, false),
-                    ReactiveTest.OnNext(2, true)
-                );
+
+                observer.Messages.Should().HaveCount(1);
             }
         }
 
-        public sealed class ThePickCountryMethod : SignupViewModelTest
+        public sealed class ClearPasswordScreenError : SignupViewModelTest
         {
-            [Fact, LogIfTooSlow]
-            public async Task NavigatesToSelectCountryViewModelPassingNullIfLocationApiFailed()
+            [Theory]
+            [InlineData(false, false, false)]
+            [InlineData(false, true, false)]
+            [InlineData(true, false, false)]
+            [InlineData(true, true, true)]
+            public void EmitAppropriateValue(bool emailValid, bool passwordValid, bool shouldEmit)
             {
-                Api.Location.Get().Returns(Observable.Throw<ILocation>(new Exception()));
-                await ViewModel.Initialize();
-
-                await ViewModel.PickCountry();
-
-                await NavigationService.Received().Navigate<SelectCountryViewModel, long?, long?>(null);
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task NavigatesToSelectCountryViewModelPassingCountryIdIfLocationApiSucceeded()
-            {
-                await ViewModel.Initialize();
-                var selectedCountryId = await new GetAllCountriesInteractor()
-                    .Execute()
-                    .Select(countries => countries.Single(country => country.CountryCode == Location.CountryCode))
-                    .Select(country => country.Id);
-
-                await ViewModel.PickCountry();
-
-                await NavigationService.Received().Navigate<SelectCountryViewModel, long?, long?>(selectedCountryId);
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task UpdatesTheCountryButtonTitle()
-            {
-                var observer = TestScheduler.CreateObserver<string>();
-                ViewModel.CountryButtonTitle.Subscribe(observer);
-
-                var selectedCountry = await new GetAllCountriesInteractor()
-                    .Execute()
-                    .Select(countries => countries.Single(country => country.Id == 1));
-                NavigationService
-                    .Navigate<SelectCountryViewModel, long?, long?>(Arg.Any<long?>())
-                    .Returns(selectedCountry.Id);
-                await ViewModel.Initialize();
-
-                await ViewModel.PickCountry();
+                ViewModel.EmailRelay.Accept(emailValid ? ValidEmail.ToString() : InvalidEmail.ToString());
+                ViewModel.PasswordRelay.Accept(passwordValid ? ValidPassword.ToString() : InvalidPassword.ToString());
+                var observer = TestScheduler.CreateObserver<Unit>();
+                ViewModel.ClearPasswordScreenError.Subscribe(observer);
 
                 TestScheduler.Start();
-                observer.Messages.AssertEqual(
-                    ReactiveTest.OnNext(1, Resources.SelectCountry),
-                    ReactiveTest.OnNext(2, Location.CountryName),
-                    ReactiveTest.OnNext(3, selectedCountry.Name)
-                );
-            }
 
-            [Fact, LogIfTooSlow]
-            public async Task SetsFailedToGetCountryToFalse()
-            {
-                var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.IsCountryErrorVisible.Subscribe(observer);
-
-                Api.Location.Get().Returns(Observable.Throw<ILocation>(new Exception()));
-                NavigationService
-                    .Navigate<SelectCountryViewModel, long?, long?>(Arg.Any<long?>())
-                    .Returns(1);
-                await ViewModel.Initialize();
-
-                await ViewModel.PickCountry();
-
-                TestScheduler.Start();
-                observer.Messages.AssertEqual(
-                    ReactiveTest.OnNext(1, false),
-                    ReactiveTest.OnNext(2, true),
-                    ReactiveTest.OnNext(3, false)
-                );
+                observer.Messages.Should().HaveCount(shouldEmit ? 1 : 0);
             }
         }
 
-        public sealed class TheGoogleSignupMethod : SignupViewModelTest
+        public sealed class TheSignUpWithEmailAction : SignupViewModelTest
         {
-            protected override void AdditionalViewModelSetup()
+            [Fact, LogIfTooSlow]
+            public void EmitsErrorWhenEmailIsInvalid()
             {
-                base.AdditionalViewModelSetup();
-                ViewModel.Initialize().Wait();
+                ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
+                var observer = TestScheduler.CreateObserver<Exception>();
+                ViewModel.SignupWithEmail.Errors.Subscribe(observer);
+
+                TestScheduler.Start();
+                ViewModel.SignupWithEmail.Execute();
+
+                observer.Messages.Should().HaveCount(1);
+                observer.Messages.Last().Value.Value.Message.Should().Be(Resources.EnterValidEmail);
             }
 
             [Fact, LogIfTooSlow]
-            public async Task NavigatesToTheTermsOfServiceViewModel()
+            public void EmitsElementWhenEmailIsValid()
             {
-                await ViewModel.GoogleSignup();
+                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
+                var observer = TestScheduler.CreateObserver<Unit>();
+                ViewModel.SignupWithEmail.Elements.Subscribe(observer);
 
-                await NavigationService.Received().Navigate<TermsOfServiceViewModel, bool>();
-            }
+                TestScheduler.Start();
+                ViewModel.SignupWithEmail.Execute();
 
-            [Fact, LogIfTooSlow]
-            public async Task DoesNotTryToSignUpIfUserDoesNotAcceptTermsOfService()
-            {
-                NavigationService.Navigate<TermsOfServiceViewModel, bool>().Returns(false);
-
-                await ViewModel.GoogleSignup();
-
-                UserAccessManager.DidNotReceive().SignUpWithGoogle(Arg.Any<bool>(), Arg.Any<int>());
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task ShowsTheTermsOfServiceViewModelOnlyOnceIfUserAcceptsTheTerms()
-            {
-                NavigationService.Navigate<TermsOfServiceViewModel, bool>().Returns(true);
-                UserAccessManager
-                    .SignUpWithGoogle(Arg.Any<bool>(), Arg.Any<int>())
-                    .Returns(Observable.Throw<ITogglDataSource>(new Exception()));
-
-                await ViewModel.GoogleSignup();
-                await ViewModel.GoogleSignup();
-
-                NavigationService.Received(1).Navigate<TermsOfServiceViewModel, bool>();
-            }
-
-            public sealed class WhenUserAcceptsTheTermsOfService : SignupViewModelTest
-            {
-                protected override void AdditionalSetup()
-                {
-                    base.AdditionalSetup();
-
-                    NavigationService.Navigate<TermsOfServiceViewModel, bool>().Returns(true);
-                }
-
-                protected override void AdditionalViewModelSetup()
-                {
-                    base.AdditionalViewModelSetup();
-                    ViewModel.Initialize().Wait();
-                }
-
-                [Fact, LogIfTooSlow]
-                public async Task CallsTheUserAccessManager()
-                {
-                    await ViewModel.GoogleSignup();
-
-                    UserAccessManager.Received().SignUpWithGoogle(true, Arg.Any<int>());
-                }
-
-                [Fact, LogIfTooSlow]
-                public async Task DoesNothingWhenThePageIsCurrentlyLoading()
-                {
-                    var never = Observable.Never<ITogglDataSource>();
-                    UserAccessManager.SignUpWithGoogle(Arg.Any<bool>(), Arg.Any<int>()).Returns(never);
-                    await ViewModel.GoogleSignup();
-                    await ViewModel.GoogleSignup();
-
-                    UserAccessManager.Received(1).SignUpWithGoogle(Arg.Any<bool>(), Arg.Any<int>());
-                }
-
-                [Fact, LogIfTooSlow]
-                public async Task SetsTheIsLoadingPropertyToTrue()
-                {
-                    var observer = TestScheduler.CreateObserver<bool>();
-                    ViewModel.IsLoading.Subscribe(observer);
-
-                    UserAccessManager.SignUpWithGoogle(true, Arg.Any<int>()).Returns(
-                        Observable.Never<ITogglDataSource>());
-
-                    await ViewModel.GoogleSignup();
-
-                    TestScheduler.Start();
-                    observer.Messages.AssertEqual(
-                        ReactiveTest.OnNext(1, false),
-                        ReactiveTest.OnNext(2, true)
-                    );
-                }
-
-                [Fact, LogIfTooSlow]
-                public async Task StopsTheViewModelLoadStateWhenItErrors()
-                {
-                    var observer = TestScheduler.CreateObserver<bool>();
-                    ViewModel.IsLoading.Subscribe(observer);
-
-                    UserAccessManager.SignUpWithGoogle(Arg.Any<bool>(), Arg.Any<int>()).Returns(
-                        Observable.Throw<ITogglDataSource>(new GoogleLoginException(false)));
-
-                    await ViewModel.GoogleSignup();
-
-                    TestScheduler.Start();
-                    observer.Messages.AssertEqual(
-                        ReactiveTest.OnNext(1, false),
-                        ReactiveTest.OnNext(2, true),
-                        ReactiveTest.OnNext(3, false)
-                    );
-                }
-
-                [Fact, LogIfTooSlow]
-                public async Task DoesNotNavigateWhenTheLoginFails()
-                {
-                    UserAccessManager.SignUpWithGoogle(Arg.Any<bool>(), Arg.Any<int>()).Returns(
-                        Observable.Throw<ITogglDataSource>(new GoogleLoginException(false)));
-
-                    await ViewModel.GoogleSignup();
-
-                    NavigationService.DidNotReceive().Navigate<MainViewModel>();
-                }
-
-                [Fact, LogIfTooSlow]
-                public async Task DoesNotDisplayAnErrorMessageWhenTheUserCancelsTheRequestOnTheGoogleService()
-                {
-                    var hasErrorObserver = TestScheduler.CreateObserver<bool>();
-                    ViewModel.HasError.Subscribe(hasErrorObserver);
-                    var errorTextObserver = TestScheduler.CreateObserver<string>();
-                    ViewModel.ErrorMessage.Subscribe(errorTextObserver);
-
-                    UserAccessManager.SignUpWithGoogle(Arg.Any<bool>(), Arg.Any<int>()).Returns(
-                        Observable.Throw<ITogglDataSource>(new GoogleLoginException(true)));
-
-                    await ViewModel.GoogleSignup();
-
-                    TestScheduler.Start();
-
-                    errorTextObserver.Messages.AssertEqual(
-                        ReactiveTest.OnNext(1, "")
-                    );
-
-                    hasErrorObserver.Messages.AssertEqual(
-                        ReactiveTest.OnNext(2, false)
-                    );
-                }
-
-                public sealed class WhenSignupSucceeds : SuccessfulSignupTest
-                {
-                    protected override void ExecuteCommand()
-                    {
-                        ViewModel.GoogleSignup().Wait();
-                    }
-
-                    protected override void AdditionalViewModelSetup()
-                    {
-                        base.AdditionalViewModelSetup();
-
-                        ViewModel.Initialize().Wait();
-
-                        UserAccessManager
-                            .SignUpWithGoogle(true, Arg.Any<int>())
-                            .Returns(Observable.Return(DataSource));
-
-                        NavigationService.Navigate<TermsOfServiceViewModel, bool>().Returns(true);
-                    }
-
-                    [FsCheck.Xunit.Property]
-                    public void SavesTheTimeOfLastLogin(DateTimeOffset now)
-                    {
-                        TimeService.CurrentDateTime.Returns(now);
-
-                        var viewModel = CreateViewModel();
-
-                        viewModel.Initialize().Wait();
-                        viewModel.GoogleSignup().Wait();
-
-                        LastTimeUsageStorage.Received().SetLogin(now);
-                    }
-                }
+                observer.Messages.Should().HaveCount(1);
             }
         }
 
         public sealed class TheTogglePasswordVisibilityMethod : SignupViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public void SetsIsPasswordMaskedToFalseWhenItIsTrue()
+            public void SetsTheIsPasswordMaskedToFalseWhenItIsTrue()
             {
                 var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.IsPasswordMasked.Subscribe(observer);
 
-                ViewModel.TogglePasswordVisibility();
+                ViewModel.IsPasswordMasked.Subscribe(observer);
+                ViewModel.TogglePasswordVisibility.Execute();
 
                 TestScheduler.Start();
                 observer.Messages.AssertEqual(
@@ -431,13 +211,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public void SetsIsPasswordMaskedToTrueWhenItIsFalse()
+            public void SetsTheIsPasswordMaskedToTrueWhenItIsFalse()
             {
                 var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.IsPasswordMasked.Subscribe(observer);
 
-                ViewModel.TogglePasswordVisibility();
-                ViewModel.TogglePasswordVisibility();
+                ViewModel.IsPasswordMasked.Subscribe(observer);
+                ViewModel.TogglePasswordVisibility.Execute();
+
+                ViewModel.TogglePasswordVisibility.Execute();
 
                 TestScheduler.Start();
                 observer.Messages.AssertEqual(
@@ -448,476 +229,110 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
         }
 
-        public sealed class TheLoginMethod : SignupViewModelTest
-        {
-            [FsCheck.Xunit.Property]
-            public void NavigatesToLoginViewModel(
-                NonEmptyString email, NonEmptyString password)
-            {
-                ViewModel.SetEmail(Email.From(email.Get));
-                ViewModel.SetPassword(Password.From(password.Get));
-
-                ViewModel.Login().Wait();
-
-                NavigationService
-                    .Received()
-                    .Navigate<LoginViewModel, CredentialsParameter>(
-                        Arg.Is<CredentialsParameter>(parameter
-                             => parameter.Email.Equals(Email.From(email.Get))
-                             && parameter.Password.Equals(Password.From(password.Get))));
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task PassesTheCredentialsToLoginViewModelIfUserTriedToSignUpWithExistingEmail()
-            {
-                var request = Substitute.For<IRequest>();
-                request.Endpoint.Returns(new Uri("http://any.url.com"));
-                var exception = new EmailIsAlreadyUsedException(
-                    new BadRequestException(
-                        request, Substitute.For<IResponse>()
-                    )
-                );
-                UserAccessManager
-                    .SignUp(Arg.Any<Email>(), Arg.Any<Password>(), true, Arg.Any<int>())
-                    .Returns(
-                        Observable.Throw<ITogglDataSource>(exception)
-                    );
-                NavigationService.Navigate<TermsOfServiceViewModel, bool>();
-                ViewModel.SetEmail(ValidEmail);
-                ViewModel.SetPassword(ValidPassword);
-                await ViewModel.Signup();
-
-                ViewModel.Login();
-
-                NavigationService
-                    .Received()
-                    .Navigate<LoginViewModel, CredentialsParameter>(
-                        Arg.Is<CredentialsParameter>(
-                            parameter => parameter.Email.Equals(ValidEmail)
-                            && parameter.Password.Equals(ValidPassword)
-                        )
-                    );
-            }
-        }
-
-        public sealed class TheShakeFlags : SignupViewModelTest
+        public sealed class TheShakeTargetsProperty : SignupViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task ReturnsNothingWhenEmailPasswordAndCountryAreValid()
+            public void ShouldEmitEmailWhenEmailIsInvalidWhenContinueToPasswordScreen()
             {
-                var observer = TestScheduler.CreateObserver<ShakeTargets>();
+                ViewModel.EmailRelay.Accept(InvalidEmail.ToString());
+                ViewModel.PasswordRelay.Accept(ValidPassword.ToString());
+                var observer = TestScheduler.CreateObserver<SignupViewModel.ShakeTarget>();
                 ViewModel.Shake.Subscribe(observer);
 
-                await ViewModel.Initialize();
-
-                ViewModel.SetEmail(ValidEmail);
-                ViewModel.SetPassword(ValidPassword);
-
-                await ViewModel.Signup();
-
+                ViewModel.SignupWithEmail.Execute();
                 TestScheduler.Start();
-                observer.Messages.AssertEqual();
+
+                observer.LastValue().Should().Be(SignupViewModel.ShakeTarget.Email);
             }
 
-            [Xunit.Theory]
-            [InlineData("not an email", "123", true, ShakeTargets.Email | ShakeTargets.Password)]
-            [InlineData("not an email", "1234567", true, ShakeTargets.Email)]
-            [InlineData("this@is.email", "123", true, ShakeTargets.Password)]
-            [InlineData("not an email", "123", false, ShakeTargets.Country | ShakeTargets.Email | ShakeTargets.Password)]
-            [InlineData("not an email", "1234567", false, ShakeTargets.Country | ShakeTargets.Email)]
-            [InlineData("this@is.email", "123", false, ShakeTargets.Country | ShakeTargets.Password)]
-            public async Task ReturnsTheCorrectFlagForInvalidEmailPasswordOrCountry(string email, string password, bool countryIsSelected, ShakeTargets shakeTargets)
+            [Fact, LogIfTooSlow]
+            public void ShouldEmitPasswordWhenPasswordIsInvalid()
             {
-                var observer = TestScheduler.CreateObserver<ShakeTargets>();
+                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
+                ViewModel.PasswordRelay.Accept(InvalidPassword.ToString());
+                var observer = TestScheduler.CreateObserver<SignupViewModel.ShakeTarget>();
                 ViewModel.Shake.Subscribe(observer);
 
-                var currentEmail = Email.From(email);
-                var currentPassword = Password.From(password);
-                var expectedShakeTargets = shakeTargets;
-
-                if (!countryIsSelected)
-                {
-                    Api.Location.Get().Returns(Observable.Throw<ILocation>(new Exception()));
-                }
-
-                await ViewModel.Initialize();
-
-                ViewModel.SetEmail(currentEmail);
-                ViewModel.SetPassword(currentPassword);
-
-                await ViewModel.Signup();
-
+                ViewModel.GotoCountrySelection.Execute();
                 TestScheduler.Start();
-                observer.Messages.AssertEqual(
-                    ReactiveTest.OnNext(1, expectedShakeTargets)
-                );
+
+                observer.LastValue().Should().Be(SignupViewModel.ShakeTarget.Password);
+            }
+
+            [Fact, LogIfTooSlow]
+            public void ShouldNotEmitWhenEmailAndPasswordAreValid()
+            {
+                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
+                ViewModel.PasswordRelay.Accept(ValidPassword.ToString());
+                var observer = TestScheduler.CreateObserver<SignupViewModel.ShakeTarget>();
+                ViewModel.Shake.Subscribe(observer);
+
+                ViewModel.GotoCountrySelection.Execute();
+                TestScheduler.Start();
+
+                observer.Messages.Should().BeEmpty();
             }
         }
 
-        public sealed class TheSignupMethod : SignupViewModelTest
+        public sealed class TheBackAction : SignupViewModelTest
         {
-            protected override void AdditionalViewModelSetup()
-            {
-                base.AdditionalViewModelSetup();
-
-                ViewModel.SetEmail(ValidEmail);
-                ViewModel.SetPassword(ValidPassword);
-
-                ViewModel.Initialize().Wait();
-            }
-
             [Fact, LogIfTooSlow]
-            public async Task NavigatesToTheTermsOfServiceViewModel()
+            public void ShouldCallNavigationServiceCloseWhenInTheFirstScreen()
             {
-                await ViewModel.Signup();
-
-                await NavigationService.Received().Navigate<TermsOfServiceViewModel, bool>();
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task DoesNotTryToSignUpIfUserDoesNotAcceptTermsOfService()
-            {
-                NavigationService.Navigate<TermsOfServiceViewModel, bool>().Returns(false);
-
-                await ViewModel.Signup();
-
-                UserAccessManager.DidNotReceive().SignUp(
-                    Arg.Any<Email>(),
-                    Arg.Any<Password>(),
-                    Arg.Any<bool>(),
-                    Arg.Any<int>());
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task ShowsTheTermsOfServiceViewModelOnlyOnceIfUserAcceptsTheTerms()
-            {
-                NavigationService.Navigate<TermsOfServiceViewModel, bool>().Returns(true);
-                UserAccessManager
-                    .SignUp(Arg.Any<Email>(), Arg.Any<Password>(), Arg.Any<bool>(), Arg.Any<int>())
-                    .Returns(Observable.Throw<ITogglDataSource>(new Exception()));
-
-                await ViewModel.Signup();
-                await ViewModel.Signup();
-
-                NavigationService.Received(1).Navigate<TermsOfServiceViewModel, bool>();
-            }
-
-            public sealed class WhenUserAcceptsTheTermsOfService : SignupViewModelTest
-            {
-                protected override void AdditionalSetup()
-                {
-                    base.AdditionalSetup();
-
-                    NavigationService.Navigate<TermsOfServiceViewModel, bool>().Returns(true);
-                }
-
-                protected override void AdditionalViewModelSetup()
-                {
-                    base.AdditionalViewModelSetup();
-
-                    ViewModel.Initialize().Wait();
-
-                    ViewModel.SetEmail(ValidEmail);
-                    ViewModel.SetPassword(ValidPassword);
-                    ViewModel.Signup().Wait();
-                }
-
-                [Fact, LogIfTooSlow]
-                public void SetsIsLoadingToTrue()
-                {
-                    var observer = TestScheduler.CreateObserver<bool>();
-                    ViewModel.IsLoading.Subscribe(observer);
-
-                    TestScheduler.Start();
-                    observer.Messages.AssertEqual(
-                        ReactiveTest.OnNext(1, true)
-                    );
-                }
-
-                [Fact, LogIfTooSlow]
-                public void TriesToSignUp()
-                {
-                    UserAccessManager.Received().SignUp(
-                        ValidEmail,
-                        ValidPassword,
-                        true,
-                        Arg.Any<int>());
-                }
-
-                public sealed class WhenSignupSucceeds : SuccessfulSignupTest
-                {
-                    protected override void ExecuteCommand()
-                    {
-                        ViewModel.Signup().Wait();
-                    }
-
-                    protected override void AdditionalViewModelSetup()
-                    {
-                        base.AdditionalViewModelSetup();
-
-                        ViewModel.Initialize().Wait();
-
-                        ViewModel.SetEmail(ValidEmail);
-                        ViewModel.SetPassword(ValidPassword);
-                        UserAccessManager
-                            .SignUp(Arg.Any<Email>(), Arg.Any<Password>(), Arg.Any<bool>(), Arg.Any<int>())
-                            .Returns(Observable.Return(DataSource));
-                        NavigationService.Navigate<TermsOfServiceViewModel, bool>().Returns(true);
-                    }
-
-                    [FsCheck.Xunit.Property]
-                    public void SavesTheTimeOfLastLogin(DateTimeOffset now)
-                    {
-                        var viewModel = CreateViewModel();
-                        viewModel.Initialize().Wait();
-                        viewModel.SetEmail(ValidEmail);
-                        viewModel.SetPassword(ValidPassword);
-                        TimeService.CurrentDateTime.Returns(now);
-
-                        viewModel.Signup().Wait();
-
-                        LastTimeUsageStorage.Received().SetLogin(now);
-                    }
-                }
-
-                public sealed class WhenSignupFails : SignupViewModelTest
-                {
-                    private void prepareException(Exception exception)
-                    {
-                        UserAccessManager
-                            .SignUp(Arg.Any<Email>(), Arg.Any<Password>(), Arg.Any<bool>(), Arg.Any<int>())
-                            .Returns(Observable.Throw<ITogglDataSource>(exception));
-                    }
-
-                    protected override void AdditionalViewModelSetup()
-                    {
-                        base.AdditionalViewModelSetup();
-
-                        ViewModel.Initialize().Wait();
-
-                        ViewModel.SetEmail(ValidEmail);
-                        ViewModel.SetPassword(ValidPassword);
-
-                        NavigationService.Navigate<TermsOfServiceViewModel, bool>().Returns(true);
-                    }
-
-                    [Fact, LogIfTooSlow]
-                    public async Task SetsIsLoadingToFalse()
-                    {
-                        var observer = TestScheduler.CreateObserver<bool>();
-                        ViewModel.IsLoading.Subscribe(observer);
-
-                        prepareException(new Exception());
-
-                        await ViewModel.Signup();
-
-                        TestScheduler.Start();
-                        observer.Messages.AssertEqual(
-                            ReactiveTest.OnNext(1, false),
-                            ReactiveTest.OnNext(2, true),
-                            ReactiveTest.OnNext(3, false)
-                        );
-                    }
-
-                    [Fact, LogIfTooSlow]
-                    public async Task SetsIncorrectEmailOrPasswordErrorIfReceivedUnautghorizedException()
-                    {
-                        var observer = TestScheduler.CreateObserver<string>();
-                        ViewModel.ErrorMessage.Subscribe(observer);
-
-                        prepareException(new UnauthorizedException(
-                            Substitute.For<IRequest>(),
-                            Substitute.For<IResponse>()));
-
-                        await ViewModel.Signup();
-
-                        TestScheduler.Start();
-                        observer.Messages.AssertEqual(
-                            ReactiveTest.OnNext(1, ""),
-                            ReactiveTest.OnNext(2, Resources.IncorrectEmailOrPassword)
-                        );
-                    }
-
-                    [Fact, LogIfTooSlow]
-                    public async Task SetsEmailAlreadyUsedErrorIfReceivedEmailIsAlreadyusedException()
-                    {
-                        var observer = TestScheduler.CreateObserver<string>();
-                        ViewModel.ErrorMessage.Subscribe(observer);
-
-                        var request = Substitute.For<IRequest>();
-                        request.Endpoint.Returns(new Uri("https://any.url.com"));
-                        prepareException(new EmailIsAlreadyUsedException(
-                            new BadRequestException(
-                                request,
-                                Substitute.For<IResponse>()
-                            )
-                        ));
-
-                        await ViewModel.Signup();
-
-                        TestScheduler.Start();
-                        observer.Messages.AssertEqual(
-                            ReactiveTest.OnNext(1, ""),
-                            ReactiveTest.OnNext(2, Resources.EmailIsAlreadyUsedError)
-                        );
-                    }
-
-                    [Fact, LogIfTooSlow]
-                    public async Task SetsGenereicErrorForAnyOtherException()
-                    {
-                        var observer = TestScheduler.CreateObserver<string>();
-                        ViewModel.ErrorMessage.Subscribe(observer);
-
-                        prepareException(new Exception());
-
-                        await ViewModel.Signup();
-
-                        TestScheduler.Start();
-                        observer.Messages.AssertEqual(
-                            ReactiveTest.OnNext(1, ""),
-                            ReactiveTest.OnNext(2, Resources.GenericSignUpError)
-                        );
-                    }
-                }
-            }
-        }
-
-        public abstract class SuccessfulSignupTest : SignupViewModelTest
-        {
-            protected abstract void ExecuteCommand();
-
-            [Fact, LogIfTooSlow]
-            public void StartsSyncing()
-            {
-                ExecuteCommand();
-
-                DataSource.Received().StartSyncing();
-            }
-
-            [Fact, LogIfTooSlow]
-            public void SetsIsNewUserToTrue()
-            {
-                ExecuteCommand();
-
-                OnboardingStorage.Received().SetIsNewUser(true);
-            }
-
-            [Fact, LogIfTooSlow]
-            public void SetsUserSignedUp()
-            {
-                ExecuteCommand();
-
-                OnboardingStorage.Received().SetUserSignedUp();
-            }
-
-            [Fact, LogIfTooSlow]
-            public void NavigatesToMainViewModel()
-            {
-                ExecuteCommand();
-
-                NavigationService.Received().ForkNavigate<MainTabBarViewModel, MainViewModel>();
-            }
-        }
-
-        public sealed class TheSignupEnabledProperty : SignupViewModelTest
-        {
-            protected override void AdditionalViewModelSetup()
-            {
-                base.AdditionalViewModelSetup();
-
-                ViewModel.Initialize().Wait();
-            }
-
-            [Fact, LogIfTooSlow]
-            public void ReturnsTrueWhenEmailAndPasswordAreValidAndIsNotLoading()
-            {
-                var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.SignupEnabled.Subscribe(observer);
-
-                ViewModel.SetEmail(ValidEmail);
-                ViewModel.SetPassword(ValidPassword);
-
+                ViewModel.Back.Execute();
                 TestScheduler.Start();
-                observer.Messages.AssertEqual(
-                    ReactiveTest.OnNext(2, true)
-                );
+
+                NavigationService.Received().Close(ViewModel);
             }
 
-            [Xunit.Theory]
-            [InlineData("not an email", "123")]
-            [InlineData("not an email", "1234567")]
-            [InlineData("this@is.email", "123")]
-            public void ReturnsFalseWhenEmailOrPasswordIsInvalid(string email, string password)
+            [Fact, LogIfTooSlow]
+            public void ShouldBeDisabledIfSigningUp()
             {
-                var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.SignupEnabled.Subscribe(observer);
-
-                ViewModel.SetEmail(Email.From(email));
-                ViewModel.SetPassword(Password.From(password));
-
-                TestScheduler.Start();
-                observer.Messages.AssertEqual(
-                    ReactiveTest.OnNext(2, false)
-                );
-            }
-
-            [Fact]
-            public async Task ReturnsFlaseWhenIsLoading()
-            {
-                var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.SignupEnabled.Subscribe(observer);
-
-                ViewModel.SetEmail(ValidEmail);
-                ViewModel.SetPassword(ValidPassword);
-                NavigationService.Navigate<TermsOfServiceViewModel, bool>().Returns(true);
-                UserAccessManager
-                    .SignUp(Arg.Any<Email>(), Arg.Any<Password>(), Arg.Any<bool>(), Arg.Any<int>())
+                ViewModel.Initialize();
+                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
+                ViewModel.PasswordRelay.Accept(ValidPassword.ToString());
+                UserAccessManager.SignUp(Arg.Any<Email>(), Arg.Any<Password>(), Arg.Any<bool>(), Arg.Any<int>())
                     .Returns(Observable.Never<ITogglDataSource>());
-                await ViewModel.Signup();
+                var observer = TestScheduler.CreateObserver<bool>();
+                ViewModel.Back.Enabled.Subscribe(observer);
+
+                ViewModel.ToggleTOSAgreement.Execute();
+                ViewModel.SignUp.Execute();
+                TestScheduler.Start();
+
+                observer.LastValue().Should().BeFalse();
+            }
+
+
+            [Fact, LogIfTooSlow]
+            public void ShouldBeEnabledByDefault()
+            {
+                var observer = TestScheduler.CreateObserver<bool>();
+                ViewModel.Back.Enabled.Subscribe(observer);
 
                 TestScheduler.Start();
+
+                observer.LastValue().Should().BeTrue();
+            }
+
+            [Fact, LogIfTooSlow]
+            public void ShouldClearThePassword()
+            {
+                ViewModel.EmailRelay.Accept(ValidEmail.ToString());
+                var observer = TestScheduler.CreateObserver<string>();
+                ViewModel.PasswordRelay.Accept("somePassword");
+                ViewModel.PasswordRelay.Subscribe(observer);
+
+                ViewModel.SignupWithEmail.Execute();
+                ViewModel.Back.Execute();
+                TestScheduler.Start();
+
                 observer.Messages.AssertEqual(
-                    ReactiveTest.OnNext(2, true),
-                    ReactiveTest.OnNext(3, false)
+                   ReactiveTest.OnNext(0, "somePassword"),
+                   ReactiveTest.OnNext(0, string.Empty)
                 );
             }
         }
 
-        public sealed class ThePrepareMethod : SignupViewModelTest
-        {
-            [FsCheck.Xunit.Property]
-            public void SetsTheEmail(NonEmptyString emailString)
-            {
-                var viewModel = CreateViewModel();
-                var email = Email.From(emailString.Get);
-                var password = Password.Empty;
-                var parameter = CredentialsParameter.With(email, password);
-                var expectedValues = new[] { Email.Empty.ToString(), email.TrimmedEnd().ToString() }.Distinct();
-                var actualValues = new List<string>();
-                viewModel.Email.Subscribe(actualValues.Add);
-
-                viewModel.Prepare(parameter);
-
-                TestScheduler.Start();
-                CollectionAssert.AreEqual(expectedValues, actualValues);
-            }
-
-            [FsCheck.Xunit.Property]
-            public void SetsThePassword(NonEmptyString passwordString)
-            {
-                var viewModel = CreateViewModel();
-                var email = Email.Empty;
-                var password = Password.From(passwordString.Get);
-                var parameter = CredentialsParameter.With(email, password);
-                var expectedValues = new[] { Password.Empty.ToString(), password.ToString() };
-                var actualValues = new List<string>();
-                viewModel.Password.Subscribe(actualValues.Add);
-
-                viewModel.Prepare(parameter);
-
-                TestScheduler.Start();
-                CollectionAssert.AreEqual(expectedValues, actualValues);
-            }
-        }
     }
 }
