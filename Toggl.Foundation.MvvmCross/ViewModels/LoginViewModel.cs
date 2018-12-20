@@ -45,10 +45,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly ITimeService timeService;
         private readonly ISchedulerProvider schedulerProvider;
 
-        private readonly Subject<ShakeTarget> shakeSubject = new Subject<ShakeTarget>();
         private readonly BehaviorSubject<bool> isPasswordMaskedSubject = new BehaviorSubject<bool>(true);
         private readonly int errorCountBeforeShowingContactSupportSuggestion = 2;
         private readonly Exception invalidEmailException = new Exception(Resources.EnterValidEmail);
+        private readonly Exception passwordTooShortException = new Exception(Resources.PasswordTooShort);
         private readonly Exception incorrectPasswordException = new Exception(Resources.IncorrectEmailOrPassword);
         private readonly BehaviorSubject<State> state = new BehaviorSubject<State>(State.Email);
 
@@ -109,9 +109,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             var isEmailState = state.Select(s => s == State.Email);
             var isReturningToEmail = isEmailState.Skip(1);
-
-            Shake = shakeSubject
-                .AsDriver(ShakeTarget.None, this.schedulerProvider);
 
             IsPasswordMasked = isPasswordMaskedSubject
                 .DistinctUntilChanged()
@@ -175,6 +172,23 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .AsDriver(schedulerProvider);
 
             ContactUs = UIAction.FromAsync(contactUs);
+
+            Shake = Observable.Merge(Login.Errors, LoginWithEmail.Errors)
+                .Select(exception =>
+                {
+                    if (exception == invalidEmailException)
+                    {
+                        return ShakeTarget.Email;
+                    }
+
+                    if (exception == passwordTooShortException)
+                    {
+                        return ShakeTarget.Password;
+                    }
+
+                    return ShakeTarget.None;
+                })
+                .AsDriver(ShakeTarget.None, this.schedulerProvider);
         }
 
         public override void Prepare(CredentialsParameter parameter)
@@ -187,7 +201,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             if (!Email.From(EmailRelay.Value).IsValid)
             {
-                shakeSubject.OnNext(ShakeTarget.Email);
                 throw invalidEmailException;
             }
 
@@ -210,18 +223,13 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             {
                 return Observable.Return(Unit.Default).Do(_ =>
                 {
-                    shakeSubject.OnNext(ShakeTarget.Email);
                     throw invalidEmailException;
                 });
             }
 
             if (!password.IsValid)
             {
-                return Observable.Return(Unit.Default).Do(_ =>
-                {
-                    shakeSubject.OnNext(ShakeTarget.Password);
-                    throw new Exception(Resources.PasswordTooShort);
-                });
+                return Observable.Return(Unit.Default).Do(_ => throw passwordTooShortException);
             }
 
             return userAccessManager
