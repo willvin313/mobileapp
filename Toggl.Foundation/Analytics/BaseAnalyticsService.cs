@@ -200,6 +200,9 @@ namespace Toggl.Foundation.Analytics
         [AnalyticsEvent("Type", "Message")]
         public IAnalyticsEvent<string, string> UnknownSignUpFailure { get; protected set; }
 
+        [AnalyticsEvent("Type", "Duration")]
+        public IAnalyticsEvent<string, long> RandomForestExecutionTime { get; protected set; }
+
         [AnalyticsEvent("Type", "Certainty")]
         public IAnalyticsEvent<string, float> SuggestionStarted { get; protected set; }
 

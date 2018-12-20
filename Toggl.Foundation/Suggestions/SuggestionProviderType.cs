@@ -3,6 +3,7 @@
     public enum SuggestionProviderType
     {
         MostUsedTimeEntries,
-        Calendar
+        Calendar,
+        RandomForest
     }
 }

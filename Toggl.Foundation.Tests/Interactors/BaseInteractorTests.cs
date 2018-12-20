@@ -1,6 +1,7 @@
 ﻿using NSubstitute;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
+using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Shortcuts;
@@ -25,6 +26,7 @@ namespace Toggl.Foundation.Tests
             = Substitute.For<IApplicationShortcutCreator>();
         protected UserAgent UserAgent { get; } = new UserAgent("Tests", "0.0");
         protected ICalendarService CalendarService { get; } = Substitute.For<ICalendarService>();
+        protected IStopwatchProvider StopwatchProvider { get; } = Substitute.For<IStopwatchProvider>();
 
         protected IInteractorFactory InteractorFactory { get; }
 
@@ -42,7 +44,8 @@ namespace Toggl.Foundation.Tests
                 LastTimeUsageStorage,
                 PlatformConstants,
                 UserAgent,
-                CalendarService
+                CalendarService,
+                StopwatchProvider
             );
         }
     }

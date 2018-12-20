@@ -1,5 +1,6 @@
 ﻿using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
+using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Shortcuts;
 using Toggl.Multivac;
@@ -24,6 +25,7 @@ namespace Toggl.Foundation.Interactors
         private readonly IPlatformConstants platformConstants;
         private readonly UserAgent userAgent;
         private readonly ICalendarService calendarService;
+        private readonly IStopwatchProvider stopwatchProvider;
 
         public InteractorFactory(
             IIdProvider idProvider,
@@ -37,7 +39,8 @@ namespace Toggl.Foundation.Interactors
             ILastTimeUsageStorage lastTimeUsageStorage,
             IPlatformConstants platformConstants,
             UserAgent userAgent,
-            ICalendarService calendarService)
+            ICalendarService calendarService,
+            IStopwatchProvider stopwatchProvider)
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
             Ensure.Argument.IsNotNull(idProvider, nameof(idProvider));
@@ -51,6 +54,7 @@ namespace Toggl.Foundation.Interactors
             Ensure.Argument.IsNotNull(platformConstants, nameof(platformConstants));
             Ensure.Argument.IsNotNull(userAgent, nameof(userAgent));
             Ensure.Argument.IsNotNull(calendarService, nameof(calendarService));
+            Ensure.Argument.IsNotNull(stopwatchProvider, nameof(stopwatchProvider));
 
             this.dataSource = dataSource;
             this.idProvider = idProvider;
@@ -64,6 +68,7 @@ namespace Toggl.Foundation.Interactors
             this.platformConstants = platformConstants;
             this.userAgent = userAgent;
             this.calendarService = calendarService;
+            this.stopwatchProvider = stopwatchProvider;
         }
     }
 }

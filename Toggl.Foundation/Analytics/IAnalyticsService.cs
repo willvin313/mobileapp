@@ -130,6 +130,8 @@ namespace Toggl.Foundation.Analytics
 
         IAnalyticsEvent<string, string> UnknownSignUpFailure { get; }
 
+        IAnalyticsEvent<string, long> RandomForestExecutionTime { get; }
+
         IAnalyticsEvent<string, float> SuggestionStarted { get; }
 
         IAnalyticsEvent<string, float, int> SuggestionPresented { get; }

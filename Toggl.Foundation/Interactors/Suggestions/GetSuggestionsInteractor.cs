@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using Toggl.Foundation.DataSources;
+using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Suggestions;
@@ -14,6 +15,7 @@ namespace Toggl.Foundation.Interactors.Suggestions
     {
         private readonly int suggestionCount;
 
+        private readonly IStopwatchProvider stopwatchProvider;
         private readonly ITimeService timeService;
         private readonly ITogglDataSource dataSource;
         private readonly ICalendarService calendarService;
@@ -21,17 +23,20 @@ namespace Toggl.Foundation.Interactors.Suggestions
 
         public GetSuggestionsInteractor(
             int suggestionCount,
+            IStopwatchProvider stopwatchProvider,
             ITogglDataSource dataSource,
             ITimeService timeService,
             ICalendarService calendarService,
             IInteractor<IObservable<IThreadSafeWorkspace>> defaultWorkspaceInteractor)
         {
             Ensure.Argument.IsInClosedRange(suggestionCount, 1, 9, nameof(suggestionCount));
+            Ensure.Argument.IsNotNull(stopwatchProvider, nameof(stopwatchProvider));
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
             Ensure.Argument.IsNotNull(calendarService, nameof(calendarService));
             Ensure.Argument.IsNotNull(defaultWorkspaceInteractor, nameof(defaultWorkspaceInteractor));
 
+            this.stopwatchProvider = stopwatchProvider;
             this.dataSource = dataSource;
             this.timeService = timeService;
             this.suggestionCount = suggestionCount;
@@ -50,6 +55,7 @@ namespace Toggl.Foundation.Interactors.Suggestions
         {
             return new List<ISuggestionProvider>
             {
+                new RandomForestSuggestionProvider(stopwatchProvider, dataSource, timeService, suggestionCount),
                 new MostUsedTimeEntrySuggestionProvider(timeService, dataSource, suggestionCount),
                 new CalendarSuggestionProvider(timeService, calendarService, defaultWorkspaceInteractor)
             };

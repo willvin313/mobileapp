@@ -20,6 +20,9 @@
         BindMainLogSectionVH,
         BindMainLogSuggestionsVH,
         CreateMainLogSuggestionsViewHolder,
-        MainActivityOnCreate
+        MainActivityOnCreate,
+        RandomForest2StepsProjectPrediction,
+        RandomForest2StepsTimeEntryPrediction,
+        RandomForest1StepTimeEntryPrediction
     }
 }
