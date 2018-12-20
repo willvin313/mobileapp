@@ -11,6 +11,7 @@ using MvvmCross.Platforms.Ios.Binding.Views;
 using Toggl.Daneel.Cells.Calendar;
 using Toggl.Daneel.Views.Calendar;
 using Toggl.Foundation;
+using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Calendar;
 using Toggl.Foundation.MvvmCross.Calendar;
 using Toggl.Foundation.MvvmCross.Collections;
@@ -43,12 +44,13 @@ namespace Toggl.Daneel.ViewSources
         private TimeFormat timeOfDayFormat = TimeFormat.TwelveHoursFormat;
         private DateTime date;
         private NSIndexPath editingItemIndexPath;
+        private NSIndexPath runningTimeEntryIndexPath;
 
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
         private readonly ISubject<CalendarItem> itemTappedSubject = new Subject<CalendarItem>();
 
         private CalendarCollectionViewLayout layout => CollectionView.CollectionViewLayout as CalendarCollectionViewLayout;
-        private CalendarLayoutCalculator layoutCalculator = new CalendarLayoutCalculator();
+        private CalendarLayoutCalculator layoutCalculator;
 
         public bool IsEditing { get; private set; }
 
@@ -68,6 +70,7 @@ namespace Toggl.Daneel.ViewSources
             this.timeOfDayFormatObservable = timeOfDayFormat;
             this.collection = collection;
 
+            layoutCalculator = new CalendarLayoutCalculator(timeService);
             calendarItems = new List<CalendarItem>();
             layoutAttributes = new List<CalendarItemLayoutAttributes>();
 
@@ -86,6 +89,13 @@ namespace Toggl.Daneel.ViewSources
             timeService
                 .MidnightObservable
                 .Subscribe(dateChanged)
+                .DisposedBy(disposeBag);
+
+            timeService
+                .CurrentDateTimeObservable
+                .DistinctUntilChanged(offset => offset.Minute)
+                .ObserveOn(SynchronizationContext.Current)
+                .Subscribe(_ => updateLayoutAttributesIfNeeded())
                 .DisposedBy(disposeBag);
 
             onCollectionChanges();
@@ -136,9 +146,10 @@ namespace Toggl.Daneel.ViewSources
                 return Enumerable.Empty<NSIndexPath>();
             }
 
+            var now = timeService.CurrentDateTime;
             var indices = calendarItems
                 .Select((value, index) => new { value, index })
-                .Where(t => t.value.StartTime.ToLocalTime().Hour >= minHour || t.value.EndTime.ToLocalTime().Hour <= maxHour)
+                .Where(t => t.value.StartTime.ToLocalTime().Hour >= minHour || t.value.EndTime(now).ToLocalTime().Hour <= maxHour)
                 .Select(t => t.index);
 
             return indices.Select(index => NSIndexPath.FromItemSection(index, 0));
@@ -149,6 +160,9 @@ namespace Toggl.Daneel.ViewSources
 
         public NSIndexPath IndexPathForEditingItem()
             => editingItemIndexPath;
+
+        public NSIndexPath IndexPathForRunningTimeEntry()
+            => runningTimeEntryIndexPath;
 
         public CalendarItem? CalendarItemAtPoint(CGPoint point)
         {
@@ -169,8 +183,8 @@ namespace Toggl.Daneel.ViewSources
         public void StartEditing(NSIndexPath indexPath)
         {
             IsEditing = true;
+            editingItemIndexPath = indexPath; 
             layout.IsEditing = true;
-            editingItemIndexPath = indexPath;
             CollectionView.ReloadItems(new NSIndexPath[] { indexPath });
         }
 
@@ -234,12 +248,25 @@ namespace Toggl.Daneel.ViewSources
         {
             calendarItems = collection.IsEmpty ? new List<CalendarItem>() : collection[0].ToList();
             layoutAttributes = calculateLayoutAttributes();
+
+            var index = calendarItems.IndexOf(item => item.Duration == null);
+            runningTimeEntryIndexPath = index >= 0 ? NSIndexPath.FromItemSection(index, 0) : null;
+
             CollectionView.ReloadData();
         }
 
         private void dateChanged(DateTimeOffset dateTimeOffset)
         {
             this.date = dateTimeOffset.ToLocalTime().Date;
+        }
+
+        private void updateLayoutAttributesIfNeeded()
+        {
+            if (runningTimeEntryIndexPath == null)
+                return;
+
+            layoutAttributes = calculateLayoutAttributes();
+            layout.InvalidateLayout();
         }
 
         private void registerCells()
@@ -275,7 +302,7 @@ namespace Toggl.Daneel.ViewSources
             return indexPath;
         }
 
-        private NSIndexPath updateCalendarItem(NSIndexPath indexPath, DateTimeOffset startTime, TimeSpan duration)
+        private NSIndexPath updateCalendarItem(NSIndexPath indexPath, DateTimeOffset startTime, TimeSpan? duration)
         {
             var position = (int)indexPath.Item;
 

@@ -19,7 +19,7 @@ namespace Toggl.Foundation.Tests
         protected IUserPreferences UserPreferences { get; } = Substitute.For<IUserPreferences>();
         protected IAnalyticsService AnalyticsService { get; } = Substitute.For<IAnalyticsService>();
         protected IIntentDonationService IntentDonationService { get; } = Substitute.For<IIntentDonationService>();
-        protected IPlatformConstants PlatformConstants { get; } = Substitute.For<IPlatformConstants>();
+        protected IPlatformInfo PlatformInfo { get; } = Substitute.For<IPlatformInfo>();
         protected INotificationService NotificationService { get; } = Substitute.For<INotificationService>();
         protected ILastTimeUsageStorage LastTimeUsageStorage { get; } = Substitute.For<ILastTimeUsageStorage>();
         protected IApplicationShortcutCreator ApplicationShortcutCreator { get; }
@@ -41,7 +41,7 @@ namespace Toggl.Foundation.Tests
                 IntentDonationService,
                 ApplicationShortcutCreator,
                 LastTimeUsageStorage,
-                PlatformConstants,
+                PlatformInfo,
                 UserAgent,
                 CalendarService
             );

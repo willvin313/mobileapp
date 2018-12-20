@@ -9,32 +9,34 @@ using MvvmCross.ViewModels;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.Foundation.Interactors;
+using Toggl.Foundation.Services;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels
 {
     [Preserve(AllMembers = true)]
     public sealed class SelectCountryViewModel : MvxViewModel<long?, long?>
     {
-        private long? selectedCountryId;
+        private readonly IRxActionFactory rxActionFactory;
 
-        private readonly ISubject<string> filterText = new BehaviorSubject<string>(string.Empty);
+        private long? selectedCountryId;
 
         private readonly IMvxNavigationService navigationService;
 
-        public InputAction<SelectableCountryViewModel> SelectCountry { get; }
-
         public IObservable<IEnumerable<SelectableCountryViewModel>> Countries { get; private set; }
+        public ISubject<string> FilterText { get; } = new BehaviorSubject<string>(string.Empty);
+        public InputAction<SelectableCountryViewModel> SelectCountry { get; }
+        public UIAction Close { get; }
 
-        public InputAction<string> SetFilterText { get; }
-
-        public SelectCountryViewModel(IMvxNavigationService navigationService)
+        public SelectCountryViewModel(IMvxNavigationService navigationService, IRxActionFactory rxActionFactory)
         {
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
+            Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
 
             this.navigationService = navigationService;
+            this.rxActionFactory = rxActionFactory;
 
-            SelectCountry = InputAction<SelectableCountryViewModel>.FromAsync(selectCountry);
-            SetFilterText = InputAction<string>.FromAction(setText);
+            SelectCountry = rxActionFactory.FromAsync<SelectableCountryViewModel>(selectCountry);
+            Close = rxActionFactory.FromAsync(() => NavigationService.Close(this));
         }
 
         public override async Task Initialize()
@@ -42,7 +44,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             await base.Initialize();
 
             var allCountries = await new GetAllCountriesInteractor().Execute();
-         
+
             var selectedElement = allCountries.Find(c => c.Id == selectedCountryId);
             if (selectedElement != null)
             {
@@ -50,8 +52,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 allCountries.Insert(0, selectedElement);
             }
 
-            Countries = filterText
-                .Select(text => text.Trim())
+            Countries = FilterText
+                .Select(text => text?.Trim() ?? string.Empty)
                 .DistinctUntilChanged()
                 .Select(trimmedText =>
                 {
@@ -68,10 +70,5 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private async Task selectCountry(SelectableCountryViewModel selectedCountry)
             => await navigationService.Close(this, selectedCountry.Country.Id);
-
-        private void setText(string text)
-        {
-            filterText.OnNext(text ?? string.Empty);
-        }
     }
 }

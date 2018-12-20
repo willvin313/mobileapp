@@ -1,5 +1,6 @@
 using System;
 using FluentAssertions;
+using NSubstitute;
 using Toggl.Foundation.Calendar;
 using Toggl.Foundation.MvvmCross.Calendar;
 using Xunit;
@@ -25,7 +26,8 @@ namespace Toggl.Foundation.Tests.Calendar
                     CalendarIconKind.None),
             };
 
-            var calculator = new CalendarLayoutCalculator();
+            var timeService = Substitute.For<ITimeService>();
+            var calculator = new CalendarLayoutCalculator(timeService);
 
             var layoutAttributes = calculator.CalculateLayoutAttributes(calendarItems);
 
@@ -54,7 +56,8 @@ namespace Toggl.Foundation.Tests.Calendar
                     CalendarIconKind.None),
             };
 
-            var calculator = new CalendarLayoutCalculator();
+            var timeService = Substitute.For<ITimeService>();
+            var calculator = new CalendarLayoutCalculator(timeService);
 
             var layoutAttributes = calculator.CalculateLayoutAttributes(calendarItems);
 
@@ -83,7 +86,8 @@ namespace Toggl.Foundation.Tests.Calendar
                     CalendarIconKind.None),
             };
 
-            var calculator = new CalendarLayoutCalculator();
+            var timeService = Substitute.For<ITimeService>();
+            var calculator = new CalendarLayoutCalculator(timeService);
 
             var layoutAttributes = calculator.CalculateLayoutAttributes(calendarItems);
 
@@ -118,7 +122,8 @@ namespace Toggl.Foundation.Tests.Calendar
                     CalendarIconKind.None),
             };
 
-            var calculator = new CalendarLayoutCalculator();
+            var timeService = Substitute.For<ITimeService>();
+            var calculator = new CalendarLayoutCalculator(timeService);
 
             var layoutAttributes = calculator.CalculateLayoutAttributes(calendarItems);
 
@@ -157,7 +162,8 @@ namespace Toggl.Foundation.Tests.Calendar
                     CalendarIconKind.None),
             };
 
-            var calculator = new CalendarLayoutCalculator();
+            var timeService = Substitute.For<ITimeService>();
+            var calculator = new CalendarLayoutCalculator(timeService);
 
             var layoutAttributes = calculator.CalculateLayoutAttributes(calendarItems);
 
@@ -196,7 +202,8 @@ namespace Toggl.Foundation.Tests.Calendar
                     CalendarIconKind.None),
             };
 
-            var calculator = new CalendarLayoutCalculator();
+            var timeService = Substitute.For<ITimeService>();
+            var calculator = new CalendarLayoutCalculator(timeService);
 
             var layoutAttributes = calculator.CalculateLayoutAttributes(calendarItems);
 

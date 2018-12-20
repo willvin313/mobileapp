@@ -230,6 +230,9 @@
     <Reference Include="MvvmCross.Plugin.Visibility">
       <HintPath>..\packages\MvvmCross.Plugin.Visibility.6.1.2\lib\xamarinios10\MvvmCross.Plugin.Visibility.dll</HintPath>
     </Reference>
+    <Reference Include="Xamarin.Essentials">
+      <HintPath>..\packages\Xamarin.Essentials.1.0.0\lib\xamarinios10\Xamarin.Essentials.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Contents.json" />
@@ -558,6 +561,10 @@
     <ImageAsset Include="Resources\Images.xcassets\icCalendarSmall.imageset\icCalendarSmall%403x.png" />
     <ImageAsset Include="Resources\Images.xcassets\togglLogoWithoutTextRed.imageset\Contents.json" />
     <ImageAsset Include="Resources\Images.xcassets\togglLogoWithoutTextRed.imageset\togglLogoRed.pdf" />
+    <ImageAsset Include="Resources\Images.xcassets\stripes.imageset\Contents.json" />
+    <ImageAsset Include="Resources\Images.xcassets\stripes.imageset\stripes.png" />
+    <ImageAsset Include="Resources\Images.xcassets\stripes.imageset\stripes%402x.png" />
+    <ImageAsset Include="Resources\Images.xcassets\stripes.imageset\stripes%403x.png" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="LaunchScreen.storyboard" />
@@ -938,7 +945,6 @@
     <Compile Include="Views\EditDuration\WheelForegroundView.cs" />
     <Compile Include="Extensions\NoEntityInfoMessageExtensions.cs" />
     <Compile Include="Views\Reports\LoadingPieChartView.cs" />
-    <Compile Include="PlatformConstants.cs" />
     <Compile Include="Views\SpiderOnARopeView.cs" />
     <Compile Include="Binding\SpiderOnARopeViewIsVisibleTargetBinding.cs" />
     <Compile Include="ApplicationShortcutCreator.cs" />
@@ -1169,6 +1175,7 @@
       <DependentUpon>SelectDefaultWorkspaceTableViewCell.cs</DependentUpon>
     </Compile>
     <Compile Include="Extensions\IThreadSafeTimeEntryExtensions.cs" />
+    <Compile Include="PlatformInfoIos.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Toggl.Foundation.MvvmCross\Toggl.Foundation.MvvmCross.csproj">
@@ -1253,6 +1260,7 @@
     <Folder Include="ViewControllers\Calendar\" />
     <Folder Include="Cells\Calendar\" />
     <Folder Include="Resources\Images.xcassets\icCalendarSmall.imageset\" />
+    <Folder Include="Resources\Images.xcassets\stripes.imageset\" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="GoogleService-Info.plist" />

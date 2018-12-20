@@ -14,7 +14,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.Services
     {
         public sealed class TheSubmitFeedbackCommand : BaseMvvmCrossTests
         {
-            private readonly IPlatformConstants platformConstants = Substitute.For<IPlatformConstants>();
+            private readonly IPlatformInfo platformInfo = Substitute.For<IPlatformInfo>();
             private readonly UserAgent userAgent = new UserAgent("Test", "0.1");
             private readonly IMailService mailService = Substitute.For<IMailService>();
             private readonly IDialogService dialogService = Substitute.For<IDialogService>();
@@ -27,7 +27,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.Services
                     userAgent,
                     mailService,
                     dialogService,
-                    platformConstants);
+                    platformInfo);
             }
 
             [Property]
@@ -36,8 +36,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.Services
             {
                 var phoneModel = nonEmptyString0.Get;
                 var os = nonEmptyString1.Get;
-                platformConstants.PhoneModel.Returns(phoneModel);
-                platformConstants.OperatingSystem.Returns(os);
+                platformInfo.PhoneModel.Returns(phoneModel);
+                platformInfo.OperatingSystem.Returns(os);
 
                 feedbackService.SubmitFeedback().Wait();
 
@@ -66,9 +66,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.Services
             [Fact, LogIfTooSlow]
             public async Task SendsAnEmailWithAppVersionPhoneModelAndOsVersion()
             {
-                platformConstants.PhoneModel.Returns("iPhone Y");
-                platformConstants.OperatingSystem.Returns("iOS 4.2.0");
-                var expectedMessage = $"\n\nVersion: {userAgent.ToString()}\nPhone: {platformConstants.PhoneModel}\nOS: {platformConstants.OperatingSystem}";
+                platformInfo.PhoneModel.Returns("iPhone Y");
+                platformInfo.OperatingSystem.Returns("iOS 4.2.0");
+                var expectedMessage = $"\n\nVersion: {userAgent.ToString()}\nPhone: {platformInfo.PhoneModel}\nOS: {platformInfo.OperatingSystem}";
 
                 await feedbackService.SubmitFeedback();
 

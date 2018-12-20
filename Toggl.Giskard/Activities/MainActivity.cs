@@ -280,7 +280,7 @@ namespace Toggl.Giskard.Activities
             }
         }
 
-        private async void onTimeEntryCardVisibilityChanged(bool visible)
+        private void onTimeEntryCardVisibilityChanged(bool visible)
         {
             cardAnimationCancellation?.Cancel();
             if (runningEntryCardFrame == null) return;
@@ -290,7 +290,9 @@ namespace Toggl.Giskard.Activities
 
             cardAnimationCancellation = new CancellationTokenSource();
 
-            var fabListener = new FabAsyncHideListener();
+            var buttonToHide = visible ? playButton : stopButton;
+            var buttonToShow = visible ? stopButton : playButton;
+
             var radialAnimation =
                 runningEntryCardFrame
                     .AnimateWithCircularReveal()
@@ -299,24 +301,14 @@ namespace Toggl.Giskard.Activities
                     .SetBehaviour((x, y, w, h) => (x, y + h, 0, w))
                     .SetType(() => visible ? Appear : Disappear);
 
-            if (visible)
-            {
-                playButton.Hide(fabListener);
-                await fabListener.HideAsync;
+            var fabListener = new FabVisibilityListener(onFabHidden);
+            buttonToHide.Hide(fabListener);
 
-                radialAnimation
-                    .OnAnimationEnd(_ => stopButton.Show())
-                    .OnAnimationCancel(() => playButton.Show())
-                    .Start();
-            }
-            else
+            void onFabHidden()
             {
-                stopButton.Hide(fabListener);
-                await fabListener.HideAsync;
-
                 radialAnimation
-                    .OnAnimationEnd(_ => playButton.Show())
-                    .OnAnimationCancel(() => stopButton.Show())
+                    .OnAnimationEnd(_ => buttonToShow.Show())
+                    .OnAnimationCancel(buttonToHide.Show)
                     .Start();
             }
         }
@@ -365,16 +357,19 @@ namespace Toggl.Giskard.Activities
             }
         }
 
-        private sealed class FabAsyncHideListener : FloatingActionButton.OnVisibilityChangedListener
+        private sealed class FabVisibilityListener : FloatingActionButton.OnVisibilityChangedListener
         {
-            private readonly TaskCompletionSource<object> hideTaskCompletionSource = new TaskCompletionSource<object>();
+            private readonly Action onFabHidden;
 
-            public Task HideAsync => hideTaskCompletionSource.Task;
+            public FabVisibilityListener(Action onFabHidden)
+            {
+                this.onFabHidden = onFabHidden;
+            }
 
             public override void OnHidden(FloatingActionButton fab)
             {
                 base.OnHidden(fab);
-                hideTaskCompletionSource.SetResult(null);
+                onFabHidden();
             }
         }
 

@@ -24,24 +24,24 @@ namespace Toggl.Foundation.Tests.MvvmCross
         private readonly MvvmCrossFoundation mvvmCrossFoundation;
 
         private readonly Version version = Version.Parse("1.0");
-        private readonly PlatformInfo platformInfo = new PlatformInfo();
         private readonly IScheduler scheduler = Substitute.For<IScheduler>();
         private readonly IApiFactory apiFactory = Substitute.For<IApiFactory>();
         private readonly UserAgent userAgent = new UserAgent("Some Client", "1.0");
         private readonly ITimeService timeService = Substitute.For<ITimeService>();
         private readonly IMailService mailService = Substitute.For<IMailService>();
         private readonly ITogglDatabase database = Substitute.For<ITogglDatabase>();
+        private readonly IPlatformInfo platformInfo = Substitute.For<IPlatformInfo>();
         private readonly IRatingService ratingService = Substitute.For<IRatingService>();
         private readonly IGoogleService googleService = Substitute.For<IGoogleService>();
         private readonly ILicenseProvider licenseProvider = Substitute.For<ILicenseProvider>();
         private readonly IAnalyticsService analyticsService = Substitute.For<IAnalyticsService>();
         private readonly IStopwatchProvider stopwatchProvider = Substitute.For<IStopwatchProvider>();
         private readonly IBackgroundService backgroundService = Substitute.For<IBackgroundService>();
-        private readonly IPlatformConstants platformConstants = Substitute.For<IPlatformConstants>();
         private readonly IRemoteConfigService remoteConfigService = Substitute.For<IRemoteConfigService>();
         private readonly IApplicationShortcutCreator applicationShortcutCreator = Substitute.For<IApplicationShortcutCreator>();
         private readonly ISuggestionProviderContainer suggestionProviderContainer = Substitute.For<ISuggestionProviderContainer>();
         private readonly ISchedulerProvider schedulerProvider = new TestSchedulerProvider();
+        private readonly IRxActionFactory rxActionFactory = Substitute.For<IRxActionFactory>();
 
         private readonly IDialogService dialogService = Substitute.For<IDialogService>();
         private readonly IBrowserService browserService = Substitute.For<IBrowserService>();
@@ -73,6 +73,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
                     .WithLastTimeUsageStorage(lastTimeUsageStorage)
                     .WithPermissionsService(permissionsService)
                     .WithCalendarService(calendarService)
+                    .WithRxActionFactory(rxActionFactory)
                     .Build();
         }
 
@@ -91,7 +92,8 @@ namespace Toggl.Foundation.Tests.MvvmCross
             bool useAccessRestrictionStorage,
             bool useLastTimeUsageStorage,
             bool usePermissionsService,
-            bool useCalendarService)
+            bool useCalendarService,
+            bool useRxActionFactory)
         {
             var foundation = useFoundation ? constructFoundation() : null;
             var actualDialogService = useDialogService ? Substitute.For<IDialogService>() : null;
@@ -106,6 +108,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
             var actualAccessRestrictionStorage = useAccessRestrictionStorage ? Substitute.For<IAccessRestrictionStorage>() : null;
             var actualPermissionsService = usePermissionsService ? Substitute.For<IPermissionsService>() : null;
             var actualCalendarService = useCalendarService ? Substitute.For<ICalendarService>() : null;
+            var actualRxActionFactory = useRxActionFactory ? Substitute.For<IRxActionFactory>() : null;
 
             Action tryingToConstructWithEmptyParameters = () =>
                 foundation.StartRegisteringPlatformServices()
@@ -121,6 +124,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
                     .WithLastTimeUsageStorage(actualLastTimeUsageStorage)
                     .WithPermissionsService(actualPermissionsService)
                     .WithCalendarService(actualCalendarService)
+                    .WithRxActionFactory(actualRxActionFactory)
                     .Build();
 
             tryingToConstructWithEmptyParameters
@@ -143,6 +147,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
             var actualLastTimeUsageStorage = Substitute.For<ILastTimeUsageStorage>();
             var actualPermissionsService = Substitute.For<IPermissionsService>();
             var actualCalendarService = Substitute.For<ICalendarService>();
+            var actualRxActionFactory = Substitute.For<IRxActionFactory>();
 
             Action tryingToConstructWithEmptyParameters = () =>
                 foundation.StartRegisteringPlatformServices()
@@ -158,6 +163,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
                     .WithLastTimeUsageStorage(actualLastTimeUsageStorage)
                     .WithPermissionsService(actualPermissionsService)
                     .WithCalendarService(actualCalendarService)
+                    .WithRxActionFactory(actualRxActionFactory)
                     .Build();
 
             tryingToConstructWithEmptyParameters.Should().NotThrow<Exception>();
@@ -192,7 +198,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
                     .WithStopwatchProvider(stopwatchProvider)
                     .WithBackgroundService(backgroundService)
                     .WithSchedulerProvider(schedulerProvider)
-                    .WithPlatformConstants(platformConstants)
+                    .WithPlatformInfo(platformInfo)
                     .WithNotificationService(notificationService)
                     .WithRemoteConfigService(remoteConfigService)
                     .WithIntentDonationService(IntentDonationService)

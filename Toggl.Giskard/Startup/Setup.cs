@@ -38,7 +38,6 @@ namespace Toggl.Giskard
 
         private IAnalyticsService analyticsService;
         private IForkingNavigationService navigationService;
-        private PlatformInfo platformInfo;
 
 #if USE_PRODUCTION_API
         private const ApiEnvironment environment = ApiEnvironment.Production;
@@ -51,12 +50,11 @@ namespace Toggl.Giskard
         protected override IMvxNavigationService InitializeNavigationService(IMvxViewModelLocatorCollection collection)
         {
             analyticsService = new AnalyticsServiceAndroid();
-            platformInfo = new PlatformInfo { Platform = Platform.Giskard };
 
             var loader = CreateViewModelLoader(collection);
             Mvx.RegisterSingleton<IMvxViewModelLoader>(loader);
 
-            navigationService = new NavigationService(null, loader, analyticsService, platformInfo);
+            navigationService = new NavigationService(null, loader, analyticsService, Platform.Giskard);
 
             Mvx.RegisterSingleton<IForkingNavigationService>(navigationService);
             Mvx.RegisterSingleton<IMvxNavigationService>(navigationService);
@@ -83,10 +81,10 @@ namespace Toggl.Giskard
             var userAgent = new UserAgent(clientName, version);
             var mailService = new MailServiceAndroid(ApplicationContext);
             var dialogService = new DialogServiceAndroid();
-            var platformConstants = new PlatformConstants();
+            var platformInfo = new PlatformInfoAndroid();
             var keyValueStorage = new SharedPreferencesStorageAndroid(sharedPreferences);
             var settingsStorage = new SettingsStorage(appVersion, keyValueStorage);
-            var feedbackService = new FeedbackService(userAgent, mailService, dialogService, platformConstants);
+            var feedbackService = new FeedbackService(userAgent, mailService, dialogService, platformInfo);
             var schedulerProvider = new AndroidSchedulerProvider();
             var permissionsService = new PermissionsServiceAndroid();
             var calendarService = new CalendarServiceAndroid(permissionsService);
@@ -107,14 +105,13 @@ namespace Toggl.Giskard
                     .WithLicenseProvider<LicenseProviderAndroid>()
                     .WithAnalyticsService(analyticsService)
                     .WithSchedulerProvider(schedulerProvider)
-                    .WithPlatformConstants(platformConstants)
+                    .WithPlatformInfo(platformInfo)
                     .WithNotificationService<NotificationServiceAndroid>()
                     .WithRemoteConfigService<RemoteConfigServiceAndroid>()
                     .WithApiFactory(new ApiFactory(environment, userAgent))
                     .WithBackgroundService(new BackgroundService(timeService))
                     .WithSuggestionProviderContainer(suggestionProviderContainer)
                     .WithApplicationShortcutCreator(new ApplicationShortcutCreator(ApplicationContext))
-                    .WithPlatformInfo(platformInfo)
                     .WithStopwatchProvider<FirebaseStopwatchProviderAndroid>()
                     .WithIntentDonationService(new NoopIntentDonationServiceAndroid())
                     .WithPrivateSharedStorageService(new NoopPrivateSharedStorageServiceAndroid())
@@ -132,6 +129,7 @@ namespace Toggl.Giskard
                     .WithPermissionsService(permissionsService)
                     .WithAccessRestrictionStorage(settingsStorage)
                     .WithErrorHandlingService(new ErrorHandlingService(navigationService, settingsStorage))
+                    .WithRxActionFactory(new RxActionFactory(schedulerProvider))
                     .Build();
 
             foundation.RevokeNewUserIfNeeded().Initialize();

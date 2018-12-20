@@ -11,5 +11,7 @@ namespace Toggl.Daneel.Views.Calendar
         CalendarItemLayoutAttributes LayoutAttributesForItemAtIndexPath(NSIndexPath indexPath);
 
         NSIndexPath IndexPathForEditingItem();
+
+        NSIndexPath IndexPathForRunningTimeEntry();
     }
 }

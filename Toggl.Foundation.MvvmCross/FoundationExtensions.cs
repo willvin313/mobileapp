@@ -5,6 +5,7 @@ using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Login;
 using Toggl.Foundation.MvvmCross.Services;
+using Toggl.Foundation.Services;
 using Toggl.Foundation.Sync;
 using Toggl.Ultrawave;
 
@@ -87,7 +88,7 @@ namespace Toggl.Foundation.MvvmCross
             Mvx.RegisterSingleton(foundation.FeedbackService);
             Mvx.RegisterSingleton(foundation.ShortcutCreator);
             Mvx.RegisterSingleton(foundation.AnalyticsService);
-            Mvx.RegisterSingleton(foundation.PlatformConstants);
+            Mvx.RegisterSingleton(foundation.PlatformInfo);
             Mvx.RegisterSingleton(foundation.NotificationService);
             Mvx.RegisterSingleton(foundation.Database.IdProvider);
             Mvx.RegisterSingleton(foundation.RemoteConfigService);
@@ -104,6 +105,7 @@ namespace Toggl.Foundation.MvvmCross
             Mvx.RegisterSingleton(foundation.IntentDonationService);
             Mvx.RegisterSingleton(foundation.PrivateSharedStorageService);
             Mvx.RegisterSingleton(foundation.PasswordManagerService ?? new StubPasswordManagerService());
+            Mvx.RegisterSingleton(foundation.RxActionFactory);
 
             // Feedback service is obsolete and is used only in the Android App and should be removed soon
             if (foundation.FeedbackService != null)

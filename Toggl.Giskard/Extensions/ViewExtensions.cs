@@ -44,17 +44,17 @@ namespace Toggl.Giskard.Extensions
         {
             if (view.IsAttachedToWindow)
             {
-                view.Post(action);
+                action();
             }
             else
             {
-                EventHandler<View.ViewAttachedToWindowEventArgs> onViewAttachedToWindow = null;
-                onViewAttachedToWindow = (sender, args) =>
-                {
-                    view.ViewAttachedToWindow -= onViewAttachedToWindow;
-                    view.Post(action);
-                };
                 view.ViewAttachedToWindow += onViewAttachedToWindow;
+            }
+
+            void onViewAttachedToWindow(object sender, View.ViewAttachedToWindowEventArgs args)
+            {
+                view.ViewAttachedToWindow -= onViewAttachedToWindow;
+                view.Post(action);
             }
         }
     }

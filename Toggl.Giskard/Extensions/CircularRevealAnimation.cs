@@ -140,41 +140,41 @@ namespace Toggl.Giskard.Extensions
                 if (duration.HasValue)
                     animator.SetDuration(duration.Value);
 
-                EventHandler onEnd = null;
-                onEnd = (o, s) =>
-                {
-                    if (type == AnimationType.Disappear)
-                        view.Visibility = ViewStates.Invisible;
-
-                    animator.AnimationEnd -= onEnd;
-                    onAnimationEnd?.Invoke(view);
-                };
-
-                EventHandler onCancel = null;
-                onCancel = (o, s) =>
-                {
-                    view.Visibility = type == AnimationType.Disappear ? ViewStates.Visible : ViewStates.Invisible;
-                    animator.AnimationEnd -= onEnd;
-                    animator.AnimationCancel -= onCancel;
-                    onAnimationCancel?.Invoke();
-                };
-
                 animator.AnimationEnd += onEnd;
+                animator.AnimationStart += onStart;
                 animator.AnimationCancel += onCancel;
-
-                animator.AnimationStart += (o, s) =>
-                {
-                    if (type == AnimationType.Appear)
-                    {
-                        view.Visibility = ViewStates.Visible;
-                    }
-                };
 
                 animator.Start();
 
                 if (cancellationToken.IsCancellationRequested)
                 {
                     animator.Cancel();
+                }
+
+                void onStart(object o, EventArgs s)
+                {
+                    if (type != AnimationType.Appear)
+                        return;
+
+                    view.Visibility = ViewStates.Visible;
+                }
+
+                void onEnd(object o, EventArgs s)
+                {
+                    if (type == AnimationType.Disappear)
+                        view.Visibility = ViewStates.Invisible;
+
+                    animator.AnimationEnd -= onEnd;
+                    onAnimationEnd?.Invoke(view);
+                }
+
+                void onCancel(object o, EventArgs s)
+                {
+                    view.Visibility = type == AnimationType.Disappear ? ViewStates.Visible : ViewStates.Invisible;
+                    animator.AnimationEnd -= onEnd;
+                    animator.AnimationStart -= onStart;
+                    animator.AnimationCancel -= onCancel;
+                    onAnimationCancel?.Invoke();
                 }
             });
         }

@@ -1,62 +1,17 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using Foundation;
 using Toggl.Foundation;
-using UIKit;
 
 namespace Toggl.Daneel
 {
-    public sealed class PlatformConstants : IPlatformConstants
+    public sealed class PlatformInfoIos : BasePlatformInfo
     {
-        private const string phoneModelProperty = "hw.machine";
-
-        public string HelpUrl { get; } = "https://support.toggl.com/toggl-timer-for-ios/";
-
-        public string PhoneModel { get; } = getDeviceModel();
-
-        public string OperatingSystem { get; } = $"{UIDevice.CurrentDevice.SystemName} {UIDevice.CurrentDevice.SystemVersion}";
-
-        public string BuildNumber { get; } = NSBundle.MainBundle.InfoDictionary["CFBundleVersion"].ToString();
-
-        [DllImport("libc", CallingConvention = CallingConvention.Cdecl)]
-        static internal extern int sysctlbyname([MarshalAs(UnmanagedType.LPStr)] string property, IntPtr output, IntPtr oldLen, IntPtr newp, uint newlen);
-
-        //Source: https://github.com/dannycabrera/Get-iOS-Model/blob/master/Xamarin.iOS.DeviceHardware.cs
-        private static string getDeviceModel()
+        public PlatformInfoIos()
+            : base("https://support.toggl.com/toggl-timer-for-ios/", Platform.Daneel)
         {
-            try
-            {
-                //Get length of phone identifier
-                var pointerToLength = Marshal.AllocHGlobal(sizeof(int));
-                int sysctlResult;
-                sysctlResult = sysctlbyname(phoneModelProperty, IntPtr.Zero, pointerToLength, IntPtr.Zero, 0);
-                if (sysctlResult != 0)
-                {
-                    Marshal.FreeHGlobal(pointerToLength);
-                    return null;
-                }
-                var length = Marshal.ReadInt32(pointerToLength);
-
-                //Get phone identifier
-                var pointerToDeviceString = Marshal.AllocHGlobal(length);
-                sysctlResult = sysctlbyname(phoneModelProperty, pointerToDeviceString, pointerToLength, IntPtr.Zero, 0);
-
-                var phoneIdentifier = sysctlResult == 0
-                    ? Marshal.PtrToStringAnsi(pointerToDeviceString)
-                    : null;
-
-                Marshal.FreeHGlobal(pointerToLength);
-                Marshal.FreeHGlobal(pointerToDeviceString);
-
-                return toDeviceModel(phoneIdentifier);
-            }
-            catch
-            {
-                return null;
-            }
         }
 
-        //Source: https://stackoverflow.com/questions/26028918/how-to-determine-the-current-iphone-device-model
+        public override string PhoneModel => toDeviceModel(base.PhoneModel);
+
         private static string toDeviceModel(string identifier)
         {
             switch (identifier)
@@ -200,8 +155,9 @@ namespace Toggl.Daneel
                     return "Simulator";
 
                 default:
-                    return null;
+                    return identifier;
             }
         }
+
     }
 }

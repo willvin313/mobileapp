@@ -90,6 +90,13 @@ namespace Toggl.Foundation.Tests.Interactors.Calendar
                         Start = new DateTimeOffset(2018, 08, 06, 15, 45, 00, TimeSpan.Zero),
                         Duration = 10,
                         IsDeleted = true
+                    },
+                    new MockTimeEntry()
+                    {
+                        Id = 5,
+                        Description = "Running time entry",
+                        Start = new DateTimeOffset(2018, 08, 06, 15, 45, 00, TimeSpan.Zero),
+                        Duration = null
                     }
                 };
 
@@ -174,11 +181,19 @@ namespace Toggl.Foundation.Tests.Interactors.Calendar
                 CalendarService
                     .GetEventsForDate(Arg.Is(date))
                     .Returns(Observable.Return(newCalendarEvents));
-                
+
                 var calendarItems = await interactor.Execute();
 
                 calendarItems.Should().HaveCount(calendarItemsFromTimeEntries.Count + newCalendarEvents.Count() - 2);
                 calendarItems.Should().NotContain(calendarItem => calendarItem.Description == "Day off" || calendarItem.Description == "Team meetup");
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task IncludesTheRunningTimeEntry()
+            {
+                var calendarItems = await interactor.Execute();
+
+                calendarItems.Should().Contain(calendarItem => calendarItem.Description == "Running time entry");
             }
         }
     }
