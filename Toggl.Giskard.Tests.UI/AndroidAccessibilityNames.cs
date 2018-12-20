@@ -16,10 +16,10 @@ namespace Toggl.Tests.UI
 
     public static class Login
     {
-        public static readonly Func<AppQuery, AppQuery> EmailText = x => x.Id("LoginEmailTextField");
-        public static readonly Func<AppQuery, AppQuery> ErrorLabel = x => x.Id("InfoTextField");
-        public const string LoginButton = "LoginButton";
-        public static readonly Func<AppQuery, AppQuery> PasswordText = x => x.Id("LoginPasswordTextField");
+        public const string EmailText = "LoginEmailEditText";
+        public const string ErrorLabel = "LoginError";
+        public const string LoginButton = "LoginLoginButton";
+        public const string PasswordText = "LoginPasswordEditText";
         public const string ShowPasswordButton = "";
         public const string SwitchToSignUpLabel = "LoginSignupCardView";
         public const string ForgotPasswordButton = "";
