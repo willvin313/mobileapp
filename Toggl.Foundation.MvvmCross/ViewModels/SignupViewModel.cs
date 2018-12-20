@@ -297,7 +297,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         }
 
         private IObservable<Unit> openCountryPicker() => navigationService
-            .Navigate<SelectCountryViewModel, long?, long?>(selectedCountry.Value.Id)
+            .Navigate<SelectCountryViewModel, long?, long?>(selectedCountry?.Value?.Id)
             .ToObservable()
             .Do(selectedCountryId =>
                 selectedCountry.OnNext(allCountries.Single(country => country.Id == selectedCountryId.Value)))
@@ -308,7 +308,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             if (selectedCountry.Value == null)
             {
-                return Observable.Throw<Unit>(missingCountryException);
+                return Observable.Return(Unit.Default).Do(_ =>
+                {
+                    shakeSubject.OnNext(ShakeTarget.Country);
+                    throw missingCountryException;
+                });
             }
 
             if (!tosAccepted.Value)

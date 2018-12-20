@@ -97,7 +97,7 @@ namespace Toggl.Daneel.ViewControllers
                 .BindAction(ViewModel.SignUp)
                 .DisposedBy(DisposeBag);
 
-            SelectCountryTextField.Rx()
+            SelectCountryButton.Rx()
                 .BindAction(ViewModel.OpenCountryPicker)
                 .DisposedBy(DisposeBag);
 
@@ -128,6 +128,8 @@ namespace Toggl.Daneel.ViewControllers
                             return SignUpWithEmailTextField;
                         case SignupViewModel.ShakeTarget.Password:
                             return PasswordTextField;
+                        case SignupViewModel.ShakeTarget.Country:
+                            return SelectCountryWrapperView;
                         default:
                             return null;
                     }
@@ -239,7 +241,6 @@ namespace Toggl.Daneel.ViewControllers
             EmailScreenErrorLabel.Text = String.Empty;
             SigningUpWithEmailTextField.Text = String.Empty;
             SigningUpWithEmailTextField.Enabled = false;
-            SelectCountryTextField.Enabled = false;
             setupGoogleButton();
         }
 

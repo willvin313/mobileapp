@@ -14,7 +14,7 @@
             <connections>
                 <outlet property="ActivityIndicator" destination="sr9-nn-Soa" id="Dmt-Sp-QwP"/>
                 <outlet property="BottomToSafeAreaConstraint" destination="bfb-Jq-GK1" id="sVm-xC-3Yg"/>
-                <outlet property="CountryErrorLabel" destination="y8w-3g-aS2" id="aeE-xR-EYQ"/>
+                <outlet property="CountryErrorLabel" destination="C2p-4O-rMx" id="Fhv-3o-t7W"/>
                 <outlet property="CountrySelectionScreenWrapperView" destination="21q-HV-H3g" id="jsa-yu-6cO"/>
                 <outlet property="EmailAndPasswordErrorLabel" destination="bDJ-O5-Mgx" id="v11-D7-6zv"/>
                 <outlet property="EmailAndPasswordScreenWrapperView" destination="aHt-Ci-I5L" id="0qS-7U-rtq"/>
@@ -25,13 +25,15 @@
                 <outlet property="PasswordMaskingControl" destination="YwE-g4-e5R" id="ein-wT-pLs"/>
                 <outlet property="PasswordMaskingImageView" destination="5CI-nd-X9f" id="lDK-1x-2Hl"/>
                 <outlet property="PasswordTextField" destination="hea-Kc-GD2" id="Ope-Fv-L9K"/>
+                <outlet property="SelectCountryButton" destination="IIv-w2-Cno" id="S3S-v5-G4f"/>
                 <outlet property="SelectCountryTextField" destination="D0r-eW-FOa" id="7ay-WX-Dib"/>
+                <outlet property="SelectCountryWrapperView" destination="uqw-Ce-g7o" id="rcw-f8-3ra"/>
                 <outlet property="SignUpButton" destination="ZNF-C3-gXL" id="Ffs-WL-8DK"/>
                 <outlet property="SignUpWithEmailButton" destination="BeL-on-TZJ" id="Hb0-IP-JdN"/>
                 <outlet property="SignUpWithEmailTextField" destination="Snc-tS-Cts" id="1bX-F7-xKM"/>
                 <outlet property="SigningUpWithEmailTextField" destination="rj1-O6-wv1" id="hpC-G5-icC"/>
                 <outlet property="TOSButton" destination="Ph2-eu-WUq" id="Wlc-uX-C9Q"/>
-                <outlet property="TOSErrorLabel" destination="C2p-4O-rMx" id="VIU-XV-PJ8"/>
+                <outlet property="TOSErrorLabel" destination="y8w-3g-aS2" id="HTK-od-6Uo"/>
                 <outlet property="UseSixCharactersLabel" destination="ONy-oM-bDX" id="N4X-QI-x0G"/>
                 <outlet property="view" destination="2" id="RRd-Eg-VrN"/>
             </connections>
@@ -283,9 +285,8 @@
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="21q-HV-H3g">
                     <rect key="frame" x="0.0" y="20" width="320" height="548"/>
                     <subviews>
-                        <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Incorrect email/password. Please try again." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="C2p-4O-rMx">
-                            <rect key="frame" x="68" y="273" width="244" height="15"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Select your country of residence" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="C2p-4O-rMx">
+                            <rect key="frame" x="40" y="381.5" width="184.5" height="14.5"/>
                             <fontDescription key="fontDescription" type="system" pointSize="12"/>
                             <color key="textColor" red="0.96862745100000003" green="0.25098039220000001" blue="0.28627450980000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <nil key="highlightedColor"/>
@@ -337,41 +338,67 @@
                             </constraints>
                             <state key="normal" image="icCheckboxSquareUnchecked"/>
                         </button>
-                        <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Incorrect email/password. Please try again." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="y8w-3g-aS2">
-                            <rect key="frame" x="40" y="466" width="243.5" height="14.5"/>
-                            <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                            <color key="textColor" red="0.96862745100000003" green="0.25098039220000001" blue="0.28627450980000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                            <nil key="highlightedColor"/>
-                        </label>
-                        <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="D0r-eW-FOa" customClass="LoginTextField">
-                            <rect key="frame" x="46" y="16" width="258" height="56"/>
-                            <constraints>
-                                <constraint firstAttribute="height" constant="56" id="zan-TX-hKc"/>
-                            </constraints>
-                            <nil key="textColor"/>
-                            <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                            <textInputTraits key="textInputTraits"/>
-                        </textField>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="I agree to the Terms of Service and Privacy Policy" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dne-bR-stE">
                             <rect key="frame" x="40" y="420" width="264" height="40"/>
                             <fontDescription key="fontDescription" type="system" pointSize="15"/>
                             <nil key="textColor"/>
                             <nil key="highlightedColor"/>
                         </label>
+                        <imageView userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" image="icDownS" translatesAutoresizingMaskIntoConstraints="NO" id="Yq2-4P-OMm">
+                            <rect key="frame" x="280" y="343.5" width="8" height="8"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="8" id="RCh-UC-tTb"/>
+                                <constraint firstAttribute="width" constant="8" id="cjj-pN-nuo"/>
+                            </constraints>
+                        </imageView>
+                        <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="You must agree to use Toggl" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="y8w-3g-aS2">
+                            <rect key="frame" x="40" y="466" width="161" height="14.5"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                            <color key="textColor" red="0.96862745100000003" green="0.25098039220000001" blue="0.28627450980000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="uqw-Ce-g7o">
+                            <rect key="frame" x="40" y="319.5" width="264" height="56"/>
+                            <subviews>
+                                <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Country of residence" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="D0r-eW-FOa" customClass="LoginTextField">
+                                    <rect key="frame" x="0.0" y="0.0" width="264" height="56"/>
+                                    <nil key="textColor"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                    <textInputTraits key="textInputTraits"/>
+                                </textField>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IIv-w2-Cno">
+                                    <rect key="frame" x="0.0" y="0.0" width="264" height="56"/>
+                                </button>
+                            </subviews>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <constraints>
+                                <constraint firstItem="D0r-eW-FOa" firstAttribute="leading" secondItem="uqw-Ce-g7o" secondAttribute="leading" id="37M-ay-QSt"/>
+                                <constraint firstAttribute="bottom" secondItem="D0r-eW-FOa" secondAttribute="bottom" id="4YF-QV-6Xn"/>
+                                <constraint firstAttribute="trailing" secondItem="IIv-w2-Cno" secondAttribute="trailing" id="KSH-Ag-uHF"/>
+                                <constraint firstAttribute="height" constant="56" id="Pqa-7i-vVC"/>
+                                <constraint firstItem="IIv-w2-Cno" firstAttribute="leading" secondItem="uqw-Ce-g7o" secondAttribute="leading" id="Zri-ho-sqY"/>
+                                <constraint firstItem="D0r-eW-FOa" firstAttribute="top" secondItem="uqw-Ce-g7o" secondAttribute="top" id="bbt-Em-MBR"/>
+                                <constraint firstItem="IIv-w2-Cno" firstAttribute="top" secondItem="uqw-Ce-g7o" secondAttribute="top" id="fXB-xF-ZCs"/>
+                                <constraint firstAttribute="bottom" secondItem="IIv-w2-Cno" secondAttribute="bottom" id="ojk-Rg-jBZ"/>
+                                <constraint firstAttribute="trailing" secondItem="D0r-eW-FOa" secondAttribute="trailing" id="pDi-iz-Btz"/>
+                            </constraints>
+                        </view>
                     </subviews>
                     <color key="backgroundColor" red="0.98039215686274506" green="0.98431372549019602" blue="0.9882352941176471" alpha="1" colorSpace="calibratedRGB"/>
                     <constraints>
-                        <constraint firstAttribute="trailing" secondItem="D0r-eW-FOa" secondAttribute="trailing" constant="16" id="7p6-IE-GCI"/>
-                        <constraint firstItem="D0r-eW-FOa" firstAttribute="leading" secondItem="21q-HV-H3g" secondAttribute="leading" constant="46" id="Jox-wj-T7s"/>
+                        <constraint firstItem="uqw-Ce-g7o" firstAttribute="trailing" secondItem="dne-bR-stE" secondAttribute="trailing" id="2xe-GZ-yao"/>
                         <constraint firstItem="pH2-xm-XVD" firstAttribute="top" secondItem="Ph2-eu-WUq" secondAttribute="bottom" constant="32" id="Kya-GT-94I"/>
-                        <constraint firstItem="D0r-eW-FOa" firstAttribute="top" secondItem="21q-HV-H3g" secondAttribute="top" constant="16" id="UNl-dT-rUW"/>
+                        <constraint firstItem="C2p-4O-rMx" firstAttribute="leading" secondItem="dne-bR-stE" secondAttribute="leading" id="M8m-ny-cqp"/>
+                        <constraint firstItem="C2p-4O-rMx" firstAttribute="top" secondItem="uqw-Ce-g7o" secondAttribute="bottom" constant="6" id="UIQ-jQ-33c"/>
                         <constraint firstItem="Ph2-eu-WUq" firstAttribute="leading" secondItem="21q-HV-H3g" secondAttribute="leading" id="ekg-0U-caC"/>
+                        <constraint firstItem="dne-bR-stE" firstAttribute="top" secondItem="C2p-4O-rMx" secondAttribute="bottom" constant="24" id="l70-Lk-ywl"/>
                         <constraint firstItem="dne-bR-stE" firstAttribute="bottom" secondItem="Ph2-eu-WUq" secondAttribute="bottom" id="mEI-ke-vIj"/>
                         <constraint firstItem="y8w-3g-aS2" firstAttribute="leading" secondItem="dne-bR-stE" secondAttribute="leading" id="mEg-Gu-nRS"/>
                         <constraint firstItem="y8w-3g-aS2" firstAttribute="top" secondItem="dne-bR-stE" secondAttribute="bottom" constant="6" id="pg0-sb-IsP"/>
                         <constraint firstItem="dne-bR-stE" firstAttribute="leading" secondItem="Ph2-eu-WUq" secondAttribute="trailing" id="pkT-3o-5MB"/>
                         <constraint firstAttribute="trailing" secondItem="dne-bR-stE" secondAttribute="trailing" constant="16" id="psv-ng-EnD"/>
                         <constraint firstAttribute="trailing" secondItem="pH2-xm-XVD" secondAttribute="trailing" constant="16" id="qnC-F4-nBv"/>
+                        <constraint firstItem="uqw-Ce-g7o" firstAttribute="leading" secondItem="dne-bR-stE" secondAttribute="leading" id="r2V-Cz-cum"/>
                         <constraint firstItem="dne-bR-stE" firstAttribute="top" secondItem="Ph2-eu-WUq" secondAttribute="top" id="srz-TH-b7k"/>
                         <constraint firstItem="pH2-xm-XVD" firstAttribute="leading" secondItem="21q-HV-H3g" secondAttribute="leading" constant="16" id="tBq-ly-beP"/>
                         <constraint firstAttribute="bottom" secondItem="pH2-xm-XVD" secondAttribute="bottom" constant="16" id="wqB-69-j9C"/>
@@ -404,6 +431,7 @@
     <resources>
         <image name="icAdd" width="10" height="10"/>
         <image name="icCheckboxSquareUnchecked" width="14" height="14"/>
+        <image name="icDownS" width="8" height="5"/>
         <image name="icGoogleColored" width="18" height="18"/>
         <image name="icPasswordUnmasked" width="19" height="13"/>
     </resources>

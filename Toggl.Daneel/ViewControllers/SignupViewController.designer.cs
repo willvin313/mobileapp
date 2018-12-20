@@ -52,7 +52,13 @@ namespace Toggl.Daneel.ViewControllers
 		Toggl.Daneel.Views.LoginTextField PasswordTextField { get; set; }
 
 		[Outlet]
+		UIKit.UIButton SelectCountryButton { get; set; }
+
+		[Outlet]
 		Toggl.Daneel.Views.LoginTextField SelectCountryTextField { get; set; }
+
+		[Outlet]
+		UIKit.UIView SelectCountryWrapperView { get; set; }
 
 		[Outlet]
 		Toggl.Daneel.Views.LoginTextField SigningUpWithEmailTextField { get; set; }
@@ -142,6 +148,11 @@ namespace Toggl.Daneel.ViewControllers
 				PasswordTextField = null;
 			}
 
+			if (SelectCountryTextField != null) {
+				SelectCountryTextField.Dispose ();
+				SelectCountryTextField = null;
+			}
+
 			if (SigningUpWithEmailTextField != null) {
 				SigningUpWithEmailTextField.Dispose ();
 				SigningUpWithEmailTextField = null;
@@ -177,9 +188,14 @@ namespace Toggl.Daneel.ViewControllers
 				UseSixCharactersLabel = null;
 			}
 
-			if (SelectCountryTextField != null) {
-				SelectCountryTextField.Dispose ();
-				SelectCountryTextField = null;
+			if (SelectCountryButton != null) {
+				SelectCountryButton.Dispose ();
+				SelectCountryButton = null;
+			}
+
+			if (SelectCountryWrapperView != null) {
+				SelectCountryWrapperView.Dispose ();
+				SelectCountryWrapperView = null;
 			}
 		}
 	}
