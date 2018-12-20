@@ -88,6 +88,43 @@
                 android:layout_height="0.5dp"
                 android:layout_width="match_parent" />
             <FrameLayout
+                android:id="@+id/SettingsDateFormatView"
+                android:clickable="true"
+                android:background="?attr/selectableItemBackground"
+                android:layout_height="56dp"
+                android:layout_width="match_parent">
+                <TextView
+                    android:id="@+id/SettingsDateFormatTextView"
+                    tools:text="MM/DD/YYYY"
+                    android:textSize="15sp"
+                    android:lineSpacingExtra="5sp"
+                    android:textColor="@android:color/black"
+                    android:layout_marginTop="9dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:textSize="12sp"
+                    android:lineSpacingExtra="4sp"
+                    android:text="@string/DateFormat"
+                    android:textColor="@color/defaultText"
+                    android:layout_gravity="bottom"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginBottom="9dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <ImageView
+                    android:src="@drawable/dropdown"
+                    android:layout_marginRight="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right|center_vertical" />
+            </FrameLayout>
+            <View
+                android:background="@color/separator"
+                android:layout_height="0.5dp"
+                android:layout_width="match_parent" />
+            <FrameLayout
                 android:id="@+id/SettingsSelectBeginningOfWeekView"
                 android:clickable="true"
                 android:background="?attr/selectableItemBackground"
@@ -107,6 +144,39 @@
                     android:textSize="12sp"
                     android:lineSpacingExtra="4sp"
                     android:text="@string/BeginningOfWeek"
+                    android:textColor="@color/defaultText"
+                    android:layout_gravity="bottom"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginBottom="9dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <ImageView
+                    android:src="@drawable/dropdown"
+                    android:layout_marginRight="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right|center_vertical" />
+            </FrameLayout>
+            <FrameLayout
+                android:id="@+id/SettingsDurationFormatView"
+                android:clickable="true"
+                android:background="?attr/selectableItemBackground"
+                android:layout_height="56dp"
+                android:layout_width="match_parent">
+                <TextView
+                    android:id="@+id/SettingsDurationFormatTextView"
+                    tools:text="Monday"
+                    android:textSize="15sp"
+                    android:lineSpacingExtra="5sp"
+                    android:textColor="@android:color/black"
+                    android:layout_marginTop="9dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:textSize="12sp"
+                    android:lineSpacingExtra="4sp"
+                    android:text="@string/DurationFormat"
                     android:textColor="@color/defaultText"
                     android:layout_gravity="bottom"
                     android:layout_marginLeft="16dp"

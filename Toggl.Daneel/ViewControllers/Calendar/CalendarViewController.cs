@@ -63,7 +63,7 @@ namespace Toggl.Daneel.ViewControllers
 
             layout = new CalendarCollectionViewLayout(timeService, dataSource);
 
-            editItemHelper = new CalendarCollectionViewEditItemHelper(CalendarCollectionView, dataSource, layout);
+            editItemHelper = new CalendarCollectionViewEditItemHelper(CalendarCollectionView, timeService, dataSource, layout);
             createFromSpanHelper = new CalendarCollectionViewCreateFromSpanHelper(CalendarCollectionView, dataSource, layout);
 
             CalendarCollectionView.SetCollectionViewLayout(layout, false);

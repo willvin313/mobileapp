@@ -573,6 +573,10 @@
     <ImageAsset Include="Resources\Images.xcassets\icCalendarSmall.imageset\icCalendarSmall%403x.png" />
     <ImageAsset Include="Resources\Images.xcassets\togglLogoWithoutTextRed.imageset\Contents.json" />
     <ImageAsset Include="Resources\Images.xcassets\togglLogoWithoutTextRed.imageset\togglLogoRed.pdf" />
+    <ImageAsset Include="Resources\Images.xcassets\stripes.imageset\Contents.json" />
+    <ImageAsset Include="Resources\Images.xcassets\stripes.imageset\stripes.png" />
+    <ImageAsset Include="Resources\Images.xcassets\stripes.imageset\stripes%402x.png" />
+    <ImageAsset Include="Resources\Images.xcassets\stripes.imageset\stripes%403x.png" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="LaunchScreen.storyboard" />
@@ -1268,6 +1272,7 @@
     <Folder Include="ViewControllers\Calendar\" />
     <Folder Include="Cells\Calendar\" />
     <Folder Include="Resources\Images.xcassets\icCalendarSmall.imageset\" />
+    <Folder Include="Resources\Images.xcassets\stripes.imageset\" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="GoogleService-Info.plist" />

@@ -232,9 +232,19 @@ namespace Toggl.Daneel.Views.Calendar
         }
 
         private IEnumerable<NSIndexPath> indexPathsForEditingHours()
-            => IsEditing
-                ? new NSIndexPath[] { NSIndexPath.FromItemSection(0, 0), NSIndexPath.FromItemSection(1, 0) }
-                : Enumerable.Empty<NSIndexPath>();
+        {
+            if (IsEditing)
+            {
+                var editingItemIndexPath = dataSource.IndexPathForEditingItem();
+                var runningTimeEntryIndexPath = dataSource.IndexPathForRunningTimeEntry();
+                var isEditingRunningTimeEntry = editingItemIndexPath != null && runningTimeEntryIndexPath != null
+                                                && runningTimeEntryIndexPath.Item == editingItemIndexPath.Item;
+                return isEditingRunningTimeEntry
+                    ? new NSIndexPath[] { NSIndexPath.FromItemSection(0, 0) }
+                    : new NSIndexPath[] { NSIndexPath.FromItemSection(0, 0), NSIndexPath.FromItemSection(1, 0) };
+            }
+            return Enumerable.Empty<NSIndexPath>();
+        }
 
         private CGRect frameForItemWithLayoutAttributes(CalendarItemLayoutAttributes attrs)
         {

@@ -14,6 +14,7 @@ using Toggl.Foundation.MvvmCross.Parameters;
 using MvvmCross.Navigation;
 using System.Collections.Immutable;
 using Toggl.Foundation.Analytics;
+using Toggl.Foundation.Services;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels
 {
@@ -22,6 +23,15 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
     {
         private const int suggestionCount = 3;
 
+        private readonly ITimeService timeService;
+        private readonly ITogglDataSource dataSource;
+        private readonly IRxActionFactory rxActionFactory;
+        private readonly IAnalyticsService analyticsService;
+        private readonly IInteractorFactory interactorFactory;
+        private readonly IOnboardingStorage onboardingStorage;
+        private readonly ISchedulerProvider schedulerProvider;
+        private readonly IMvxNavigationService navigationService;
+
         public IObservable<IImmutableList<Suggestion>> Suggestions { get; private set; }
 
         public IObservable<bool> IsEmpty { get; private set; }
@@ -29,17 +39,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public InputAction<Suggestion> StartTimeEntry { get; private set; }
         public InputAction<Suggestion> StartAndEditTimeEntry { get; private set; }
 
-        private readonly ITimeService timeService;
-        private readonly ITogglDataSource dataSource;
-        private readonly IAnalyticsService analyticsService;
-        private readonly IOnboardingStorage onboardingStorage;
-        private readonly ISchedulerProvider schedulerProvider;
-        private readonly IInteractorFactory interactorFactory;
-        private readonly IMvxNavigationService navigationService;
-
         public SuggestionsViewModel(
             ITimeService timeService,
             ITogglDataSource dataSource,
+            IRxActionFactory rxActionFactory,
             IAnalyticsService analyticsService,
             IInteractorFactory interactorFactory,
             IOnboardingStorage onboardingStorage,
@@ -48,6 +51,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
+            Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
             Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(interactorFactory, nameof(interactorFactory));
             Ensure.Argument.IsNotNull(onboardingStorage, nameof(onboardingStorage));
@@ -56,14 +60,15 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             this.dataSource = dataSource;
             this.timeService = timeService;
+            this.rxActionFactory = rxActionFactory;
             this.analyticsService = analyticsService;
             this.interactorFactory = interactorFactory;
             this.onboardingStorage = onboardingStorage;
             this.schedulerProvider = schedulerProvider;
             this.navigationService = navigationService;
 
-            StartTimeEntry = InputAction<Suggestion>.FromAsync(startTimeEntry);
-            StartAndEditTimeEntry = InputAction<Suggestion>.FromAsync(startAndEditTimeEntry);
+            StartTimeEntry = rxActionFactory.FromAsync<Suggestion>(startTimeEntry);
+            StartAndEditTimeEntry = rxActionFactory.FromAsync<Suggestion>(startAndEditTimeEntry);
         }
 
         public override async Task Initialize()

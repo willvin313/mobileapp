@@ -5,6 +5,7 @@ using CoreGraphics;
 using Foundation;
 using MvvmCross.Plugin.Color.Platforms.Ios;
 using MvvmCross.UI;
+using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Views;
 using Toggl.Daneel.Views.Calendar;
 using Toggl.Foundation.Calendar;
@@ -17,6 +18,11 @@ namespace Toggl.Daneel.Cells.Calendar
     {
         private static readonly Dictionary<CalendarIconKind, UIImage> images;
 
+        private CALayer backgroundLayer;
+        private CALayer patternLayer;
+        private CALayer tintLayer;
+        private CAShapeLayer topBorderLayer;
+        private CAShapeLayer bottomBorderLayer;
         private CAShapeLayer topDragIndicatorBorderLayer;
         private CAShapeLayer bottomDragIndicatorBorderLayer;
 
@@ -43,6 +49,8 @@ namespace Toggl.Daneel.Cells.Calendar
             }
         }
 
+        private bool isRunningTimeEntry => Item.Duration == null;
+
         static CalendarItemView()
         {
             Nib = UINib.FromName(nameof(CalendarItemView), NSBundle.MainBundle);
@@ -68,12 +76,19 @@ namespace Toggl.Daneel.Cells.Calendar
         {
             base.AwakeFromNib();
 
-            BackgroundView = new UIView()
-            {
-                BackgroundColor = UIColor.White
-            };
-
             prepareInitialConstraints();
+
+            backgroundLayer = new CALayer();
+            patternLayer = new CALayer();
+            tintLayer = new CALayer();
+            topBorderLayer = new CAShapeLayer();
+            bottomBorderLayer = new CAShapeLayer();
+
+            ContentView.Layer.InsertSublayer(topBorderLayer, 0);
+            ContentView.Layer.InsertSublayer(bottomBorderLayer, 1);
+            ContentView.Layer.InsertSublayer(backgroundLayer, 2);
+            ContentView.Layer.InsertSublayer(patternLayer, 3);
+            ContentView.Layer.InsertSublayer(tintLayer, 4);
 
             ContentView.BringSubviewToFront(TopDragIndicator);
             ContentView.BringSubviewToFront(BottomDragIndicator);
@@ -96,11 +111,16 @@ namespace Toggl.Daneel.Cells.Calendar
         protected override void UpdateView()
         {
             var color = itemColor();
+            backgroundLayer.BackgroundColor = UIColor.White.CGColor;
+            patternLayer.BackgroundColor = patternColor(Item.Source, color).CGColor;
+            tintLayer.BackgroundColor = tintColor(color).CGColor;
+            BackgroundColor = UIColor.White;
             DescriptionLabel.Text = Item.Description;
             DescriptionLabel.TextColor = textColor(color);
-            ContentView.BackgroundColor = backgroundColor(Item.Source, color);
+
             updateIcon(color);
             updateConstraints();
+            updateBorderStyle(color);
             updateDragIndicators(color);
         }
 
@@ -109,24 +129,48 @@ namespace Toggl.Daneel.Cells.Calendar
             base.LayoutSubviews();
 
             updateShadow();
+            updateBorderLayers();
+            updateBackgroundLayers();
             updateConstraints();
         }
 
         private UIColor itemColor()
             => MvxColor.ParseHexString(Item.Color).ToNativeColor();
 
-        private UIColor backgroundColor(CalendarItemSource source, UIColor color)
+        private UIColor patternColor(CalendarItemSource source, UIColor color)
         {
             switch (source)
             {
                 case CalendarItemSource.Calendar:
                     return color.ColorWithAlpha((nfloat)0.24);
                 case CalendarItemSource.TimeEntry:
-                    return color;
+                    if (isRunningTimeEntry)
+                    {
+                        var patternTint = color.ColorWithAlpha((nfloat)0.1);
+                        var patternTemplate = UIImage.FromBundle("stripes").ImageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate);
+
+                        UIGraphics.BeginImageContextWithOptions(patternTemplate.Size, false, patternTemplate.CurrentScale);
+                        UIGraphics.GetCurrentContext().ScaleCTM(1, -1);
+                        UIGraphics.GetCurrentContext().TranslateCTM(0, -patternTemplate.Size.Height);
+                        patternTint.SetColor();
+                        patternTemplate.Draw(new CGRect(0, 0, patternTemplate.Size.Width, patternTemplate.Size.Height));
+
+                        var pattern = UIGraphics.GetImageFromCurrentImageContext();
+                        UIGraphics.EndImageContext();
+
+                        return UIColor.FromPatternImage(pattern);
+                    }
+                    else
+                    {
+                        return color;
+                    }
                 default:
                     throw new ArgumentException("Unexpected calendar item source");
             }
         }
+
+        private UIColor tintColor(UIColor color)
+            => isRunningTimeEntry ? color.ColorWithAlpha((nfloat)0.04) : UIColor.Clear;
 
         private UIColor textColor(UIColor color)
         {
@@ -135,7 +179,7 @@ namespace Toggl.Daneel.Cells.Calendar
                 case CalendarItemSource.Calendar:
                     return color;
                 case CalendarItemSource.TimeEntry:
-                    return Item.ForegroundColor().ToNativeColor();
+                    return isRunningTimeEntry ? color : Item.ForegroundColor().ToNativeColor();
                 default:
                     throw new ArgumentException("Unexpected calendar item source");
             }
@@ -157,7 +201,7 @@ namespace Toggl.Daneel.Cells.Calendar
         private void updateDragIndicators(UIColor color)
         {
             TopDragIndicator.Hidden = !IsEditing;
-            BottomDragIndicator.Hidden = !IsEditing;
+            BottomDragIndicator.Hidden = !IsEditing || isRunningTimeEntry;
             topDragIndicatorBorderLayer.StrokeColor = color.CGColor;
             bottomDragIndicatorBorderLayer.StrokeColor = color.CGColor;
         }
@@ -186,6 +230,57 @@ namespace Toggl.Daneel.Cells.Calendar
                 = DescriptionLabelBottomConstraint.Constant
                 = descriptionLabelTopAndBottomConstraintConstant();
 
+        }
+
+        private void updateBorderStyle(UIColor color)
+        {
+            topBorderLayer.FillColor = UIColor.Clear.CGColor;
+            topBorderLayer.StrokeColor = isRunningTimeEntry ? color.CGColor : UIColor.Clear.CGColor;
+            topBorderLayer.LineWidth = 1.5f;
+            topBorderLayer.LineCap = CAShapeLayer.CapRound;
+
+            bottomBorderLayer.FillColor = UIColor.Clear.CGColor;
+            bottomBorderLayer.StrokeColor = isRunningTimeEntry ? color.CGColor : UIColor.Clear.CGColor;
+            bottomBorderLayer.LineWidth = 1.5f;
+            bottomBorderLayer.LineCap = CAShapeLayer.CapRound;
+            bottomBorderLayer.LineDashPattern = new NSNumber[] { 4, 6 };
+        }
+
+        private void updateBackgroundLayers()
+        {
+            CATransaction.Begin();
+            CATransaction.AnimationDuration = 0.0;
+
+            var borderWidth = isRunningTimeEntry ? 1.5 : 0;
+            var rect = ContentView.Bounds.Inset((nfloat)borderWidth, (nfloat)borderWidth);
+
+            backgroundLayer.Frame = rect;
+            patternLayer.Frame = rect;
+            tintLayer.Frame = rect;
+
+            CATransaction.Commit();
+        }
+
+        private void updateBorderLayers()
+        {
+            var dashLineHeight = CalendarCollectionViewLayout.HourHeight / 4;
+            var halfLineWidth = 0.5;
+
+            CATransaction.Begin();
+            CATransaction.AnimationDuration = 0.0;
+
+            topBorderLayer.Frame = new CGRect(0, 0, ContentView.Bounds.Width, ContentView.Bounds.Height - dashLineHeight);
+            bottomBorderLayer.Frame = new CGRect(0, ContentView.Bounds.Height - dashLineHeight, ContentView.Bounds.Width, dashLineHeight);
+
+            var topBorderBezierPathRect = topBorderLayer.Bounds.Inset((nfloat)halfLineWidth, (nfloat)halfLineWidth);
+            var topBorderBezierPath = UIBezierPath.FromRoundedRect(topBorderBezierPathRect, UIRectCorner.TopLeft | UIRectCorner.TopRight, new CGSize(2, 2));
+            topBorderLayer.Path = topBorderBezierPath.CGPath;
+
+            var bottomBorderBezierPathRect = bottomBorderLayer.Bounds.Inset((nfloat)halfLineWidth, (nfloat)halfLineWidth);
+            var bottomBorderBezierPath = UIBezierPath.FromRoundedRect(bottomBorderBezierPathRect, UIRectCorner.BottomLeft | UIRectCorner.BottomRight, new CGSize(2, 2));
+            bottomBorderLayer.Path = bottomBorderBezierPath.CGPath;
+
+            CATransaction.Commit();
         }
 
         private int descriptionLabelLeadingConstraintConstant()

@@ -6,6 +6,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <ViewStub
+        android:id="@+id/EmptyStateViewStub"
+        android:layout="@layout/MainLogEmptyView"
+        android:inflatedId="@+id/EmptyStateEmptyView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize" />
+    <ViewStub
         android:id="@+id/WelcomeBackViewStub"
         android:inflatedId="@+id/WelcomeBackView"
         android:layout="@layout/WelcomeBackPlaceholder"

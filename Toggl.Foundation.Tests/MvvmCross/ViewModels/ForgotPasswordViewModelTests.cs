@@ -24,8 +24,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             protected Email InvalidEmail { get; } = Email.From("This is not an email");
 
             protected override ForgotPasswordViewModel CreateViewModel()
-                => new ForgotPasswordViewModel(TimeService, UserAccessManager, AnalyticsService, NavigationService,
-                    SchedulerProvider);
+                => new ForgotPasswordViewModel(
+                    TimeService,
+                    UserAccessManager,
+                    AnalyticsService,
+                    NavigationService,
+                    SchedulerProvider,
+                    RxActionFactory);
         }
 
         public sealed class TheConstructor : ForgotPasswordViewModelTest
@@ -37,17 +42,19 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 bool useUserAccessManager,
                 bool useAnalyticsService,
                 bool useNavigationService,
-                bool useSchedulerProvider)
+                bool useSchedulerProvider,
+                bool useRxActionFactory)
             {
                 var timeService = useTimeService ? TimeService : null;
                 var userAccessManager = useUserAccessManager ? UserAccessManager : null;
                 var analyticsSerivce = useAnalyticsService ? AnalyticsService : null;
                 var navigationService = useNavigationService ? NavigationService : null;
                 var schedulerProvider = useSchedulerProvider ? SchedulerProvider : null;
+                var rxActionFactory = useRxActionFactory ? RxActionFactory : null;
 
                 Action tryingToConstructWithEmptyParameters =
                     () => new ForgotPasswordViewModel(
-                        timeService, userAccessManager, analyticsSerivce, navigationService, schedulerProvider);
+                        timeService, userAccessManager, analyticsSerivce, navigationService, schedulerProvider, rxActionFactory);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
@@ -213,7 +220,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     var testScheduler = new TestScheduler();
                     var timeService = new TimeService(testScheduler);
                     var viewModel = new ForgotPasswordViewModel(
-                        timeService, UserAccessManager, AnalyticsService, NavigationService, SchedulerProvider);
+                        timeService, UserAccessManager, AnalyticsService, NavigationService, SchedulerProvider, RxActionFactory);
                     viewModel.Email.OnNext(ValidEmail);
                     UserAccessManager
                         .ResetPassword(Arg.Any<Email>())
@@ -336,6 +343,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 ViewModel.Close.Execute();
 
+                TestScheduler.Start();
                 NavigationService
                     .Received()
                     .Close(

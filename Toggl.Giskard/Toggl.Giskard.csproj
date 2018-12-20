@@ -925,6 +925,9 @@
     <AndroidResource Include="Resources\drawable\ic_thumbs_up.xml" />
     <AndroidResource Include="Resources\layout\MainUserFeedbackCard.axml" />
     <AndroidResource Include="Resources\xml\RemoteConfigDefaults.xml" />
+    <AndroidResource Include="Resources\layout\MainLogEmptyView.axml" />
+    <AndroidResource Include="Resources\drawable\BorderRectangle.xml" />
+    <AndroidResource Include="Resources\drawable\EmptyViewRoundedRectangle.xml" />
     <AndroidResource Include="Resources\layout\MainSuggestionsHeader.axml" />
     <AndroidResource Include="Resources\drawable-hdpi\toggl_spider.png" />
     <AndroidResource Include="Resources\drawable-mdpi\toggl_spider.png" />

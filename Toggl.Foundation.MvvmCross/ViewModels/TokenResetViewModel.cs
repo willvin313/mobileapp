@@ -10,6 +10,7 @@ using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Login;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Services;
+using Toggl.Foundation.Services;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
@@ -27,6 +28,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly IUserPreferences userPreferences;
         private readonly IAnalyticsService analyticsService;
         private readonly ISchedulerProvider schedulerProvider;
+        private readonly IRxActionFactory rxActionFactory;
 
         private readonly BehaviorSubject<string> errorSubject = new BehaviorSubject<string>(string.Empty);
         private readonly BehaviorSubject<Email> emailSubject = new BehaviorSubject<Email>(Multivac.Email.Empty);
@@ -58,7 +60,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IForkingNavigationService navigationService,
             IUserPreferences userPreferences,
             IAnalyticsService analyticsService,
-            ISchedulerProvider schedulerProvider
+            ISchedulerProvider schedulerProvider,
+            IRxActionFactory rxActionFactory
         )
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
@@ -68,6 +71,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(userPreferences, nameof(userPreferences));
             Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
+            Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
 
             this.dataSource = dataSource;
             this.userAccessManager = userAccessManager;
@@ -76,6 +80,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             this.userPreferences = userPreferences;
             this.analyticsService = analyticsService;
             this.schedulerProvider = schedulerProvider;
+            this.rxActionFactory = rxActionFactory;
 
             Error = errorSubject
                 .AsDriver(schedulerProvider);
@@ -97,11 +102,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .DistinctUntilChanged()
                 .AsDriver(schedulerProvider);
 
-            TogglePasswordVisibility = UIAction.FromAction(togglePasswordVisibility);
-            SetPassword = InputAction<string>.FromAction(setPassword);
+            TogglePasswordVisibility = rxActionFactory.FromAction(togglePasswordVisibility);
+            SetPassword = rxActionFactory.FromAction<string>(setPassword);
 
-            Done = UIAction.FromObservable(done);
-            SignOut = UIAction.FromAsync(signout);
+            Done = rxActionFactory.FromObservable(done);
+            SignOut = rxActionFactory.FromAsync(signout);
 
             IsLoading = Done.Executing
                 .DistinctUntilChanged()

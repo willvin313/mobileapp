@@ -31,7 +31,7 @@ namespace Toggl.Giskard.Services
         public GoogleServiceAndroid()
         {
             var signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DefaultSignIn)
-                .RequestIdToken("{TOGGL_DROID_GOOGLE_SERVICES_CLIENT_ID}")
+                .RequestIdToken("")
                 .RequestEmail()
                 .Build();
 

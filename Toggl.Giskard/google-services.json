@@ -1,27 +1,27 @@
 {
   "project_info": {
-    "project_number": "{TOGGL_GCM_SENDER_ID}",
-    "firebase_url": "{TOGGL_DATABASE_URL}",
-    "project_id": "{TOGGL_PROJECT_ID}",
-    "storage_bucket": "{TOGGL_STORAGE_BUCKET}"
+    "project_number": "424423194736",
+    "firebase_url": "https://toggl-mobile.firebaseio.com",
+    "project_id": "toggl-mobile",
+    "storage_bucket": "toggl-mobile.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "{TOGGL_DROID_GOOGLE_SERVICES_MOBILE_SDK_APP_ID}",
+        "mobilesdk_app_id": "",
         "android_client_info": {
           "package_name": "com.toggl.giskard"
         }
       },
       "oauth_client": [
         {
-          "client_id": "{TOGGL_DROID_GOOGLE_SERVICES_CLIENT_ID}",
+          "client_id": "",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "{TOGGL_DROID_GOOGLE_SERVICES_API_KEY}"
+          "current_key": ""
         }
       ],
       "services": {

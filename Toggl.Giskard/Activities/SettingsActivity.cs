@@ -40,7 +40,10 @@ namespace Toggl.Giskard.Activities
                 Resource.Layout.SettingsActivityWorkspaceCell,
                 WorkspaceSelectionViewHolder.Create
             );
-            adapter.OnItemTapped = ViewModel.SelectDefaultWorkspace;
+            adapter.ItemTapObservable
+                .Subscribe(ViewModel.SelectDefaultWorkspace.Inputs)
+                .DisposedBy(DisposeBag);
+
             workspacesRecyclerView.SetAdapter(adapter);
             workspacesRecyclerView.SetLayoutManager(new LinearLayoutManager(this));
 
@@ -74,8 +77,16 @@ namespace Toggl.Giskard.Activities
                 .Subscribe(stoppedTimerNotificationsSwitch.Rx().Checked())
                 .DisposedBy(DisposeBag);
 
+            ViewModel.DateFormat
+                .Subscribe(dateFormatTextView.Rx().TextObserver())
+                .DisposedBy(DisposeBag);
+
             ViewModel.BeginningOfWeek
                 .Subscribe(beginningOfWeekTextView.Rx().TextObserver())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.DurationFormat
+                .Subscribe(durationFormatTextView.Rx().TextObserver())
                 .DisposedBy(DisposeBag);
 
             ViewModel.UserAvatar
@@ -131,6 +142,14 @@ namespace Toggl.Giskard.Activities
                 .BindAction(ViewModel.SelectBeginningOfWeek)
                 .DisposedBy(DisposeBag);
 
+            dateFormatView.Rx().Tap()
+                .Subscribe(ViewModel.SelectDateFormat.Inputs)
+                .DisposedBy(DisposeBag);
+
+            durationFormatView.Rx().Tap()
+                .Subscribe(ViewModel.SelectDurationFormat.Inputs)
+                .DisposedBy(DisposeBag);
+
             setupToolbar();
         }
 
@@ -162,7 +181,7 @@ namespace Toggl.Giskard.Activities
 
         private void onNavigateBack(object sender, Toolbar.NavigationClickEventArgs e)
         {
-            ViewModel.Close().Execute();
+            ViewModel.Close.Execute();
         }
 
         public override void Finish()

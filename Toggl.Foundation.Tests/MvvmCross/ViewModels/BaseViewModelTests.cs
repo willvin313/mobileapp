@@ -39,12 +39,15 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         protected IStopwatchProvider StopwatchProvider { get; } = Substitute.For<IStopwatchProvider>();
 
         protected TestScheduler TestScheduler { get; }
+        protected IRxActionFactory RxActionFactory { get; }
 
         protected TViewModel ViewModel { get; private set; }
 
         protected BaseViewModelTests()
         {
             TestScheduler = SchedulerProvider.TestScheduler;
+            RxActionFactory = new RxActionFactory(SchedulerProvider);
+
             Setup();
         }
 

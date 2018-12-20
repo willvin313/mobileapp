@@ -11,11 +11,11 @@ namespace Toggl.Foundation.Calendar
 
         public CalendarItemSource Source { get; }
 
-        public TimeSpan Duration { get; }
+        public TimeSpan? Duration { get; }
 
         public DateTimeOffset StartTime { get; }
 
-        public DateTimeOffset EndTime => StartTime + Duration;
+        public DateTimeOffset? EndTime => StartTime + Duration;
 
         public string Description { get; }
 
@@ -31,7 +31,7 @@ namespace Toggl.Foundation.Calendar
             string id,
             CalendarItemSource source,
             DateTimeOffset startTime,
-            TimeSpan duration,
+            TimeSpan? duration,
             string description,
             CalendarIconKind iconKind,
             string color = ColorHelper.NoProject,
@@ -54,7 +54,7 @@ namespace Toggl.Foundation.Calendar
                 timeEntry.Id.ToString(),
                 CalendarItemSource.TimeEntry,
                 timeEntry.Start,
-                TimeSpan.FromSeconds(timeEntry.Duration ?? 0),
+                timeEntry.Duration.HasValue ? TimeSpan.FromSeconds(timeEntry.Duration.Value) : null as TimeSpan?,
                 timeEntry.Description,
                 CalendarIconKind.None,
                 timeEntry.Project?.Color ?? ColorHelper.NoProject,
@@ -88,7 +88,7 @@ namespace Toggl.Foundation.Calendar
                 this.TimeEntryId,
                 this.CalendarId);
 
-        public CalendarItem WithDuration(TimeSpan duration)
+        public CalendarItem WithDuration(TimeSpan? duration)
             => new CalendarItem(
                 this.Id,
                 this.Source,

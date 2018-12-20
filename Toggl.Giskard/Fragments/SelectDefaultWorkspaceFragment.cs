@@ -11,6 +11,7 @@ using MvvmCross.Platforms.Android.Presenters.Attributes;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Giskard.Adapters;
 using Toggl.Giskard.ViewHolders;
+using Toggl.Multivac.Extensions;
 
 namespace Toggl.Giskard.Fragments
 {
@@ -35,7 +36,9 @@ namespace Toggl.Giskard.Fragments
                 SelectDefaultWorkspaceViewHolder.Create
             );
             adapter.Items = ViewModel.Workspaces.ToList();
-            adapter.OnItemTapped = async workspace => await ViewModel.SelectWorkspace.Execute(workspace);
+            adapter.ItemTapObservable
+                .Subscribe(ViewModel.SelectWorkspace.Inputs)
+                .DisposedBy(DisposeBag);
 
             recyclerView.SetAdapter(adapter);
             recyclerView.SetLayoutManager(new LinearLayoutManager(Context));

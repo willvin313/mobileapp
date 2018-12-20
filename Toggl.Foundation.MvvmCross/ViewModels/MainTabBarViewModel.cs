@@ -48,7 +48,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IRemoteConfigService remoteConfigService,
             IIntentDonationService intentDonationService,
             IAccessRestrictionStorage accessRestrictionStorage,
-            IStopwatchProvider stopwatchProvider)
+            IStopwatchProvider stopwatchProvider,
+            IRxActionFactory rxActionFactory)
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
@@ -68,6 +69,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(dialogService, nameof(dialogService));
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
             Ensure.Argument.IsNotNull(stopwatchProvider, nameof(stopwatchProvider));
+            Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
 
             this.remoteConfigService = remoteConfigService;
             this.stopwatchProvider = stopwatchProvider;
@@ -85,7 +87,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 intentDonationService,
                 accessRestrictionStorage,
                 schedulerProvider,
-                stopwatchProvider);
+                stopwatchProvider,
+                rxActionFactory);
 
             reportsViewModel = new ReportsViewModel(
                 dataSource,
@@ -96,7 +99,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 dialogService,
                 intentDonationService,
                 schedulerProvider,
-                stopwatchProvider);
+                stopwatchProvider,
+                rxActionFactory);
 
             calendarViewModel = new CalendarViewModel(
                 dataSource,
@@ -110,7 +114,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 schedulerProvider,
                 permissionsService,
                 navigationService,
-                stopwatchProvider);
+                stopwatchProvider,
+                rxActionFactory);
         }
 
         public override async Task Initialize()

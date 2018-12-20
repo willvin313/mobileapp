@@ -122,6 +122,7 @@ namespace Toggl.Foundation.Tests
                 var applicationShortcutCreator = Substitute.For<IApplicationShortcutCreator>();
                 var dismissedSuggestionStorage = Substitute.For<IDismissedSuggestionStorage>();
                 var privateSharedStorageService = Substitute.For<IPrivateSharedStorageService>();
+                var rxActionFactory = Substitute.For<IRxActionFactory>();
 
                 Action tryingToConstructWithValidParameters = () =>
                     TogglFoundation

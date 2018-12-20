@@ -38,6 +38,7 @@ namespace Toggl.Foundation.MvvmCross
         public IApplicationShortcutCreator ShortcutCreator { get; }
         public IIntentDonationService IntentDonationService { get; }
         public IPrivateSharedStorageService PrivateSharedStorageService { get; }
+        public IRxActionFactory RxActionFactory { get; }
 
         public PlatformInfo PlatformInfo { get; }
         public IDialogService DialogService { get; }
@@ -71,6 +72,7 @@ namespace Toggl.Foundation.MvvmCross
             LastTimeUsageStorage = builder.LastTimeUsageStorage;
             PermissionsService = builder.PermissionsService;
             CalendarService = builder.CalendarService;
+            RxActionFactory = builder.RxActionFactory;
 
             Version = builder.Foundation.Version;
             Database = builder.Foundation.Database;
@@ -112,6 +114,7 @@ namespace Toggl.Foundation.MvvmCross
             public ILastTimeUsageStorage LastTimeUsageStorage { get; private set; }
             public IPermissionsService PermissionsService { get; private set; }
             public ICalendarService CalendarService { get; private set; }
+            public IRxActionFactory RxActionFactory { get; private set; }
 
             public Builder(TogglFoundation foundation)
             {
@@ -198,6 +201,12 @@ namespace Toggl.Foundation.MvvmCross
                 return this;
             }
 
+            public Builder WithRxActionFactory(IRxActionFactory rxActionFactory)
+            {
+                RxActionFactory = rxActionFactory;
+                return this;
+            }
+
             public Builder WithDialogService<TDialogService>()
                 where TDialogService : IDialogService, new()
                 => WithDialogService(new TDialogService());
@@ -263,6 +272,7 @@ namespace Toggl.Foundation.MvvmCross
                 Ensure.Argument.IsNotNull(LastTimeUsageStorage, nameof(LastTimeUsageStorage));
                 Ensure.Argument.IsNotNull(PermissionsService, nameof(PermissionsService));
                 Ensure.Argument.IsNotNull(CalendarService, nameof(CalendarService));
+                Ensure.Argument.IsNotNull(RxActionFactory, nameof(RxActionFactory));
             }
         }
     }

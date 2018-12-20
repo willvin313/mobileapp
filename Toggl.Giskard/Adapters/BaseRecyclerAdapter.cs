@@ -18,8 +18,6 @@ namespace Toggl.Giskard.Adapters
     {
         public IObservable<T> ItemTapObservable => itemTapSubject.AsObservable();
 
-        public Func<T, Task> OnItemTapped { get; set; }
-
         private Subject<T> itemTapSubject = new Subject<T>();
 
         private IList<T> items = new List<T>();
@@ -51,7 +49,6 @@ namespace Toggl.Giskard.Adapters
             var inflater = LayoutInflater.From(parent.Context);
             var viewHolder = CreateViewHolder(parent, inflater, viewType);
             viewHolder.TappedSubject = itemTapSubject;
-
             return viewHolder;
         }
 

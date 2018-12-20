@@ -1,6 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Toggl.Foundation.Calendar;
+using Toggl.Foundation.Extensions;
+using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 
 using CalendarItemGroup = System.Collections.Generic.List<(Toggl.Foundation.Calendar.CalendarItem Item, int Index)>;
@@ -10,7 +13,15 @@ namespace Toggl.Foundation.MvvmCross.Calendar
 {
     public sealed class CalendarLayoutCalculator
     {
+        private static readonly TimeSpan offsetFromNow = TimeSpan.FromMinutes(7);
         private static readonly List<CalendarItemLayoutAttributes> emptyAttributes = new List<CalendarItemLayoutAttributes>();
+        private readonly ITimeService timeService;
+
+        public CalendarLayoutCalculator(ITimeService timeService)
+        {
+            Ensure.Argument.IsNotNull(timeService, nameof(timeService));
+            this.timeService = timeService;
+        }
 
         public IList<CalendarItemLayoutAttributes> CalculateLayoutAttributes(IList<CalendarItem> calendarItems)
         {
@@ -45,9 +56,10 @@ namespace Toggl.Foundation.MvvmCross.Calendar
                 return buckets;
             }
 
+            var now = timeService.CurrentDateTime;
             var group = buckets.Last();
-            var endTime = group.Max(i => i.Item.EndTime.LocalDateTime);
-            if (indexedItem.Item.StartTime.LocalDateTime < endTime)
+            var maxEndTime = group.Max(i => i.Item.EndTime(now, offsetFromNow));
+            if (indexedItem.Item.StartTime.LocalDateTime < maxEndTime)
                 group.Add(indexedItem);
             else
                 buckets.Add(new CalendarItemGroup { indexedItem });
@@ -121,9 +133,10 @@ namespace Toggl.Foundation.MvvmCross.Calendar
             (CalendarItem Item, int Index) item)
         {
             var positionToInsert = -1;
+            var now = timeService.CurrentDateTime;
             var column = columns.FirstOrDefault(c =>
             {
-                var index = c.FindLastIndex(elem => elem.Item.EndTime.LocalDateTime <= item.Item.StartTime.LocalDateTime);
+                var index = c.FindLastIndex(elem => elem.Item.EndTime(now, offsetFromNow) <= item.Item.StartTime.LocalDateTime);
                 if (index < 0)
                 {
                     return false;
@@ -133,7 +146,7 @@ namespace Toggl.Foundation.MvvmCross.Calendar
                     positionToInsert = c.Count;
                     return true;
                 }
-                if (c[index + 1].Item.StartTime.LocalDateTime >= item.Item.EndTime.LocalDateTime)
+                if (c[index + 1].Item.StartTime.LocalDateTime >= item.Item.EndTime(now, offsetFromNow))
                 {
                     positionToInsert += 1;
                     return true;
@@ -149,7 +162,8 @@ namespace Toggl.Foundation.MvvmCross.Calendar
             int totalColumns,
             int columnIndex)
         {
-            return new CalendarItemLayoutAttributes(calendarItem.StartTime.LocalDateTime, calendarItem.Duration, totalColumns, columnIndex);
+            var now = timeService.CurrentDateTime;
+            return new CalendarItemLayoutAttributes(calendarItem.StartTime.LocalDateTime, calendarItem.Duration(now, offsetFromNow), totalColumns, columnIndex);
         }
     }
 }

@@ -13,13 +13,11 @@ using Toggl.Foundation.Tests.Generators;
 using Xunit;
 using TimeEntry = Toggl.Foundation.Models.TimeEntry;
 using Toggl.Foundation.Models.Interfaces;
-using Toggl.Foundation.DataSources;
 using System.Reactive.Subjects;
 using FsCheck.Xunit;
 using Toggl.Foundation.Tests.Mocks;
 using Toggl.Foundation.MvvmCross.Parameters;
 using System.Collections.Immutable;
-using Toggl.Multivac.Extensions;
 using FsCheck;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
@@ -29,7 +27,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public abstract class SuggestionsViewModelTest : BaseViewModelTests<SuggestionsViewModel>
         {
             protected override SuggestionsViewModel CreateViewModel()
-                => new SuggestionsViewModel(TimeService, DataSource, AnalyticsService, InteractorFactory, OnboardingStorage, SchedulerProvider, NavigationService);
+                => new SuggestionsViewModel(TimeService, DataSource, RxActionFactory, AnalyticsService, InteractorFactory, OnboardingStorage, SchedulerProvider, NavigationService);
 
             protected override void AdditionalViewModelSetup()
             {
@@ -51,10 +49,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 bool useNavigationService,
                 bool useOnboardingStorage,
                 bool useInteractorFactory,
-                bool useSchedulerProvider)
+                bool useSchedulerProvider,
+                bool useRxActionFactory)
             {
                 var dataSource = useDataSource ? DataSource : null;
                 var timeService = useTimeService ? TimeService : null;
+                var rxActionFactory = useRxActionFactory ? RxActionFactory : null;
                 var analyticsService = useAnalyticsService ? AnalyticsService : null;
                 var navigationService = useNavigationService ? NavigationService : null;
                 var onboardingStorage = useOnboardingStorage ? OnboardingStorage : null;
@@ -62,7 +62,15 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var schedulerProvider = useSchedulerProvider ? SchedulerProvider : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new SuggestionsViewModel(timeService, dataSource, analyticsService, interactorFactory, onboardingStorage, schedulerProvider, navigationService);
+                    () => new SuggestionsViewModel(
+                        timeService,
+                        dataSource,
+                        rxActionFactory,
+                        analyticsService,
+                        interactorFactory,
+                        onboardingStorage,
+                        schedulerProvider,
+                        navigationService);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
@@ -175,7 +183,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var suggestion = createSuggestion();
                 await ViewModel.Initialize();
 
-                await ViewModel.StartTimeEntry.Execute(suggestion);
+                ViewModel.StartTimeEntry.Execute(suggestion);
+                TestScheduler.Start();
 
                 InteractorFactory.Received().StartSuggestion(suggestion);
             }
@@ -188,7 +197,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 InteractorFactory.StartSuggestion(Arg.Any<Suggestion>()).Returns(mockedInteractor);
                 await ViewModel.Initialize();
 
-                await ViewModel.StartTimeEntry.Execute(suggestion);
+                ViewModel.StartTimeEntry.Execute(suggestion);
+                TestScheduler.Start();
 
                 await mockedInteractor.Received().Execute();
             }
@@ -204,8 +214,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Returns(Observable.Return(timeEntry));
                 await ViewModel.Initialize();
 
-                await ViewModel.StartTimeEntry.Execute(suggestion);
-                await ViewModel.StartTimeEntry.Execute(suggestion);
+                var auxObservable = TestScheduler.CreateObserver<Unit>();
+                Observable.Concat(
+                        Observable.Defer(() => ViewModel.StartTimeEntry.Execute(suggestion)),
+                        Observable.Defer(() => ViewModel.StartTimeEntry.Execute(suggestion))
+                    )
+                    .Subscribe(auxObservable);
+                TestScheduler.Start();
 
                 InteractorFactory.Received(2).StartSuggestion(suggestion);
             }
@@ -216,8 +231,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var suggestion = createSuggestion();
                 await ViewModel.Initialize();
 
-                await ViewModel.StartTimeEntry.Execute(suggestion);
-                await ViewModel.StartTimeEntry.Execute(suggestion);
+                var auxObservable = TestScheduler.CreateObserver<Unit>();
+                Observable.Concat(
+                        Observable.Defer(() => ViewModel.StartTimeEntry.Execute(suggestion)),
+                        Observable.Defer(() => ViewModel.StartTimeEntry.Execute(suggestion))
+                    )
+                    .Subscribe(auxObservable);
+                TestScheduler.Start();
 
                 OnboardingStorage.Received().SetTimeEntryContinued();
             }
@@ -248,65 +268,74 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         {
             public sealed class NavigatesToTheStartTimeEntryView : SuggestionsViewModelTest
             {
-                [Property, LogIfTooSlow]
-                public void PassingTheCurrentTime(DateTimeOffset now)
+                [Fact, LogIfTooSlow]
+                public async Task PassingTheCurrentTime()
                 {
+                    var now = new DateTimeOffset(2020, 1, 2, 3, 4, 5, TimeSpan.Zero);
+                    NavigationService.ClearReceivedCalls();
                     TimeService.CurrentDateTime.Returns(now);
                     var suggestion = new Suggestion(new MockTimeEntry(), 0.5f, SuggestionProviderType.Calendar);
 
-                    ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
+                    ViewModel.StartAndEditTimeEntry.Execute(suggestion);
 
-                    NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
+                    await NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
                         Arg.Is<StartTimeEntryParameters>(parameters => parameters.StartTime == now)
-                    ).Wait();
+                    );
                 }
 
-                [Property, LogIfTooSlow]
-                public void PassingTheDescriptionFromSuggestion(string description)
+                [Theory, LogIfTooSlow]
+                [InlineData("")]
+                [InlineData("Some description")]
+                public async Task PassingTheDescriptionFromSuggestion(string description)
                 {
                     var suggestion = new Suggestion(new MockTimeEntry { Description = description }, 0.5f, SuggestionProviderType.Calendar);
 
-                    ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
+                    ViewModel.StartAndEditTimeEntry.Execute(suggestion);
 
-                    NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
+                    await NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
                         Arg.Is<StartTimeEntryParameters>(parameters => parameters.EntryDescription == description)
-                    ).Wait();
+                    );
                 }
 
-                [Property, LogIfTooSlow]
-                public void PassingTheWorkspaceIdFromSuggestion(long workspaceId)
+                [Fact, LogIfTooSlow]
+                public async Task PassingTheWorkspaceIdFromSuggestion()
                 {
+                    long workspaceId = 123;
                     var suggestion = new Suggestion(new MockTimeEntry { WorkspaceId = workspaceId }, 0.5f, SuggestionProviderType.Calendar);
 
-                    ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
+                    ViewModel.StartAndEditTimeEntry.Execute(suggestion);
 
-                    NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
+                    await NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
                         Arg.Is<StartTimeEntryParameters>(parameters => parameters.WorkspaceId == workspaceId)
-                    ).Wait();
+                    );
                 }
 
-                [Property, LogIfTooSlow]
-                public void PassingTheProjectIdFromSuggestion(long? projectId)
+                [Theory, LogIfTooSlow]
+                [InlineData(123)]
+                [InlineData(null)]
+                public async Task PassingTheProjectIdFromSuggestion(long? projectId)
                 {
                     var suggestion = new Suggestion(new MockTimeEntry { ProjectId = projectId }, 0.5f, SuggestionProviderType.Calendar);
 
-                    ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
+                    ViewModel.StartAndEditTimeEntry.Execute(suggestion);
 
-                    NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
+                    await NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
                         Arg.Is<StartTimeEntryParameters>(parameters => parameters.ProjectId == projectId)
-                    ).Wait();
+                    );
                 }
 
-                [Property, LogIfTooSlow]
-                public void PassingTheTaskIdFromSuggestion(long? taskId)
+                [Theory, LogIfTooSlow]
+                [InlineData(420)]
+                [InlineData(null)]
+                public async Task PassingTheTaskIdFromSuggestion(long? taskId)
                 {
                     var suggestion = new Suggestion(new MockTimeEntry { TaskId = taskId }, 0.5f, SuggestionProviderType.Calendar);
 
-                    ViewModel.StartAndEditTimeEntry.Execute(suggestion).Wait();
+                    ViewModel.StartAndEditTimeEntry.Execute(suggestion);
 
-                    NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
+                    await NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
                         Arg.Is<StartTimeEntryParameters>(parameters => parameters.TaskId == taskId)
-                    ).Wait();
+                    );
                 }
             }
         }
