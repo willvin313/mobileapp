@@ -58,6 +58,10 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(ViewModel.SignupWithEmail.Inputs)
                 .DisposedBy(DisposeBag);
 
+            GoogleSignUpButton.Rx()
+                .BindAction(ViewModel.SignupWithGoogle)
+                .DisposedBy(DisposeBag);
+
             SignUpWithEmailButton.Rx()
                 .BindAction(ViewModel.SignupWithEmail)
                 .DisposedBy(DisposeBag);

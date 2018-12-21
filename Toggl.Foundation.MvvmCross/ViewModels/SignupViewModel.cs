@@ -68,6 +68,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly Exception tosNotAcceptedException = new Exception(Resources.TOSAgreeRequired);
         private readonly BehaviorSubject<bool> tosAccepted = new BehaviorSubject<bool>(false);
         private readonly BehaviorSubject<ICountry> selectedCountry = new BehaviorSubject<ICountry>(null);
+        private readonly BehaviorSubject<GoogleAccountData?> googleAcccountData = new BehaviorSubject<GoogleAccountData?>(null);
 
         public BehaviorRelay<string> EmailRelay { get; } = new BehaviorRelay<string>(string.Empty);
         public BehaviorRelay<string> PasswordRelay { get; } = new BehaviorRelay<string>(string.Empty);
@@ -260,7 +261,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private IObservable<Unit> signupWithGoogle()
         {
-            throw new Exception("not implemented");
+            return userAccessManager.GetGoogleAccountData()
+                .Do(data => googleAcccountData.OnNext(data))
+                .Do(_ => state.OnNext(State.CountrySelection))
+                .SelectUnit();
         }
 
         private void signUpWithEmail()
@@ -291,7 +295,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     PasswordRelay.Accept(string.Empty);
                     break;
                 case State.CountrySelection:
-                    state.OnNext(State.EmailAndPassword);
+                    var isSigningUpUsingGoogle = googleAcccountData.Value != null;
+                    state.OnNext(isSigningUpUsingGoogle ? State.Email : State.EmailAndPassword);
                     break;
             }
         }
@@ -320,8 +325,15 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 return Observable.Throw<Unit>(tosNotAcceptedException);
             }
 
-            return userAccessManager
-                .SignUp(Email.From(EmailRelay.Value), Password.From(PasswordRelay.Value), true, (int)selectedCountry.Value.Id)
+            var isSigningUpWithGoogle = googleAcccountData.Value != null;
+            var countryId = (int)selectedCountry.Value.Id;
+
+            var signUpStream = isSigningUpWithGoogle
+                ? userAccessManager.SignUpWithGoogle(googleAcccountData.Value.Value, true, countryId)
+                : userAccessManager
+                    .SignUp(Email.From(EmailRelay.Value), Password.From(PasswordRelay.Value), true, countryId);
+
+            return signUpStream
                 .SelectMany(onSignupSuccessfully)
                 .Catch<Unit, Exception>(handleException)
                 .ObserveOn(schedulerProvider.MainScheduler);

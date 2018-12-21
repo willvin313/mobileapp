@@ -27,14 +27,13 @@ namespace Toggl.Daneel.Services
                 var token = user.Authentication.AccessToken;
                 signIn.DisconnectUser();
                 tokenSubject.OnNext(new GoogleAccountData(user.Profile.Name, token, user.Profile.Description));
+                tokenSubject.OnCompleted();
             }
             else
             {
                 tokenSubject.OnError(new GoogleLoginException(error.Code == cancelErrorCode));
             }
 
-            tokenSubject.OnCompleted();
-                    
             tokenSubject = new Subject<GoogleAccountData>();
             loggingIn = false;
         }
@@ -45,7 +44,14 @@ namespace Toggl.Daneel.Services
             {
                 SignIn.SharedInstance.Delegate = this;
                 SignIn.SharedInstance.UIDelegate = this;
-                SignIn.SharedInstance.SignInUser();
+                try
+                {
+                    SignIn.SharedInstance.SignInUser();
+                }
+                catch (Exception e)
+                {
+                    return Observable.Throw<GoogleAccountData>(e);
+                }
                 loggingIn = true;
             }
 
