@@ -76,14 +76,14 @@ namespace Toggl.Foundation.Suggestions
 
         private IEnumerable<(IDatabaseTimeEntry, float)> predictUsing2Steps(List<IDatabaseTimeEntry> timeEntries)
         {
-            var projectPredictionStopWatch = stopwatchProvider.Get(MeasuredOperation.RandomForest2StepsProjectPrediction);
+            var projectPredictionStopWatch = stopwatchProvider.Create(MeasuredOperation.RandomForest2StepsProjectPrediction);
             projectPredictionStopWatch.Start();
             var predictedProjectTuple = predictProjectID(timeEntries); //Step 1 Predict Projects
             projectPredictionStopWatch.Stop();
             
             var timeEntriesFromProject = timeEntries.Where(te => te.ProjectId == predictedProjectTuple.id).ToList();
 
-            var timeEntryPredictionStopWatch = stopwatchProvider.Get(MeasuredOperation.RandomForest2StepsTimeEntryPrediction);
+            var timeEntryPredictionStopWatch = stopwatchProvider.Create(MeasuredOperation.RandomForest2StepsTimeEntryPrediction);
             timeEntryPredictionStopWatch.Start();
             var predictedTimeEntryTuple = predictTimeEntryID(timeEntriesFromProject); //Step 2 Predict the TimeEntry
             timeEntryPredictionStopWatch.Stop();
@@ -95,7 +95,7 @@ namespace Toggl.Foundation.Suggestions
 
         private IEnumerable<(IDatabaseTimeEntry, float)> predictUsing1Step(List<IDatabaseTimeEntry> timeEntries)
         {
-            var timeEntryPredictionStopWatch = stopwatchProvider.Get(MeasuredOperation.RandomForest1StepTimeEntryPrediction);
+            var timeEntryPredictionStopWatch = stopwatchProvider.Create(MeasuredOperation.RandomForest1StepTimeEntryPrediction);
             timeEntryPredictionStopWatch.Start();
             var predictedTimeEntryTuple = predictTimeEntryID(timeEntries);
             timeEntryPredictionStopWatch.Stop();
