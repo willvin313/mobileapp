@@ -344,13 +344,6 @@
                             <nil key="textColor"/>
                             <nil key="highlightedColor"/>
                         </label>
-                        <imageView userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" image="icDownS" translatesAutoresizingMaskIntoConstraints="NO" id="Yq2-4P-OMm">
-                            <rect key="frame" x="280" y="343.5" width="8" height="8"/>
-                            <constraints>
-                                <constraint firstAttribute="height" constant="8" id="RCh-UC-tTb"/>
-                                <constraint firstAttribute="width" constant="8" id="cjj-pN-nuo"/>
-                            </constraints>
-                        </imageView>
                         <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="You must agree to use Toggl" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="y8w-3g-aS2">
                             <rect key="frame" x="40" y="466" width="161" height="14.5"/>
                             <fontDescription key="fontDescription" type="system" pointSize="12"/>
@@ -369,13 +362,22 @@
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IIv-w2-Cno">
                                     <rect key="frame" x="0.0" y="0.0" width="264" height="56"/>
                                 </button>
+                                <imageView userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="icDownS" translatesAutoresizingMaskIntoConstraints="NO" id="Yq2-4P-OMm">
+                                    <rect key="frame" x="240" y="24" width="8" height="8"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="8" id="RCh-UC-tTb"/>
+                                        <constraint firstAttribute="width" constant="8" id="cjj-pN-nuo"/>
+                                    </constraints>
+                                </imageView>
                             </subviews>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
                                 <constraint firstItem="D0r-eW-FOa" firstAttribute="leading" secondItem="uqw-Ce-g7o" secondAttribute="leading" id="37M-ay-QSt"/>
                                 <constraint firstAttribute="bottom" secondItem="D0r-eW-FOa" secondAttribute="bottom" id="4YF-QV-6Xn"/>
+                                <constraint firstAttribute="trailing" secondItem="Yq2-4P-OMm" secondAttribute="trailing" constant="16" id="CJQ-Ik-nkC"/>
                                 <constraint firstAttribute="trailing" secondItem="IIv-w2-Cno" secondAttribute="trailing" id="KSH-Ag-uHF"/>
                                 <constraint firstAttribute="height" constant="56" id="Pqa-7i-vVC"/>
+                                <constraint firstItem="Yq2-4P-OMm" firstAttribute="centerY" secondItem="uqw-Ce-g7o" secondAttribute="centerY" id="RS2-R8-xOP"/>
                                 <constraint firstItem="IIv-w2-Cno" firstAttribute="leading" secondItem="uqw-Ce-g7o" secondAttribute="leading" id="Zri-ho-sqY"/>
                                 <constraint firstItem="D0r-eW-FOa" firstAttribute="top" secondItem="uqw-Ce-g7o" secondAttribute="top" id="bbt-Em-MBR"/>
                                 <constraint firstItem="IIv-w2-Cno" firstAttribute="top" secondItem="uqw-Ce-g7o" secondAttribute="top" id="fXB-xF-ZCs"/>
