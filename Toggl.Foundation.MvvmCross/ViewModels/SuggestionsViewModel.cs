@@ -97,7 +97,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             for (int i = 0; i < count; i++)
             {
                 var suggestion = suggestions[i];
-                analyticsService.SuggestionPresented.Track(suggestion.ProviderName.ToString(), suggestion.Certainty, i);
+                analyticsService.SuggestionPresented.Track(suggestion.ProviderType.ToString(), suggestion.Certainty, i);
             }
         }
 
@@ -105,7 +105,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             onboardingStorage.SetTimeEntryContinued();
 
-            analyticsService.SuggestionStarted.Track(suggestion.ProviderName.ToString(), suggestion.Certainty);
+            analyticsService.SuggestionStarted.Track(suggestion.ProviderType.ToString(), suggestion.Certainty);
 
             await interactorFactory
                 .StartSuggestion(suggestion)

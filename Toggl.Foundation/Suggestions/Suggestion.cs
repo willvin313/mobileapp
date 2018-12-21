@@ -41,14 +41,14 @@ namespace Toggl.Foundation.Suggestions
 
         public float Certainty { get; }
 
-        public SuggestionProviderType ProviderName { get; }
+        public SuggestionProviderType ProviderType { get; }
 
         internal Suggestion(IDatabaseTimeEntry timeEntry, float certainty, SuggestionProviderType providerName)
         {
             Ensure.Argument.IsInClosedRange(certainty, 0, 1, nameof(certainty));
 
             Certainty = certainty;
-            ProviderName = providerName;
+            ProviderType = providerName;
 
             TaskId = timeEntry.TaskId;
             ProjectId = timeEntry.ProjectId;
@@ -77,8 +77,28 @@ namespace Toggl.Foundation.Suggestions
 
             Certainty = certainty;
             WorkspaceId = workspaceId;
-            ProviderName = providerType;
+            ProviderType = providerType;
             Description = calendarItem.Description;
+        }
+
+        internal Suggestion(Suggestion suggestion, float certainty)
+        {
+            Certainty = certainty;
+            TaskId = suggestion.TaskId;
+            TagIds = suggestion.TagIds;
+            ClientId = suggestion.ClientId;
+            TaskName = suggestion.TaskName;
+            Duration = suggestion.Duration;
+            ProjectId = suggestion.ProjectId;
+            StartTime = suggestion.StartTime;
+            ClientName = suggestion.ClientName;
+            HasProject = suggestion.HasProject;
+            IsBillable = suggestion.IsBillable;
+            WorkspaceId = suggestion.WorkspaceId;
+            Description = suggestion.Description;
+            ProjectName = suggestion.ProjectName;
+            ProjectColor = suggestion.ProjectColor;
+            ProviderType = suggestion.ProviderType;
         }
 
         public bool Equals(Suggestion other)

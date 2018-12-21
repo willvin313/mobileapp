@@ -48,8 +48,10 @@ namespace Toggl.Foundation.Interactors.Suggestions
             => getSuggestionProviders()
                 .Select(provider => provider.GetSuggestions())
                 .Aggregate(Observable.Concat)
-                .Take(suggestionCount)
-                .ToList();
+                .ToList()
+                .Select(balancedSuggestions)
+                .Select(suggestions => suggestions.OrderByDescending(suggestion => suggestion.Certainty))
+                .Take(suggestionCount);
 
         private IReadOnlyList<ISuggestionProvider> getSuggestionProviders()
         {
@@ -59,6 +61,29 @@ namespace Toggl.Foundation.Interactors.Suggestions
                 new MostUsedTimeEntrySuggestionProvider(timeService, dataSource, suggestionCount),
                 new CalendarSuggestionProvider(timeService, calendarService, defaultWorkspaceInteractor)
             };
+        }
+
+        private IList<Suggestion> balancedSuggestions(IList<Suggestion> suggestions)
+        {
+            if (!suggestions.Any())
+                return suggestions;
+
+            var overallAverageCertainty = suggestions.Average(suggestion => suggestion.Certainty);
+
+            var averageCertaintiesPerProvider = suggestions
+                .GroupBy(suggestion => suggestion.ProviderType)
+                .ToDictionary(
+                    keySelector: grouping => grouping.First().ProviderType,
+                    elementSelector: grouping => grouping.Average(s => s.Certainty));
+
+            var results = new List<Suggestion>();
+            foreach (var suggestion in suggestions)
+            {
+                var exponent = System.Math.Log(overallAverageCertainty, averageCertaintiesPerProvider[suggestion.ProviderType]);
+                var newCertainty = (float)System.Math.Pow(suggestion.Certainty, exponent);
+                results.Add(new Suggestion(suggestion, newCertainty));
+            }
+            return results;
         }
     }
 }
