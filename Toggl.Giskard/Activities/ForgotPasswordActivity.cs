@@ -5,6 +5,7 @@ using System.Reactive.Subjects;
 using Android.App;
 using Android.Content.PM;
 using Android.OS;
+using Android.Support.Design.Widget;
 using Android.Views;
 using Android.Widget;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
@@ -14,18 +15,17 @@ using Toggl.Giskard.Extensions;
 using Toggl.Giskard.Extensions.Reactive;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
-using Toolbar = Android.Support.V7.Widget.Toolbar;
 
 namespace Toggl.Giskard.Activities
 {
     [MvxActivityPresentation]
     [Activity(Theme = "@style/AppTheme.WhiteStatusBar",
         ScreenOrientation = ScreenOrientation.Portrait,
-        WindowSoftInputMode = SoftInput.StateVisible,
+        WindowSoftInputMode = SoftInput.AdjustResize | SoftInput.StateVisible,
         ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize)]
     public sealed partial class ForgotPasswordActivity : ReactiveActivity<ForgotPasswordViewModel>
     {
-        private Subject<Unit> closeSubject = new Subject<Unit>();
+        private const int snackBarDuration = 5000;
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -33,46 +33,84 @@ namespace Toggl.Giskard.Activities
             SetContentView(Resource.Layout.ForgotPasswordActivity);
             OverridePendingTransition(Resource.Animation.abc_slide_in_right, Resource.Animation.abc_fade_out);
 
-            setupToolbar();
             InitializeViews();
-            setupInputField();
+            initializeEmailHelperText();
 
-            ViewModel.Reset
-                .Errors
-                .Subscribe(exception =>
-                {
-                    loginEmail.Error = exception.Message;
-                })
+            setupBindings();
+
+            emailTextField.SetFocus();
+        }
+
+        private void setupBindings()
+        {
+            backButton.Rx().BindAction(ViewModel.Close)
                 .DisposedBy(DisposeBag);
 
-            loginEmailEditText.Rx().Text()
+            emailTextField.Rx().EditorActionSent()
+                .Subscribe(ViewModel.ResetPassword.Inputs)
+                .DisposedBy(DisposeBag);
+
+            emailTextField.Rx().Text()
                 .Select(Email.From)
                 .Subscribe(ViewModel.Email.OnNext)
                 .DisposedBy(DisposeBag);
 
-            ViewModel.Reset.Executing
-                .Subscribe(loadingProgressBar.Rx().IsVisible())
+            ViewModel.Email
+                .SelectToString()
+                .Subscribe(emailTextField.Rx().TextObserver(ignoreUnchanged: true))
                 .DisposedBy(DisposeBag);
 
-            ViewModel.Reset
-                .Elements
-                .VoidSubscribe(showResetPasswordSuccessToast)
+            ViewModel.ResetPassword.Errors
+                .Select(e => e.Message)
+                .Do(_ => emailTextLayout.ErrorEnabled = true)
+                .Subscribe(emailTextLayout.Rx().ErrorText())
                 .DisposedBy(DisposeBag);
 
-            ViewModel.Reset
-                .Elements
-                .SelectValue(false)
-                .Subscribe(resetPasswordButton.Rx().IsVisible())
+            ViewModel.SuggestContactSupport
+                .Subscribe(needHelpContactUsButton.Rx().IsVisible())
+                .DisposedBy(DisposeBag);
+
+            needHelpContactUsButton.Rx().Tap()
+                .Subscribe(ViewModel.ContactUs.Inputs)
                 .DisposedBy(DisposeBag);
 
             resetPasswordButton.Rx()
-                .Tap()
-                .Subscribe(ViewModel.Reset.Inputs)
+                .BindAction(ViewModel.ResetPassword)
                 .DisposedBy(DisposeBag);
 
-            closeSubject
-                .Subscribe(ViewModel.Close.Inputs)
+            ViewModel.ResetPassword.Executing
+                .Subscribe(onPasswordResettingStateChange)
                 .DisposedBy(DisposeBag);
+
+            ViewModel.ResetPassword.Elements
+                .Do(_ => resetPasswordButton.Visibility = ViewStates.Gone)
+                .Subscribe(_ => showResetPasswordSuccessSnackbar())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.ClearErrors
+                .Subscribe(_ => emailTextLayout.ErrorEnabled = false)
+                .DisposedBy(DisposeBag);
+        }
+
+        private void onPasswordResettingStateChange(bool isLoading)
+        {
+            if (isLoading)
+            {
+                emailTextLayout.HelperTextEnabled = false;
+                emailTextLayout.ErrorEnabled = false;
+            }
+
+            activityIndicator.Visibility = isLoading.ToVisibility();
+
+            resetPasswordButton.Text = isLoading
+                ? string.Empty
+                : GetString(Resource.String.GetPasswordResetLink);
+        }
+
+        private void initializeEmailHelperText()
+        {
+            emailTextLayout.HelperTextEnabled = true;
+            emailTextLayout.HelperText = GetString(Resource.String.ForgotPasswordEmailExplanation).AsJavaString();
         }
 
         public override void Finish()
@@ -81,36 +119,11 @@ namespace Toggl.Giskard.Activities
             OverridePendingTransition(Resource.Animation.abc_fade_in, Resource.Animation.abc_slide_out_right);
         }
 
-        private void setupInputField()
+        private void showResetPasswordSuccessSnackbar()
         {
-            loginEmailEditText.SetFocus();
-            loginEmailEditText.SetSelection(loginEmailEditText.Text?.Length ?? 0);
-        }
-
-        private void showResetPasswordSuccessToast()
-        {
-            loginEmailEditText.RemoveFocus();
-            Toast.MakeText(this, Resource.String.ResetPasswordEmailSentMessage, ToastLength.Long).Show();
-        }
-
-        private void setupToolbar()
-        {
-            var toolbar = FindViewById<Toolbar>(Resource.Id.ForgotPasswordToolbar);
-
-            SetSupportActionBar(toolbar);
-            SupportActionBar.SetDisplayHomeAsUpEnabled(true);
-            SupportActionBar.SetDisplayShowHomeEnabled(true);
-            SupportActionBar.Title = GetString(Resource.String.ForgotPasswordTitle);
-        }
-
-        public override bool OnOptionsItemSelected(IMenuItem item)
-        {
-            if (item.ItemId == Android.Resource.Id.Home)
-            {
-                closeSubject.OnNext(Unit.Default);
-                return true;
-            }
-            return base.OnOptionsItemSelected(item);
+            var snackbar = Snackbar.Make(rootLayout, Resource.String.ResetPasswordEmailSentMessage, Snackbar.LengthLong);
+            snackbar.SetDuration(snackBarDuration);
+            snackbar.Show();
         }
     }
 }

@@ -77,7 +77,7 @@ your app to continue.</string>
     <string name="Or">Or</string>
     <string name="ForgotPasswordEmailExplanation">Please enter your email to reset your password</string>
     <string name="ResetPasswordEmailSentMessage">Link sent. Please, check your email to reset the password</string>
-    <string name="GetPasswordResetLink">Get Password Reset Link</string>
+    <string name="GetPasswordResetLink">Get password reset link</string>
     <string name="ForgotPasswordTitle">Forgot your password?</string>
     <string name="And">and</string>
     <string name="IAgree">I Agree</string>
@@ -114,6 +114,8 @@ understand and agree to Toggl\'s</string>
     <string name="Uhoh">Uh oh.</string>
     <string name="SetDefaultWorkspaceTitle">Set default workspace</string>
     <string name="SetDefaultWorkspaceDescription">Your time will be tracked automatically from this workspace. You can cange this later from the Settings.</string>
+    <string name="PleaseCheckThatEmailIsCorrect">Please check that the email is entered correctly</string>
+    <string name="NeedHelpContactUs">Need help? <b><u>Contact us!</u></b></string>
 
     <string name="ReportsCalendarShortcutsTemplateSelector" translatable="false">Toggl.Giskard.TemplateSelectors.ReportsCalendarShortcutsTemplateSelector, Toggl.Giskard</string>
     <string name="ReportsCalendarTemplateSelector" translatable="false">Toggl.Giskard.TemplateSelectors.ReportsCalendarTemplateSelector, Toggl.Giskard</string>

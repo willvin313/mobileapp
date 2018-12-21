@@ -15,7 +15,6 @@
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
     <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
-    <AndroidUseLatestPlatformSdk>true</AndroidUseLatestPlatformSdk>
     <AndroidLinkMode>Full</AndroidLinkMode>
     <AndroidLinkSkip>Toggl.Giskard</AndroidLinkSkip>
     <EnableProguard>true</EnableProguard>
@@ -511,6 +510,7 @@
       <DependentUpon>SignupOrLoginChoiceActivity.cs</DependentUpon>
     </Compile>
     <Compile Include="Services\IntentResultRequestCodes.cs" />
+    <Compile Include="Extensions\Reactive\TextInputLayoutWithHelperTextExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\AndroidManifest.xml" />

@@ -1,3 +1,5 @@
+using Android.Support.Constraints;
+using Android.Support.Design.Widget;
 using Android.Widget;
 using Toggl.Giskard.Views;
 
@@ -5,17 +7,23 @@ namespace Toggl.Giskard.Activities
 {
     public partial class ForgotPasswordActivity
     {
-        private TextInputLayoutWithHelperText loginEmail;
-        private EditText loginEmailEditText;
+        private ImageView backButton;
+        private TextInputLayoutWithHelperText emailTextLayout;
+        private TextInputEditText emailTextField;
+        private TextView needHelpContactUsButton;
         private Button resetPasswordButton;
-        private ProgressBar loadingProgressBar;
+        private ProgressBar activityIndicator;
+        private ConstraintLayout rootLayout;
 
         protected override void InitializeViews()
         {
-            loginEmail = FindViewById<TextInputLayoutWithHelperText>(Resource.Id.LoginEmail);
-            loginEmailEditText = FindViewById<EditText>(Resource.Id.LoginEmailEditText);
+            backButton = FindViewById<ImageView>(Resource.Id.BackButton);
+            emailTextLayout = FindViewById<TextInputLayoutWithHelperText>(Resource.Id.EmailTextLayout);
+            emailTextField = FindViewById<TextInputEditText>(Resource.Id.EmailTextField);
+            needHelpContactUsButton = FindViewById<TextView>(Resource.Id.NeedHelpContactUsButton);
             resetPasswordButton = FindViewById<Button>(Resource.Id.ResetPasswordButton);
-            loadingProgressBar = FindViewById<ProgressBar>(Resource.Id.LoadingProgressBar);
+            activityIndicator = FindViewById<ProgressBar>(Resource.Id.ActivityIndicator);
+            rootLayout = FindViewById<ConstraintLayout>(Resource.Id.RootLayout);
         }
     }
 }

@@ -19,8 +19,16 @@ namespace Toggl.Giskard.Extensions.Reactive
                 .FromEventPattern<TextChangedEventArgs>(e => reactive.Base.TextChanged += e, e => reactive.Base.TextChanged -= e)
                 .Select(args => ((EditText)args.Sender).TextFormatted);
 
-        public static Action<string> TextObserver(this IReactive<TextView> reactive)
-            => text => reactive.Base.Text = text;
+        public static Action<string> TextObserver(this IReactive<TextView> reactive, bool ignoreUnchanged = false)
+        {
+            return text =>
+            {
+                if(ignoreUnchanged && reactive.Base.Text == text)
+                    return;
+                
+                reactive.Base.Text = text;
+            };
+        }
 
         public static Action<ISpannable> TextFormattedObserver(this IReactive<TextView> reactive)
             => text => reactive.Base.TextFormatted = text;

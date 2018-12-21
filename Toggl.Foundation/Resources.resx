@@ -216,6 +216,9 @@ time entries will appear here.</value>
     <data name="PasswordResetExplanation">
         <value>Please enter your email to reset your password.</value>
     </data>
+    <data name="PasswordResetInvalidEmailError">
+        <value>Please check that the email is entered correctly</value>
+    </data>
     <data name="PasswordResetSuccess">
         <value>We just sent you an email. Please follow the link in the email to reset your password.</value>
     </data>

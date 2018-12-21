@@ -73,7 +73,7 @@ namespace Toggl.Daneel.ViewControllers
         private void prepareBindings()
         {
             EmailTextField.Rx().ShouldReturn()
-                .Subscribe(ViewModel.Reset.Inputs)
+                .Subscribe(ViewModel.ResetPassword.Inputs)
                 .DisposedBy(DisposeBag);
 
             EmailTextField.Rx().Text()
@@ -82,10 +82,10 @@ namespace Toggl.Daneel.ViewControllers
                 .DisposedBy(DisposeBag);
 
             ResetPasswordButton.Rx()
-                .BindAction(ViewModel.Reset)
+                .BindAction(ViewModel.ResetPassword)
                 .DisposedBy(DisposeBag);
 
-            ViewModel.Reset.Errors
+            ViewModel.ResetPassword.Errors
                 .Subscribe(updateErrorMessage)
                 .DisposedBy(DisposeBag);
 
@@ -98,7 +98,7 @@ namespace Toggl.Daneel.ViewControllers
                 .DisposedBy(DisposeBag);
 
             // Indicators
-            ViewModel.Reset.Executing
+            ViewModel.ResetPassword.Executing
                 .Subscribe(loading =>
                 {
                     if (loading)
@@ -109,15 +109,20 @@ namespace Toggl.Daneel.ViewControllers
                 })
                 .DisposedBy(DisposeBag);
 
-            ViewModel.Reset.Executing
+            ViewModel.ResetPassword.Executing
                 .Subscribe(ActivityIndicator.Rx().IsVisibleWithFade())
                 .DisposedBy(DisposeBag);
 
-            ViewModel.Reset.Elements
+            ViewModel.ResetPassword.Elements
                 .Subscribe(_ => {
                     DoneCard.Rx().IsVisibleWithFade()(true);
                     ResetPasswordButton.Rx().IsVisibleWithFade()(false);
                 })
+                .DisposedBy(DisposeBag);
+
+            ViewModel.ClearErrors
+                .SelectValue(false)
+                .Subscribe(ErrorLabel.Rx().IsVisible())
                 .DisposedBy(DisposeBag);
         }
 

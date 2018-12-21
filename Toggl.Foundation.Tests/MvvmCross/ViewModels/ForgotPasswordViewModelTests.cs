@@ -76,12 +76,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .ResetPassword(Arg.Any<Email>())
                     .Returns(Observable.Return("Great success"));
                 var observer = TestScheduler.CreateObserver<Unit>();
-                ViewModel.Reset.Elements.Subscribe(observer);
+                ViewModel.ResetPassword.Elements.Subscribe(observer);
                 TestScheduler.Start();
 
                 ViewModel.Email.OnNext(ValidEmail);
 
-                ViewModel.Reset.Execute(Unit.Default);
+                ViewModel.ResetPassword.Execute(Unit.Default);
 
                 UserAccessManager.Received().ResetPassword(ValidEmail);
             }
@@ -90,7 +90,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public void ShouldBeEnableIfEmailIsValid()
             {
                 var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.Reset.Enabled.Subscribe(observer);
+                ViewModel.ResetPassword.Enabled.Subscribe(observer);
                 TestScheduler.Start();
 
                 ViewModel.Email.OnNext(ValidEmail);
@@ -99,24 +99,36 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public void CannotExecuteWhenEmailIsNotValid()
+            public void ShouldBeEnabledEvenIfEmailIsInvalid()
             {
                 var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.Reset.Enabled.Subscribe(observer);
+                ViewModel.ResetPassword.Enabled.Subscribe(observer);
                 TestScheduler.Start();
 
                 ViewModel.Email.OnNext(InvalidEmail);
 
-                observer.LastValue().Should().BeFalse();
+                observer.LastValue().Should().BeTrue();
             }
 
             [Fact, LogIfTooSlow]
-            public void CannotExecuteWhenEmailIsEmpty()
+            public void ShouldBeEnabledEvenIfEmailIsEmpty()
             {
                 var observer = TestScheduler.CreateObserver<bool>();
-                ViewModel.Reset.Enabled.Subscribe(observer);
+                ViewModel.ResetPassword.Enabled.Subscribe(observer);
 
-                observer.LastValue().Should().BeFalse();
+                observer.LastValue().Should().BeTrue();
+            }
+
+            [Fact, LogIfTooSlow]
+            public void ShouldEmitsEmailInvalidExceptionWhenEmailIsInvalid()
+            {
+                var observer = TestScheduler.CreateObserver<Exception>();
+                ViewModel.ResetPassword.Errors.Subscribe(observer);
+                TestScheduler.Start();
+
+                ViewModel.ResetPassword.Execute();
+
+                observer.LastValue().Message.Should().Be(Resources.PasswordResetInvalidEmailError);
             }
 
             public sealed class WhenPasswordResetSucceeds : ForgotPasswordViewModelTest
@@ -130,9 +142,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         .Returns(Observable.Return("Great success"));
 
                     var observer = TestScheduler.CreateObserver<Unit>();
-                    ViewModel.Reset.Elements.Subscribe(observer);
+                    ViewModel.ResetPassword.Elements.Subscribe(observer);
 
-                    ViewModel.Reset.Execute(Unit.Default);
+                    ViewModel.ResetPassword.Execute(Unit.Default);
                     TestScheduler.Start();
 
                     observer.Messages.Should().HaveCount(1);
@@ -146,7 +158,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         .ResetPassword(Arg.Any<Email>())
                         .Returns(Observable.Return("Great success"));
 
-                    ViewModel.Reset.Execute(Unit.Default);
+                    ViewModel.ResetPassword.Execute(Unit.Default);
                     TestScheduler.Start();
 
                     TimeService.Received().RunAfterDelay(TimeSpan.FromSeconds(4), Arg.Any<Action>());
@@ -164,7 +176,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         .ResetPassword(Arg.Any<Email>())
                         .Returns(Observable.Return("Great success"));
 
-                    viewModel.Reset.Execute(Unit.Default);
+                    viewModel.ResetPassword.Execute(Unit.Default);
 
                     TestScheduler.Start();
                     TestScheduler.AdvanceBy(TimeSpan.FromSeconds(4).Ticks);
@@ -190,9 +202,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         .Returns(Observable.Throw<string>(exception));
 
                     var observer = TestScheduler.CreateObserver<Exception>();
-                    ViewModel.Reset.Errors.Subscribe(observer);
+                    ViewModel.ResetPassword.Errors.Subscribe(observer);
 
-                    ViewModel.Reset.Execute(Unit.Default);
+                    ViewModel.ResetPassword.Execute(Unit.Default);
                     TestScheduler.Start();
 
                     observer.Messages.Should().HaveCount(1);
@@ -209,9 +221,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         .Returns(Observable.Throw<string>(exception));
 
                     var observer = TestScheduler.CreateObserver<Exception>();
-                    ViewModel.Reset.Errors.Subscribe(observer);
+                    ViewModel.ResetPassword.Errors.Subscribe(observer);
 
-                    ViewModel.Reset.Execute(Unit.Default);
+                    ViewModel.ResetPassword.Execute(Unit.Default);
                     TestScheduler.Start();
 
                     observer.LastValue().Message.Should().Be(Resources.PasswordResetEmailDoesNotExistError);
@@ -226,9 +238,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         .Returns(Observable.Throw<string>(new OfflineException()));
 
                     var observer = TestScheduler.CreateObserver<Exception>();
-                    ViewModel.Reset.Errors.Subscribe(observer);
+                    ViewModel.ResetPassword.Errors.Subscribe(observer);
 
-                    ViewModel.Reset.Execute(Unit.Default);
+                    ViewModel.ResetPassword.Execute(Unit.Default);
                     TestScheduler.Start();
 
                     observer.LastValue().Message.Should().Be(Resources.PasswordResetOfflineError);
@@ -250,9 +262,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         .Returns(Observable.Throw<string>(exception));
 
                     var observer = TestScheduler.CreateObserver<Exception>();
-                    ViewModel.Reset.Errors.Subscribe(observer);
+                    ViewModel.ResetPassword.Errors.Subscribe(observer);
 
-                    ViewModel.Reset.Execute(Unit.Default);
+                    ViewModel.ResetPassword.Execute(Unit.Default);
                     TestScheduler.Start();
 
                     observer.LastValue().Message.Should().Be(exception.LocalizedApiErrorMessage);
@@ -267,9 +279,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         .Returns(Observable.Throw<string>(new Exception()));
 
                     var observer = TestScheduler.CreateObserver<Exception>();
-                    ViewModel.Reset.Errors.Subscribe(observer);
+                    ViewModel.ResetPassword.Errors.Subscribe(observer);
 
-                    ViewModel.Reset.Execute(Unit.Default);
+                    ViewModel.ResetPassword.Execute(Unit.Default);
                     TestScheduler.Start();
 
                     observer.LastValue().Message.Should().Be(Resources.PasswordResetGeneralError);
@@ -305,7 +317,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         Enumerable
                             .Range(1, threshold)
                             .Select(n
-                                => Observable.Defer(() => ViewModel.Reset.Execute(Unit.Default)).Catch(Observable.Return(Unit.Default)))
+                                => Observable.Defer(() => ViewModel.ResetPassword.Execute(Unit.Default)).Catch(Observable.Return(Unit.Default)))
                     )
                     .Subscribe();
 

@@ -24,10 +24,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly TimeSpan delayAfterPassordReset = TimeSpan.FromSeconds(4);
 
         public BehaviorSubject<Email> Email { get; } = new BehaviorSubject<Email>(Multivac.Email.Empty);
-        public UIAction Reset { get; }
+        public UIAction ResetPassword { get; }
         public UIAction Close { get; }
         public UIAction ContactUs { get; }
         public IObservable<bool> SuggestContactSupport { get; }
+
+        public IObservable<Unit> ClearErrors { get; }
 
         public ForgotPasswordViewModel(
             ITimeService timeService,
@@ -45,17 +47,22 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             this.navigationService = navigationService;
             this.schedulerProvider = schedulerProvider;
 
-            Reset = UIAction.FromObservable(reset, Email.Select(email => email.IsValid));
+            ResetPassword = UIAction.FromObservable(reset);
 
-            Close = UIAction.FromAction(returnAndFillEmail, Reset.Executing.Invert());
+            Close = UIAction.FromAction(returnAndFillEmail, ResetPassword.Executing.Invert());
 
             ContactUs = UIAction.FromAsync(contactUs);
 
-            SuggestContactSupport = Reset.Errors
+            SuggestContactSupport = ResetPassword.Errors
                 .Skip(errorCountBeforeShowingContactSupportSuggestion)
                 .SelectValue(true)
                 .StartWith(false)
                 .AsDriver(false, schedulerProvider);
+
+            ClearErrors = Email
+                .Where(email => email.IsValid)
+                .DistinctUntilChanged()
+                .SelectUnit();
         }
 
         public override void Prepare(EmailParameter parameter)
@@ -65,12 +72,15 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private IObservable<Unit> reset()
         {
+            if (!Email.Value.IsValid)
+                return Observable.Throw<Unit>(new Exception(Resources.PasswordResetInvalidEmailError));
+
             return userAccessManager
                 .ResetPassword(Email.Value)
-                .ObserveOn(schedulerProvider.MainScheduler)
                 .Do(closeWithDelay)
                 .SelectUnit()
-                .Catch<Unit, Exception>(e => throw createUIException(e));
+                .Catch<Unit, Exception>(e => throw createUIException(e))
+                .ObserveOn(schedulerProvider.MainScheduler);
         }
 
         private void closeWithDelay()
