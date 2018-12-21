@@ -36,7 +36,16 @@ namespace Toggl.Giskard.ViewHolders
 
         protected override void UpdateView()
         {
-            timeEntriesLogCellDescriptionLabel.Text = Item.Description;
+            #if DEBUG
+                timeEntriesLogCellDescriptionLabel.Text = Item.ProviderType.ToString().Substring(0, 4)
+                                    + " "
+                                    + (Item.Certainty * 100).ToString("n1")
+                                    + "% "
+                                    + Item.Description;
+            #else
+                timeEntriesLogCellDescriptionLabel.Text = Item.Description;
+            #endif
+
             timeEntriesLogCellProjectLabel.Text = Item.ProjectName;
             timeEntriesLogCellProjectLabel.SetTextColor(Color.ParseColor(Item.ProjectColor));
             timeEntriesLogCellProjectLabel.Visibility = Item.HasProject.ToVisibility();

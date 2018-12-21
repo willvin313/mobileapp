@@ -41,7 +41,16 @@ namespace Toggl.Daneel
             if (Suggestion == null) return;
 
             Hidden = false;
-            DescriptionLabel.Text = Suggestion.Description;
+
+            #if DEBUG
+                DescriptionLabel.Text = Suggestion.ProviderType.ToString().Substring(0, 4)
+                                        + " "
+                                        + (Suggestion.Certainty * 100).ToString("n1")
+                                        + "% "
+                                        + Suggestion.Description;
+            #else
+                DescriptionLabel.Text = Suggestion.Description;
+            #endif
 
             var hasProject = Suggestion.ProjectId != null;
             DescriptionTopDistanceConstraint.Constant = hasProject ? hasProjectDistance : noProjectDistance;
