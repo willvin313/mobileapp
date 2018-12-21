@@ -50,8 +50,9 @@ namespace Toggl.Foundation.Interactors.Suggestions
                 .Aggregate(Observable.Concat)
                 .ToList()
                 .Select(balancedSuggestions)
-                .Select(suggestions => suggestions.OrderByDescending(suggestion => suggestion.Certainty))
-                .Take(suggestionCount);
+                .Select(suggestions => suggestions
+                    .OrderByDescending(suggestion => suggestion.Certainty)
+                    .Take(suggestionCount));
 
         private IReadOnlyList<ISuggestionProvider> getSuggestionProviders()
         {
