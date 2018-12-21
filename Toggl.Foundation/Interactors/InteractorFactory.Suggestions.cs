@@ -8,6 +8,6 @@ namespace Toggl.Foundation.Interactors
     public sealed partial class InteractorFactory : IInteractorFactory
     {
         public IInteractor<IObservable<IEnumerable<Suggestion>>> GetSuggestions(int count)
-            => new GetSuggestionsInteractor(count, stopwatchProvider, dataSource, timeService, calendarService, GetDefaultWorkspace());
+            => new GetSuggestionsInteractor(count, stopwatchProvider, dataSource, timeService, calendarService, analyticsService, GetDefaultWorkspace());
     }
 }

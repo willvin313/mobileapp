@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Diagnostics;
+using Toggl.Foundation.Exceptions;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Suggestions;
@@ -19,6 +21,7 @@ namespace Toggl.Foundation.Interactors.Suggestions
         private readonly ITimeService timeService;
         private readonly ITogglDataSource dataSource;
         private readonly ICalendarService calendarService;
+        private readonly IAnalyticsService analyticsService;
         private readonly IInteractor<IObservable<IThreadSafeWorkspace>> defaultWorkspaceInteractor;
 
         public GetSuggestionsInteractor(
@@ -27,6 +30,7 @@ namespace Toggl.Foundation.Interactors.Suggestions
             ITogglDataSource dataSource,
             ITimeService timeService,
             ICalendarService calendarService,
+            IAnalyticsService analyticsService,
             IInteractor<IObservable<IThreadSafeWorkspace>> defaultWorkspaceInteractor)
         {
             Ensure.Argument.IsInClosedRange(suggestionCount, 1, 9, nameof(suggestionCount));
@@ -34,6 +38,7 @@ namespace Toggl.Foundation.Interactors.Suggestions
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
             Ensure.Argument.IsNotNull(calendarService, nameof(calendarService));
+            Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(defaultWorkspaceInteractor, nameof(defaultWorkspaceInteractor));
 
             this.stopwatchProvider = stopwatchProvider;
@@ -41,12 +46,13 @@ namespace Toggl.Foundation.Interactors.Suggestions
             this.timeService = timeService;
             this.suggestionCount = suggestionCount;
             this.calendarService = calendarService;
+            this.analyticsService = analyticsService;
             this.defaultWorkspaceInteractor = defaultWorkspaceInteractor;
         }
 
         public IObservable<IEnumerable<Suggestion>> Execute()
             => getSuggestionProviders()
-                .Select(provider => provider.GetSuggestions())
+                .Select(getSuggestionsWithExceptionTracking)
                 .Aggregate(Observable.Concat)
                 .ToList()
                 .Select(balancedSuggestions)
@@ -85,6 +91,16 @@ namespace Toggl.Foundation.Interactors.Suggestions
                 results.Add(new Suggestion(suggestion, newCertainty));
             }
             return results;
+        }
+
+        private IObservable<Suggestion> getSuggestionsWithExceptionTracking(ISuggestionProvider provider)
+        {
+            return provider.GetSuggestions()
+                .Catch((Exception exception) => {
+                    var providerException = new SuggestionProviderException($"{provider.GetType()} threw an exception", exception);
+                    analyticsService.Track(providerException, providerException.Message);
+                    return Observable.Empty<Suggestion>();
+                });
         }
     }
 }
