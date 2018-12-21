@@ -52,7 +52,10 @@ namespace Toggl.Foundation.Suggestions
 
         private IEnumerable<(IDatabaseTimeEntry, float)> predictUsingRandomForestClassifier(IEnumerable<IDatabaseTimeEntry> timeEntriesForPrediction)
         {
-            var timeEntries = timeEntriesForPrediction
+            var timeEntriesWithProjectOrDescription = timeEntriesForPrediction
+                .Where(hasDescriptionOrProject);
+
+            var timeEntries = timeEntriesWithProjectOrDescription
                 .Where(te => te.ProjectId.HasValue)
                 .Take(maxNumberOfTimeEntriesForTraining)
                 .ToList();
@@ -62,7 +65,7 @@ namespace Toggl.Foundation.Suggestions
                 return predictUsing2Steps(timeEntries);
             }
 
-            timeEntries = timeEntriesForPrediction
+            timeEntries = timeEntriesWithProjectOrDescription
                 .Take(maxNumberOfTimeEntriesForTraining)
                 .ToList();
 
@@ -242,5 +245,8 @@ namespace Toggl.Foundation.Suggestions
 
             return (uniqueOutputs[prediction.id], prediction.score);
         }
+
+        private bool hasDescriptionOrProject(IDatabaseTimeEntry timeEntry)
+            => !string.IsNullOrEmpty(timeEntry.Description) || timeEntry.ProjectId != null;
     }
 }

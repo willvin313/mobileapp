@@ -54,6 +54,7 @@ namespace Toggl.Foundation.Suggestions
 
         private bool isSuitableForSuggestion(IDatabaseTimeEntry timeEntry)
             => calculateDelta(timeEntry) <= thresholdPeriod
+               && hasDescriptionOrProject(timeEntry)
                && isActive(timeEntry);
 
         private TimeSpan calculateDelta(IDatabaseTimeEntry timeEntry)
@@ -66,5 +67,8 @@ namespace Toggl.Foundation.Suggestions
 
         private float calculateCertainty(int occurences, int totalCount)
             => (float)occurences / totalCount;
+
+        private bool hasDescriptionOrProject(IDatabaseTimeEntry timeEntry)
+            => !string.IsNullOrEmpty(timeEntry.Description) || timeEntry.ProjectId != null;
     }
 }
