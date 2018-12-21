@@ -121,6 +121,16 @@ namespace Toggl.Daneel.ViewControllers
             ViewModel.SignupWithEmail.Errors
                 .Select(e => e.Message)
                 .Subscribe(EmailScreenErrorLabel.Rx().Text())
+            .DisposedBy(DisposeBag);
+
+            ViewModel.SignUp.Errors
+                .Select(e => e.Message)
+                .Subscribe(displayErrorAlert)
+                .DisposedBy(DisposeBag);
+
+            ViewModel.SignupWithGoogle.Errors
+                .Select(e => e.Message)
+                .Subscribe(displayErrorAlert)
                 .DisposedBy(DisposeBag);
 
             ViewModel.Shake
@@ -267,6 +277,14 @@ namespace Toggl.Daneel.ViewControllers
         {
             var imageName = masked ? "icPasswordMasked" : "icPasswordUnmasked";
             PasswordMaskingImageView.Image = UIImage.FromBundle(imageName);
+        }
+
+        private void displayErrorAlert(string message)
+        {
+            var alertVc = UIAlertController.Create("Error", message, UIAlertControllerStyle.Alert);
+            var okAction = UIAlertAction.Create(Resources.Ok, UIAlertActionStyle.Cancel, null);
+            alertVc.AddAction(okAction);
+            PresentViewController(alertVc, true, null);
         }
     }
 }
