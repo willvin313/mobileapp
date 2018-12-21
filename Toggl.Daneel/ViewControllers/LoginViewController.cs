@@ -42,7 +42,6 @@ namespace Toggl.Daneel.ViewControllers
             UIView.Animate(e.AnimationDuration, () =>
             {
                 BottomToSafeAreaConstraint.Constant = e.FrameEnd.Height;
-                View.LayoutIfNeeded();
             });
         }
 
@@ -51,7 +50,6 @@ namespace Toggl.Daneel.ViewControllers
             UIView.Animate(e.AnimationDuration, () =>
             {
                 BottomToSafeAreaConstraint.Constant = 0;
-                View.LayoutIfNeeded();
             });
         }
 
