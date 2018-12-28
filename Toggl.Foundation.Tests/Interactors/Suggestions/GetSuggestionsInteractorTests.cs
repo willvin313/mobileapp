@@ -8,9 +8,9 @@ using NSubstitute;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Interactors.Suggestions;
 using Toggl.Foundation.Models.Interfaces;
+using Toggl.Foundation.Suggestions;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Foundation.Tests.Mocks;
-using Toggl.Multivac.Models;
 using Xunit;
 
 namespace Toggl.Foundation.Tests.Interactors.Suggestions
@@ -19,26 +19,18 @@ namespace Toggl.Foundation.Tests.Interactors.Suggestions
     {
         public sealed class TheConstructor : BaseInteractorTests
         {
-            private readonly IInteractor<IObservable<IThreadSafeWorkspace>> defaultWorkspaceInteractor = Substitute.For<IInteractor<IObservable<IThreadSafeWorkspace>>>();
+            private readonly IInteractor<IEnumerable<ISuggestionProvider>> suggestionProvidersInteractor = Substitute.For<IInteractor<IEnumerable<ISuggestionProvider>>>();
 
             [Theory, LogIfTooSlow]
             [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(
-                bool useStopWatchProvider,
-                bool useDataSource,
-                bool useTimeService,
-                bool useCalendarService,
                 bool useAnalyticsService,
-                bool useDefaultWorkspaceInteractor)
+                bool useSugestionProvidersInteractor)
             {
                 Action createInstance = () => new GetSuggestionsInteractor(
                     3,
-                    useStopWatchProvider ? StopwatchProvider : null,
-                    useDataSource ? DataSource : null,
-                    useTimeService ? TimeService : null,
-                    useCalendarService ? CalendarService : null,
                     useAnalyticsService ? AnalyticsService : null,
-                    useDefaultWorkspaceInteractor ? defaultWorkspaceInteractor : null);
+                    useSugestionProvidersInteractor ? suggestionProvidersInteractor : null);
 
                 createInstance.Should().Throw<ArgumentNullException>();
             }
@@ -53,12 +45,8 @@ namespace Toggl.Foundation.Tests.Interactors.Suggestions
             {
                 Action createInstance = () => new GetSuggestionsInteractor(
                         count,
-                        StopwatchProvider,
-                        DataSource,
-                        TimeService,
-                        CalendarService,
                         AnalyticsService,
-                        defaultWorkspaceInteractor);
+                        suggestionProvidersInteractor);
 
                 createInstance.Should().Throw<ArgumentException>();
             }
@@ -73,7 +61,14 @@ namespace Toggl.Foundation.Tests.Interactors.Suggestions
             {
                 var defaultWorkspaceInteractor = Substitute.For<IInteractor<IObservable<IThreadSafeWorkspace>>>();
                 defaultWorkspaceInteractor.Execute().Returns(Observable.Return(defaultWorkspace));
-                interactor = new GetSuggestionsInteractor(3, StopwatchProvider, DataSource, TimeService, CalendarService, AnalyticsService, defaultWorkspaceInteractor);
+                var suggestionProvidersInteractor = new GetSuggestionProvidersInteractor(
+                    3,
+                    StopwatchProvider,
+                    DataSource,
+                    TimeService,
+                    CalendarService,
+                    defaultWorkspaceInteractor);
+                interactor = new GetSuggestionsInteractor(3, AnalyticsService, suggestionProvidersInteractor);
             }
 
 
