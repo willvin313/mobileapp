@@ -473,7 +473,7 @@ private TemporaryFileTransformation GetIntegrationTestsConfigurationTransformati
     {
         Path = path,
         Original = file,
-        Temporary = file.Replace("{CAKE_COMMIT_HASH}", commitHash)
+        Temporary = file.Replace("\"CAKE_COMMIT_HASH\"", $"\"{commitHash}\"")
     };
 }
 
@@ -513,15 +513,14 @@ private string[] GetUnitTestProjects() => new []
 
 private string[] GetUITestFiles() => new []
 {
-    "./bin/Debug/Toggl.Giskard.Tests.UI.dll",
-    "./bin/Debug/Toggl.Daneel.Tests.UI.dll"
+    "./bin/Release/Toggl.Daneel.Tests.UI.dll"
 };
 
 private string[] GetIntegrationTestProjects()
     => new [] { "./Toggl.Ultrawave.Tests.Integration/Toggl.Ultrawave.Tests.Integration.csproj" };
 
 private string[] GetSyncTestProjects()
-    => new [] { "./Toggl.Foundation.Sync.Tests/Toggl.Foundation.Sync.Tests.csproj" };
+    => new [] { "./Toggl.Foundation.Tests.Sync/Toggl.Foundation.Tests.Sync.csproj" };
 
 Setup(context => transformations.ForEach(transformation => System.IO.File.WriteAllText(transformation.Path, transformation.Temporary)));
 Teardown(context =>
@@ -586,8 +585,7 @@ Task("Build.Tests.Sync")
 
 Task("Build.Tests.UI")
     .IsDependentOn("Nuget")
-    .Does(BuildSolution("UITests"))
-    .Does(GenerateApk("Release"));
+    .Does(BuildSolution("UITests"));
 
 Task("BuildSyncDiagramGenerator")
     .IsDependentOn("Nuget")

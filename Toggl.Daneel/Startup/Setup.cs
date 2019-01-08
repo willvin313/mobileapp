@@ -32,7 +32,6 @@ namespace Toggl.Daneel
 
         private IAnalyticsService analyticsService;
         private IForkingNavigationService navigationService;
-        private PlatformInfo platformInfo;
 
 #if USE_PRODUCTION_API
         private const ApiEnvironment environment = ApiEnvironment.Production;
@@ -46,12 +45,11 @@ namespace Toggl.Daneel
         protected override IMvxNavigationService InitializeNavigationService(IMvxViewModelLocatorCollection collection)
         {
             analyticsService = new AnalyticsServiceIos();
-            platformInfo = new PlatformInfo { Platform = Platform.Daneel };
 
             var loader = CreateViewModelLoader(collection);
             Mvx.RegisterSingleton<IMvxViewModelLoader>(loader);
 
-            navigationService = new NavigationService(null, loader, analyticsService, platformInfo);
+            navigationService = new NavigationService(null, loader, analyticsService, Platform.Daneel);
 
             Mvx.RegisterSingleton<IForkingNavigationService>(navigationService);
             Mvx.RegisterSingleton<IMvxNavigationService>(navigationService);
@@ -74,7 +72,7 @@ namespace Toggl.Daneel
             var topViewControllerProvider = (ITopViewControllerProvider)Presenter;
             var mailService = new MailServiceIos(topViewControllerProvider);
             var dialogService = new DialogServiceIos(topViewControllerProvider);
-            var platformConstants = new PlatformConstants();
+            var platformInfo = new PlatformInfoIos();
             var intentDonationService = new IntentDonationServiceIos();
             var privateSharedStorageService = new PrivateSharedStorageServiceIos();
 
@@ -88,6 +86,9 @@ namespace Toggl.Daneel
             var schedulerProvider = new IOSSchedulerProvider();
             var calendarService = new CalendarServiceIos(permissionsService);
             var notificationService = new NotificationServiceIos(permissionsService, timeService);
+            var backgroundSyncService = new BackgroundSyncServiceIos();
+            var backgroundService = new BackgroundService(timeService);
+            var automaticSyncingService = new AutomaticSyncingService(backgroundService, timeService, analyticsService);
 
             var foundation =
                 TogglFoundation
@@ -102,17 +103,18 @@ namespace Toggl.Daneel
                     .WithLicenseProvider<LicenseProviderIos>()
                     .WithAnalyticsService(analyticsService)
                     .WithSchedulerProvider(schedulerProvider)
-                    .WithPlatformConstants(platformConstants)
                     .WithRemoteConfigService(remoteConfigService)
                     .WithNotificationService(notificationService)
                     .WithApiFactory(new ApiFactory(environment, userAgent))
-                    .WithBackgroundService(new BackgroundService(timeService))
+                    .WithBackgroundService(backgroundService)
+                    .WithAutomaticSyncingService(automaticSyncingService)
                     .WithApplicationShortcutCreator(new ApplicationShortcutCreator())
                     .WithIntentDonationService(intentDonationService)
                     .WithStopwatchProvider<FirebaseStopwatchProviderIos>()
                     .WithDismissedSuggestionStorage<DismissedSuggestionStorage>()
                     .WithPrivateSharedStorageService(privateSharedStorageService)
                     .WithPlatformInfo(platformInfo)
+                    .WithBackgroundSyncService(backgroundSyncService)
 
                     .StartRegisteringPlatformServices()
                     .WithDialogService(dialogService)
@@ -127,7 +129,7 @@ namespace Toggl.Daneel
                     .WithAccessRestrictionStorage(settingsStorage)
                     .WithPasswordManagerService<OnePasswordServiceIos>()
                     .WithErrorHandlingService(new ErrorHandlingService(navigationService, settingsStorage))
-                    .WithFeedbackService(new FeedbackService(userAgent, mailService, dialogService, platformConstants))
+                    .WithFeedbackService(new FeedbackService(userAgent, mailService, dialogService, platformInfo))
                     .WithRxActionFactory(new RxActionFactory(schedulerProvider))
                     .Build();
 

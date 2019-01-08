@@ -12,7 +12,7 @@ namespace Toggl.Foundation.Interactors
                 dataSource.User,
                 dataSource.Workspaces,
                 dataSource.TimeEntries,
-                platformConstants,
+                platformInfo,
                 userPreferences,
                 lastTimeUsageStorage,
                 timeService,

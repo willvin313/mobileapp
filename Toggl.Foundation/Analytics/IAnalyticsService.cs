@@ -136,6 +136,16 @@ namespace Toggl.Foundation.Analytics
 
         IAnalyticsEvent<string, float, int> SuggestionPresented { get; }
 
+        IAnalyticsEvent<int> NumberOfSyncedTimeEntriesWhenResumingTheAppFromBackground { get; }
+
+        IAnalyticsEvent BackgroundSyncStarted { get; }
+
+        IAnalyticsEvent<string> BackgroundSyncFinished { get; }
+
+        IAnalyticsEvent<string, string, string> BackgroundSyncFailed { get; }
+
+        IAnalyticsEvent<int> RateLimitingDelayDuringSyncing { get; }
+
         void Track(string eventName, Dictionary<string, string> parameters = null);
 
         void TrackAnonymized(Exception exception);

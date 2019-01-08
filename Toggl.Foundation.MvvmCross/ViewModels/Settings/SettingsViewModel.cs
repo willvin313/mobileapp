@@ -39,14 +39,13 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly ISubject<bool> isFeedbackSuccessViewShowing = new Subject<bool>();
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
 
-        private readonly UserAgent userAgent;
         private readonly ITogglDataSource dataSource;
         private readonly IUserAccessManager userAccessManager;
         private readonly IDialogService dialogService;
         private readonly IUserPreferences userPreferences;
         private readonly IFeedbackService feedbackService;
         private readonly IAnalyticsService analyticsService;
-        private readonly IPlatformConstants platformConstants;
+        private readonly IPlatformInfo platformInfo;
         private readonly IOnboardingStorage onboardingStorage;
         private readonly IInteractorFactory interactorFactory;
         private readonly IMvxNavigationService navigationService;
@@ -63,7 +62,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public string Title { get; private set; } = Resources.Settings;
         public bool CalendarSettingsEnabled => onboardingStorage.CompletedCalendarOnboarding();
-        public string Version => $"{userAgent.Version} ({platformConstants.BuildNumber})";
+        public string Version => $"{platformInfo.Version} ({platformInfo.BuildNumber})";
 
         public IObservable<string> Name { get; }
         public IObservable<string> Email { get; }
@@ -93,21 +92,19 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public UIAction PickDefaultWorkspace { get; }
         public UIAction SelectDurationFormat { get; }
         public UIAction SelectBeginningOfWeek { get; }
-
         public UIAction Close { get; }
 
         public InputAction<SelectableWorkspaceViewModel> SelectDefaultWorkspace { get; }
 
         public SettingsViewModel(
-            UserAgent userAgent,
             ITogglDataSource dataSource,
-            IUserAccessManager userAccessManager,
+            IPlatformInfo platformInfo,
             IDialogService dialogService,
             IUserPreferences userPreferences,
             IFeedbackService feedbackService,
             IAnalyticsService analyticsService,
+            IUserAccessManager userAccessManager,
             IInteractorFactory interactorFactory,
-            IPlatformConstants platformConstants,
             IOnboardingStorage onboardingStorage,
             IMvxNavigationService navigationService,
             IPrivateSharedStorageService privateSharedStorageService,
@@ -115,9 +112,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IStopwatchProvider stopwatchProvider,
             IRxActionFactory rxActionFactory)
         {
-            Ensure.Argument.IsNotNull(userAgent, nameof(userAgent));
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
-            Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
+            Ensure.Argument.IsNotNull(platformInfo, nameof(platformInfo));
             Ensure.Argument.IsNotNull(dialogService, nameof(dialogService));
             Ensure.Argument.IsNotNull(userPreferences, nameof(userPreferences));
             Ensure.Argument.IsNotNull(feedbackService, nameof(feedbackService));
@@ -125,26 +121,26 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(onboardingStorage, nameof(onboardingStorage));
             Ensure.Argument.IsNotNull(interactorFactory, nameof(interactorFactory));
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
-            Ensure.Argument.IsNotNull(platformConstants, nameof(platformConstants));
+            Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
             Ensure.Argument.IsNotNull(privateSharedStorageService, nameof(privateSharedStorageService));
             Ensure.Argument.IsNotNull(intentDonationService, nameof(intentDonationService));
             Ensure.Argument.IsNotNull(stopwatchProvider, nameof(stopwatchProvider));
             Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
 
-            this.userAgent = userAgent;
             this.dataSource = dataSource;
-            this.userAccessManager = userAccessManager;
+            this.platformInfo = platformInfo;
             this.dialogService = dialogService;
             this.userPreferences = userPreferences;
             this.feedbackService = feedbackService;
+            this.rxActionFactory = rxActionFactory;
             this.analyticsService = analyticsService;
             this.interactorFactory = interactorFactory;
             this.navigationService = navigationService;
-            this.platformConstants = platformConstants;
+            this.userAccessManager = userAccessManager;
             this.onboardingStorage = onboardingStorage;
-            this.privateSharedStorageService = privateSharedStorageService;
-            this.intentDonationService = intentDonationService;
             this.stopwatchProvider = stopwatchProvider;
+            this.intentDonationService = intentDonationService;
+            this.privateSharedStorageService = privateSharedStorageService;
             this.rxActionFactory = rxActionFactory;
 
             IsSynced = dataSource.SyncManager.ProgressObservable.SelectMany(checkSynced);
@@ -370,7 +366,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private Task openHelpView() =>
             navigationService.Navigate<BrowserViewModel, BrowserParameters>(
-                BrowserParameters.WithUrlAndTitle(platformConstants.HelpUrl, Resources.Help)
+                BrowserParameters.WithUrlAndTitle(platformInfo.HelpUrl, Resources.Help)
             );
 
         private async Task tryLogout()

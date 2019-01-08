@@ -89,13 +89,13 @@ namespace Toggl.Giskard.Activities
             passwordEditText.Rx().EditorActionSent()
                 .Subscribe(ViewModel.Signup.Inputs)
                 .DisposedBy(DisposeBag);
-                
-            googleSignupButton.Rx()
-                .BindAction(ViewModel.GoogleSignup)
+
+            googleSignupButton.Rx().Tap()
+                .Subscribe(ViewModel.GoogleSignup.Inputs)
                 .DisposedBy(DisposeBag);
 
-            countrySelection.Rx()
-                .BindAction(ViewModel.PickCountry)
+            countrySelection.Rx().Tap()
+                .Subscribe(ViewModel.PickCountry.Inputs)
                 .DisposedBy(DisposeBag);
 
             string signupButtonTitle(bool isLoading)

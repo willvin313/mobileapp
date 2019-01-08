@@ -302,7 +302,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 }
 
                 [Fact, LogIfTooSlow]
-
                 public void CallsTheUserAccessManager()
                 {
                     ViewModel.GoogleSignup.Execute();
@@ -331,7 +330,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     UserAccessManager.SignUpWithGoogle(true, Arg.Any<int>()).Returns(
                         Observable.Never<ITogglDataSource>());
-                        
+
                     ViewModel.GoogleSignup.Execute();
 
                     TestScheduler.Start();
@@ -361,7 +360,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     UserAccessManager.SignUpWithGoogle(Arg.Any<bool>(), Arg.Any<int>()).Returns(
                         Observable.Throw<ITogglDataSource>(new GoogleLoginException(false)));
-                        
+
                     ViewModel.GoogleSignup.Execute();
 
                     TestScheduler.Start();
@@ -394,7 +393,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     UserAccessManager.SignUpWithGoogle(Arg.Any<bool>(), Arg.Any<int>()).Returns(
                         Observable.Throw<ITogglDataSource>(new GoogleLoginException(true)));
-                        
+
                     ViewModel.GoogleSignup.Execute();
 
                     TestScheduler.Start();
@@ -411,7 +410,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     protected override void ExecuteCommand()
                     {
-
                         ViewModel.GoogleSignup.Execute();
                     }
 
@@ -773,7 +771,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         prepareException(new UnauthorizedException(
                             Substitute.For<IRequest>(),
                             Substitute.For<IResponse>()));
-                            
+
                         ViewModel.Signup.Execute();
 
                         TestScheduler.Start();
@@ -797,7 +795,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                                 Substitute.For<IResponse>()
                             )
                         ));
-                            
+
                         ViewModel.Signup.Execute();
 
                         TestScheduler.Start();
@@ -825,7 +823,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     }
 
                     [Fact, LogIfTooSlow]
-
                     public void TracksTheEventAndException()
                     {
                         var exception = new Exception();
@@ -852,7 +849,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ExecuteCommand();
 
                 TestScheduler.Start();
-                DataSource.Received().StartSyncing();
+
+                DataSource.SyncManager.Received().ForceFullSync();
             }
 
             [Fact, LogIfTooSlow]

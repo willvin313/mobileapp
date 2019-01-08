@@ -63,7 +63,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Settings
                 .Select(s => s.Title())
                 .DistinctUntilChanged()
                 .AsDriver(schedulerProvider);
-                
             RequestAccess = rxActionFactory.FromAction(requestAccess);
             OpenUpcomingEvents = rxActionFactory.FromAsync(openUpcomingEvents);
         }

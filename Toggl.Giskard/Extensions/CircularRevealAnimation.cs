@@ -114,6 +114,7 @@ namespace Toggl.Giskard.Extensions
             onAnimationCancel = action;
             return this;
         }
+
         public CircularRevealAnimation WithCancellationToken(CancellationToken cancellationToken)
         {
             this.cancellationToken = cancellationToken;

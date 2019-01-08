@@ -19,6 +19,8 @@ using Toggl.Foundation.Tests.Mocks;
 using Toggl.Foundation.MvvmCross.Parameters;
 using System.Collections.Immutable;
 using FsCheck;
+using Toggl.Foundation.MvvmCross.Extensions;
+using Toggl.Multivac.Extensions;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 {

@@ -194,6 +194,18 @@ namespace Toggl.Foundation.Analytics
         [AnalyticsEvent("NumberOfWorkspacesInaccesibleAfterCleanUp")]
         public IAnalyticsEvent<int> WorkspacesInaccesibleAfterCleanUp { get; protected set; }
 
+        [AnalyticsEvent("SyncedTimeEntries")]
+        public IAnalyticsEvent<int> NumberOfSyncedTimeEntriesWhenResumingTheAppFromBackground { get; protected set; }
+
+        [AnalyticsEvent]
+        public IAnalyticsEvent BackgroundSyncStarted { get; protected set; }
+
+        [AnalyticsEvent("BackgroundSyncFinishedWithOutcome")]
+        public IAnalyticsEvent<string> BackgroundSyncFinished { get; protected set; }
+
+        [AnalyticsEvent("Type", "Message", "StackTrace")]
+        public IAnalyticsEvent<string, string, string> BackgroundSyncFailed { get; protected set; }
+
         [AnalyticsEvent("Type", "Message")]
         public IAnalyticsEvent<string, string> UnknownLoginFailure { get; protected set; }
 
@@ -208,6 +220,9 @@ namespace Toggl.Foundation.Analytics
 
         [AnalyticsEvent("Type", "Certainty", "Index")]
         public IAnalyticsEvent<string, float, int> SuggestionPresented { get; protected set; }
+
+        [AnalyticsEvent("DelayDurationSeconds")]
+        public IAnalyticsEvent<int> RateLimitingDelayDuringSyncing { get; protected set; }
 
         public void TrackAnonymized(Exception exception)
         {

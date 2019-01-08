@@ -17,12 +17,12 @@ namespace Toggl.Foundation
     {
         public Version Version { get; }
         public UserAgent UserAgent { get; }
+        public IScheduler Scheduler { get; }
         public IApiFactory ApiFactory { get; }
         public ITogglDatabase Database { get; }
         public ITimeService TimeService { get; }
-        public IScheduler Scheduler { get; }
         public IMailService MailService { get; }
-        public PlatformInfo PlatformInfo { get; }
+        public IPlatformInfo PlatformInfo { get; }
         public IGoogleService GoogleService { get; }
         public IRatingService RatingService { get; }
         public ApiEnvironment ApiEnvironment { get; }
@@ -30,14 +30,15 @@ namespace Toggl.Foundation
         public IAnalyticsService AnalyticsService { get; }
         public IStopwatchProvider StopwatchProvider { get; }
         public IBackgroundService BackgroundService { get; }
+        public IBackgroundSyncService BackgroundSyncService { get; }
         public ISchedulerProvider SchedulerProvider { get; }
-        public IPlatformConstants PlatformConstants { get; }
         public INotificationService NotificationService { get; }
         public IRemoteConfigService RemoteConfigService { get; }
         public IApplicationShortcutCreator ShortcutCreator { get; }
         public IIntentDonationService IntentDonationService { get; }
         public IDismissedSuggestionStorage DismissedSuggestionStorage { get; }
         public IPrivateSharedStorageService PrivateSharedStorageService { get; }
+        public IAutomaticSyncingService AutomaticSyncingService { get; }
 
         public static Builder ForClient(UserAgent userAgent, Version version)
             => new Builder(userAgent, version);
@@ -53,7 +54,6 @@ namespace Toggl.Foundation
             ApiFactory = builder.ApiFactory;
             TimeService = builder.TimeService;
             MailService = builder.MailService;
-            PlatformInfo = builder.PlatformInfo;
             GoogleService = builder.GoogleService;
             RatingService = builder.RatingService;
             ApiEnvironment = builder.ApiEnvironment;
@@ -61,14 +61,16 @@ namespace Toggl.Foundation
             ShortcutCreator = builder.ShortcutCreator;
             AnalyticsService = builder.AnalyticsService;
             StopwatchProvider = builder.StopwatchProvider;
-            PlatformConstants = builder.PlatformConstants;
+            PlatformInfo = builder.PlatformInfo;
             BackgroundService = builder.BackgroundService;
+            BackgroundSyncService = builder.BackgroundSyncService;
             SchedulerProvider = builder.SchedulerProvider;
             NotificationService = builder.NotificationService;
             RemoteConfigService = builder.RemoteConfigService;
             IntentDonationService = builder.IntentDonationService;
             DismissedSuggestionStorage = builder.DismissedSuggestionStorage;
             PrivateSharedStorageService = builder.PrivateSharedStorageService;
+            AutomaticSyncingService = builder.AutomaticSyncingService;
         }
 
         public class Builder
@@ -80,7 +82,6 @@ namespace Toggl.Foundation
             public ITimeService TimeService { get; internal set; }
             public IScheduler Scheduler { get; internal set; }
             public IMailService MailService { get; internal set; }
-            public PlatformInfo PlatformInfo { get; internal set; }
             public IRatingService RatingService { get; internal set; }
             public IGoogleService GoogleService { get; internal set; }
             public ApiEnvironment ApiEnvironment { get; internal set; }
@@ -89,14 +90,16 @@ namespace Toggl.Foundation
             public IAnalyticsService AnalyticsService { get; internal set; }
             public IStopwatchProvider StopwatchProvider { get; internal set; }
             public ISchedulerProvider SchedulerProvider { get; internal set; }
-            public IPlatformConstants PlatformConstants { get; internal set; }
             public IBackgroundService BackgroundService { get; internal set; }
             public INotificationService NotificationService { get; internal set; }
             public IRemoteConfigService RemoteConfigService { get; internal set; }
             public IApplicationShortcutCreator ShortcutCreator { get; internal set; }
+            public IPlatformInfo PlatformInfo { get; internal set; }
+            public IBackgroundSyncService BackgroundSyncService { get; internal set; }
             public IIntentDonationService IntentDonationService { get; internal set; }
             public IDismissedSuggestionStorage DismissedSuggestionStorage { get; internal set; }
             public IPrivateSharedStorageService PrivateSharedStorageService { get; internal set; }
+            public IAutomaticSyncingService AutomaticSyncingService { get; internal set; }
 
             public Builder(UserAgent agent, Version version)
             {
@@ -158,6 +161,12 @@ namespace Toggl.Foundation
                 return this;
             }
 
+            public Builder WithBackgroundSyncService(IBackgroundSyncService backgroundSyncService)
+            {
+                BackgroundSyncService = backgroundSyncService;
+                return this;
+            }
+
             public Builder WithLicenseProvider(ILicenseProvider licenseProvider)
             {
                 LicenseProvider = licenseProvider;
@@ -176,9 +185,9 @@ namespace Toggl.Foundation
                 return this;
             }
 
-            public Builder WithPlatformConstants(IPlatformConstants platformConstants)
+            public Builder WithPlatformInfo(IPlatformInfo platformInfo)
             {
-                PlatformConstants = platformConstants;
+                PlatformInfo = platformInfo;
                 return this;
             }
 
@@ -206,12 +215,6 @@ namespace Toggl.Foundation
                 return this;
             }
 
-            public Builder WithPlatformInfo(PlatformInfo platformInfo)
-            {
-                PlatformInfo = platformInfo;
-                return this;
-            }
-
             public Builder WithNotificationService(INotificationService notificationService)
             {
                 NotificationService = notificationService;
@@ -227,6 +230,12 @@ namespace Toggl.Foundation
             public Builder WithDismissedSuggestionStorage(IDismissedSuggestionStorage dismissedSuggestionStorage)
             {
                 DismissedSuggestionStorage = dismissedSuggestionStorage;
+                return this;
+            }
+
+            public Builder WithAutomaticSyncingService(IAutomaticSyncingService automaticSyncingService)
+            {
+                AutomaticSyncingService = automaticSyncingService;
                 return this;
             }
 
@@ -254,6 +263,10 @@ namespace Toggl.Foundation
                 where TBackgroundService : IBackgroundService, new()
                 => WithBackgroundService(new TBackgroundService());
 
+            public Builder WithBackgroundSyncService<TBackgroundSyncService>()
+                where TBackgroundSyncService : IBackgroundSyncService, new()
+                => WithBackgroundSyncService(new TBackgroundSyncService());
+
             public Builder WithLicenseProvider<TLicenseProvider>()
                 where TLicenseProvider : ILicenseProvider, new()
                 => WithLicenseProvider(new TLicenseProvider());
@@ -266,9 +279,9 @@ namespace Toggl.Foundation
                 where TApplicationShortcutCreator : IApplicationShortcutCreator, new()
                 => WithApplicationShortcutCreator(new TApplicationShortcutCreator());
 
-            public Builder WithPlatformConstants<TPlatformConstants>()
-                where TPlatformConstants : IPlatformConstants, new()
-                => WithPlatformConstants(new TPlatformConstants());
+            public Builder WithPlatformInfo<TPlatformInfo>()
+                where TPlatformInfo : IPlatformInfo, new()
+                => WithPlatformInfo(new TPlatformInfo());
 
             public Builder WithRemoteConfigService<TRemoteConfigService>()
                 where TRemoteConfigService : IRemoteConfigService, new()
@@ -302,7 +315,6 @@ namespace Toggl.Foundation
                 Ensure.Argument.IsNotNull(ApiFactory, nameof(ApiFactory));
                 Ensure.Argument.IsNotNull(TimeService, nameof(TimeService));
                 Ensure.Argument.IsNotNull(MailService, nameof(MailService));
-                Ensure.Argument.IsNotNull(PlatformInfo, nameof(PlatformInfo));
                 Ensure.Argument.IsNotNull(GoogleService, nameof(GoogleService));
                 Ensure.Argument.IsNotNull(RatingService, nameof(RatingService));
                 Ensure.Argument.IsNotNull(LicenseProvider, nameof(LicenseProvider));
@@ -310,13 +322,15 @@ namespace Toggl.Foundation
                 Ensure.Argument.IsNotNull(AnalyticsService, nameof(AnalyticsService));
                 Ensure.Argument.IsNotNull(StopwatchProvider, nameof(StopwatchProvider));
                 Ensure.Argument.IsNotNull(BackgroundService, nameof(BackgroundService));
+                Ensure.Argument.IsNotNull(BackgroundSyncService, nameof(BackgroundSyncService));
                 Ensure.Argument.IsNotNull(SchedulerProvider, nameof(SchedulerProvider));
-                Ensure.Argument.IsNotNull(PlatformConstants, nameof(PlatformConstants));
+                Ensure.Argument.IsNotNull(PlatformInfo, nameof(PlatformInfo));
                 Ensure.Argument.IsNotNull(NotificationService, nameof(NotificationService));
                 Ensure.Argument.IsNotNull(RemoteConfigService, nameof(RemoteConfigService));
                 Ensure.Argument.IsNotNull(IntentDonationService, nameof(IntentDonationService));
                 Ensure.Argument.IsNotNull(DismissedSuggestionStorage, nameof(DismissedSuggestionStorage));
                 Ensure.Argument.IsNotNull(PrivateSharedStorageService, nameof(PrivateSharedStorageService));
+                Ensure.Argument.IsNotNull(AutomaticSyncingService, nameof(AutomaticSyncingService));
             }
         }
     }

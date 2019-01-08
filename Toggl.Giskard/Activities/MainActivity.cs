@@ -324,6 +324,7 @@ namespace Toggl.Giskard.Activities
                 {
                     emptyStateView = emptyStateViewStub.Inflate();
                 }
+                    
                 emptyStateView.Visibility = ViewStates.Visible;
             }
             else if (emptyStateView != null)
@@ -362,7 +363,7 @@ namespace Toggl.Giskard.Activities
         private sealed class FabVisibilityListener : FloatingActionButton.OnVisibilityChangedListener
         {
             private readonly Action onFabHidden;
-
+        
             public FabVisibilityListener(Action onFabHidden)
             {
                 this.onFabHidden = onFabHidden;

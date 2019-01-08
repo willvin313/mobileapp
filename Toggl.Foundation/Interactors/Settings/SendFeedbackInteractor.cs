@@ -24,7 +24,7 @@ namespace Toggl.Foundation.Interactors.Settings
 
         private readonly IDataSource<IThreadSafeTimeEntry, IDatabaseTimeEntry> timeEntriesDataSource;
 
-        private readonly IPlatformConstants platformConstants;
+        private readonly IPlatformInfo platformInfo;
 
         private readonly IUserPreferences userPreferences;
 
@@ -41,7 +41,7 @@ namespace Toggl.Foundation.Interactors.Settings
             ISingletonDataSource<IThreadSafeUser> userDataSource,
             IDataSource<IThreadSafeWorkspace, IDatabaseWorkspace> workspacesDataSource,
             IDataSource<IThreadSafeTimeEntry, IDatabaseTimeEntry> timeEntriesDataSource,
-            IPlatformConstants platformConstants,
+            IPlatformInfo platformInfo,
             IUserPreferences userPreferences,
             ILastTimeUsageStorage lastTimeUsageStorage,
             ITimeService timeService,
@@ -52,7 +52,7 @@ namespace Toggl.Foundation.Interactors.Settings
             Ensure.Argument.IsNotNull(userDataSource, nameof(userDataSource));
             Ensure.Argument.IsNotNull(workspacesDataSource, nameof(workspacesDataSource));
             Ensure.Argument.IsNotNull(timeEntriesDataSource, nameof(timeEntriesDataSource));
-            Ensure.Argument.IsNotNull(platformConstants, nameof(platformConstants));
+            Ensure.Argument.IsNotNull(platformInfo, nameof(platformInfo));
             Ensure.Argument.IsNotNull(userPreferences, nameof(userPreferences));
             Ensure.Argument.IsNotNull(lastTimeUsageStorage, nameof(lastTimeUsageStorage));
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
@@ -63,7 +63,7 @@ namespace Toggl.Foundation.Interactors.Settings
             this.userDataSource = userDataSource;
             this.workspacesDataSource = workspacesDataSource;
             this.timeEntriesDataSource = timeEntriesDataSource;
-            this.platformConstants = platformConstants;
+            this.platformInfo = platformInfo;
             this.userPreferences = userPreferences;
             this.lastTimeUsageStorage = lastTimeUsageStorage;
             this.timeService = timeService;
@@ -132,8 +132,8 @@ namespace Toggl.Foundation.Interactors.Settings
             int unsyncableTimeEntriesCount)
             => new Dictionary<string, string>
             {
-                [PhoneModel] = platformConstants.PhoneModel,
-                [OperatingSystem] = platformConstants.OperatingSystem,
+                [PhoneModel] = platformInfo.PhoneModel,
+                [OperatingSystem] = platformInfo.OperatingSystem,
                 [AppNameAndVersion] = $"{userAgent.Name}/{userAgent.Version}",
                 [NumberOfWorkspaces] = workspaces.ToString(),
                 [NumberOfTimeEntries] = timeEntries.ToString(),

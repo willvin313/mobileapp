@@ -122,11 +122,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             GoogleSignup = rxActionFactory.FromAsync(googleSignup);
             PickCountry = rxActionFactory.FromAsync(pickCountry);
 
-            Login = rxActionFactory.FromAsync(login);
-            Signup = rxActionFactory.FromAsync(signup);
-            GoogleSignup = rxActionFactory.FromAsync(googleSignup);
-            PickCountry = rxActionFactory.FromAsync(pickCountry);
-
             var emailObservable = emailSubject.Select(email => email.TrimmedEnd());
 
             Shake = shakeSubject.AsDriver(this.schedulerProvider);
@@ -272,7 +267,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             lastTimeUsageStorage.SetLogin(timeService.CurrentDateTime);
 
-            await dataSource.StartSyncing();
+            await dataSource.SyncManager.ForceFullSync();
 
             onboardingStorage.SetIsNewUser(true);
             onboardingStorage.SetUserSignedUp();

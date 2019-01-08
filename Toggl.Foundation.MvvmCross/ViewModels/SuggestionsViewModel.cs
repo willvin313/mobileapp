@@ -14,6 +14,7 @@ using Toggl.Foundation.MvvmCross.Parameters;
 using MvvmCross.Navigation;
 using System.Collections.Immutable;
 using Toggl.Foundation.Analytics;
+using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Services;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels

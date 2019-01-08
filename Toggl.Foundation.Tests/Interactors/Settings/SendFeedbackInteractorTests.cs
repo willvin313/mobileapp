@@ -34,7 +34,7 @@ namespace Toggl.Foundation.Tests.Interactors.Settings
                 bool useUserDataSource,
                 bool useWorkspacesDataSource,
                 bool useTimeEntriesDataSource,
-                bool usePlatformConstants,
+                bool useplatformInfo,
                 bool useUserPreferences,
                 bool useLastTimeUsageStorage,
                 bool useTimeService,
@@ -47,7 +47,7 @@ namespace Toggl.Foundation.Tests.Interactors.Settings
                     useUserDataSource ? DataSource.User : null,
                     useWorkspacesDataSource ? DataSource.Workspaces : null,
                     useTimeEntriesDataSource ? DataSource.TimeEntries : null,
-                    usePlatformConstants ? Substitute.For<IPlatformConstants>() : null,
+                    useplatformInfo ? Substitute.For<IPlatformInfo>() : null,
                     useUserPreferences ? UserPreferences : null,
                     useLastTimeUsageStorage ? Substitute.For<ILastTimeUsageStorage>() : null,
                     useTimeService ? TimeService : null,
@@ -100,12 +100,12 @@ namespace Toggl.Foundation.Tests.Interactors.Settings
             }
 
             [Fact, LogIfTooSlow]
-            public async Task SendsCorrectPlatformConstants()
+            public async Task SendsCorrectplatformInfo()
             {
                 var operatingSystem = "TogglOS";
                 var phoneModel = "TogglPhone";
-                PlatformConstants.OperatingSystem.Returns(operatingSystem);
-                PlatformConstants.PhoneModel.Returns(phoneModel);
+                PlatformInfo.OperatingSystem.Returns(operatingSystem);
+                PlatformInfo.PhoneModel.Returns(phoneModel);
 
                 await executeInteractor();
 
@@ -197,7 +197,7 @@ namespace Toggl.Foundation.Tests.Interactors.Settings
                     DataSource.User,
                     DataSource.Workspaces,
                     DataSource.TimeEntries,
-                    PlatformConstants,
+                    PlatformInfo,
                     UserPreferences,
                     LastTimeUsageStorage,
                     TimeService,

@@ -591,7 +591,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var mockWorkspace = new MockWorkspace { Id = WorkspaceId + 1 };
                 DialogService.Select(Arg.Any<string>(), Arg.Any<IEnumerable<(string, IThreadSafeWorkspace)>>(), Arg.Any<int>())
                     .Returns(Observable.Return(mockWorkspace));
-                    
+
                 ViewModel.SelectWorkspace.Execute();
                 TestScheduler.Start();
 
@@ -627,7 +627,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 await ViewModel.Initialize();
                 DialogService.Select(Arg.Any<string>(), Arg.Any<IEnumerable<(string, IThreadSafeWorkspace)>>(), Arg.Any<int>())
                     .Returns(Observable.Return<IThreadSafeWorkspace>(null));
-                    
+
                 ViewModel.SelectWorkspace.Execute();
                 TestScheduler.Start();
 
@@ -643,7 +643,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var mockWorkspace = new MockWorkspace { Id = WorkspaceId };
                 DialogService.Select(Arg.Any<string>(), Arg.Any<IEnumerable<(string, IThreadSafeWorkspace)>>(), Arg.Any<int>())
                     .Returns(Observable.Return<IThreadSafeWorkspace>(mockWorkspace));
-                    
+
                 ViewModel.SelectWorkspace.Execute();
                 TestScheduler.Start();
 

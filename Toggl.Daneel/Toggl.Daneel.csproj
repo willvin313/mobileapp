@@ -245,6 +245,9 @@
     <Reference Include="Accord.MachineLearning">
       <HintPath>..\packages\Accord.MachineLearning.3.8.0\lib\netstandard2.0\Accord.MachineLearning.dll</HintPath>
     </Reference>
+    <Reference Include="Xamarin.Essentials">
+      <HintPath>..\packages\Xamarin.Essentials.1.0.0\lib\xamarinios10\Xamarin.Essentials.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Contents.json" />
@@ -681,6 +684,7 @@
     <Compile Include="Extensions\Binders\ReactiveTableViewBinder.cs" />
     <Compile Include="Extensions\IntentPeriod.cs" />
     <Compile Include="Extensions\Reactive\HueSaturationPickerViewExtensions.cs" />
+    <Compile Include="Extensions\Reactive\UIScrollViewExtensions.cs" />
     <Compile Include="Extensions\Reactive\UISliderExtensions.cs" />
     <Compile Include="Extensions\SectionedIndexExtensions.cs" />
     <Compile Include="Services\PermissionsServiceIos.cs" />
@@ -957,7 +961,6 @@
     <Compile Include="Views\EditDuration\WheelForegroundView.cs" />
     <Compile Include="Extensions\NoEntityInfoMessageExtensions.cs" />
     <Compile Include="Views\Reports\LoadingPieChartView.cs" />
-    <Compile Include="PlatformConstants.cs" />
     <Compile Include="Views\SpiderOnARopeView.cs" />
     <Compile Include="Binding\SpiderOnARopeViewIsVisibleTargetBinding.cs" />
     <Compile Include="ApplicationShortcutCreator.cs" />
@@ -1188,6 +1191,8 @@
       <DependentUpon>SelectDefaultWorkspaceTableViewCell.cs</DependentUpon>
     </Compile>
     <Compile Include="Extensions\IThreadSafeTimeEntryExtensions.cs" />
+    <Compile Include="PlatformInfoIos.cs" />
+    <Compile Include="Services\BackgroundSyncServiceIos.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Toggl.Foundation.MvvmCross\Toggl.Foundation.MvvmCross.csproj">

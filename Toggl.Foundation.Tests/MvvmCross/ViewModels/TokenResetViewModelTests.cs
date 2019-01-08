@@ -94,7 +94,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 var nextIsEnabledObserver = Observe(ViewModel.NextIsEnabled);
 
-                ViewModel.SetPassword.Execute(InvalidPassword.ToString());
+                ViewModel.Password.OnNext(InvalidPassword.ToString());
 
                 TestScheduler.Start();
                 nextIsEnabledObserver.LastValue().Should().BeFalse();
@@ -105,7 +105,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 var nextIsEnabledObserver = Observe(ViewModel.NextIsEnabled);
 
-                ViewModel.SetPassword.Execute(ValidPassword.ToString());
+                ViewModel.Password.OnNext(ValidPassword.ToString());
 
                 TestScheduler.Start();
                 nextIsEnabledObserver.LastValue().Should().BeTrue();
@@ -117,7 +117,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var scheduler = new TestScheduler();
                 var never = Observable.Never<ITogglDataSource>();
                 UserAccessManager.RefreshToken(Arg.Any<Password>()).Returns(never);
-                ViewModel.SetPassword.Execute(ValidPassword.ToString());
+
+                ViewModel.Password.OnNext(ValidPassword.ToString());
 
                 var nextIsEnabledObserver = Observe(ViewModel.NextIsEnabled);
 
@@ -133,8 +134,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public void IsSuccessfullyEmmited()
             {
-                var passwordObserver = Observe(ViewModel.Password);
-                ViewModel.SetPassword.Execute(ValidPassword.ToString());
+                var passwordObserver = Observe(ViewModel.Password.Select(Password.From));
+                ViewModel.Password.OnNext(ValidPassword.ToString());
 
                 TestScheduler.Start();
                 passwordObserver.LastValue().Should().Be(ValidPassword);
@@ -146,7 +147,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task DoesNotAttemptToLoginWhileThePasswordIsNotValid()
             {
-                ViewModel.SetPassword.Execute(InvalidPassword.ToString());
+                ViewModel.Password.OnNext(InvalidPassword.ToString());
                 var executionObserver = TestScheduler.CreateObserver<Unit>();
 
                 ViewModel.Done.Execute().Subscribe(executionObserver);
@@ -159,19 +160,18 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task CallsTheUserAccessManagerWhenThePasswordIsValid()
             {
-                ViewModel.SetPassword.Execute(ValidPassword.ToString());
+                ViewModel.Password.OnNext(ValidPassword.ToString());
 
                 ViewModel.Done.Execute();
 
                 TestScheduler.Start();
-
                 await UserAccessManager.Received().RefreshToken(Arg.Is(ValidPassword));
             }
 
             [Fact, LogIfTooSlow]
             public async Task NavigatesToTheMainViewModelModelWhenTheTokenRefreshSucceeds()
             {
-                ViewModel.SetPassword.Execute(ValidPassword.ToString());
+                ViewModel.Password.OnNext(ValidPassword.ToString());
                 UserAccessManager.RefreshToken(Arg.Any<Password>())
                             .Returns(Observable.Return(Substitute.For<ITogglDataSource>()));
 
@@ -185,25 +185,25 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task StopsTheViewModelLoadStateWhenItCompletes()
             {
                 await ViewModel.Initialize();
-                ViewModel.SetPassword.Execute(ValidPassword.ToString());
-                var isLoadingObserver = Observe(ViewModel.IsLoading);
+                ViewModel.Password.OnNext(ValidPassword.ToString());
+                var isLoadingObserver = Observe(ViewModel.Done.Executing);
 
                 UserAccessManager.RefreshToken(Arg.Any<Password>())
                             .Returns(Observable.Return(Substitute.For<ITogglDataSource>()));
 
                 ViewModel.Done.Execute();
-
                 TestScheduler.Start();
+
                 isLoadingObserver.LastValue().Should().BeFalse();
             }
 
             [Fact, LogIfTooSlow]
             public void StopsTheViewModelLoadStateWhenItErrors()
             {
-                ViewModel.SetPassword.Execute(ValidPassword.ToString());
+                ViewModel.Password.OnNext(ValidPassword.ToString());
                 UserAccessManager.RefreshToken(Arg.Any<Password>())
                             .Returns(Observable.Throw<ITogglDataSource>(new Exception()));
-                var isLoadingObserver = Observe(ViewModel.IsLoading);
+                var isLoadingObserver = Observe(ViewModel.Done.Executing);
 
                 ViewModel.Done.Execute();
 
@@ -215,7 +215,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task DoesNotNavigateWhenTheLoginFails()
             {
-                ViewModel.SetPassword.Execute(ValidPassword.ToString());
+                ViewModel.Password.OnNext(ValidPassword.ToString());
                 UserAccessManager.RefreshToken(Arg.Any<Password>())
                             .Returns(Observable.Throw<ITogglDataSource>(new Exception()));
 

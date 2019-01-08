@@ -11,6 +11,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
     public sealed class CalendarPermissionDeniedViewModel : MvxViewModelResult<Unit>
     {
         private readonly IPermissionsService permissionsService;
+        private readonly IRxActionFactory rxActionFactory;
 
         public UIAction EnableAccess { get; }
         public UIAction Close { get; }
