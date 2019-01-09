@@ -2,15 +2,8 @@
 
 namespace Toggl.Tests.UI.Extensions
 {
-    public static class LoginExtensions
+    public static partial class LoginExtensions
     {
-        public static void WaitForLoginScreen(this IApp app)
-        {
-            #if __IOS__
-            app.SkipToLoginPage();
-            #endif
-        }
-
         public static void TryLoginAndFail(this IApp app)
         {
             app.Tap(Login.LoginButton);

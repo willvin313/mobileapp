@@ -32,6 +32,8 @@ namespace Toggl.Foundation.MvvmCross
         public IAnalyticsService AnalyticsService { get; }
         public IStopwatchProvider StopwatchProvider { get; }
         public IBackgroundService BackgroundService { get; }
+        public IAutomaticSyncingService AutomaticSyncingService { get; }
+        public IBackgroundSyncService BackgroundSyncService { get; }
         public ISchedulerProvider SchedulerProvider { get; }
         public INotificationService NotificationService { get; }
         public IRemoteConfigService RemoteConfigService { get; }
@@ -50,6 +52,7 @@ namespace Toggl.Foundation.MvvmCross
         public IForkingNavigationService NavigationService { get; }
         public IPasswordManagerService PasswordManagerService { get; }
         public IErrorHandlingService ErrorHandlingService { get; }
+        public ISyncErrorHandlingService SyncErrorHandlingService { get; }
         public IAccessRestrictionStorage AccessRestrictionStorage { get; }
         public ILastTimeUsageStorage LastTimeUsageStorage { get; }
         public IPermissionsService PermissionsService { get; }
@@ -68,6 +71,7 @@ namespace Toggl.Foundation.MvvmCross
             NavigationService = builder.NavigationService;
             PasswordManagerService = builder.PasswordManagerService;
             ErrorHandlingService = builder.ErrorHandlingService;
+            SyncErrorHandlingService = builder.SyncErrorHandlingService;
             AccessRestrictionStorage = builder.AccessRestrictionStorage;
             LastTimeUsageStorage = builder.LastTimeUsageStorage;
             PermissionsService = builder.PermissionsService;
@@ -92,6 +96,8 @@ namespace Toggl.Foundation.MvvmCross
             PlatformInfo = builder.Foundation.PlatformInfo;
             SchedulerProvider = builder.Foundation.SchedulerProvider;
             BackgroundService = builder.Foundation.BackgroundService;
+            AutomaticSyncingService = builder.Foundation.AutomaticSyncingService;
+            BackgroundSyncService = builder.Foundation.BackgroundSyncService;
             NotificationService = builder.Foundation.NotificationService;
             RemoteConfigService = builder.Foundation.RemoteConfigService;
             IntentDonationService = builder.Foundation.IntentDonationService;
@@ -111,6 +117,7 @@ namespace Toggl.Foundation.MvvmCross
             public IForkingNavigationService NavigationService { get; private set; }
             public IPasswordManagerService PasswordManagerService { get; private set; }
             public IErrorHandlingService ErrorHandlingService { get; private set; }
+            public ISyncErrorHandlingService SyncErrorHandlingService { get; private set; }
             public IAccessRestrictionStorage AccessRestrictionStorage { get; private set; }
             public ILastTimeUsageStorage LastTimeUsageStorage { get; private set; }
             public IPermissionsService PermissionsService { get; private set; }
@@ -181,6 +188,12 @@ namespace Toggl.Foundation.MvvmCross
             public Builder WithErrorHandlingService(IErrorHandlingService errorHandlingService)
             {
                 ErrorHandlingService = errorHandlingService;
+                return this;
+            }
+
+            public Builder WithSyncErrorHandlingService(ISyncErrorHandlingService syncErrorHandlingService)
+            {
+                SyncErrorHandlingService = syncErrorHandlingService;
                 return this;
             }
 

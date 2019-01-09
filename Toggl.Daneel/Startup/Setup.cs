@@ -89,6 +89,10 @@ namespace Toggl.Daneel
             var schedulerProvider = new IOSSchedulerProvider();
             var calendarService = new CalendarServiceIos(permissionsService);
             var notificationService = new NotificationServiceIos(permissionsService, timeService);
+            var backgroundSyncService = new BackgroundSyncServiceIos();
+            var backgroundService = new BackgroundService(timeService);
+            var automaticSyncingService = new AutomaticSyncingService(backgroundService, timeService, analyticsService);
+            var errorHandlingService = new ErrorHandlingService(navigationService, settingsStorage);
 
             var foundation =
                 TogglFoundation
@@ -106,13 +110,15 @@ namespace Toggl.Daneel
                     .WithRemoteConfigService(remoteConfigService)
                     .WithNotificationService(notificationService)
                     .WithApiFactory(new ApiFactory(environment, userAgent))
-                    .WithBackgroundService(new BackgroundService(timeService))
+                    .WithBackgroundService(backgroundService)
+                    .WithAutomaticSyncingService(automaticSyncingService)
                     .WithApplicationShortcutCreator(new ApplicationShortcutCreator())
                     .WithSuggestionProviderContainer(suggestionProviderContainer)
                     .WithIntentDonationService(intentDonationService)
                     .WithStopwatchProvider<FirebaseStopwatchProviderIos>()
                     .WithPrivateSharedStorageService(privateSharedStorageService)
                     .WithPlatformInfo(platformInfo)
+                    .WithBackgroundSyncService(backgroundSyncService)
 
                     .StartRegisteringPlatformServices()
                     .WithDialogService(dialogService)
@@ -126,7 +132,8 @@ namespace Toggl.Daneel
                     .WithPermissionsService(permissionsService)
                     .WithAccessRestrictionStorage(settingsStorage)
                     .WithPasswordManagerService<OnePasswordServiceIos>()
-                    .WithErrorHandlingService(new ErrorHandlingService(navigationService, settingsStorage))
+                    .WithErrorHandlingService(errorHandlingService)
+                    .WithSyncErrorHandlingService(new SyncErrorHandlingService(errorHandlingService))
                     .WithFeedbackService(new FeedbackService(userAgent, mailService, dialogService, platformInfo))
                     .WithRxActionFactory(new RxActionFactory(schedulerProvider))
                     .Build();

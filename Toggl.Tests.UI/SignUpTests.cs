@@ -31,6 +31,7 @@ namespace Toggl.Tests.UI
             app.Tap(SignUp.PasswordText);
             app.EnterText(password);
 
+            app.WaitForDefaultCountryToBeAutoSelected();
             app.Tap(SignUp.SignUpButton);
             app.Tap(SignUp.GdprButton);
 
@@ -48,6 +49,7 @@ namespace Toggl.Tests.UI
             app.Tap(SignUp.PasswordText);
             app.EnterText(password);
 
+            app.WaitForDefaultCountryToBeAutoSelected();
             app.Tap(SignUp.SignUpButton);
             app.Tap(SignUp.GdprButton);
 
@@ -65,6 +67,7 @@ namespace Toggl.Tests.UI
             app.Tap(SignUp.PasswordText);
             app.EnterText(password);
 
+            app.WaitForDefaultCountryToBeAutoSelected();
             app.Tap(SignUp.SignUpButton);
             app.RejectTerms();
 

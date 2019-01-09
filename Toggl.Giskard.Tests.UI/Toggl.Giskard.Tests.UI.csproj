@@ -35,6 +35,9 @@
   <ItemGroup>
     <Compile Include="AndroidAccessibilityNames.cs" />
     <Compile Include="Configuration.cs" />
+    <Compile Include="Extensions\AppQueryExtensions.cs" />
+    <Compile Include="Extensions\LoginExtensions.cs" />
+    <Compile Include="Extensions\SignUpExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

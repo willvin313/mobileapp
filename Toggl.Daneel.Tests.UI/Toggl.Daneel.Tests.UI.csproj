@@ -33,6 +33,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions\AppQueryExtensions.cs" />
+    <Compile Include="Extensions\LoginExtensions.cs" />
+    <Compile Include="Extensions\SignUpExtensions.cs" />
     <Compile Include="IosAccessibilityNames.cs" />
     <Compile Include="Configuration.cs" />
   </ItemGroup>

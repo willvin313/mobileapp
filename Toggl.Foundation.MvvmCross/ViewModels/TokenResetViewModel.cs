@@ -146,7 +146,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private void onDataSource(ITogglDataSource newDataSource)
         {
-            newDataSource.StartSyncing();
+            newDataSource.SyncManager.ForceFullSync().Subscribe();
 
             navigationService.ForkNavigate<MainTabBarViewModel, MainViewModel>();
         }

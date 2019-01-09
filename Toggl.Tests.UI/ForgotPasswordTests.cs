@@ -41,7 +41,8 @@ namespace Toggl.Tests.UI
             app.Tap(ForgotPassword.EmailText);
             app.EnterText(email);
             app.Tap(ForgotPassword.GetLinkButton);
-            app.WaitForElement(ForgotPassword.ErrorLabel);
+
+            app.WaitForElementWithText(ForgotPassword.ErrorLabel, "Oops! Unknown email. Please check that it's entered correctly.");
         }
 
         [Test]

@@ -22,35 +22,49 @@ namespace Toggl.Foundation.Sync.States.Push
 
         private readonly IBaseDataSource<TThreadsafeModel> dataSource;
 
+        private readonly ILeakyBucket leakyBucket;
+        private readonly IRateLimiter limiter;
+
         private readonly Func<TModel, TThreadsafeModel> convertToThreadsafeModel;
 
         public StateResult<TThreadsafeModel> EntityChanged { get; } = new StateResult<TThreadsafeModel>();
 
-        public StateResult<TThreadsafeModel> Finished { get; } = new StateResult<TThreadsafeModel>();
+        public StateResult<TThreadsafeModel> Done { get; } = new StateResult<TThreadsafeModel>();
 
         public UpdateEntityState(
             IUpdatingApiClient<TModel> api,
             IBaseDataSource<TThreadsafeModel> dataSource,
             IAnalyticsService analyticsService,
+            ILeakyBucket leakyBucket,
+            IRateLimiter limiter,
             Func<TModel, TThreadsafeModel> convertToThreadsafeModel)
             : base(analyticsService)
         {
             Ensure.Argument.IsNotNull(api, nameof(api));
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
             Ensure.Argument.IsNotNull(convertToThreadsafeModel, nameof(convertToThreadsafeModel));
+            Ensure.Argument.IsNotNull(leakyBucket, nameof(leakyBucket));
+            Ensure.Argument.IsNotNull(limiter, nameof(limiter));
 
             this.api = api;
             this.dataSource = dataSource;
             this.convertToThreadsafeModel = convertToThreadsafeModel;
+            this.leakyBucket = leakyBucket;
+            this.limiter = limiter;
         }
 
         public override IObservable<ITransition> Start(TThreadsafeModel entity)
-            => update(entity)
+        {
+            if (!leakyBucket.TryClaimFreeSlot(out var timeToFreeSlot))
+                return Observable.Return(PreventOverloadingServer.Transition(timeToFreeSlot));
+
+            return update(entity)
                 .Select(convertToThreadsafeModel)
                 .SelectMany(tryOverwrite(entity))
                 .Track(AnalyticsService.EntitySynced, Update, entity.GetSafeTypeName())
                 .Track(AnalyticsService.EntitySyncStatus, entity.GetSafeTypeName(), $"{Update}:{Resources.Success}")
                 .Catch(Fail(entity, Update));
+        }
 
         private Func<TThreadsafeModel, IObservable<ITransition>> tryOverwrite(TThreadsafeModel originalEntity)
           => serverEntity
@@ -66,7 +80,7 @@ namespace Toggl.Foundation.Sync.States.Push
                 switch (result)
                 {
                     case UpdateResult<TThreadsafeModel> u when u.OriginalId == originalEntity.Id:
-                        return Observable.Return(Finished.Transition(extractFrom(result)));
+                        return Observable.Return(Done.Transition(extractFrom(result)));
 
                     case IgnoreResult<TThreadsafeModel> i when i.Id == originalEntity.Id:
                         return Observable.Return(EntityChanged.Transition(originalEntity));
@@ -86,6 +100,7 @@ namespace Toggl.Foundation.Sync.States.Push
         private IObservable<TModel> update(TModel entity)
             => entity == null
                 ? Observable.Throw<TModel>(new ArgumentNullException(nameof(entity)))
-                : api.Update(entity);
+                : limiter.WaitForFreeSlot()
+                    .ThenExecute(() => api.Update(entity));
     }
 }

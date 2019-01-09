@@ -669,6 +669,7 @@
     <Compile Include="Extensions\Binders\ReactiveTableViewBinder.cs" />
     <Compile Include="Extensions\IntentPeriod.cs" />
     <Compile Include="Extensions\Reactive\HueSaturationPickerViewExtensions.cs" />
+    <Compile Include="Extensions\Reactive\UIScrollViewExtensions.cs" />
     <Compile Include="Extensions\Reactive\UISliderExtensions.cs" />
     <Compile Include="Extensions\SectionedIndexExtensions.cs" />
     <Compile Include="Services\PermissionsServiceIos.cs" />
@@ -1176,6 +1177,7 @@
     </Compile>
     <Compile Include="Extensions\IThreadSafeTimeEntryExtensions.cs" />
     <Compile Include="PlatformInfoIos.cs" />
+    <Compile Include="Services\BackgroundSyncServiceIos.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Toggl.Foundation.MvvmCross\Toggl.Foundation.MvvmCross.csproj">

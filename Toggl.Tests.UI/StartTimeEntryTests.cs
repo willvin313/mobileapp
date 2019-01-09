@@ -62,7 +62,7 @@ namespace Toggl.Tests.UI
         }
 
         [Test]
-        public void TappingDoneAfterTryingToDiscardAndEditingTheDescription()
+        public void TappingDoneAfterTryingToDiscardAndEditingTheDescriptionDoesNotChangeTheCurrentDescription()
         {
             var description = "UI testing the Toggl App";
             var edit = " - edit";

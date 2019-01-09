@@ -34,7 +34,7 @@
 	<key>CFBundleName</key>
 	<string>Toggl for Devs</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.14.2</string>
+	<string>1.15</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -70,5 +70,9 @@
 	<string>Toggl needs access to your calendar in order to display its events</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+	</array>
 </dict>
 </plist>

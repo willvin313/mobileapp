@@ -22,7 +22,7 @@ namespace Toggl.Tests.UI
         public const string PasswordText = "LoginPasswordEditText";
         public const string ShowPasswordButton = "";
         public const string SwitchToSignUpLabel = "LoginSignupCardView";
-        public const string ForgotPasswordButton = "";
+        public const string ForgotPasswordButton = "LoginForgotPassword";
     }
 
     public static class SignUp
@@ -52,9 +52,9 @@ namespace Toggl.Tests.UI
 
     public static class ForgotPassword
     {
-        public const string EmailText = "ForgotPasswordEmail";
-        public const string ErrorLabel = "ForgotPasswordError";
-        public const string GetLinkButton = "ForgotPasswordGetLink";
-        public const string DoneCard = "ForgotPasswordDoneCard";
+        public const string EmailText = "LoginEmailEditText";
+        public const string ErrorLabel = "LoginEmail";
+        public const string GetLinkButton = "ResetPasswordButton";
+        public const string DoneCard = "Link sent. Please, check your email to reset the password";
     }
 }
