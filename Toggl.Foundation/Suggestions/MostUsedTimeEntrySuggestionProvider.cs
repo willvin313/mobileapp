@@ -38,16 +38,16 @@ namespace Toggl.Foundation.Suggestions
 
         private IEnumerable<Suggestion> createSuggestions(IEnumerable<IDatabaseTimeEntry> timeEntries)
         {
-            var countOfAllTimeEntries = timeEntries.Count();
+            var suitableTimeEntries = timeEntries.Where(isSuitableForSuggestion);
+            var countOfSuitableTimeEntries = suitableTimeEntries.Count();
 
-            return timeEntries
-                .Where(isSuitableForSuggestion)
+            return suitableTimeEntries
                 .GroupBy(te => new { te.Description, te.ProjectId, te.TaskId })
                 .OrderByDescending(g => g.Count())
                 .Select(grouping =>
                     new Suggestion(
                         grouping.First(),
-                        calculateCertainty(grouping.Count(), countOfAllTimeEntries),
+                        calculateCertainty(grouping.Count(), countOfSuitableTimeEntries),
                         SuggestionProviderType.MostUsedTimeEntries))
                 .Take(maxNumberOfSuggestions);
         }
