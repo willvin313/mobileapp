@@ -7,6 +7,7 @@ using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.Services;
 using Toggl.Multivac;
+using Toggl.Multivac.Extensions;
 using Math = System.Math;
 
 namespace Toggl.Foundation.Suggestions
@@ -60,17 +61,18 @@ namespace Toggl.Foundation.Suggestions
         private float calculateCertainty(CalendarItem calendarItem)
         {
             var now = timeService.CurrentDateTime;
-            var delta = (now - calendarItem.StartTime).TotalMinutes;
+            var delta = (now - calendarItem.StartTime).TotalMinutes
+                .Apply(Math.Abs);
 
-            //Delta has to be bigger than 1, so 1 / delta < 1
+            //Delta has to be bigger or equal to 1, so 1 / delta <= 1
             if (delta < 1)
-                delta++;
+                delta = 1;
 
             //If the event is in the past, it is rated lower than an upcoming event with the same delta
             if (calendarItem.StartTime < now)
                 delta++;
 
-            return 1 / (float)Math.Abs(delta);
+            return 1 / (float)delta;
         }
     }
 }
