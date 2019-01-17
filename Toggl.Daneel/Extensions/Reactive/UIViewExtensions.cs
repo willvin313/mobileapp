@@ -51,6 +51,9 @@ namespace Toggl.Daneel.Extensions.Reactive
         public static Action<UIColor> TintColor(this IReactive<UIView> reactive)
             => color => reactive.Base.TintColor = color;
 
+        public static Action<UIColor> BackgroundColor(this IReactive<UIView> reactive)
+            => color => reactive.Base.BackgroundColor = color;
+
         public static Action<bool> AnimatedIsVisible(this IReactive<UIView> reactive)
             => isVisible =>
             {
