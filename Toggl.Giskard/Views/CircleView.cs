@@ -12,14 +12,10 @@ namespace Toggl.Giskard.Views
     {
         private readonly Paint paint;
 
-        public Color CircleColor
+        public void SetCircleColor(Color color)
         {
-            get => paint.Color;
-            set 
-            {
-                paint.Color = value;
-                Invalidate();
-            }
+            paint.Color = color;
+            Invalidate();
         }
 
         public CircleView(IntPtr javaReference, JniHandleOwnership transfer)

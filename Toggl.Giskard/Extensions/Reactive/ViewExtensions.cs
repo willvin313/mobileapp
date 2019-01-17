@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Reactive;
 using System.Reactive.Linq;
+using Android.App;
+using Android.Content;
 using Android.Graphics;
 using Android.Graphics.Drawables;
 using Android.Views;
@@ -63,6 +65,21 @@ namespace Toggl.Giskard.Extensions.Reactive
                 )
                 .Subscribe(action.Inputs);
         }
+
+        public static Action<int> MarginTop(this IReactive<View> reactive)
+            => topMargin => reactive.Base.Post(() =>
+            {
+                if (reactive.Base.LayoutParameters is ViewGroup.MarginLayoutParams marginParams)
+                {
+                    var topMarginInPixels = topMargin.DpToPixels(Application.Context);
+                    reactive.Base.LayoutParameters = marginParams.WithMargins(
+                        marginParams.LeftMargin,
+                        topMarginInPixels,
+                        marginParams.RightMargin,
+                        marginParams.BottomMargin
+                    );
+                }
+            });
 
         public static IDisposable BindAction<T>(this IReactive<View> reactive, InputAction<T> action, Func<View, T> convert, ButtonEventType eventType = ButtonEventType.Tap)
         {

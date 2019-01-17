@@ -536,6 +536,7 @@
     <Compile Include="Adapters\SelectDateFormatRecyclerAdapter.cs" />
     <Compile Include="ViewHolders\SelectDateFormatViewHolder.cs" />
     <Compile Include="Extensions\ColorExtensions.cs" />
+    <Compile Include="Activities\EditProjectActivity.ViewBinds.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\AndroidManifest.xml" />

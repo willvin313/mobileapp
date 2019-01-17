@@ -35,7 +35,7 @@ namespace Toggl.Giskard.ViewHolders
 
         protected override void UpdateView()
         {
-            colorCircle.CircleColor = Item.Color.ToNativeColor();
+            colorCircle.SetCircleColor(Item.Color.ToNativeColor());
             selectionCircle.Visibility = Item.Selected.ToVisibility(useGone: false);
         }
     }

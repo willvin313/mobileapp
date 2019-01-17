@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
+using Android.Graphics;
 using Android.Text;
 using Android.Widget;
 using Java.Lang;
@@ -33,6 +34,9 @@ namespace Toggl.Giskard.Extensions.Reactive
                     reactive.Base.Text = text;
             };
         }
+
+        public static Action<Color> TextColor(this IReactive<TextView> reactive)
+            => reactive.Base.SetTextColor;
 
         public static Action<ISpannable> TextFormattedObserver(this IReactive<TextView> reactive)
             => text => reactive.Base.TextFormatted = text;
