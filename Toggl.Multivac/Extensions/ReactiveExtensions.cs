@@ -171,5 +171,8 @@ namespace Toggl.Multivac.Extensions
 
         public static IObservable<string> SelectToString<T>(this IObservable<T> observable)
             => observable.Select(item => item.ToString());
+
+        public static IObservable<T> SkipWhileValueIsDefault<T>(this IObservable<T> observable)
+            => observable.SkipWhile(x => x.Equals(default(T)));
     }
 }
