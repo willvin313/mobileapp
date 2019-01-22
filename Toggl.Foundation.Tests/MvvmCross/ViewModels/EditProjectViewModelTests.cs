@@ -91,10 +91,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 bool before, 
                 bool after)
             {
-                Observer.ClearReceivedCalls();
+                Observer.Messages.Clear();
                 using (var disposable = testedObservable.Subscribe(Observer))
                 {
-                    TestScheduler.Start();
                     setupChangingWorkspaceScenario();
 
                     NavigationService
@@ -102,10 +101,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         .Returns(Task.FromResult(1L));
 
                     ViewModel.Prepare(projectName);
+                    TestScheduler.Start();
 
                     await ViewModel.Initialize();
 
                     await ViewModel.PickWorkspace.Execute();
+                    TestScheduler.AdvanceBy(100);
 
                     Observer.Messages.AssertEqual(
                         ReactiveTest.OnNext(0, before),
@@ -159,10 +160,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Execute()
                     .Returns(Observable.Return(false));
 
-                DataSource.Projects
-                          .GetAll(Arg.Any<ProjectPredicate>())
-                          .Returns(callInfo => Observable.Return(projects)
-                                                         .Select(p => p.Where<IThreadSafeProject>(callInfo.Arg<ProjectPredicate>())));
+                DataSource
+                    .Projects
+                    .GetAll(Arg.Any<ProjectPredicate>())
+                    .Returns(callInfo => 
+                        Observable
+                            .Return(projects)
+                            .Select(p => p
+                                .Where<IThreadSafeProject>(callInfo.Arg<ProjectPredicate>())));
 
             }
         }
@@ -206,38 +211,32 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
         public sealed class TheNameIsAlreadyTakenProperty : EditProjectWithSpecificNameViewModelTest
         {
-            public TheNameIsAlreadyTakenProperty()
-            {
-                ViewModel.NameIsAlreadyTaken.Subscribe(Observer);
-                TestScheduler.Start();
-            }
-
             [Fact, LogIfTooSlow]
-            public async Task IsTrueWhenProjectWithSameNameAlreadyExistsInSameWorkspace()
+            public async Task IsTrueWhenAProjectWithSameNameAlreadyExistsInSameWorkspace()
             {
                 SetupDataSource(isFromSameWorkspace: true);
-
+                ViewModel.NameIsAlreadyTaken.Subscribe(Observer);
                 ViewModel.Prepare(ProjectName);
+                TestScheduler.Start();
 
                 await ViewModel.Initialize();
+                TestScheduler.AdvanceBy(100);
 
-                Observer.Messages.AssertEqual(
-                    ReactiveTest.OnNext(0, true)
-                );
+                Observer.Messages.Last().Value.Value.Should().BeTrue();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task IsFalseWhenProjectWithSameNameAlreadyExistsOnlyInAnotherWorkspace()
+            public async Task IsFalseWhenAProjectWithTheSameNameAlreadyExistsOnlyInAnotherWorkspace()
             {
                 SetupDataSource(isFromSameWorkspace: false);
-
+                ViewModel.NameIsAlreadyTaken.Subscribe(Observer);
                 ViewModel.Prepare(ProjectName);
+                TestScheduler.Start();
 
                 await ViewModel.Initialize();
+                TestScheduler.AdvanceBy(100);
 
-                Observer.Messages.AssertEqual(
-                    ReactiveTest.OnNext(0, false)
-                );
+                Observer.Messages.Last().Value.Value.Should().BeFalse();
             }
 
             [Fact, LogIfTooSlow]
@@ -550,7 +549,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 project.Id.Returns(projectId);
                 Workspace.Id.Returns(proWorkspaceId);
 
-                ViewModel
+                //ViewModel
             }
 
             [Fact, LogIfTooSlow]
