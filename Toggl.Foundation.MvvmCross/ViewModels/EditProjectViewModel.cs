@@ -84,51 +84,54 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             this.stopwatchProvider = stopwatchProvider;
             this.interactorFactory = interactorFactory;
 
-            var projectInfoDriver = project
+            Name = project
+                .Select(p => p.Name)
+                .DistinctUntilChanged()
                 .AsDriver(schedulerProvider);
 
-            Name = projectInfoDriver
-                .Select(p => p.Name)
-                .DistinctUntilChanged();
-
-            IsPrivate = projectInfoDriver
+            IsPrivate = project
                 .Select(p => p.IsPrivate)
-                .DistinctUntilChanged();
+                .DistinctUntilChanged()
+                .AsDriver(schedulerProvider);
 
-            Color = projectInfoDriver
+            Color = project
                 .Select(p => p.Color)
-                .DistinctUntilChanged();
+                .DistinctUntilChanged()
+                .AsDriver(schedulerProvider);
 
-            ClientName = projectInfoDriver
+            ClientName = project
                 .Select(p => p.ClientName)
-                .DistinctUntilChanged();
+                .DistinctUntilChanged()
+                .AsDriver(schedulerProvider);
 
             TrimmedName = Name
                 .Select(n => n.Trim())
-                .DistinctUntilChanged();
+                .DistinctUntilChanged()
+                .AsDriver(schedulerProvider);
 
-            WorkspaceName = projectInfoDriver
+            WorkspaceName = project
                 .Select(p => p.WorkspaceName)
                 .DistinctUntilChanged();
 
-            var workspaceId = projectInfoDriver
+            var workspaceId = project
                 .Select(project => project.WorkspaceId)
                 .DistinctUntilChanged();
 
             var projectsInWorkspace = workspaceId
                 .SelectMany(id => dataSource.Projects
                     .GetAll(project => project.WorkspaceId == id)
-                    .Select(projects => projects.Select(p => p.Name).ToHashSet())
-                );
+                    .Select(projects => projects.Select(p => p.Name).ToHashSet()));
 
             NameIsAlreadyTaken = projectsInWorkspace
-                .CombineLatest(TrimmedName, (projectNames, name) => projectNames.Contains(name));
+                .CombineLatest(TrimmedName, (projectNames, name) => projectNames.Contains(name))
+                .DistinctUntilChanged()
+                .AsDriver(schedulerProvider);
 
             var canSave = NameIsAlreadyTaken.Invert()
                 .CombineLatest(Name.Select(nameIsValid), CommonFunctions.And);
 
-            Save = rxActionFactory.FromAsync(done, canSave);
             Close = rxActionFactory.FromAsync(close);
+            Save = rxActionFactory.FromAsync(done, canSave);
             PickColor = rxActionFactory.FromAsync(pickColor);
             PickClient = rxActionFactory.FromAsync(pickClient);
             PickWorkspace = rxActionFactory.FromAsync(pickWorkspace);
