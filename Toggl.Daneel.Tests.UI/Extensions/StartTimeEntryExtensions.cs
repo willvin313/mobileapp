@@ -23,5 +23,10 @@ namespace Toggl.Tests.UI.Extensions
         {
             app.TapNthCellInCollection(0);
         }
+
+        public static void TapCreateClient(this IApp app, string clientName)
+        {
+            app.TapNthCellInCollection(0);
+        }
     }
 }

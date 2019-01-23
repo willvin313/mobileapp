@@ -26,6 +26,12 @@ namespace Toggl.Tests.UI.Extensions
             tapAndWaitForElement(app, projectName);
         }
 
+        public static void TapCreateClient(this IApp app, string clientName)
+        {
+            var query = $"Create client \"{clientName}\"";
+            tapAndWaitForElement(app, query);
+        }
+
         private static void tapAndWaitForElement(IApp app, string query)
         {
             app.WaitForElement(query);

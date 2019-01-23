@@ -42,7 +42,7 @@ namespace Toggl.Giskard.Activities
                 .BindAction(ViewModel.PickColor)
                 .DisposedBy(DisposeBag);
 
-            editWorkspace.Rx()
+            changeWorkspace.Rx()
                 .BindAction(ViewModel.PickWorkspace)
                 .DisposedBy(DisposeBag);
 

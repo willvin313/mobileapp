@@ -7,7 +7,7 @@ namespace Toggl.Giskard.Activities
     public sealed partial class EditProjectActivity
     {
         private View errorText;
-        private View editWorkspace;
+        private View changeWorkspace;
         private View editClientView;
         private View toggleIsPrivateView;
         private View editProjectColorArrow;
@@ -21,8 +21,8 @@ namespace Toggl.Giskard.Activities
         protected override void InitializeViews()
         {
             errorText = FindViewById(Resource.Id.ErrorText);
-            editWorkspace = FindViewById(Resource.Id.EditWorkspace);
             editClientView = FindViewById(Resource.Id.EditClientView);
+            changeWorkspace = FindViewById(Resource.Id.ChangeWorkspaceButton);
             toggleIsPrivateView = FindViewById(Resource.Id.ToggleIsPrivateView);
             isPrivateSwitch = FindViewById<Switch>(Resource.Id.IsPrivateSwitch);
             editProjectColorArrow = FindViewById(Resource.Id.EditProjectColorArrow);

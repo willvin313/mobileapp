@@ -227,7 +227,6 @@ private TemporaryFileTransformation GetIosInfoConfigurationTransformation()
 
     var commitCount = GetCommitCount();
     var reversedClientId = EnvironmentVariable("TOGGL_REVERSED_CLIENT_ID");
-    var facebookAppId = EnvironmentVariable("TOGGL_FACEBOOK_APP_ID");
 
     var bundleId = bundleIdToReplace;
     var appName = appNameToReplace;
@@ -254,7 +253,6 @@ private TemporaryFileTransformation GetIosInfoConfigurationTransformation()
         Path = path,
         Original = file,
         Temporary = file.Replace("{TOGGL_REVERSED_CLIENT_ID}", reversedClientId)
-                        .Replace("{TOGGL_FACEBOOK_APP_ID}", facebookAppId)
                         .Replace("IOS_BUNDLE_VERSION", commitCount)
                         .Replace(bundleIdToReplace, bundleId)
                         .Replace(appNameToReplace, appName)

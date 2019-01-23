@@ -96,6 +96,24 @@ namespace Toggl.Tests.UI
         }
 
         [Test]
+        public void AddingAClientBeforeSavingPersistsTheClient()
+        {
+            const string description = "Field Research ";
+            app.EnterText(description);
+
+            var projectName = "Meme Production";
+            var clientName = "The World Wide Web";
+            app.CreateProjectInStartView(projectName, clientName);
+
+            app.Tap(StartTimeEntry.DoneButton);
+            app.Tap(Main.StopTimeEntryButton);
+
+            app.PullToRefresh();
+
+            app.WaitForElement(clientName);
+        }
+
+        [Test]
         public void CreatingATimeEntryWithASingleTagWorks()
         {
             const string description = "Working from home ";

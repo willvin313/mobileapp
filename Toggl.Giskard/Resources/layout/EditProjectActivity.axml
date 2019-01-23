@@ -79,7 +79,8 @@
             android:layout_marginLeft="55dp"
             android:layout_width="match_parent" />
         <RelativeLayout
-            android:id="@+id/EditWorkspace"
+            android:id="@+id/ChangeWorkspaceButton"
+            local:MvxBind="Click PickWorkspaceCommand"
             android:clickable="true"
             android:background="?attr/selectableItemBackground"
             android:layout_height="48dp"
@@ -130,7 +131,12 @@
             android:layout_marginLeft="55dp"
             android:layout_width="match_parent" />
         <RelativeLayout
+<<<<<<< HEAD
             android:id="@+id/EditClientView"
+=======
+            android:id="@+id/ChangeClientButton"
+            local:MvxBind="Click PickClientCommand"
+>>>>>>> develop
             android:clickable="true"
             android:background="?attr/selectableItemBackground"
             android:layout_height="48dp"
@@ -182,7 +188,12 @@
             android:layout_marginLeft="55dp"
             android:layout_width="match_parent" />
         <RelativeLayout
+<<<<<<< HEAD
             android:id="@+id/ToggleIsPrivateView"
+=======
+            android:id="@+id/PrivateProjectSwitchContainer"
+            local:MvxBind="Click TogglePrivateProjectCommand"
+>>>>>>> develop
             android:clickable="true"
             android:paddingTop="12dp"
             android:paddingBottom="12dp"
