@@ -153,7 +153,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 observer.Messages.Should().HaveCount(2);
                 observer.Messages.First().Value.Value.Should().HaveCount(0);
-                observer.Messages.Last().Value.Value.Should().HaveCount(0);
+                observer.LastEmittedValue().Should().HaveCount(0);
                 await provider.Received(2).GetSuggestions();
             }
 
@@ -176,7 +176,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 observer.Messages.Should().HaveCount(2);
                 observer.Messages.First().Value.Value.Should().HaveCount(0);
-                observer.Messages.Last().Value.Value.Should().HaveCount(0);
+                observer.LastEmittedValue().Should().HaveCount(0);
                 await provider.Received(2).GetSuggestions();
             }
 

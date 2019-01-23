@@ -81,7 +81,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 ViewModel.Reset.Execute();
 
-                observer.Messages.Last().Value.Value.Should().BeEmpty();
+                observer.LastEmittedValue().Should().BeEmpty();
             }
 
             [Fact, LogIfTooSlow]
@@ -97,7 +97,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 ViewModel.Reset.Execute();
 
-                observer.Messages.Last().Value.Value.Should().BeFalse();
+                observer.LastEmittedValue().Should().BeFalse();
             }
 
             [Fact, LogIfTooSlow]
@@ -128,7 +128,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserver<bool>();
                 ViewModel.Reset.Enabled.Subscribe(observer);
 
-                observer.Messages.Last().Value.Value.Should().BeFalse();
+                observer.LastEmittedValue().Should().BeFalse();
             }
 
             [Fact, LogIfTooSlow]
@@ -137,7 +137,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserver<bool>();
                 ViewModel.Reset.Enabled.Subscribe(observer);
 
-                observer.Messages.Last().Value.Value.Should().BeFalse();
+                observer.LastEmittedValue().Should().BeFalse();
             }
 
             [Fact, LogIfTooSlow]
@@ -153,7 +153,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserver<bool>();
                 ViewModel.Reset.Enabled.Subscribe(observer);
 
-                observer.Messages.Last().Value.Value.Should().BeFalse();
+                observer.LastEmittedValue().Should().BeFalse();
             }
 
             public sealed class WhenPasswordResetSucceeds : ForgotPasswordViewModelTest
@@ -172,7 +172,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     ViewModel.Reset.Execute();
                     TestScheduler.Start();
 
-                    observer.Messages.Last().Value.Value.Should().BeFalse();
+                    observer.LastEmittedValue().Should().BeFalse();
                 }
 
                 [Fact, LogIfTooSlow]
@@ -189,7 +189,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     ViewModel.Reset.Execute();
                     TestScheduler.Start();
 
-                    observer.Messages.Last().Value.Value.Should().BeTrue();
+                    observer.LastEmittedValue().Should().BeTrue();
                 }
 
                 [Fact, LogIfTooSlow]
@@ -246,7 +246,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     ViewModel.Reset.Execute();
 
-                    observer.Messages.Last().Value.Value.Should().BeFalse();
+                    observer.LastEmittedValue().Should().BeFalse();
                 }
 
                 [Fact, LogIfTooSlow]
@@ -265,7 +265,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     ViewModel.Reset.Execute();
                     TestScheduler.Start();
 
-                    observer.Messages.Last().Value.Value.Should().Be(Resources.PasswordResetEmailDoesNotExistError);
+                    observer.LastEmittedValue().Should().Be(Resources.PasswordResetEmailDoesNotExistError);
                 }
 
                 [Fact, LogIfTooSlow]
@@ -282,7 +282,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     ViewModel.Reset.Execute();
                     TestScheduler.Start();
 
-                    observer.Messages.Last().Value.Value.Should().Be(Resources.PasswordResetOfflineError);
+                    observer.LastEmittedValue().Should().Be(Resources.PasswordResetOfflineError);
                 }
 
                 [Property]
@@ -303,7 +303,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     ViewModel.Reset.Execute();
                     TestScheduler.Start();
 
-                    observer.Messages.Last().Value.Value.Should().Be(exception.LocalizedApiErrorMessage);
+                    observer.LastEmittedValue().Should().Be(exception.LocalizedApiErrorMessage);
                 }
 
                 [Fact, LogIfTooSlow]
@@ -320,7 +320,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     ViewModel.Reset.Execute();
                     TestScheduler.Start();
 
-                    observer.Messages.Last().Value.Value.Should().Be(Resources.PasswordResetGeneralError);
+                    observer.LastEmittedValue().Should().Be(Resources.PasswordResetGeneralError);
                 }
             }
         }

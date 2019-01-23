@@ -215,7 +215,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 viewModel.ShouldShowOnboarding.Subscribe(observer);
 
                 TestScheduler.Start();
-                observer.Messages.Single().Value.Value.Should().BeTrue();
+                observer.SingleEmittedValue().Should().BeTrue();
             }
 
             [Fact, LogIfTooSlow]
@@ -228,7 +228,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 viewModel.ShouldShowOnboarding.Subscribe(observer);
                 TestScheduler.Start();
 
-                observer.Messages.Single().Value.Value.Should().BeFalse();
+                observer.SingleEmittedValue().Should().BeFalse();
             }
 
             [Fact, LogIfTooSlow]

@@ -42,7 +42,7 @@ namespace Toggl.Foundation.Tests.Interactors.Workspace
 
                 observer.Messages.Should().HaveCount(2);
                 observer.Messages.First().Value.Value.Should().BeEquivalentTo(workspaces);
-                observer.Messages.Last().Value.Value.Should().BeEquivalentTo(newWorkspaces);
+                observer.LastEmittedValue().Should().BeEquivalentTo(newWorkspaces);
             }
 
             [Fact, LogIfTooSlow]

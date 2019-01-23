@@ -86,7 +86,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels.Reports
             ReportsSubject.OnNext(Report);
 
             TestScheduler.Start();
-            barsObserver.Messages.Single().Value.Value
+            barsObserver.SingleEmittedValue()
                 .Should().BeEquivalentTo(new[]
                 {
                     new BarViewModel(3.0 / 14.0, (13.0 - 3.0) / 14.0),
@@ -125,7 +125,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels.Reports
             ReportsSubject.OnNext(Report);
 
             TestScheduler.Start();
-            maximumHoursPerBarObserver.Messages.Last().Value.Value.Should().Be(14);
+            maximumHoursPerBarObserver.LastEmittedValue().Should().Be(14);
         }
     }
 
@@ -147,7 +147,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels.Reports
             ReportsSubject.OnNext(Report);
 
             TestScheduler.Start();
-            legendObserver.Messages.Single().Value.Value.Should().BeNull();
+            legendObserver.SingleEmittedValue().Should().BeNull();
         }
 
         [Theory]
@@ -163,7 +163,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels.Reports
             ReportsSubject.OnNext(Report);
 
             TestScheduler.Start();
-            legendObserver.Messages.Single().Value.Value.Should().BeNull();
+            legendObserver.SingleEmittedValue().Should().BeNull();
         }
 
         [Theory]
@@ -189,7 +189,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels.Reports
             ReportsSubject.OnNext(Report);
 
             TestScheduler.Start();
-            legendObserver.Messages.Last().Value.Value.AssertEqual(
+            legendObserver.LastEmittedValue().AssertEqual(
                 Enumerable.Range(0, daysCount).Select(n => start.AddDays(n)));
         }
     }
@@ -208,7 +208,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels.Reports
             CurrentPreferences.OnNext(preferences);
 
             TestScheduler.Start();
-            dateFormatObserver.Messages.Single().Value.Value.Should().Be(dateFormat);
+            dateFormatObserver.SingleEmittedValue().Should().Be(dateFormat);
         }
     }
 }

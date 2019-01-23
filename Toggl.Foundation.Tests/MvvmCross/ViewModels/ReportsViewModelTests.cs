@@ -280,7 +280,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 await Initialize();
 
                 TestScheduler.Start();
-                isLoadingObserver.Messages.Last().Value.Value.Should().BeTrue();
+                isLoadingObserver.LastEmittedValue().Should().BeTrue();
             }
 
             [Fact, LogIfTooSlow]
@@ -295,7 +295,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 await Initialize();
 
                 TestScheduler.Start();
-                isLoadingObserver.Messages.Last().Value.Value.Should().BeFalse();
+                isLoadingObserver.LastEmittedValue().Should().BeFalse();
             }
         }
 
@@ -636,7 +636,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 await ViewModel.Initialize();
 
                 TestScheduler.Start();
-                isEnabledObserver.Messages.Single().Value.Value.Should().BeFalse();
+                isEnabledObserver.SingleEmittedValue().Should().BeFalse();
             }
 
             [Fact]
@@ -650,7 +650,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SelectWorkspace.Execute();
                 TestScheduler.Start();
 
-                isEnabledObserver.Messages.Last().Value.Value.Should().BeFalse();
+                isEnabledObserver.LastEmittedValue().Should().BeFalse();
             }
 
             [Fact]
@@ -665,7 +665,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SelectWorkspace.Execute();
                 TestScheduler.Start();
 
-                isEnabledObserver.Messages.Last().Value.Value.Should().BeTrue();
+                isEnabledObserver.LastEmittedValue().Should().BeTrue();
             }
 
             private void prepareWorkspace(bool isProEnabled)

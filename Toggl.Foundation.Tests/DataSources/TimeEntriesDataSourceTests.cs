@@ -174,8 +174,8 @@ namespace Toggl.Foundation.Tests.DataSources
                 timeEntriesSource.Created.Subscribe(createdObserver);
                 await timeEntriesSource.Create(newTimeEntry);
 
-                createdObserver.Messages.Single().Value.Value.Id.Should().Be(newTimeEntry.Id);
-                createdObserver.Messages.Single().Value.Value.Duration.Should().BeNull();
+                createdObserver.SingleEmittedValue().Id.Should().Be(newTimeEntry.Id);
+                createdObserver.SingleEmittedValue().Duration.Should().BeNull();
             }
 
             [Fact]
@@ -203,9 +203,9 @@ namespace Toggl.Foundation.Tests.DataSources
                 timeEntriesSource.Created.Subscribe(createdObserver);
                 await timeEntriesSource.Create(newTimeEntry);
 
-                updatedObserver.Messages.Single().Value.Value.Entity.Duration.Should().Be(durationAfterStopping);
-                createdObserver.Messages.Single().Value.Value.Id.Should().Be(newTimeEntry.Id);
-                createdObserver.Messages.Single().Value.Value.Duration.Should().BeNull();
+                updatedObserver.SingleEmittedValue().Entity.Duration.Should().Be(durationAfterStopping);
+                createdObserver.SingleEmittedValue().Id.Should().Be(newTimeEntry.Id);
+                createdObserver.SingleEmittedValue().Duration.Should().BeNull();
             }
         }
 

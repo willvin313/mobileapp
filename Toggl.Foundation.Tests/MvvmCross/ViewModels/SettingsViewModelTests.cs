@@ -139,8 +139,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     ProgressSubject.OnNext(state);
 
-                    var isSynced = syncedObserver.Messages.Single().Value.Value;
-                    var isRunningSync = syncingObserver.Messages.Single().Value.Value;
+                    var isSynced = syncedObserver.SingleEmittedValue();
+                    var isRunningSync = syncingObserver.SingleEmittedValue();
 
                     (isRunningSync && isSynced).Should().BeFalse();
                 }
@@ -161,7 +161,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     ProgressSubject.OnNext(state);
 
-                    var isRunningSync = observer.Messages.Single().Value.Value;
+                    var isRunningSync = observer.SingleEmittedValue();
                     isRunningSync.Should().Be(state == SyncProgress.Syncing);
                 }
             }
@@ -183,7 +183,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     ProgressSubject.OnNext(state);
 
-                    var isSynced = observer.Messages.Single().Value.Value;
+                    var isSynced = observer.SingleEmittedValue();
                     isSynced.Should().Be(state == SyncProgress.Synced);
                 }
             }
@@ -838,7 +838,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 viewModel.IsFeedbackSuccessViewShowing.StartWith(true).Subscribe(observer);
                 viewModel.CloseFeedbackSuccessView();
-                observer.Messages.Last().Value.Value.Should().BeFalse();
+                observer.LastEmittedValue().Should().BeFalse();
             }
         }
 

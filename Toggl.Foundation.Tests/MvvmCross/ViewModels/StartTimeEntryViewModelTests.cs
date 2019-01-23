@@ -2136,7 +2136,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public static TextFieldInfo GetLatestInfo(this ITestableObserver<TextFieldInfo> observer, TestScheduler testScheduler)
         {
             testScheduler.Start();
-            return observer.Messages.Last().Value.Value;
+            return observer.LastEmittedValue();
         }
 
         public static QueryTextSpan GetQuerySpan(this TextFieldInfo textFieldInfo)
