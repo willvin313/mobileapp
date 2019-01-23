@@ -131,7 +131,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .CombineLatest(Name.Select(nameIsValid), CommonFunctions.And);
 
             Close = rxActionFactory.FromAsync(close);
-            Save = rxActionFactory.FromAsync(done, canSave);
+            Save = rxActionFactory.FromAsync(save, canSave);
             PickColor = rxActionFactory.FromAsync(pickColor);
             PickClient = rxActionFactory.FromAsync(pickClient);
             PickWorkspace = rxActionFactory.FromAsync(pickWorkspace);
@@ -210,7 +210,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             project.OnNext(p => p.ToggleIsPrivate());
         }
 
-        private async Task done()
+        private async Task save()
         {
             if (initialWorkspaceId != project.Value.WorkspaceId)
             {
@@ -316,7 +316,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 => new ProjectInformation(ClientId, IsPrivate, WorkspaceId, Name, ClientName, WorkspaceName, color);
 
             public ProjectInformation WithClient(IThreadSafeClient client)
-                => new ProjectInformation(client?.Id, IsPrivate, WorkspaceId, Name, client?.Name, WorkspaceName, Color);
+                => new ProjectInformation(client?.Id, IsPrivate, WorkspaceId, Name, client?.Name ?? "", WorkspaceName, Color);
 
             public ProjectInformation WithWorkspace(IThreadSafeWorkspace workspace)
                 => new ProjectInformation(ClientId, IsPrivate, workspace.Id, Name, ClientName, workspace.Name, Color);
