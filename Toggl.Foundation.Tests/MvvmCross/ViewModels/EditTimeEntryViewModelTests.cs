@@ -8,9 +8,7 @@ using FluentAssertions;
 using FsCheck;
 using FsCheck.Xunit;
 using NSubstitute;
-using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.DTOs;
-using Toggl.Foundation.Models;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.Services;
@@ -24,7 +22,6 @@ using Xunit;
 using static Toggl.Foundation.Helper.Constants;
 using static Toggl.Multivac.Extensions.StringExtensions;
 using Task = System.Threading.Tasks.Task;
-using Toggl.Foundation.Tests.Mocks;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 {
