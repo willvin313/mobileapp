@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -24,6 +24,7 @@ using Microsoft.Reactive.Testing;
 using Toggl.Foundation.MvvmCross.ViewModels.Reports;
 using Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar;
 using Toggl.Foundation.Tests.Extensions;
+using Toggl.Foundation.Tests.TestExtensions;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 {
@@ -266,7 +267,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 await ViewModel.Initialize();
 
                 TestScheduler.Start();
-                isLoadingObserver.Messages.Last().Value.Value.Should().BeTrue();
+                isLoadingObserver.LastEmittedValue().Should().BeTrue();
             }
 
             [Fact, LogIfTooSlow]

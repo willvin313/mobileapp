@@ -17,6 +17,7 @@ using Toggl.Foundation.DataSources;
 using System.Reactive.Subjects;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Multivac.Extensions;
+using Toggl.Foundation.Tests.TestExtensions;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 {

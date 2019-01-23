@@ -10,6 +10,7 @@ using Toggl.Foundation.Tests.Generators;
 using Toggl.Foundation.Tests.Extensions;
 using Xunit;
 using static Toggl.Foundation.Sync.SyncState;
+using Toggl.Foundation.Tests.TestExtensions;
 
 namespace Toggl.Foundation.Tests.Sync
 {
