@@ -15,7 +15,7 @@ namespace Toggl.Foundation.Tests.Interactors.TimeEntry
     public class ObserveTimeEntriesChangesInteractorTests : BaseInteractorTests
     {
         [Fact, LogIfTooSlow]
-        public async Task GetsAnEventWhenAChangeToTimeEntriesHappens()
+        public void GetsAnEventWhenAChangeToTimeEntriesHappens()
         {
             var createSubject = new Subject<IThreadSafeTimeEntry>();
             var deleteSubject = new Subject<long>();

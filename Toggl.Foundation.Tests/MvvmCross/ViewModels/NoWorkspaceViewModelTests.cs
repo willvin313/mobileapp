@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Reactive.Testing;
 using NSubstitute;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.ViewModels;
-using Toggl.Foundation.Tests.Extensions;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Foundation.Tests.TestExtensions;
 using Xunit;
@@ -52,7 +50,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheTryAgainCommand : NoWorkspaceViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task ClosesWhenAnotherWorkspaceIsFetched()
+            public void ClosesWhenAnotherWorkspaceIsFetched()
             {
                 var workspace = Substitute.For<IThreadSafeWorkspace>();
                 InteractorFactory.GetAllWorkspaces().Execute().Returns(Observable.Return(new List<IThreadSafeWorkspace>() { workspace }));
@@ -60,12 +58,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.TryAgain.Execute();
                 TestScheduler.Start();
 
-                await NavigationService.Received().Close(Arg.Is(ViewModel), Unit.Default);
+                NavigationService.Received().Close(Arg.Is(ViewModel), Unit.Default);
             }
 
             [Fact, LogIfTooSlow]
 
-            public async Task ResetsNoWorkspaceStateWhenAnotherWorkspaceIsFetched()
+            public void ResetsNoWorkspaceStateWhenAnotherWorkspaceIsFetched()
             {
                 var workspace = Substitute.For<IThreadSafeWorkspace>();
                 InteractorFactory.GetAllWorkspaces().Execute().Returns(Observable.Return(new List<IThreadSafeWorkspace>() { workspace }));
@@ -77,19 +75,19 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task DoesNothingWhenNoWorkspacesAreFetched()
+            public void DoesNothingWhenNoWorkspacesAreFetched()
             {
                 DataSource.Workspaces.GetAll().Returns(Observable.Return(new List<IThreadSafeWorkspace>()));
 
                 ViewModel.TryAgain.Execute();
                 TestScheduler.Start();
 
-                await NavigationService.DidNotReceive().Close(Arg.Is(ViewModel));
+                NavigationService.DidNotReceive().Close(Arg.Is(ViewModel));
                 AccessRestrictionStorage.DidNotReceive().SetNoWorkspaceStateReached(Arg.Any<bool>());
             }
 
             [Fact, LogIfTooSlow]
-            public async Task StartsAndStopsLoading()
+            public void StartsAndStopsLoading()
             {
                 var observer = TestScheduler.CreateObserver<bool>();
                 ViewModel.IsLoading.Subscribe(observer);
@@ -111,7 +109,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheCreateWorkspaceCommand : NoWorkspaceViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task CreatesNewWorkspaceWithDefaultName()
+            public void CreatesNewWorkspaceWithDefaultName()
             {
                 var name = "Rick Sanchez";
                 var user = Substitute.For<IThreadSafeUser>();
@@ -121,11 +119,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.CreateWorkspaceWithDefaultName.Execute();
                 TestScheduler.Start();
 
-                await InteractorFactory.CreateDefaultWorkspace().Received().Execute();
+                InteractorFactory.CreateDefaultWorkspace().Received().Execute();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ClosesAfterNewWorkspaceIsCreated()
+            public void ClosesAfterNewWorkspaceIsCreated()
             {
                 var workspace = Substitute.For<IThreadSafeWorkspace>();
                 InteractorFactory.CreateDefaultWorkspace().Execute().Returns(Observable.Return(Unit.Default));
@@ -134,11 +132,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.CreateWorkspaceWithDefaultName.Execute();
                 TestScheduler.Start();
 
-                await NavigationService.Received().Close(Arg.Is(ViewModel), Unit.Default);
+                NavigationService.Received().Close(Arg.Is(ViewModel), Unit.Default);
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ResetsNoWorkspaceStateWhenAfterNewWorkspaceIsCreated()
+            public void ResetsNoWorkspaceStateWhenAfterNewWorkspaceIsCreated()
             {
                 var workspace = Substitute.For<IThreadSafeWorkspace>();
                 InteractorFactory.CreateDefaultWorkspace().Execute().Returns(Observable.Return(Unit.Default));
@@ -151,7 +149,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task StartsAndStopsLoading()
+            public void StartsAndStopsLoading()
             {
                 var observer = TestScheduler.CreateObserver<bool>();
                 ViewModel.IsLoading.Subscribe(observer);

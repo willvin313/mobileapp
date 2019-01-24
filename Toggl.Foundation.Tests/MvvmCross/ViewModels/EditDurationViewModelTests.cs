@@ -8,11 +8,9 @@ using NSubstitute;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
-using Toggl.Foundation.Tests.Extensions;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Foundation.Tests.TestExtensions;
 using Xunit;
-using Task = System.Threading.Tasks.Task;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 {
@@ -217,7 +215,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheCloseCommand : EditDurationViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task ClosesTheViewModel()
+            public void ClosesTheViewModel()
             {
                 var parameter = DurationParameter.WithStartAndDuration(DateTimeOffset.UtcNow, null);
                 ViewModel.Prepare(new EditDurationParameters(parameter));
@@ -225,11 +223,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.Close.Execute();
 
                 TestScheduler.Start();
-                await NavigationService.Received().Close(Arg.Is(ViewModel), Arg.Any<DurationParameter>());
+                NavigationService.Received().Close(Arg.Is(ViewModel), Arg.Any<DurationParameter>());
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ReturnsTheDefaultParameter()
+            public void ReturnsTheDefaultParameter()
             {
                 var parameter = DurationParameter.WithStartAndDuration(DateTimeOffset.UtcNow, null);
                 ViewModel.Prepare(new EditDurationParameters(parameter));
@@ -237,14 +235,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.Close.Execute();
 
                 TestScheduler.Start();
-                await NavigationService.Received().Close(Arg.Is(ViewModel), Arg.Is(parameter));
+                NavigationService.Received().Close(Arg.Is(ViewModel), Arg.Is(parameter));
             }
         }
 
         public sealed class TheSaveCommand : EditDurationViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task ClosesTheViewModel()
+            public void ClosesTheViewModel()
             {
                 var parameter = DurationParameter.WithStartAndDuration(DateTimeOffset.UtcNow, null);
                 ViewModel.Prepare(new EditDurationParameters(parameter));
@@ -252,7 +250,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.Save.Execute();
 
                 TestScheduler.Start();
-                await NavigationService.Received().Close(Arg.Is(ViewModel), Arg.Any<DurationParameter>());
+                NavigationService.Received().Close(Arg.Is(ViewModel), Arg.Any<DurationParameter>());
             }
 
             [Property]

@@ -5,16 +5,13 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using FluentAssertions;
-using FsCheck.Xunit;
 using Microsoft.Reactive.Testing;
 using MvvmCross.Binding.Extensions;
 using NSubstitute;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
-using Toggl.Foundation.Experiments;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Models;
 using Toggl.Foundation.Models.Interfaces;
@@ -33,7 +30,6 @@ using Toggl.Multivac.Models;
 using Toggl.PrimeRadiant;
 using Xunit;
 using static Toggl.Foundation.Helper.Constants;
-using Notification = System.Reactive.Notification;
 using ThreadingTask = System.Threading.Tasks.Task;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
@@ -243,14 +239,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [InlineData(true, false)]
             [InlineData(false, true)]
             [InlineData(false, false)]
-            public async ThreadingTask NavigatesToTheStartTimeEntryViewModel(bool isInManualMode, bool useDefaultMode)
+            public void NavigatesToTheStartTimeEntryViewModel(bool isInManualMode, bool useDefaultMode)
             {
                 UserPreferences.IsManualModeEnabled.Returns(isInManualMode);
 
                 ViewModel.StartTimeEntry.Execute(useDefaultMode);
 
                 TestScheduler.Start();
-                await NavigationService.Received()
+                NavigationService.Received()
                    .Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(Arg.Any<StartTimeEntryParameters>());
             }
 
@@ -259,7 +255,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [InlineData(true, false)]
             [InlineData(false, true)]
             [InlineData(false, false)]
-            public async ThreadingTask PassesTheAppropriatePlaceholderToTheStartTimeEntryViewModel(bool isInManualMode, bool useDefaultMode)
+            public void PassesTheAppropriatePlaceholderToTheStartTimeEntryViewModel(bool isInManualMode, bool useDefaultMode)
             {
                 UserPreferences.IsManualModeEnabled.Returns(isInManualMode);
 
@@ -269,7 +265,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var expected = isInManualMode == useDefaultMode
                     ? Resources.ManualTimeEntryPlaceholder
                     : Resources.StartTimeEntryPlaceholder;
-                await NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
+                NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
                     Arg.Is<StartTimeEntryParameters>(parameter => parameter.PlaceholderText == expected)
                 );
             }
@@ -279,7 +275,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [InlineData(true, false)]
             [InlineData(false, true)]
             [InlineData(false, false)]
-            public async ThreadingTask PassesTheAppropriateDurationToTheStartTimeEntryViewModel(bool isInManualMode, bool useDefaultMode)
+            public void PassesTheAppropriateDurationToTheStartTimeEntryViewModel(bool isInManualMode, bool useDefaultMode)
             {
                 UserPreferences.IsManualModeEnabled.Returns(isInManualMode);
 
@@ -289,7 +285,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var expected = isInManualMode == useDefaultMode
                     ? TimeSpan.FromMinutes(DefaultTimeEntryDurationForManualModeInMinutes)
                     : (TimeSpan?)null;
-                await NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
+                NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
                     Arg.Is<StartTimeEntryParameters>(parameter => parameter.Duration == expected)
                 );
             }
@@ -299,7 +295,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [InlineData(true, false)]
             [InlineData(false, true)]
             [InlineData(false, false)]
-            public async ThreadingTask PassesTheAppropriateStartTimeToTheStartTimeEntryViewModel(bool isInManualMode, bool useDefaultMode)
+            public void PassesTheAppropriateStartTimeToTheStartTimeEntryViewModel(bool isInManualMode, bool useDefaultMode)
             {
                 var date = DateTimeOffset.Now;
                 TimeService.CurrentDateTime.Returns(date);
@@ -311,7 +307,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var expected = isInManualMode == useDefaultMode
                     ? date.Subtract(TimeSpan.FromMinutes(DefaultTimeEntryDurationForManualModeInMinutes))
                     : date;
-                await NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
+                NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
                     Arg.Is<StartTimeEntryParameters>(parameter => parameter.StartTime == expected)
                 );
             }
@@ -345,6 +341,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 OnboardingStorage.Received().StartButtonWasTapped();
             }
 
+            #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             [Theory, LogIfTooSlow]
             [InlineData(true)]
             [InlineData(false)]
@@ -379,19 +376,20 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 TestScheduler.Start();
                 OnboardingStorage.Received().SetNavigatedAwayFromMainViewAfterStopButton();
             }
+            #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         public sealed class TheOpenSettingsCommand : MainViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async ThreadingTask NavigatesToTheSettingsViewModel()
+            public void NavigatesToTheSettingsViewModel()
             {
                 ViewModel.Initialize().Wait();
 
                 ViewModel.OpenSettings.Execute();
 
                 TestScheduler.Start();
-                await NavigationService.Received().Navigate<SettingsViewModel>();
+                NavigationService.Received().Navigate<SettingsViewModel>();
             }
 
             [Fact, LogIfTooSlow]
@@ -422,7 +420,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheOpenReportsCommand : MainViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async ThreadingTask NavigatesToTheReportsViewModel()
+            public void NavigatesToTheReportsViewModel()
             {
                 const long workspaceId = 10;
                 var workspace = Substitute.For<IThreadSafeWorkspace>();
@@ -434,7 +432,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.OpenReports.Execute();
 
                 TestScheduler.Start();
-                await NavigationService.Received().Navigate<ReportsViewModel>();
+                NavigationService.Received().Navigate<ReportsViewModel>();
             }
 
             [Fact, LogIfTooSlow]
@@ -473,14 +471,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheOpenSyncFailuresCommand : MainViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async ThreadingTask NavigatesToTheSyncFailuresViewModel()
+            public void NavigatesToTheSyncFailuresViewModel()
             {
                 ViewModel.Initialize().Wait();
 
                 ViewModel.OpenSyncFailures.Execute();
 
                 TestScheduler.Start();
-                await NavigationService.Received().Navigate<SyncFailuresViewModel>();
+                NavigationService.Received().Navigate<SyncFailuresViewModel>();
             }
         }
 
@@ -499,7 +497,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async ThreadingTask CallsTheStopMethodOnTheDataSource()
+            public void CallsTheStopMethodOnTheDataSource()
             {
                 var date = DateTimeOffset.UtcNow;
                 TimeService.CurrentDateTime.Returns(date);
@@ -507,16 +505,16 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.StopTimeEntry.Execute(TimeEntryStopOrigin.Deeplink);
 
                 TestScheduler.Start();
-                await InteractorFactory.Received().StopTimeEntry(date, TimeEntryStopOrigin.Deeplink).Execute();
+                InteractorFactory.Received().StopTimeEntry(date, TimeEntryStopOrigin.Deeplink).Execute();
             }
 
             [Fact, LogIfTooSlow]
-            public async ThreadingTask InitiatesPushSync()
+            public void InitiatesPushSync()
             {
                 ViewModel.StopTimeEntry.Execute(Arg.Any<TimeEntryStopOrigin>());
 
                 TestScheduler.Start();
-                await DataSource.SyncManager.Received().PushSync();
+                DataSource.SyncManager.Received().PushSync();
             }
 
             [Fact, LogIfTooSlow]
@@ -835,7 +833,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public sealed class WhenShowingTheRatingsView : MainViewModelTest
             {
                 [Fact, LogIfTooSlow]
-                public async void DoesNotShowTheRatingViewByDefault()
+                public async ThreadingTask DoesNotShowTheRatingViewByDefault()
                 {
                     await ViewModel.Initialize();
                     await NavigationService.DidNotReceive().ChangePresentation(
@@ -844,7 +842,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 }
 
                 [Fact, LogIfTooSlow]
-                public async void ShowsTheRatingView()
+                public async ThreadingTask ShowsTheRatingView()
                 {
                     var defaultRemoteConfiguration = new RatingViewConfiguration(5, RatingViewCriterion.Start);
                     RemoteConfigService
@@ -864,7 +862,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 }
 
                 [Fact, LogIfTooSlow]
-                public async void DoesNotShowTheRatingViewIfThereWasAnInteraction()
+                public async ThreadingTask DoesNotShowTheRatingViewIfThereWasAnInteraction()
                 {
                     var defaultRemoteConfiguration = new RatingViewConfiguration(5, RatingViewCriterion.Start);
                     RemoteConfigService
@@ -885,7 +883,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 }
 
                 [Fact, LogIfTooSlow]
-                public async void DoesNotShowTheRatingViewIfAfter24HourSnooze()
+                public async ThreadingTask DoesNotShowTheRatingViewIfAfter24HourSnooze()
                 {
                     var defaultRemoteConfiguration = new RatingViewConfiguration(5, RatingViewCriterion.Start);
                     RemoteConfigService
@@ -911,7 +909,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public sealed class InvokeIntentDonationService : MainViewModelTest
             {
                 [Fact, LogIfTooSlow]
-                public async void ShouldSetShortcutSuggestions()
+                public async ThreadingTask ShouldSetShortcutSuggestions()
                 {
                     await ViewModel.Initialize();
                     IntentDonationService.Received().SetDefaultShortcutSuggestions(Arg.Any<IWorkspace>());

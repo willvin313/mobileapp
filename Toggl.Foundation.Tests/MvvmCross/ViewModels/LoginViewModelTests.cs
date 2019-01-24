@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using FluentAssertions;
 using FsCheck;
 using Microsoft.Reactive.Testing;
@@ -116,7 +115,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [InlineData("invalid email address", "123")]
             [InlineData("invalid email address", "T0tally s4afe p4a$$")]
             [InlineData("person@company.com", "123")]
-            public async Task ReturnsFalseWhenIsLoading(string email, string password)
+            public void ReturnsFalseWhenIsLoading(string email, string password)
             {
                 var observer = TestScheduler.CreateObserver<bool>();
                 ViewModel.LoginEnabled.Subscribe(observer);
@@ -187,7 +186,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 }
 
                 [Fact, LogIfTooSlow]
-                public async Task StartsSyncing()
+                public void StartsSyncing()
                 {
                     ViewModel.Login();
 
@@ -505,18 +504,18 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task DoesNotCallPasswordManagerWhenThePasswordManagerIsNotAvailable()
+            public void DoesNotCallPasswordManagerWhenThePasswordManagerIsNotAvailable()
             {
                 PasswordManagerService.IsAvailable.Returns(false);
 
                 ViewModel.StartPasswordManager.Execute();
 
                 TestScheduler.Start();
-                await PasswordManagerService.DidNotReceive().GetLoginInformation();
+                PasswordManagerService.DidNotReceive().GetLoginInformation();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task CallsThePasswordManagerServiceWhenTheServiceIsAvailable()
+            public void CallsThePasswordManagerServiceWhenTheServiceIsAvailable()
             {
                 var observable = Observable.Return(new PasswordManagerResult(ValidEmail, ValidPassword));
                 PasswordManagerService.GetLoginInformation().Returns(observable);
@@ -524,11 +523,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.StartPasswordManager.Execute();
 
                 TestScheduler.Start();
-                await PasswordManagerService.Received().GetLoginInformation();
+                PasswordManagerService.Received().GetLoginInformation();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task CallsTheLoginCommandWhenValidCredentialsAreProvided()
+            public void CallsTheLoginCommandWhenValidCredentialsAreProvided()
             {
                 var scheduler = new TestScheduler();
                 var observable = arrangeCallToPasswordManagerWithValidCredentials();
@@ -536,11 +535,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.StartPasswordManager.Execute();
 
                 TestScheduler.Start();
-                await UserAccessManager.Received().Login(Arg.Any<Email>(), Arg.Any<Password>());
+                UserAccessManager.Received().Login(Arg.Any<Email>(), Arg.Any<Password>());
             }
 
             [Fact, LogIfTooSlow]
-            public async Task SetsTheEmailFieldWhenValidCredentialsAreProvided()
+            public void SetsTheEmailFieldWhenValidCredentialsAreProvided()
             {
                 var scheduler = new TestScheduler();
                 var observable = arrangeCallToPasswordManagerWithValidCredentials();
@@ -557,7 +556,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task SetsTheEmailFieldWhenInvalidCredentialsAreProvided()
+            public void SetsTheEmailFieldWhenInvalidCredentialsAreProvided()
             {
                 arrangeCallToPasswordManagerWithInvalidCredentials();
                 var observer = TestScheduler.CreateObserver<string>();
@@ -573,7 +572,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task SetsThePasswordFieldWhenValidCredentialsAreProvided()
+            public void SetsThePasswordFieldWhenValidCredentialsAreProvided()
             {
                 arrangeCallToPasswordManagerWithValidCredentials();
                 var observer = TestScheduler.CreateObserver<string>();
@@ -589,7 +588,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task DoesNotSetThePasswordFieldWhenInvalidCredentialsAreProvided()
+            public void DoesNotSetThePasswordFieldWhenInvalidCredentialsAreProvided()
             {
                 arrangeCallToPasswordManagerWithInvalidCredentials();
                 var observer = TestScheduler.CreateObserver<string>();
@@ -604,7 +603,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task DoesNothingWhenValidCredentialsAreNotProvided()
+            public void DoesNothingWhenValidCredentialsAreNotProvided()
             {
                 var scheduler = new TestScheduler();
                 var observable = arrangeCallToPasswordManagerWithInvalidCredentials();
@@ -612,11 +611,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.StartPasswordManager.Execute();
 
                 TestScheduler.Start();
-                await UserAccessManager.DidNotReceive().Login(Arg.Any<Email>(), Arg.Any<Password>());
+                UserAccessManager.DidNotReceive().Login(Arg.Any<Email>(), Arg.Any<Password>());
             }
 
             [Fact, LogIfTooSlow]
-            public async Task TracksThePasswordManagerButtonClicked()
+            public void TracksThePasswordManagerButtonClicked()
             {
                 PasswordManagerService.IsAvailable.Returns(true);
                 var observable = arrangeCallToPasswordManagerWithInvalidCredentials();
@@ -630,7 +629,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task TracksThePasswordManagerContainsValidEmail()
+            public void TracksThePasswordManagerContainsValidEmail()
             {
                 PasswordManagerService.IsAvailable.Returns(true);
                 var loginInfo = new PasswordManagerResult(ValidEmail, InvalidPassword);
@@ -646,7 +645,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task TracksThePasswordManagerContainsValidPassword()
+            public void TracksThePasswordManagerContainsValidPassword()
             {
                 PasswordManagerService.IsAvailable.Returns(true);
                 var observable = arrangeCallToPasswordManagerWithValidCredentials();

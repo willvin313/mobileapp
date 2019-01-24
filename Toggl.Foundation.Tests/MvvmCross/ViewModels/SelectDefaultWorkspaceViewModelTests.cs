@@ -82,6 +82,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
         public sealed class SelectWorkspaceAction : SelectDefaultWorkspaceViewModelTest
         {
+            #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             [Fact, LogIfTooSlow]
             public async Task SetsTheWorkspaceAsDefault()
             {
@@ -104,16 +105,17 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 InteractorFactory.Received().SetDefaultWorkspace(selectedWorkspace.WorkspaceId);
                 await setDefaultWorkspaceInteractor.Received().Execute();
             }
+            #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
             [Fact, LogIfTooSlow]
-            public async Task ClosesTheViewModel()
+            public void ClosesTheViewModel()
             {
                 var selectedWorkspace = new SelectableWorkspaceViewModel(new MockWorkspace(), false);
 
                 ViewModel.SelectWorkspace.Execute(selectedWorkspace);
                 TestScheduler.Start();
 
-                await NavigationService.Received().Close(ViewModel, Unit.Default);
+                NavigationService.Received().Close(ViewModel, Unit.Default);
             }
         }
     }

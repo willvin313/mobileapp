@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
@@ -96,7 +95,7 @@ namespace Toggl.Foundation.Tests.Interactors.TimeEntry
         public sealed class WhenThereIsARunningTimeEntry : BaseInteractorTests
         {
             [Fact, LogIfTooSlow]
-            public async Task ReturnsATickingObservable()
+            public void ReturnsATickingObservable()
             {
                 var currentDateTimeSubject = new Subject<DateTimeOffset>();
                 var timeService = Substitute.For<ITimeService>();

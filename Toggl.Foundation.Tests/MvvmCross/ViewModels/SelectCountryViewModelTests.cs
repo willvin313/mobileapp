@@ -95,6 +95,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.Prepare(10);
             }
 
+            #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             [Fact, LogIfTooSlow]
             public async Task ClosesTheViewModelWithSelectedCountryCode()
             {
@@ -113,6 +114,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 await NavigationService.Received()
                     .Close(Arg.Is(ViewModel), country.Id);
             }
+            #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         public sealed class TheTextProperty : SelectCountryViewModelTest

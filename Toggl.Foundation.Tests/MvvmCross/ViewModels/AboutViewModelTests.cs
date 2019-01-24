@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Xunit;
-using System.Reactive.Linq;
 using Toggl.Foundation.Tests.Generators;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
@@ -53,7 +51,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheTermsOfServiceCommand : AboutViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task OpensTheBrowserInTheTermsOfServicePage()
+            public void OpensTheBrowserInTheTermsOfServicePage()
             {
                 ViewModel.OpenTermsOfServiceView.Execute();
 
@@ -63,7 +61,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task OpensTheBrowserWithTheAppropriateTitle()
+            public void OpensTheBrowserWithTheAppropriateTitle()
             {
                 ViewModel.OpenTermsOfServiceView.Execute();
 
@@ -76,7 +74,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class ThePrivacyPolicyCommand : AboutViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task OpensTheBrowserInThePrivacyPolicyPage()
+            public void OpensTheBrowserInThePrivacyPolicyPage()
             {
                 ViewModel.OpenPrivacyPolicyView.Execute();
 
@@ -86,7 +84,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task OpensTheBrowserWithTheAppropriateTitle()
+            public void OpensTheBrowserWithTheAppropriateTitle()
             {
                 ViewModel.OpenPrivacyPolicyView.Execute();
 

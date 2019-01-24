@@ -50,7 +50,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [InlineData(CalendarNotificationsOption.FifteenMinutes, true, 15)]
             [InlineData(CalendarNotificationsOption.ThirtyMinutes, true, 30)]
             [InlineData(CalendarNotificationsOption.OneHour, true, 60)]
-            public async Task SavesTheSelectedOption(CalendarNotificationsOption option, bool enabled, int minutes)
+            public void SavesTheSelectedOption(CalendarNotificationsOption option, bool enabled, int minutes)
             {
                 ViewModel.SelectOption.Execute(option);
 
@@ -62,7 +62,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 else
                     UserPreferences.DidNotReceive().SetTimeSpanBeforeCalendarNotifications(Arg.Any<TimeSpan>());
 
-                await NavigationService.Received().Close(Arg.Any<UpcomingEventsNotificationSettingsViewModel>(), Unit.Default);
+                NavigationService.Received().Close(Arg.Any<UpcomingEventsNotificationSettingsViewModel>(), Unit.Default);
             }
         }
     }

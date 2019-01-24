@@ -2,15 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reflection.Metadata;
-using System.Threading;
 using FluentAssertions;
 using FsCheck;
 using FsCheck.Xunit;
-using Microsoft.Reactive.Testing;
 using NSubstitute;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
@@ -24,7 +20,6 @@ using Toggl.Foundation.Tests.Generators;
 using Toggl.Foundation.Tests.Mocks;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
-using Toggl.PrimeRadiant.Models;
 using Xunit;
 using ThreadingTask = System.Threading.Tasks.Task;
 
@@ -324,7 +319,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact]
-            public async ThreadingTask ShowsTheUndoUI()
+            public void ShowsTheUndoUI()
             {
                 viewModel.DelayDeleteTimeEntry.Execute(timeEntry);
                 SchedulerProvider.TestScheduler.Start();
@@ -344,7 +339,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact]
-            public async ThreadingTask HidesTheUndoUIAfterSeveralSeconds()
+            public void HidesTheUndoUIAfterSeveralSeconds()
             {
                 viewModel.DelayDeleteTimeEntry.Execute(timeEntry);
                 SchedulerProvider.TestScheduler.Start();
@@ -354,7 +349,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact]
-            public async ThreadingTask DoesNotHideTheUndoUIIfAnotherItemWasDeletedWhileWaiting()
+            public void DoesNotHideTheUndoUIIfAnotherItemWasDeletedWhileWaiting()
             {
                 var timeEntryA = new TimeEntryViewModel(new MockTimeEntry { Id = 1, Duration = 123, TagIds = Array.Empty<long>(), Workspace = new MockWorkspace() }, DurationFormat.Classic);
                 var timeEntryB = new TimeEntryViewModel(new MockTimeEntry { Id = 1, Duration = 123, TagIds = Array.Empty<long>(), Workspace = new MockWorkspace() }, DurationFormat.Classic);
@@ -378,7 +373,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observableB = viewModel.DelayDeleteTimeEntry.Execute(timeEntryB);
                 await observableA;
 
-                InteractorFactory.Received().DeleteTimeEntry(Arg.Is(timeEntryA.Id)).Execute();
+                await InteractorFactory.Received().DeleteTimeEntry(Arg.Is(timeEntryA.Id)).Execute();
             }
         }
 
@@ -395,7 +390,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact]
-            public async ThreadingTask DoesNotDeleteTheTimeEntryIfTheUndoIsInitiatedBeforeTheUndoPeriodIsOver()
+            public void DoesNotDeleteTheTimeEntryIfTheUndoIsInitiatedBeforeTheUndoPeriodIsOver()
             {
                 viewModel.DelayDeleteTimeEntry.Execute(timeEntry);
                 SchedulerProvider.TestScheduler.AdvanceBy(Constants.UndoTime.Ticks / 2);
@@ -406,7 +401,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact]
-            public async ThreadingTask DeletesTheTimeEntryIfTheUndoIsInitiatedAfterTheUndoPeriodIsOver()
+            public void DeletesTheTimeEntryIfTheUndoIsInitiatedAfterTheUndoPeriodIsOver()
             {
                 viewModel.DelayDeleteTimeEntry.Execute(timeEntry);
                 SchedulerProvider.TestScheduler.AdvanceBy(Constants.UndoTime.Ticks);
@@ -416,7 +411,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact]
-            public async ThreadingTask HidesTheUndoUI()
+            public void HidesTheUndoUI()
             {
                 viewModel.DelayDeleteTimeEntry.Execute(timeEntry);
                 SchedulerProvider.TestScheduler.AdvanceBy(Constants.UndoTime.Ticks / 2);

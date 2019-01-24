@@ -234,14 +234,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheCloseButtonTappedAction : SendFeedbackViewModelTest
         {
             [Fact]
-            public async Task SimplyClosesTheViewWhenTextIsEmpty()
+            public void SimplyClosesTheViewWhenTextIsEmpty()
             {
                 ViewModel.FeedbackText.OnNext(string.Empty);
 
                 ViewModel.Close.Execute();
 
                 TestScheduler.Start();
-                await NavigationService.Received().Close(ViewModel, false);
+                NavigationService.Received().Close(ViewModel, false);
             }
 
             [Property]
@@ -303,7 +303,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheSendButtonTappedAction : SendFeedbackViewModelTest
         {
             [Fact]
-            public async Task SendsFeedback()
+            public void SendsFeedback()
             {
                 ViewModel.FeedbackText.OnNext("feedback");
                 InteractorFactory.SendFeedback(Arg.Any<string>())
@@ -313,7 +313,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.Send.Execute();
 
                 TestScheduler.Start();
-                await NavigationService.Received().Close(ViewModel, true);
+                NavigationService.Received().Close(ViewModel, true);
             }
 
             [Fact]

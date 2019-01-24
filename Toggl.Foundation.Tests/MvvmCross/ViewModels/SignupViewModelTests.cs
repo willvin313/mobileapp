@@ -6,7 +6,6 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FsCheck;
-using FsCheck.Xunit;
 using Microsoft.Reactive.Testing;
 using NSubstitute;
 using NUnit.Framework;
@@ -170,6 +169,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
         public sealed class ThePickCountryMethod : SignupViewModelTest
         {
+            #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             [Fact, LogIfTooSlow]
             public async Task NavigatesToSelectCountryViewModelPassingNullIfLocationApiFailed()
             {
@@ -242,6 +242,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     ReactiveTest.OnNext(3, false)
                 );
             }
+            #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         public sealed class TheGoogleSignupMethod : SignupViewModelTest
@@ -253,12 +254,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task NavigatesToTheTermsOfServiceViewModel()
+            public void NavigatesToTheTermsOfServiceViewModel()
             {
                 ViewModel.GoogleSignup.Execute();
 
                 TestScheduler.Start();
-                await NavigationService.Received().Navigate<TermsOfServiceViewModel, bool>();
+                NavigationService.Received().Navigate<TermsOfServiceViewModel, bool>();
             }
 
             [Fact, LogIfTooSlow]
@@ -550,6 +551,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
         public sealed class TheShakeFlags : SignupViewModelTest
         {
+            #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             [Fact, LogIfTooSlow]
             public async Task ReturnsNothingWhenEmailPasswordAndCountryAreValid()
             {
@@ -600,6 +602,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     ReactiveTest.OnNext(1, expectedShakeTargets)
                 );
             }
+            #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         public sealed class TheSignupMethod : SignupViewModelTest
@@ -615,12 +618,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task NavigatesToTheTermsOfServiceViewModel()
+            public void NavigatesToTheTermsOfServiceViewModel()
             {
                 ViewModel.Signup.Execute();
 
                 TestScheduler.Start();
-                await NavigationService.Received().Navigate<TermsOfServiceViewModel, bool>();
+                NavigationService.Received().Navigate<TermsOfServiceViewModel, bool>();
             }
 
             [Fact, LogIfTooSlow]

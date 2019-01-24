@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.MvvmCross.ViewModels;
-using Toggl.Foundation.Tests.Extensions;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Foundation.Tests.TestExtensions;
 using Toggl.Multivac;
@@ -157,18 +156,18 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task CallsTheUserAccessManagerWhenThePasswordIsValid()
+            public void CallsTheUserAccessManagerWhenThePasswordIsValid()
             {
                 ViewModel.Password.OnNext(ValidPassword.ToString());
 
                 ViewModel.Done.Execute();
 
                 TestScheduler.Start();
-                await UserAccessManager.Received().RefreshToken(Arg.Is(ValidPassword));
+                UserAccessManager.Received().RefreshToken(Arg.Is(ValidPassword));
             }
 
             [Fact, LogIfTooSlow]
-            public async Task NavigatesToTheMainViewModelModelWhenTheTokenRefreshSucceeds()
+            public void NavigatesToTheMainViewModelModelWhenTheTokenRefreshSucceeds()
             {
                 ViewModel.Password.OnNext(ValidPassword.ToString());
                 UserAccessManager.RefreshToken(Arg.Any<Password>())
@@ -177,9 +176,10 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.Done.Execute();
 
                 TestScheduler.Start();
-                await NavigationService.Received().ForkNavigate<MainTabBarViewModel, MainViewModel>();
+                NavigationService.Received().ForkNavigate<MainTabBarViewModel, MainViewModel>();
             }
 
+            #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             [Fact, LogIfTooSlow]
             public async Task StopsTheViewModelLoadStateWhenItCompletes()
             {
@@ -195,6 +195,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 isLoadingObserver.LastEmittedValue().Should().BeFalse();
             }
+            #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
             [Fact, LogIfTooSlow]
             public void StopsTheViewModelLoadStateWhenItErrors()
@@ -212,7 +213,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task DoesNotNavigateWhenTheLoginFails()
+            public void DoesNotNavigateWhenTheLoginFails()
             {
                 ViewModel.Password.OnNext(ValidPassword.ToString());
                 UserAccessManager.RefreshToken(Arg.Any<Password>())
@@ -221,7 +222,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.Done.Execute();
 
                 TestScheduler.Start();
-                await NavigationService.DidNotReceive().Navigate<MainViewModel>();
+                NavigationService.DidNotReceive().Navigate<MainViewModel>();
             }
         }
 
@@ -236,6 +237,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 await ViewModel.Initialize();
             }
 
+            #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             [Fact, LogIfTooSlow]
             public async Task LogsTheUserOut()
             {
@@ -302,6 +304,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 TestScheduler.Start();
                 AnalyticsService.Logout.Received().Track(LogoutSource.TokenReset);
             }
+            #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
     }
 }

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
@@ -40,7 +37,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheEnableAccessAction : CalendarPermissionDeniedViewModelTest
         {
             [Fact]
-            public async Task OpensAppSettings()
+            public void OpensAppSettings()
             {
                 ViewModel.EnableAccess.Execute();
 

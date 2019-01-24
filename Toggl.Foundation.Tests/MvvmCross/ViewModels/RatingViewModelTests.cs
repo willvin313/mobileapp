@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Reactive.Testing;
 using NSubstitute;
@@ -9,7 +8,6 @@ using NUnit.Framework;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.MvvmCross.ViewModels.Hints;
-using Toggl.Foundation.Services;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.PrimeRadiant;
 using Xunit;
@@ -205,7 +203,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 protected abstract IAnalyticsEvent ExpectedEvent { get; }
 
                 [Fact, LogIfTooSlow]
-                public async Task HidesTheViewModel()
+                public void HidesTheViewModel()
                 {
                     ViewModel.PerformMainAction.Execute();
                     TestScheduler.Start();
@@ -221,7 +219,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 }
 
                 [Fact, LogIfTooSlow]
-                public async Task PerformsTheCorrectAction()
+                public void PerformsTheCorrectAction()
                 {
                     ViewModel.PerformMainAction.Execute();
                     TestScheduler.Start();
@@ -230,7 +228,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 }
 
                 [Fact, LogIfTooSlow]
-                public async Task TracksTheAppropriateEventWithTheExpectedParameter()
+                public void TracksTheAppropriateEventWithTheExpectedParameter()
                 {
                     ViewModel.PerformMainAction.Execute();
                     TestScheduler.Start();
@@ -242,7 +240,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 }
 
                 [Fact, LogIfTooSlow]
-                public async Task TracksTheCorrectEvent()
+                public void TracksTheCorrectEvent()
                 {
                     ViewModel.PerformMainAction.Execute();
                     TestScheduler.Start();
@@ -251,7 +249,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 }
 
                 [Fact, LogIfTooSlow]
-                public async Task StoresTheAppropriateRatingViewOutcomeAndTime()
+                public void StoresTheAppropriateRatingViewOutcomeAndTime()
                 {
                     ViewModel.PerformMainAction.Execute();
                     TestScheduler.Start();
@@ -292,7 +290,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public sealed class WhenImpressionWasntLeft : RatingViewModelTest
             {
                 [Fact, LogIfTooSlow]
-                public async Task DoesNothing()
+                public void DoesNothing()
                 {
                     ViewModel.PerformMainAction.Execute();
                     TestScheduler.Start();
@@ -360,7 +358,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 }
 
                 [Fact, LogIfTooSlow]
-                public async Task TracksTheCorrectEvent()
+                public void TracksTheCorrectEvent()
                 {
                     ViewModel.Dismiss();
 

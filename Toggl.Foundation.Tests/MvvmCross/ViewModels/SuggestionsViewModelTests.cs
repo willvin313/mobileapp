@@ -2,22 +2,19 @@
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Reactive.Testing;
 using NSubstitute;
 using Toggl.Foundation.Interactors;
+using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Suggestions;
 using Toggl.Foundation.Tests.Generators;
+using Toggl.Foundation.Tests.TestExtensions;
 using Xunit;
 using TimeEntry = Toggl.Foundation.Models.TimeEntry;
-using Toggl.Foundation.Models.Interfaces;
-using Toggl.Foundation.DataSources;
-using System.Reactive.Subjects;
-using Toggl.Foundation.MvvmCross.Extensions;
-using Toggl.Multivac.Extensions;
-using Toggl.Foundation.Tests.TestExtensions;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 {
@@ -219,6 +216,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 TimeService.CurrentDateTime.Returns(DateTimeOffset.Now);
             }
 
+            #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             [Fact, LogIfTooSlow]
             public async Task CallsTheCreateTimeEntryInteractor()
             {
@@ -244,6 +242,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 await mockedInteractor.Received().Execute();
             }
+            #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
             [Fact, LogIfTooSlow]
             public async Task CanBeExecutedForTheSecondTimeIfStartingTheFirstOneFinishesSuccessfully()

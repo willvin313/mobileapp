@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reactive.Linq;
 using FluentAssertions;
 using NSubstitute;
 using Toggl.Foundation.MvvmCross.ViewModels;
@@ -41,7 +40,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             private const string termsOfServiceUrl = "https://toggl.com/legal/terms/";
 
             [Fact, LogIfTooSlow]
-            public async void OpensTermsOfService()
+            public void OpensTermsOfService()
             {
                 ViewModel.ViewTermsOfService.Execute();
                 TestScheduler.Start();
@@ -55,7 +54,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             private const string privacyPolicyUrl = "https://toggl.com/legal/privacy/";
 
             [Fact, LogIfTooSlow]
-            public async void OpensPrivacyPolicy()
+            public void OpensPrivacyPolicy()
             {
                 ViewModel.ViewPrivacyPolicy.Execute();
                 TestScheduler.Start();

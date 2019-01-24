@@ -1,18 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
-using FsCheck.Xunit;
 using NSubstitute;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.Analytics;
-using Toggl.Foundation.Diagnostics;
-using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Reports;
 using Toggl.Foundation.Tests.Generators;
@@ -22,8 +17,6 @@ using Toggl.Multivac.Extensions;
 using Xunit;
 using Microsoft.Reactive.Testing;
 using Toggl.Foundation.MvvmCross.ViewModels.Reports;
-using Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar;
-using Toggl.Foundation.Tests.Extensions;
 using Toggl.Foundation.Tests.TestExtensions;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
@@ -521,6 +514,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
         public sealed class TheSelectWorkspaceCommand : ReportsViewModelTest
         {
+            #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             [Fact, LogIfTooSlow]
             public async Task ShouldTriggerAReportReload()
             {
@@ -593,6 +587,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 await ReportsProvider.DidNotReceive().GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(),
                     Arg.Any<DateTimeOffset>());
             }
+            #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         public sealed class TheStartDateAndEndDateObservables : ReportsViewModelTest
@@ -640,6 +635,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 isEnabledObserver.SingleEmittedValue().Should().BeFalse();
             }
 
+            #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             [Fact]
             public async Task StaysDisabledWhenSwitchingToAFreeWorkspace()
             {
@@ -668,6 +664,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 isEnabledObserver.LastEmittedValue().Should().BeTrue();
             }
+            #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
             private void prepareWorkspace(bool isProEnabled)
             {
@@ -710,8 +707,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 }
                 TestScheduler.Start();
 
-                ReportsProvider.Received(numberOfAppearances).GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(),
-                    Arg.Any<DateTimeOffset>());
+                await ReportsProvider
+                    .Received(numberOfAppearances)
+                    .GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>());
             }
         }
     }

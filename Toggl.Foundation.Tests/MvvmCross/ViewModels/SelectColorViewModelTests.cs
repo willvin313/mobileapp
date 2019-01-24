@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using FluentAssertions;
 using MvvmCross.UI;
 using NSubstitute;
@@ -10,8 +9,6 @@ using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Xunit;
 using System.Reactive.Linq;
-using Toggl.Foundation.MvvmCross;
-using Toggl.Foundation.Services;
 using Toggl.Foundation.Tests.Generators;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
@@ -66,7 +63,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ReturnsTheSelectedColorIfCustomColorsAreNotAllowed()
+            public void ReturnsTheSelectedColorIfCustomColorsAreNotAllowed()
             {
                 var initiallySelectedColor = Color.DefaultProjectColors.First();
                 var colorToSelect = Color.DefaultProjectColors.Last();
@@ -79,12 +76,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 ViewModel.SelectColor.Execute(colorToSelect);
 
-                await NavigationService.Received()
+                NavigationService.Received()
                     .Close(Arg.Is(ViewModel), Arg.Is<MvxColor>(c => c.ARGB == colorToSelect.ARGB));
             }
 
             [Fact, LogIfTooSlow]
-            public async Task DoesNotReturnIfCustomColorsAreAllowed()
+            public void DoesNotReturnIfCustomColorsAreAllowed()
             {
                 var initiallySelectedColor = Color.DefaultProjectColors.First();
                 var colorToSelect = Color.DefaultProjectColors.Last();
@@ -97,7 +94,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 ViewModel.SelectColor.Execute(colorToSelect);
 
-                await NavigationService.DidNotReceive()
+                NavigationService.DidNotReceive()
                     .Close(Arg.Is(ViewModel), Arg.Any<MvxColor>());
             }
         }
@@ -190,16 +187,16 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public class TheCloseCommand : SelectColorViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task ClosesTheViewModel()
+            public void ClosesTheViewModel()
             {
                 ViewModel.Close.Execute();
                 TestScheduler.Start();
 
-                await NavigationService.Received().Close(Arg.Is(ViewModel), Arg.Any<MvxColor>());
+                NavigationService.Received().Close(Arg.Is(ViewModel), Arg.Any<MvxColor>());
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ReturnsTheDefaultParameter()
+            public void ReturnsTheDefaultParameter()
             {
                 var color = Color.DefaultProjectColors.Last();
                 var parameters = ColorParameters.Create(color, true);
@@ -215,16 +212,16 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheSaveCommand : SelectColorViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task ClosesTheViewModel()
+            public void ClosesTheViewModel()
             {
                 ViewModel.Close.Execute();
                 TestScheduler.Start();
 
-                await NavigationService.Received().Close(Arg.Is(ViewModel), Arg.Any<MvxColor>());
+                NavigationService.Received().Close(Arg.Is(ViewModel), Arg.Any<MvxColor>());
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ReturnsTheSelectedColor()
+            public void ReturnsTheSelectedColor()
             {
                 var parameters = ColorParameters.Create(MvxColors.Azure, true);
                 ViewModel.Prepare(parameters);
@@ -234,7 +231,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.Save.Execute();
                 TestScheduler.Start();
 
-                await NavigationService.Received()
+                NavigationService.Received()
                     .Close(Arg.Is(ViewModel), Arg.Is<MvxColor>(c => c.ARGB == expected.ARGB));
             }
         }

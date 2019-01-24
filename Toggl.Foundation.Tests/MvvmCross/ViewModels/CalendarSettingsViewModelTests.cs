@@ -66,7 +66,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheRequestAccessAction : CalendarSettingsViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task OpensAppSettings()
+            public void OpensAppSettings()
             {
                 ViewModel.RequestAccess.Execute();
 
@@ -113,7 +113,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheSelectCalendarAction : CalendarSettingsViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task StoresTheEnabledCalendarsInUserPreferences()
+            public void StoresTheEnabledCalendarsInUserPreferences()
             {
                 var firstCalendar = new UserCalendar("1", "1", "1");
                 var secondCalendar = new UserCalendar("2", "2", "2");

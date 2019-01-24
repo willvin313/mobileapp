@@ -5,7 +5,6 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
-using NSubstitute.Exceptions;
 using Toggl.Foundation.DataSources.Interfaces;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.Sync.States;
@@ -59,7 +58,7 @@ namespace Toggl.Foundation.Tests.Sync.States.Pull
 
             await state.Start(fetch).SingleAsync();
 
-            dataSource.Received().Delete(Arg.Is<long>(id => runningTimeEntry.Id == id));
+            await dataSource.Received().Delete(Arg.Is<long>(id => runningTimeEntry.Id == id));
         }
 
         [Theory, LogIfTooSlow]
@@ -82,7 +81,7 @@ namespace Toggl.Foundation.Tests.Sync.States.Pull
 
             await state.Start(fetch).SingleAsync();
 
-            dataSource.DidNotReceive().Delete(Arg.Any<long>());
+            await dataSource.DidNotReceive().Delete(Arg.Any<long>());
         }
 
         [Theory, LogIfTooSlow]
@@ -106,7 +105,7 @@ namespace Toggl.Foundation.Tests.Sync.States.Pull
 
             await state.Start(fetch).SingleAsync();
 
-            dataSource.DidNotReceive().Delete(Arg.Any<long>());
+            await dataSource.DidNotReceive().Delete(Arg.Any<long>());
         }
 
         private void configureDataSource(IEnumerable<IThreadSafeTimeEntry> timeEntries)

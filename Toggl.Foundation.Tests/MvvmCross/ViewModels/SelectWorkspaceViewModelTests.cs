@@ -99,6 +99,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
         public sealed class TheCloseAction : SelectWorkspaceViewModelTest
         {
+            #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             [Fact, LogIfTooSlow]
             public async Task ClosesTheViewModel()
             {
@@ -122,6 +123,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 await NavigationService.Received()
                     .Close(Arg.Is(ViewModel), expectedId);
             }
+            #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         public sealed class TheSelectWorkspaceAction : SelectWorkspaceViewModelTest
@@ -129,18 +131,18 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             private readonly IThreadSafeWorkspace Workspace = Substitute.For<IThreadSafeWorkspace>();
 
             [Fact, LogIfTooSlow]
-            public async Task ClosesTheViewModel()
+            public void ClosesTheViewModel()
             {
                 var selectableWorkspace = new SelectableWorkspaceViewModel(Workspace, true);
 
                 ViewModel.SelectWorkspace.Execute(selectableWorkspace);
 
-                await NavigationService.Received()
+                NavigationService.Received()
                     .Close(Arg.Is(ViewModel), Arg.Any<long>());
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ReturnsTheSelectedWorkspaceId()
+            public void ReturnsTheSelectedWorkspaceId()
             {
                 const long expectedId = 10;
                 Workspace.Id.Returns(expectedId);
@@ -149,7 +151,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 ViewModel.SelectWorkspace.Execute(selectableWorkspace);
 
-                await NavigationService.Received().Close(
+                NavigationService.Received().Close(
                     Arg.Is(ViewModel),
                     Arg.Is(expectedId)
                 );

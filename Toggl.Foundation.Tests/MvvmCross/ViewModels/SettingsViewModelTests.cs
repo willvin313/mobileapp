@@ -238,7 +238,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheTryLogoutMethod : SettingsViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task EmitsOneIsLoggingOutEvent()
+            public void EmitsOneIsLoggingOutEvent()
             {
                 var observer = TestScheduler.CreateObserver<Unit>();
                 ViewModel.LoggingOut.Subscribe(observer);
@@ -252,18 +252,18 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task CallsLogoutOnTheDataSource()
+            public void CallsLogoutOnTheDataSource()
             {
                 doNotShowConfirmationDialog();
 
                 ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
 
-                await UserAccessManager.Received().Logout();
+                UserAccessManager.Received().Logout();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ResetsUserPreferences()
+            public void ResetsUserPreferences()
             {
                 doNotShowConfirmationDialog();
 
@@ -274,40 +274,40 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task NavigatesToTheLoginScreen()
+            public void NavigatesToTheLoginScreen()
             {
                 doNotShowConfirmationDialog();
 
                 ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
 
-                await NavigationService.Received().Navigate<LoginViewModel>();
+                NavigationService.Received().Navigate<LoginViewModel>();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ChecksIfThereAreUnsyncedDataWhenTheSyncProcessFinishes()
+            public void ChecksIfThereAreUnsyncedDataWhenTheSyncProcessFinishes()
             {
                 ProgressSubject.OnNext(SyncProgress.Synced);
 
                 ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
 
-                await DataSource.Received().HasUnsyncedData();
+                DataSource.Received().HasUnsyncedData();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task DoesNotShowConfirmationDialogWhenTheAppIsInSync()
+            public void DoesNotShowConfirmationDialogWhenTheAppIsInSync()
             {
                 doNotShowConfirmationDialog();
 
                 ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
 
-                await DialogService.DidNotReceiveWithAnyArgs().Confirm("", "", "", "");
+                DialogService.DidNotReceiveWithAnyArgs().Confirm("", "", "", "");
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ShowsConfirmationDialogWhenThereIsNothingToPushButSyncIsRunning()
+            public void ShowsConfirmationDialogWhenThereIsNothingToPushButSyncIsRunning()
             {
                 DataSource.HasUnsyncedData().Returns(Observable.Return(false));
                 ProgressSubject.OnNext(SyncProgress.Syncing);
@@ -315,11 +315,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
 
-                await DialogService.ReceivedWithAnyArgs().Confirm("", "", "", "");
+                DialogService.ReceivedWithAnyArgs().Confirm("", "", "", "");
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ShowsConfirmationDialogWhenThereIsSomethingToPushButSyncIsNotRunning()
+            public void ShowsConfirmationDialogWhenThereIsSomethingToPushButSyncIsNotRunning()
             {
                 DataSource.HasUnsyncedData().Returns(Observable.Return(true));
                 ProgressSubject.OnNext(SyncProgress.Syncing);
@@ -327,11 +327,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
 
-                await DialogService.ReceivedWithAnyArgs().Confirm("", "", "", "");
+                DialogService.ReceivedWithAnyArgs().Confirm("", "", "", "");
             }
 
             [Fact, LogIfTooSlow]
-            public async Task DoesNotProceedWithLogoutWhenUserClicksCancelButtonInTheDialog()
+            public void DoesNotProceedWithLogoutWhenUserClicksCancelButtonInTheDialog()
             {
                 ProgressSubject.OnNext(SyncProgress.Syncing);
                 DialogService.Confirm(
@@ -343,12 +343,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
 
-                await UserAccessManager.DidNotReceive().Logout();
-                await NavigationService.DidNotReceive().Navigate<LoginViewModel>();
+                UserAccessManager.DidNotReceive().Logout();
+                NavigationService.DidNotReceive().Navigate<LoginViewModel>();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ProceedsWithLogoutWhenUserClicksSignOutButtonInTheDialog()
+            public void ProceedsWithLogoutWhenUserClicksSignOutButtonInTheDialog()
             {
                 ProgressSubject.OnNext(SyncProgress.Syncing);
                 DialogService.Confirm(
@@ -360,12 +360,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
 
-                await UserAccessManager.Received().Logout();
-                await NavigationService.Received().Navigate<LoginViewModel>();
+                UserAccessManager.Received().Logout();
+                NavigationService.Received().Navigate<LoginViewModel>();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task TracksLogoutEvent()
+            public void TracksLogoutEvent()
             {
                 doNotShowConfirmationDialog();
 
@@ -382,7 +382,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ClearsPrivateSharedStorage()
+            public void ClearsPrivateSharedStorage()
             {
                 doNotShowConfirmationDialog();
 
@@ -393,7 +393,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ClearsDonatedIntents()
+            public void ClearsDonatedIntents()
             {
                 doNotShowConfirmationDialog();
 
@@ -434,17 +434,17 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task CallsTheSelectWorkspaceViewModel()
+            public void CallsTheSelectWorkspaceViewModel()
             {
                 ViewModel.PickDefaultWorkspace.Execute();
                 TestScheduler.Start();
 
-                await NavigationService.Received()
+                NavigationService.Received()
                     .Navigate<SelectWorkspaceViewModel, long, long>(Arg.Any<long>());
             }
 
             [Fact, LogIfTooSlow]
-            public async Task UpdatesTheUserWithTheReceivedWorspace()
+            public void UpdatesTheUserWithTheReceivedWorspace()
             {
                 NavigationService
                     .Navigate<SelectWorkspaceViewModel, long, long>(Arg.Any<long>())
@@ -453,14 +453,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.PickDefaultWorkspace.Execute();
                 TestScheduler.Start();
 
-                await InteractorFactory
+                InteractorFactory
                     .Received()
                     .UpdateDefaultWorkspace(Arg.Is(workspaceId))
                     .Execute();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task StartsTheSyncAlgorithm()
+            public void StartsTheSyncAlgorithm()
             {
                 NavigationService
                     .Navigate<SelectWorkspaceViewModel, long, long>(Arg.Any<long>())
@@ -469,7 +469,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.PickDefaultWorkspace.Execute();
                 TestScheduler.Start();
 
-                await DataSource.SyncManager.Received().PushSync();
+                DataSource.SyncManager.Received().PushSync();
             }
         }
 
@@ -542,7 +542,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheSelectDateFormatMethod : SettingsViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task NavigatesToSelectDateFormatViewModelPassingCurrentDateFormat()
+            public void NavigatesToSelectDateFormatViewModelPassingCurrentDateFormat()
             {
                 var dateFormat = DateFormat.FromLocalizedDateFormat("MM-DD-YYYY");
                 var preferences = new MockPreferences { DateFormat = dateFormat };
@@ -551,13 +551,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SelectDateFormat.Execute();
                 TestScheduler.Start();
 
-                await NavigationService
+                NavigationService
                     .Received()
                     .Navigate<SelectDateFormatViewModel, DateFormat, DateFormat>(dateFormat);
             }
 
             [Fact, LogIfTooSlow]
-            public async Task UpdatesTheStoredPreferences()
+            public void UpdatesTheStoredPreferences()
             {
                 var oldDateFormat = DateFormat.FromLocalizedDateFormat("MM-DD-YYYY");
                 var newDateFormat = DateFormat.FromLocalizedDateFormat("DD.MM.YYYY");
@@ -570,14 +570,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SelectDateFormat.Execute();
                 TestScheduler.Start();
 
-                await InteractorFactory
+                InteractorFactory
                     .Received()
                     .UpdatePreferences(Arg.Is<EditPreferencesDTO>(dto => dto.DateFormat.Equals(New<DateFormat>.Value(newDateFormat))))
                     .Execute();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task UpdatesTheDateFormatProperty()
+            public void UpdatesTheDateFormatProperty()
             {
                 var oldDateFormat = DateFormat.FromLocalizedDateFormat("MM-DD-YYYY");
                 var newDateFormat = DateFormat.FromLocalizedDateFormat("DD.MM.YYYY");
@@ -594,14 +594,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SelectDateFormat.Execute();
                 TestScheduler.Start();
 
-                await InteractorFactory
+                InteractorFactory
                     .Received()
                     .UpdatePreferences(Arg.Is<EditPreferencesDTO>(dto => dto.DateFormat.ValueOr(oldDateFormat) == newDateFormat))
                     .Execute();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task InitiatesPushSync()
+            public void InitiatesPushSync()
             {
                 var oldDateFormat = DateFormat.FromLocalizedDateFormat("MM-DD-YYYY");
                 var newDateFormat = DateFormat.FromLocalizedDateFormat("DD.MM.YYYY");
@@ -614,7 +614,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SelectDateFormat.Execute();
                 TestScheduler.Start();
 
-                await DataSource.SyncManager.Received().PushSync();
+                DataSource.SyncManager.Received().PushSync();
             }
         }
 
@@ -623,7 +623,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Theory, LogIfTooSlow]
             [InlineData(true)]
             [InlineData(false)]
-            public async Task ChangesTheValueOfTheUseTwentyFourHourHourClock(bool originalValue)
+            public void ChangesTheValueOfTheUseTwentyFourHourHourClock(bool originalValue)
             {
                 var timeFormat = originalValue ? TimeFormat.TwentyFourHoursFormat : TimeFormat.TwelveHoursFormat;
                 PreferencesSubject.OnNext(new MockPreferences { TimeOfDayFormat = timeFormat });
@@ -631,7 +631,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.ToggleTwentyFourHourSettings.Execute();
                 TestScheduler.Start();
 
-                await InteractorFactory
+                InteractorFactory
                     .Received()
                     .UpdatePreferences(Arg.Is<EditPreferencesDTO>(
                         dto => dto.TimeOfDayFormat.ValueOr(default(TimeFormat)).IsTwentyFourHoursFormat != originalValue)
@@ -639,7 +639,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task InitiatesPushSync()
+            public void InitiatesPushSync()
             {
                 var preferences = new MockPreferences();
                 PreferencesSubject.OnNext(preferences);
@@ -649,14 +649,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.ToggleTwentyFourHourSettings.Execute();
                 TestScheduler.Start();
 
-                await DataSource.SyncManager.Received().PushSync();
+                DataSource.SyncManager.Received().PushSync();
             }
         }
 
         public sealed class TheSelectDurationFormatMethod : SettingsViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task NavigatesToSelectDurationFormatViewModelPassingCurrentDurationFormat()
+            public void NavigatesToSelectDurationFormatViewModelPassingCurrentDurationFormat()
             {
                 var durationFormat = DurationFormat.Improved;
                 var preferences = new MockPreferences { DurationFormat = durationFormat };
@@ -665,13 +665,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SelectDurationFormat.Execute();
                 TestScheduler.Start();
 
-                await NavigationService
+                NavigationService
                     .Received()
                     .Navigate<SelectDurationFormatViewModel, DurationFormat, DurationFormat>(durationFormat);
             }
 
             [Fact, LogIfTooSlow]
-            public async Task UpdatesTheStoredPreferences()
+            public void UpdatesTheStoredPreferences()
             {
                 var oldDurationFormat = DurationFormat.Decimal;
                 var newDurationFormat = DurationFormat.Improved;
@@ -684,14 +684,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SelectDurationFormat.Execute();
                 TestScheduler.Start();
 
-                await InteractorFactory
+                InteractorFactory
                     .Received()
                     .UpdatePreferences(Arg.Is<EditPreferencesDTO>(dto => dto.DurationFormat.Equals(New<DurationFormat>.Value(newDurationFormat))))
                     .Execute();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task SelectDurationFormatCommandCallsPushSync()
+            public void SelectDurationFormatCommandCallsPushSync()
             {
                 var oldDurationFormat = DurationFormat.Decimal;
                 var newDurationFormat = DurationFormat.Improved;
@@ -706,11 +706,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SelectDurationFormat.Execute();
                 TestScheduler.Start();
 
-                await syncManager.Received().PushSync();
+                syncManager.Received().PushSync();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task UpdatesTheDurationFormatProperty()
+            public void UpdatesTheDurationFormatProperty()
             {
                 var oldDurationFormat = DurationFormat.Decimal;
                 var newDurationFormat = DurationFormat.Improved;
@@ -728,7 +728,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SelectDurationFormat.Execute();
                 TestScheduler.Start();
 
-                await InteractorFactory
+                InteractorFactory
                     .UpdatePreferences(Arg.Is<EditPreferencesDTO>(dto => dto.DurationFormat.ValueOr(oldDurationFormat) == newDurationFormat))
                     .Received()
                     .Execute();
@@ -738,7 +738,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheSelectBeginningOfWeekMethod : SettingsViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task NavigatesToSelectBeginningOfWeekViewModelPassingCurrentBeginningOfWeek()
+            public void NavigatesToSelectBeginningOfWeekViewModelPassingCurrentBeginningOfWeek()
             {
                 var beginningOfWeek = BeginningOfWeek.Friday;
                 var user = new MockUser { BeginningOfWeek = beginningOfWeek };
@@ -747,13 +747,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SelectBeginningOfWeek.Execute();
                 TestScheduler.Start();
 
-                await NavigationService
+                NavigationService
                     .Received()
                     .Navigate<SelectBeginningOfWeekViewModel, BeginningOfWeek, BeginningOfWeek>(beginningOfWeek);
             }
 
             [Fact, LogIfTooSlow]
-            public async Task UpdatesTheStoredPreferences()
+            public void UpdatesTheStoredPreferences()
             {
                 var oldBeginningOfWeek = BeginningOfWeek.Tuesday;
                 var newBeginningOfWeek = BeginningOfWeek.Sunday;
@@ -768,14 +768,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SelectBeginningOfWeek.Execute();
                 TestScheduler.Start();
 
-                await InteractorFactory
+                InteractorFactory
                     .Received()
                     .UpdateUser(Arg.Is<EditUserDTO>(dto => dto.BeginningOfWeek == newBeginningOfWeek))
                     .Execute();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task SelectBeginningOfWeekCommandCallsPushSync()
+            public void SelectBeginningOfWeekCommandCallsPushSync()
             {
                 var oldBeginningOfWeek = BeginningOfWeek.Tuesday;
                 var newBeginningOfWeek = BeginningOfWeek.Sunday;
@@ -790,11 +790,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SelectBeginningOfWeek.Execute();
                 TestScheduler.Start();
 
-                await syncManager.Received().PushSync();
+                syncManager.Received().PushSync();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task UpdatesTheBeginningOfWeekProperty()
+            public void UpdatesTheBeginningOfWeekProperty()
             {
                 var oldBeginningOfWeek = BeginningOfWeek.Tuesday;
                 var newBeginningOfWeek = BeginningOfWeek.Sunday;
@@ -812,7 +812,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SelectBeginningOfWeek.Execute();
                 TestScheduler.Start();
 
-                await InteractorFactory.UpdateUser(
+                InteractorFactory.UpdateUser(
                     Arg.Is<EditUserDTO>(dto => dto.BeginningOfWeek == newBeginningOfWeek
                 )).Received().Execute();
             }
@@ -821,7 +821,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheOpenAboutViewMethod : SettingsViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task NavigatesToTheAboutPage()
+            public void NavigatesToTheAboutPage()
             {
                 ViewModel.OpenAboutView.Execute();
 
@@ -846,7 +846,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheOpenCalendarSettingsAction : SettingsViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task NavigatesToCalendarSettingsViewModel()
+            public void NavigatesToCalendarSettingsViewModel()
             {
                 ViewModel.OpenCalendarSettings.Execute(Unit.Default);
 

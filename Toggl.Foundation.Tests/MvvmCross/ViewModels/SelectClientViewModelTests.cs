@@ -5,13 +5,11 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FsCheck;
-using FsCheck.Xunit;
 using NSubstitute;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Tests.Generators;
-using Toggl.PrimeRadiant.Models;
 using Xunit;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
@@ -131,6 +129,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
         public sealed class TheCloseAction : SelectClientViewModelTest
         {
+            #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             [Fact, LogIfTooSlow]
             public async Task ClosesTheViewModel()
             {
@@ -154,6 +153,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 await NavigationService.Received()
                     .Close(Arg.Is(ViewModel), null);
             }
+            #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         public sealed class TheSelectClientAction : SelectClientViewModelTest
@@ -168,6 +168,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Returns(Observable.Return(clients));
             }
 
+            #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             [Fact, LogIfTooSlow]
             public async Task ClosesTheViewModel()
             {
@@ -229,6 +230,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .CreateClient(Arg.Is(trimmed), Arg.Any<long>())
                     .Execute();
             }
+            #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
         }
 
@@ -251,10 +253,10 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task AddCreationCellWhenNoMatchingSuggestion()
             {
-                var clients = GenerateClientList();
+                var generatedClients = GenerateClientList();
                 InteractorFactory.GetAllClientsInWorkspace(Arg.Any<long>())
                     .Execute()
-                    .Returns(Observable.Return(clients));
+                    .Returns(Observable.Return(generatedClients));
                 await ViewModel.Initialize();
 
                 var nonExistingClientName = "Some none existing name";
