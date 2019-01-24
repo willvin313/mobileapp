@@ -256,12 +256,10 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Returns(Observable.Return(timeEntry));
                 await ViewModel.Initialize();
 
-                var auxObservable = TestScheduler.CreateObserver<Unit>();
-                Observable.Concat(
-                        Observable.Defer(() => ViewModel.StartTimeEntry.Execute(suggestion)),
-                        Observable.Defer(() => ViewModel.StartTimeEntry.Execute(suggestion))
-                    )
-                    .Subscribe(auxObservable);
+                RxActionHelper.RunSequentially(
+                    () => ViewModel.StartTimeEntry.Execute(suggestion),
+                    () => ViewModel.StartTimeEntry.Execute(suggestion)
+                );
                 TestScheduler.Start();
 
                 InteractorFactory.Received(2).StartSuggestion(suggestion);
@@ -273,12 +271,10 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var suggestion = createSuggestion();
                 await ViewModel.Initialize();
 
-                var auxObservable = TestScheduler.CreateObserver<Unit>();
-                Observable.Concat(
-                        Observable.Defer(() => ViewModel.StartTimeEntry.Execute(suggestion)),
-                        Observable.Defer(() => ViewModel.StartTimeEntry.Execute(suggestion))
-                    )
-                    .Subscribe(auxObservable);
+                RxActionHelper.RunSequentially(
+                    () => ViewModel.StartTimeEntry.Execute(suggestion),
+                    () => ViewModel.StartTimeEntry.Execute(suggestion)
+                );
                 TestScheduler.Start();
 
                 OnboardingStorage.Received().SetTimeEntryContinued();
