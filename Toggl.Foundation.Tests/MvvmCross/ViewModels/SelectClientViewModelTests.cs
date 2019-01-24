@@ -76,30 +76,33 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task AddsANoClientSuggestion()
             {
-                var clients = GenerateClientList();
+                var generatedClients = GenerateClientList();
                 InteractorFactory.GetAllClientsInWorkspace(Arg.Any<long>())
                     .Execute()
-                    .Returns(Observable.Return(clients));
+                    .Returns(Observable.Return(generatedClients));
                 ViewModel.Prepare(Parameters);
 
                 await ViewModel.Initialize();
 
-                ViewModel.Clients.First().First().Name.Should().Be(Resources.NoClient);
-                ViewModel.Clients.First().First().Should().BeOfType<SelectableClientViewModel>();
+                var clients = await ViewModel.Clients.FirstAsync();
+                var firstClient = clients.First();
+                firstClient.Name.Should().Be(Resources.NoClient);
+                firstClient.Should().BeOfType<SelectableClientViewModel>();
             }
 
             [Fact, LogIfTooSlow]
             public async Task SetsNoClientAsSelectedIfTheParameterDoesNotSpecifyTheCurrentClient()
             {
-                var clients = GenerateClientList();
+                var generatedClients = GenerateClientList();
                 InteractorFactory.GetAllClientsInWorkspace(Arg.Any<long>())
                     .Execute()
-                    .Returns(Observable.Return(clients));
+                    .Returns(Observable.Return(generatedClients));
                 ViewModel.Prepare(Parameters);
 
                 await ViewModel.Initialize();
 
-                ViewModel.Clients.First().Single(c => c.Selected).Name.Should().Be(Resources.NoClient);
+                var clients = await ViewModel.Clients.FirstAsync();
+                clients.Single(c => c.Selected).Name.Should().Be(Resources.NoClient);
             }
 
             [Theory, LogIfTooSlow]
@@ -115,15 +118,16 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task SetsTheAppropriateClientAsTheCurrentlySelectedOne(int id)
             {
                 var parameter = SelectClientParameters.WithIds(10, id);
-                var clients = GenerateClientList();
+                var generatedClients = GenerateClientList();
                 InteractorFactory.GetAllClientsInWorkspace(Arg.Any<long>())
                     .Execute()
-                    .Returns(Observable.Return(clients));
+                    .Returns(Observable.Return(generatedClients));
                 ViewModel.Prepare(parameter);
 
                 await ViewModel.Initialize();
 
-                ViewModel.Clients.First().Single(c => c.Selected).Name.Should().Be(id.ToString());
+                var clients = await ViewModel.Clients.FirstAsync();
+                clients.Single(c => c.Selected).Name.Should().Be(id.ToString());
             }
         }
 
@@ -262,8 +266,10 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var nonExistingClientName = "Some none existing name";
                 ViewModel.FilterText.OnNext(nonExistingClientName);
 
-                ViewModel.Clients.First().First().Name.Should().Equals(nonExistingClientName);
-                ViewModel.Clients.First().First().Should().BeOfType<SelectableClientCreationViewModel>();
+                var clients = await ViewModel.Clients.FirstAsync();
+                var firstClient = clients.First();
+                firstClient.Name.Should().Equals(nonExistingClientName);
+                firstClient.Should().BeOfType<SelectableClientCreationViewModel>();
             }
 
             [Theory, LogIfTooSlow]
@@ -291,15 +297,16 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task DoesNotSuggestCreationWhenTextMatchesAExistingClientName()
             {
-                var clients = GenerateClientList();
+                var generatedClients = GenerateClientList();
                 InteractorFactory.GetAllClientsInWorkspace(Arg.Any<long>())
                     .Execute()
-                    .Returns(Observable.Return(clients));
+                    .Returns(Observable.Return(generatedClients));
                 await ViewModel.Initialize();
 
-                ViewModel.FilterText.OnNext(clients.First().Name);
+                ViewModel.FilterText.OnNext(generatedClients.First().Name);
 
-                ViewModel.Clients.First().First().Should().NotBeOfType<SelectableClientCreationViewModel>();
+                var clients = await ViewModel.Clients.FirstAsync();
+                clients.First().Should().NotBeOfType<SelectableClientCreationViewModel>();
             }
         }
     }
