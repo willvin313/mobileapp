@@ -99,12 +99,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 viewModel.Initialize().Wait();
 
-                foreach (var calendarGroup in viewModel.Calendars)
+                var calendars = viewModel.Calendars.FirstAsync().Wait();
+                foreach (var calendarGroup in calendars)
                 {
                     foreach (var calendar in calendarGroup)
                     {
                         if (enabledCalendarIds.Contains(calendar.Id))
-                            calendar.Selected.Should().BeTrue();
+                            calendar.InitiallySelected.Should().BeTrue();
                     }
                 }
             }

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Daneel.Presentation.Attributes;
+using Toggl.Daneel.Views.Settings;
 using Toggl.Daneel.ViewSources;
 using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross.ViewModels;
@@ -13,6 +14,8 @@ namespace Toggl.Daneel.ViewControllers
     [ModalCardPresentation]
     public partial class SelectDurationFormatViewController : ReactiveViewController<SelectDurationFormatViewModel>, IDismissableViewController
     {
+        private const int rowHeight = 48;
+
         CompositeDisposable disposeBag = new CompositeDisposable();
 
         public SelectDurationFormatViewController()
@@ -32,16 +35,22 @@ namespace Toggl.Daneel.ViewControllers
 
             TitleLabel.Text = Resources.DurationFormat;
 
-            var source = new DurationFormatsTableViewSource(DurationFormatsTableView, ViewModel.DurationFormats);
-            
+            DurationFormatsTableView.RowHeight = rowHeight;
+            DurationFormatsTableView.RegisterNibForCellReuse(DurationFormatViewCell.Nib, DurationFormatViewCell.Identifier);
+
+            var source = new ReloadTableViewSource<SelectableDurationFormatViewModel>(
+                DurationFormatViewCell.CellConfiguration(DurationFormatViewCell.Identifier),
+                ViewModel.DurationFormats
+            );
+
             DurationFormatsTableView.Source = source;
+
+            source.Rx().ModelSelected()
+                .Subscribe(ViewModel.SelectDurationFormat.Inputs)
+                .DisposedBy(disposeBag);
 
             BackButton.Rx()
                 .BindAction(ViewModel.Close)
-                .DisposedBy(disposeBag);
-
-            source.DurationFormatSelected
-                .Subscribe(ViewModel.SelectDurationFormat.Inputs)
                 .DisposedBy(disposeBag);
         }
 

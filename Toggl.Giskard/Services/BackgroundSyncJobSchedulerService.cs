@@ -19,6 +19,11 @@ namespace Toggl.Giskard.Services
 
         public override bool OnStartJob(JobParameters @params)
         {
+            // Background sync is temporary disabled due to a crash that is hard to reproduce
+            // Calling JobFinished and eturning early here stops the background job from running
+            JobFinished(@params, false);
+            return true;
+
             MvxAndroidSetupSingleton
                 .EnsureSingletonAvailable(ApplicationContext)
                 .EnsureInitialized();

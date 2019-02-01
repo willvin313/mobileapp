@@ -218,6 +218,24 @@ namespace Toggl.Foundation.Analytics
         [AnalyticsEvent("DelayDurationSeconds")]
         public IAnalyticsEvent<int> RateLimitingDelayDuringSyncing { get; protected set; }
 
+        [AnalyticsEvent("State")]
+        public IAnalyticsEvent<string> SyncOperationStarted { get; protected set; }
+
+        [AnalyticsEvent]
+        public IAnalyticsEvent SyncCompleted { get; protected set; }
+
+        [AnalyticsEvent("Type", "Message", "StackTrace")]
+        public IAnalyticsEvent<string, string, string> SyncFailed { get; protected set; }
+
+        [AnalyticsEvent("StateName")]
+        public IAnalyticsEvent<string> SyncStateTransition { get; protected set; }
+
+        [AnalyticsEvent]
+        public IAnalyticsEvent AppDidEnterForeground { get; protected set; }
+
+        [AnalyticsEvent]
+        public IAnalyticsEvent AppSentToBackground { get; protected set; }
+
         public void TrackAnonymized(Exception exception)
         {
             if (exception.IsAnonymized())

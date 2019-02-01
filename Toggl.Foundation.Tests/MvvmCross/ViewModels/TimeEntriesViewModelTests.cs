@@ -375,6 +375,29 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 await InteractorFactory.Received().DeleteTimeEntry(Arg.Is(timeEntryA.Id)).Execute();
             }
+
+            [Fact]
+            public async ThreadingTask ImmediatelyHardDeletesTheTimeEntryWhenCallingFinilizeDelayDeleteTimeEntryIfNeeded()
+            {
+                var timeEntryA = new TimeEntryViewModel(new MockTimeEntry { Id = 1, Duration = 123, TagIds = Array.Empty<long>(), Workspace = new MockWorkspace() }, DurationFormat.Classic);
+
+                var observableA = viewModel.DelayDeleteTimeEntry.Execute(timeEntryA);
+                SchedulerProvider.TestScheduler.AdvanceBy(Constants.UndoTime.Ticks / 2);
+                await viewModel.FinilizeDelayDeleteTimeEntryIfNeeded();
+
+                InteractorFactory.Received().DeleteTimeEntry(Arg.Is(timeEntryA.Id)).Execute();
+            }
+
+            [Fact]
+            public async ThreadingTask DoesNotHardDeletesTheTimeEntryWhenNotCallingFinilizeDelayDeleteTimeEntryIfNeeded()
+            {
+                var timeEntryA = new TimeEntryViewModel(new MockTimeEntry { Id = 1, Duration = 123, TagIds = Array.Empty<long>(), Workspace = new MockWorkspace() }, DurationFormat.Classic);
+
+                var observableA = viewModel.DelayDeleteTimeEntry.Execute(timeEntryA);
+                SchedulerProvider.TestScheduler.AdvanceBy(Constants.UndoTime.Ticks / 2);
+
+                InteractorFactory.DidNotReceive().DeleteTimeEntry(Arg.Is(timeEntryA.Id)).Execute();
+            }
         }
 
         public sealed class TheCancelDeleteTimeEntryAction : TimeEntriesViewModelTest
