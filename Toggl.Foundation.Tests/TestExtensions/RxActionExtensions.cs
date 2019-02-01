@@ -9,33 +9,35 @@ namespace Toggl.Foundation.Tests.TestExtensions
 {
     public static class RxActionHelper
     {
-        public static void RunSequentially(params UIAction[] actions)
+        public static IObservable<Unit> ExecuteSequentially(this UIAction action, int numberOfTimes)
         {
-            actions
-                .Select(RxActionExtensions.DeferredExecute)
-                .Aggregate(Observable.Concat)
-                .Subscribe();
+            var observable = Enumerable
+                .Range(0, numberOfTimes)
+                .Select(_ => Observable.Defer(() => action.Execute()))
+                .Concat();
+            observable.Subscribe();
+
+            return observable;
         }
 
-        public static void RunSequentially<T>(params Func<IObservable<T>>[] actions)
+        public static IObservable<Unit> ExecuteSequentially<TInput>(this InputAction<TInput> action, params TInput[] inputs)
         {
-            RunSequentially(actions.Select(Observable.Defer).ToArray());
+            var observable = inputs
+                .Select(input => Observable.Defer(() => action.Execute(input)))
+                .Concat();
+            observable.Subscribe();
+
+            return observable;
         }
 
-        public static void RunSequentially<T>(params IObservable<T>[] actions)
+        public static IObservable<Unit> ExecuteSequentially<TInput>(this InputAction<TInput> action, IEnumerable<TInput> inputs)
         {
-            actions
-                .Aggregate(Observable.Concat)
-                .Subscribe();
+            var observable = inputs
+                .Select(input => Observable.Defer(() => action.Execute(input)))
+                .Concat();
+            observable.Subscribe();
+
+            return observable;
         }
-    }
-
-    public static class RxActionExtensions
-    {
-        public static IObservable<Unit> DeferredExecute(this UIAction action)
-            => Observable.Defer(() => action.Execute());
-
-        public static IObservable<TElement> DeferredExecute<TInput, TElement>(this RxAction<TInput, TElement> action, TInput input)
-            => Observable.Defer(() => action.Execute(input));
     }
 }

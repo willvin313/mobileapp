@@ -119,11 +119,10 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var secondCalendar = new UserCalendar("2", "2", "2");
 
                 var observer = TestScheduler.CreateObserver<Unit>();
-                RxActionHelper.RunSequentially(
-                    () => ViewModel.SelectCalendar.Execute(new SelectableUserCalendarViewModel(firstCalendar, false)),
-                    () => ViewModel.SelectCalendar.Execute(new SelectableUserCalendarViewModel(secondCalendar, false))
+                ViewModel.SelectCalendar.ExecuteSequentially(
+                    new SelectableUserCalendarViewModel(firstCalendar, false),
+                    new SelectableUserCalendarViewModel(secondCalendar, false)
                 );
-
                 TestScheduler.Start();
 
                 Received.InOrder(() =>

@@ -242,7 +242,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 await mockedInteractor.Received().Execute();
             }
-            #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
             [Fact, LogIfTooSlow]
             public async Task CanBeExecutedForTheSecondTimeIfStartingTheFirstOneFinishesSuccessfully()
@@ -255,10 +254,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Returns(Observable.Return(timeEntry));
                 await ViewModel.Initialize();
 
-                RxActionHelper.RunSequentially(
-                    () => ViewModel.StartTimeEntry.Execute(suggestion),
-                    () => ViewModel.StartTimeEntry.Execute(suggestion)
-                );
+                ViewModel.StartTimeEntry.ExecuteSequentially(suggestion, suggestion);
                 TestScheduler.Start();
 
                 InteractorFactory.Received(2).StartSuggestion(suggestion);
@@ -270,14 +266,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var suggestion = createSuggestion();
                 await ViewModel.Initialize();
 
-                RxActionHelper.RunSequentially(
-                    () => ViewModel.StartTimeEntry.Execute(suggestion),
-                    () => ViewModel.StartTimeEntry.Execute(suggestion)
-                );
+                ViewModel.StartTimeEntry.ExecuteSequentially(suggestion, suggestion);
                 TestScheduler.Start();
 
                 OnboardingStorage.Received().SetTimeEntryContinued();
             }
+            #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
             private Suggestion createSuggestion()
             {

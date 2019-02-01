@@ -347,10 +347,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.IsEditingStartTime.Subscribe(startObserver);
                 ViewModel.IsEditingStopTime.Subscribe(stopObserver);
 
-                RxActionHelper.RunSequentially(
-                    ViewModel.EditStartTime,
-                    ViewModel.EditStartTime
-                );
+                ViewModel.EditStartTime.ExecuteSequentially(numberOfTimes: 2);
 
                 TestScheduler.Start();
                 startObserver.LastEmittedValue().Should().BeFalse();
@@ -422,10 +419,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.IsEditingStartTime.Subscribe(startObserver);
                 ViewModel.IsEditingStopTime.Subscribe(stopObserver);
 
-                RxActionHelper.RunSequentially(
-                    ViewModel.EditStopTime,
-                    ViewModel.EditStopTime
-                );
+                ViewModel.EditStopTime.ExecuteSequentially(numberOfTimes: 2);
 
                 TestScheduler.Start();
                 startObserver.LastEmittedValue().Should().BeFalse();

@@ -54,6 +54,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
         public sealed class TheDoneAction : SelectUserCalendarsViewModelTest
         {
+            #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             [Fact, LogIfTooSlow]
             public async Task ClosesTheViewModelAndReturnsSelectedCalendarIds()
             {
@@ -71,20 +72,18 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 await ViewModel.Initialize();
                 var selectedIds = new[] { "0", "2", "4", "7" };
 
-                var selectCalendars = userCalendars
+                userCalendars
                     .Where(calendar => selectedIds.Contains(calendar.Id))
                     .Select(calendar => new SelectableUserCalendarViewModel(calendar, false))
-                    .Select(ViewModel.SelectCalendar.DeferredExecute)
-                    .Aggregate(Observable.Concat);
-
-                RxActionHelper.RunSequentially(
-                    selectCalendars,
-                    ViewModel.Done.DeferredExecute()
-                );
+                    .Select(calendar => Observable.Defer(() => ViewModel.SelectCalendar.Execute(calendar)))
+                    .Aggregate(Observable.Concat)
+                    .Concat(Observable.Defer(() => ViewModel.Done.Execute()))
+                    .Subscribe();
                 TestScheduler.Start();
 
                 await NavigationService.Received().Close(ViewModel, Arg.Is<string[]>(ids => ids.SequenceEqual(selectedIds)));
             }
+            #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         public abstract class TheDoneActionEnabledProperty
@@ -161,12 +160,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                             return new SelectableUserCalendarViewModel(userCalendar, false);
                         });
 
-                    var auxObserver = TestScheduler.CreateObserver<Unit>();
-                    RxActionHelper.RunSequentially(
-                        selectedableUserCalendars
-                            .Select(calendar => Observable.Defer(() => ViewModel.SelectCalendar.Execute(calendar)))
-                            .ToArray()
-                    );
+                    TestScheduler.CreateObserver<Unit>();
+                    ViewModel.SelectCalendar.ExecuteSequentially(selectedableUserCalendars);
                     TestScheduler.Start();
 
                     Received.InOrder(() =>
@@ -189,11 +184,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                             return new SelectableUserCalendarViewModel(userCalendar, false);
                         });
 
-                    var selectAll = selectedableUserCalendars
-                        .Select(calendar => ViewModel.SelectCalendar.DeferredExecute(calendar))
-                        .Aggregate(Observable.Concat);
-
-                    RxActionHelper.RunSequentially(selectAll, selectAll);
+                    ViewModel.SelectCalendar.ExecuteSequentially(selectedableUserCalendars);
+                    ViewModel.SelectCalendar.ExecuteSequentially(selectedableUserCalendars);
                     TestScheduler.Start();
 
                     Received.InOrder(() =>
