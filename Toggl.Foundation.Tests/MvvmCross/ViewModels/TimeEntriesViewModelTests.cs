@@ -385,7 +385,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 SchedulerProvider.TestScheduler.AdvanceBy(Constants.UndoTime.Ticks / 2);
                 await viewModel.FinilizeDelayDeleteTimeEntryIfNeeded();
 
-                InteractorFactory.Received().DeleteTimeEntry(Arg.Is(timeEntryA.Id)).Execute();
+                await InteractorFactory.Received().DeleteTimeEntry(Arg.Is(timeEntryA.Id)).Execute();
             }
 
             [Fact]
@@ -396,7 +396,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observableA = viewModel.DelayDeleteTimeEntry.Execute(timeEntryA);
                 SchedulerProvider.TestScheduler.AdvanceBy(Constants.UndoTime.Ticks / 2);
 
-                InteractorFactory.DidNotReceive().DeleteTimeEntry(Arg.Is(timeEntryA.Id)).Execute();
+                await InteractorFactory.DidNotReceive().DeleteTimeEntry(Arg.Is(timeEntryA.Id)).Execute();
             }
         }
 

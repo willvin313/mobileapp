@@ -337,7 +337,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ProceedsWithLogoutWhenUserClicksSignOutButtonInTheDialog()
+            public void ProceedsWithLogoutWhenUserClicksSignOutButtonInTheDialog()
             {
                 ProgressSubject.OnNext(SyncProgress.Syncing);
                 DialogService.Confirm(
@@ -349,8 +349,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
 
-                await InteractorFactory.Received().Logout(LogoutSource.Settings).Execute();
-                await NavigationService.Received().Navigate<LoginViewModel>();
+                InteractorFactory.Received().Logout(LogoutSource.Settings).Execute();
+                NavigationService.Received().Navigate<LoginViewModel>();
             }
 
             private void doNotShowConfirmationDialog()
