@@ -41,6 +41,13 @@ namespace Toggl.Daneel.ViewControllers
         {
             base.ViewDidLoad();
 
+            ExtendedNavbarView.BackgroundColor = NavigationController.NavigationBar.BackgroundColor;
+            TimeTrackedTodayLabel.Font = TimeTrackedTodayLabel.Font.GetMonospacedDigitFont();
+
+            TitleLabel.Text = Resources.Welcome;
+            DescriptionLabel.Text = Resources.CalendarFeatureDescription;
+            GetStartedButton.SetTitle(Resources.GetStarted, UIControlState.Normal);
+
             settingsButton.SetImage(UIImage.FromBundle("icSettings"), UIControlState.Normal);
 
             ViewModel
@@ -56,6 +63,14 @@ namespace Toggl.Daneel.ViewControllers
 
             GetStartedButton.Rx()
                 .BindAction(ViewModel.GetStarted)
+                .DisposedBy(DisposeBag);
+
+            ViewModel.TimeTrackedToday
+                .Subscribe(TimeTrackedTodayLabel.Rx().Text())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.CurrentDate
+                .Subscribe(CurrentDateLabel.Rx().Text())
                 .DisposedBy(DisposeBag);
 
             dataSource = new CalendarCollectionViewSource(

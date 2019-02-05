@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Reactive.Linq;
 using CoreGraphics;
+using MvvmCross;
 using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Daneel.ViewSources;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
+using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using UIKit;
 
@@ -24,22 +26,29 @@ namespace Toggl.Daneel.ViewControllers.Calendar
         private const float enabledDoneButtonAlpha = 1;
         private const float disabledDoneButtonAlpha = 0.32f;
 
+        private readonly ISchedulerProvider schedulerProvider;
+
         public SelectUserCalendarsViewController() : base(null)
         {
+            schedulerProvider = Mvx.Resolve<ISchedulerProvider>();
         }
 
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
 
-            var source = new SelectUserCalendarsTableViewSource(TableView, ViewModel.Calendars);
+            HeadingLabel.Text = Resources.SelectCalendars;
+            DescriptionLabel.Text = Resources.SelectCalendarsDescription;
+            DoneButton.SetTitle(Resources.Done, UIControlState.Normal);
+
+            var source = new SelectUserCalendarsTableViewSource(TableView);
             TableView.Source = source;
 
             DoneButton.Rx()
                 .BindAction(ViewModel.Done)
                 .DisposedBy(DisposeBag);
 
-            source.ItemSelected
+            source.Rx().ModelSelected()
                 .Subscribe(ViewModel.SelectCalendar.Inputs)
                 .DisposedBy(DisposeBag);
 
@@ -50,6 +59,10 @@ namespace Toggl.Daneel.ViewControllers.Calendar
             ViewModel.Done.Enabled
                 .Select(alphaForEnabled)
                 .Subscribe(DoneButton.Rx().AnimatedAlpha())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.Calendars
+                .Subscribe(TableView.Rx().Sections(source))
                 .DisposedBy(DisposeBag);
         }
 

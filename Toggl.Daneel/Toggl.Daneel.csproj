@@ -102,10 +102,6 @@
     <MtouchHttpClientHandler>HttpClientHandler</MtouchHttpClientHandler>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Facebook, Version=4.10.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\Xamarin.Facebook.iOS.4.30.0\lib\Xamarin.iOS10\Facebook.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Reactive, Version=4.1.0.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263">
       <HintPath>..\packages\System.Reactive.4.1.2\lib\netstandard2.0\System.Reactive.dll</HintPath>
@@ -232,6 +228,9 @@
     </Reference>
     <Reference Include="Xamarin.Essentials">
       <HintPath>..\packages\Xamarin.Essentials.1.0.0\lib\xamarinios10\Xamarin.Essentials.dll</HintPath>
+    </Reference>
+    <Reference Include="AdjustSdk.Xamarin.iOS">
+      <HintPath>..\packages\AdjustSdk.Xamarin.iOS.4.17.0\lib\xamarinios10\AdjustSdk.Xamarin.iOS.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -672,9 +671,12 @@
     <Compile Include="Cells\BaseCollectionViewCell.cs" />
     <Compile Include="Extensions\Binders\ReactiveTableViewBinder.cs" />
     <Compile Include="Extensions\IntentPeriod.cs" />
+    <Compile Include="Extensions\Reactive\DurationFieldExtensions.cs" />
     <Compile Include="Extensions\Reactive\HueSaturationPickerViewExtensions.cs" />
+    <Compile Include="Extensions\Reactive\BaseTableViewSourceExtensions.cs" />
     <Compile Include="Extensions\Reactive\UIScrollViewExtensions.cs" />
     <Compile Include="Extensions\Reactive\UISliderExtensions.cs" />
+    <Compile Include="Extensions\Reactive\WheelForegroundViewExtensions.cs" />
     <Compile Include="Extensions\SectionedIndexExtensions.cs" />
     <Compile Include="Services\PermissionsServiceIos.cs" />
     <Compile Include="Services\CalendarServiceIos.cs" />
@@ -710,10 +712,12 @@
     <Compile Include="Binding\BarButtonCommandTargetBinding.cs" />
     <Compile Include="Binding\ViewAnimatedVisibilityTargetBinding.cs" />
     <Compile Include="ViewControllers\SyncFailuresViewController.cs" />
-    <Compile Include="ViewSources\Generic\ListCollectionViewSource.cs" />
-    <Compile Include="ViewSources\Generic\ListTableViewSource.cs" />
+    <Compile Include="ViewSources\Generic\CollectionView\ReloadCollectionViewSource.cs" />
     <Compile Include="ViewSources\Generic\ReactiveSectionedListTableViewSource.cs" />
-    <Compile Include="ViewSources\Generic\SectionedListTableViewSource.cs" />
+    <Compile Include="ViewSources\Generic\MutableSectionedListTableViewSource.cs" />
+    <Compile Include="ViewSources\Generic\TableView\BaseTableViewSource.cs" />
+    <Compile Include="ViewSources\Generic\TableView\ReloadTableViewSource.cs" />
+    <Compile Include="ViewSources\SelectProjectTableViewSource.cs" />
     <Compile Include="Binding\TextFieldSecureTextEntryTargetBinding.cs" />
     <Compile Include="Binding\BarButtonAnimatedEnabledTargetBinding.cs" />
     <Compile Include="Binding\TextFieldFocusTargetBinding.cs" />
@@ -727,7 +731,6 @@
     <Compile Include="ViewControllers\StartTimeEntryViewController.designer.cs">
       <DependentUpon>StartTimeEntryViewController.cs</DependentUpon>
     </Compile>
-    <Compile Include="ViewSources\WorkspaceTableViewSource.cs" />
     <Compile Include="Views\ActivityIndicatorView.cs" />
     <Compile Include="Presentation\Attributes\ModalCardPresentationAttribute.cs" />
     <Compile Include="Presentation\Attributes\NestedChildPresentationAttribute.cs" />
@@ -953,7 +956,6 @@
     <Compile Include="Binding\SpiderOnARopeViewIsVisibleTargetBinding.cs" />
     <Compile Include="ApplicationShortcutCreator.cs" />
     <Compile Include="Extensions\PointExtensions.cs" />
-    <Compile Include="Services\MailServiceIos.cs" />
     <Compile Include="Autocomplete\TokenTextAttachment.cs" />
     <Compile Include="Autocomplete\AutocompleteExtensions.cs" />
     <Compile Include="Services\AnalyticsServiceIos.cs" />
@@ -976,12 +978,10 @@
     <Compile Include="ViewControllers\SelectDateFormatViewController.designer.cs">
       <DependentUpon>SelectDateFormatViewController.cs</DependentUpon>
     </Compile>
-    <Compile Include="ViewSources\DateFormatsTableViewSource.cs" />
     <Compile Include="ViewControllers\SelectDurationFormatViewController.cs" />
     <Compile Include="ViewControllers\SelectDurationFormatViewController.designer.cs">
       <DependentUpon>SelectDurationFormatViewController.cs</DependentUpon>
     </Compile>
-    <Compile Include="ViewSources\DurationFormatsTableViewSource.cs" />
     <Compile Include="Views\Settings\DurationFormatViewCell.cs" />
     <Compile Include="Views\Settings\DurationFormatViewCell.designer.cs">
       <DependentUpon>DurationFormatViewCell.cs</DependentUpon>
@@ -1023,7 +1023,6 @@
     <Compile Include="ViewControllers\SelectCountryViewController.designer.cs">
       <DependentUpon>SelectCountryViewController.cs</DependentUpon>
     </Compile>
-    <Compile Include="ViewSources\CountryTableViewSource.cs" />
     <Compile Include="Views\CountrySelection\CountryViewCell.cs" />
     <Compile Include="Views\CountrySelection\CountryViewCell.designer.cs">
       <DependentUpon>CountryViewCell.cs</DependentUpon>

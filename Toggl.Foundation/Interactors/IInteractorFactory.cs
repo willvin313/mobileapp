@@ -36,6 +36,8 @@ namespace Toggl.Foundation.Interactors
 
         IInteractor<IObservable<Unit>> ObserveTimeEntriesChanges();
 
+        IInteractor<IObservable<TimeSpan>> ObserveTimeTrackedToday();
+
         #endregion
 
         #region Projects
@@ -120,6 +122,12 @@ namespace Toggl.Foundation.Interactors
         IInteractor<IObservable<IThreadSafeUser>> UpdateUser(EditUserDTO dto);
 
         IInteractor<IObservable<IThreadSafeUser>> UpdateDefaultWorkspace(long selectedWorkspaceId);
+
+        #endregion
+
+        #region UserAccess
+
+        IInteractor<IObservable<Unit>> Logout(LogoutSource source);
 
         #endregion
 

@@ -9,6 +9,7 @@ using FsCheck;
 using FsCheck.Xunit;
 using Microsoft.Reactive.Testing;
 using NSubstitute;
+using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DTOs;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Parameters;
@@ -50,7 +51,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     PlatformInfo,
                     DialogService,
                     UserPreferences,
-                    FeedbackService,
                     AnalyticsService,
                     UserAccessManager,
                     InteractorFactory,
@@ -76,7 +76,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 bool useUserAccessManager,
                 bool useDialogService,
                 bool useUserPreferences,
-                bool useFeedbackService,
                 bool useAnalyticsService,
                 bool useInteractorFactory,
                 bool useplatformInfo,
@@ -91,7 +90,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var platformInfo = useplatformInfo ? PlatformInfo : null;
                 var dialogService = useDialogService ? DialogService : null;
                 var userPreferences = useUserPreferences ? UserPreferences : null;
-                var feedbackService = useFeedbackService ? FeedbackService : null;
                 var analyticsService = useAnalyticsService ? AnalyticsService : null;
                 var userAccessManager = useUserAccessManager ? UserAccessManager : null;
                 var onboardingStorage = useOnboardingStorage ? OnboardingStorage : null;
@@ -108,7 +106,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         platformInfo,
                         dialogService,
                         userPreferences,
-                        feedbackService,
                         analyticsService,
                         userAccessManager,
                         interactorFactory,
@@ -255,25 +252,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task CallsLogoutOnTheDataSource()
+            public async Task ExecutesTheLogoutInteractor()
             {
                 doNotShowConfirmationDialog();
 
                 ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
 
-                await UserAccessManager.Received().Logout();
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task ResetsUserPreferences()
-            {
-                doNotShowConfirmationDialog();
-
-                ViewModel.TryLogout.Execute();
-                TestScheduler.Start();
-
-                UserPreferences.Received().Reset();
+                await InteractorFactory.Received().Logout(LogoutSource.Settings).Execute();
             }
 
             [Fact, LogIfTooSlow]
@@ -346,7 +332,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
 
-                await UserAccessManager.DidNotReceive().Logout();
+                InteractorFactory.DidNotReceive().Logout(Arg.Any<LogoutSource>());
                 await NavigationService.DidNotReceive().Navigate<LoginViewModel>();
             }
 
@@ -363,47 +349,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
 
-                await UserAccessManager.Received().Logout();
+                await InteractorFactory.Received().Logout(LogoutSource.Settings).Execute();
                 await NavigationService.Received().Navigate<LoginViewModel>();
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task TracksLogoutEvent()
-            {
-                doNotShowConfirmationDialog();
-
-                ViewModel.TryLogout.Execute();
-                TestScheduler.Start();
-
-                AnalyticsService.Logout.Received().Track(Analytics.LogoutSource.Settings);
             }
 
             private void doNotShowConfirmationDialog()
             {
                 DataSource.HasUnsyncedData().Returns(Observable.Return(false));
                 ProgressSubject.OnNext(SyncProgress.Synced);
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task ClearsPrivateSharedStorage()
-            {
-                doNotShowConfirmationDialog();
-
-                ViewModel.TryLogout.Execute();
-                TestScheduler.Start();
-
-                PrivateSharedStorageService.Received().ClearAll();
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task ClearsDonatedIntents()
-            {
-                doNotShowConfirmationDialog();
-
-                ViewModel.TryLogout.Execute();
-                TestScheduler.Start();
-
-                IntentDonationService.Received().ClearAll();
             }
         }
 
@@ -843,16 +796,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 viewModel.IsFeedbackSuccessViewShowing.StartWith(true).Subscribe(observer);
                 viewModel.CloseFeedbackSuccessView();
                 observer.Messages.Last().Value.Value.Should().BeFalse();
-            }
-        }
-
-        public sealed class TheSubmitFeedbackUsingEmailMethod : SettingsViewModelTest
-        {
-            [Fact, LogIfTooSlow]
-            public async Task CallsTheFeedbackService()
-            {
-                await ViewModel.SubmitFeedbackUsingEmail();
-                await FeedbackService.Received().SubmitFeedback();
             }
         }
 
