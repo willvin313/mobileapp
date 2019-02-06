@@ -72,7 +72,7 @@
                     </collectionViewFlowLayout>
                 </collectionView>
                 <view alpha="0.0" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4HD-Ed-Lag" userLabel="Onboarding View">
-                    <rect key="frame" x="0.0" y="-636" width="375" height="1303"/>
+                    <rect key="frame" x="0.0" y="32" width="375" height="635"/>
                     <subviews>
                         <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="icIllustrationCalendar" translatesAutoresizingMaskIntoConstraints="NO" id="CPI-0j-ChM">
                             <rect key="frame" x="142" y="145" width="91" height="69"/>
@@ -133,8 +133,8 @@
                 <constraint firstItem="Gmd-lW-ZGB" firstAttribute="trailing" secondItem="LXy-pR-2Vb" secondAttribute="trailing" id="Rld-f6-Acg"/>
                 <constraint firstAttribute="trailing" secondItem="3RA-hC-Bqf" secondAttribute="trailing" id="gmv-li-nfu"/>
                 <constraint firstItem="NhI-Kn-KUq" firstAttribute="top" secondItem="3RA-hC-Bqf" secondAttribute="bottom" id="hEg-dN-eMJ"/>
+                <constraint firstItem="4HD-Ed-Lag" firstAttribute="top" secondItem="3RA-hC-Bqf" secondAttribute="bottom" id="jyI-vw-Zuz"/>
                 <constraint firstItem="LXy-pR-2Vb" firstAttribute="top" secondItem="2" secondAttribute="top" id="kLd-uU-jws"/>
-                <constraint firstItem="4HD-Ed-Lag" firstAttribute="centerY" secondItem="LXy-pR-2Vb" secondAttribute="centerY" id="u5U-tR-N2x"/>
                 <constraint firstItem="NhI-Kn-KUq" firstAttribute="trailing" secondItem="Gmd-lW-ZGB" secondAttribute="trailing" id="xyG-4v-H5P"/>
                 <constraint firstItem="3RA-hC-Bqf" firstAttribute="leading" secondItem="2" secondAttribute="leading" id="yGO-jS-eul"/>
                 <constraint firstItem="4HD-Ed-Lag" firstAttribute="leading" secondItem="2" secondAttribute="leading" id="yS4-uj-tTO"/>

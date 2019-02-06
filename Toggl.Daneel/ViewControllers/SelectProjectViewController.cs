@@ -2,6 +2,8 @@
 using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Daneel.ViewSources;
+using Toggl.Foundation;
+using Toggl.Foundation.Autocomplete.Suggestions;
 using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Daneel.Extensions.Reactive;
@@ -25,47 +27,59 @@ namespace Toggl.Daneel.ViewControllers
         {
             base.ViewDidLoad();
 
-            var source = new SelectProjectTableViewSource(ViewModel.Suggestions, ReactiveProjectSuggestionViewCell.Key);
-            source.UseGrouping = ViewModel.UseGrouping;
-            source.RegisterViewCells(ProjectsTableView);
+            TitleLabel.Text = Resources.Projects;
+            TextField.Placeholder = Resources.AddFilterProjects;
+            EmptyStateLabel.Text = Resources.EmptyProjectText;
+            
+            var source = new SelectProjectTableViewSource(ProjectsTableView);
+            ProjectsTableView.Source = source;
+            source.ToggleTasksCommand = new MvxCommand<ProjectSuggestion>(toggleTaskSuggestions);
 
-            ProjectsTableView.TableFooterView = new UIView();
+            var bindingSet = this.CreateBindingSet<SelectProjectViewController, SelectProjectViewModel>();
 
-            ProjectsTableView.Rx()
-                .Bind(source, ViewModel.CreateEntitySuggestion.Select(createEntitySuggestion => createEntitySuggestion != null))
-                .DisposedBy(DisposeBag);
+            bindingSet.Bind(EmptyStateLabel)
+                      .For(v => v.BindVisible())
+                      .To(vm => vm.IsEmpty);
 
-            ViewModel.IsEmpty
-                .Subscribe(EmptyStateLabel.Rx().IsVisible())
-                .DisposedBy(DisposeBag);
+            bindingSet.Bind(EmptyStateImage)
+                      .For(v => v.BindVisible())
+                      .To(vm => vm.IsEmpty);
 
-            ViewModel.IsEmpty
-                .Subscribe(EmptyStateImage.Rx().IsVisible())
-                .DisposedBy(DisposeBag);
+            //Table view
+            bindingSet.Bind(source)
+                      .For(v => v.ObservableCollection)
+                      .To(vm => vm.Suggestions);
 
-            ViewModel.PlaceholderText
-                .Subscribe(TextField.Rx().PlaceholderText())
-                .DisposedBy(DisposeBag);
+            bindingSet.Bind(source)
+                      .For(v => v.CreateCommand)
+                      .To(vm => vm.CreateProjectCommand);
 
-            ViewModel.CreateEntitySuggestion
-                .Subscribe(source.OnCreateEntitySuggestion)
-                .DisposedBy(DisposeBag);
+            bindingSet.Bind(source)
+                      .For(v => v.SuggestCreation)
+                      .To(vm => vm.SuggestCreation);
 
-            TextField.Rx().Text()
-                .Subscribe(ViewModel.FilterText)
-                .DisposedBy(DisposeBag);
+            bindingSet.Bind(source)
+                      .For(v => v.UseGrouping)
+                      .To(vm => vm.UseGrouping);
 
-            CloseButton.Rx()
-                .BindAction(ViewModel.Close)
-                .DisposedBy(DisposeBag);
+            bindingSet.Bind(source)
+                      .For(v => v.Text)
+                      .To(vm => vm.Text);
+            
+            //Text
+            bindingSet.Bind(TextField).To(vm => vm.Text);
 
-            source.ItemSelected
-                .Subscribe(ViewModel.SelectProject.Inputs)
-                .DisposedBy(DisposeBag);
+            bindingSet.Bind(TextField)
+                      .For(v => v.BindPlaceholder())
+                      .To(vm => vm.PlaceholderText);
 
-            source.ToggleTaskSuggestion
-                .Subscribe(ViewModel.ToggleTaskSuggestions.Inputs)
-                .DisposedBy(DisposeBag);
+            //Commands
+            bindingSet.Bind(CloseButton).To(vm => vm.CloseCommand);
+            bindingSet.Bind(source)
+                      .For(s => s.SelectionChangedCommand)
+                      .To(vm => vm.SelectProjectCommand);
+            
+            bindingSet.Apply();
 
             TextField.BecomeFirstResponder();
         }

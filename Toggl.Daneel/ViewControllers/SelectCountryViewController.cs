@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reactive;
-using Toggl.Daneel.ViewSources;
+﻿using System.Reactive;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using UIKit;
@@ -10,8 +7,8 @@ using System.Threading.Tasks;
 using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Daneel.Views.CountrySelection;
 using Toggl.Foundation;
-using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Multivac.Extensions;
+using Toggl.Daneel.ViewSources.Generic.TableView;
 
 namespace Toggl.Daneel.ViewControllers
 {
@@ -35,9 +32,9 @@ namespace Toggl.Daneel.ViewControllers
             CountriesTableView.RegisterNibForCellReuse(CountryViewCell.Nib, CountryViewCell.Identifier);
             CountriesTableView.RowHeight = rowHeight;
 
-            var source = new ReloadTableViewSource<string, SelectableCountryViewModel>(
-                CountryViewCell.CellConfiguration(CountryViewCell.Identifier)
-            );
+            var source = new CustomTableViewSource<string, SelectableCountryViewModel>(
+                CountryViewCell.CellConfiguration(CountryViewCell.Identifier));
+                
             CountriesTableView.Source = source;
 
             source.Rx().ModelSelected()
@@ -45,7 +42,7 @@ namespace Toggl.Daneel.ViewControllers
                 .DisposedBy(DisposeBag);
 
             ViewModel.Countries
-                .Subscribe(CountriesTableView.Rx().Items(source))
+                .Subscribe(CountriesTableView.Rx().ReloadItems(source))
                 .DisposedBy(DisposeBag);
 
             CloseButton.Rx()

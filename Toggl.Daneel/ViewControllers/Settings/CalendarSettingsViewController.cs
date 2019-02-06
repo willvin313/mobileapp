@@ -1,5 +1,4 @@
-﻿using System;
-using MvvmCross;
+﻿using MvvmCross;
 using MvvmCross.Platforms.Ios.Presenters.Attributes;
 using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Daneel.Extensions;
@@ -43,7 +42,7 @@ namespace Toggl.Daneel.ViewControllers.Settings
             UserCalendarsTableView.Source = source;
 
             ViewModel.Calendars
-                .Subscribe(UserCalendarsTableView.Rx().Sections(source))
+                .Subscribe(UserCalendarsTableView.Rx().ReloadSections(source))
                 .DisposedBy(DisposeBag);
 
             header.EnableCalendarAccessTapped
