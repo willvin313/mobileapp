@@ -716,7 +716,6 @@
     <Compile Include="ViewSources\Generic\ReactiveSectionedListTableViewSource.cs" />
     <Compile Include="ViewSources\Generic\MutableSectionedListTableViewSource.cs" />
     <Compile Include="ViewSources\Generic\TableView\BaseTableViewSource.cs" />
-    <Compile Include="ViewSources\SelectProjectTableViewSource.cs" />
     <Compile Include="Binding\TextFieldSecureTextEntryTargetBinding.cs" />
     <Compile Include="Binding\BarButtonAnimatedEnabledTargetBinding.cs" />
     <Compile Include="Binding\TextFieldFocusTargetBinding.cs" />
