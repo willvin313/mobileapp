@@ -1,5 +1,4 @@
 ﻿using System;
-using Toggl.Daneel.ViewSources;
 using Toggl.Daneel.ViewSources.Generic.TableView;
 using UIKit;
 

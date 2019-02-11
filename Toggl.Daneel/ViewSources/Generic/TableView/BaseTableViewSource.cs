@@ -60,7 +60,7 @@ namespace Toggl.Daneel.ViewSources
 
         public override nint RowsInSection(UITableView tableview, nint section)
             => Sections[(int)section].Items.Count;
-            
+
         protected THeader HeaderOf(nint section)
             => Sections[(int)section].Header;
 

@@ -1,4 +1,4 @@
-using Foundation;
+﻿using Foundation;
 using Toggl.Daneel.Cells;
 using Toggl.Daneel.Views.Client;
 using Toggl.Foundation.MvvmCross.ViewModels;

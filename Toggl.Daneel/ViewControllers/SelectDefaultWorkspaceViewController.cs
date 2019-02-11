@@ -1,5 +1,6 @@
 ﻿using System.Reactive;
 using CoreGraphics;
+using Foundation;
 using Toggl.Daneel.Cells;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Daneel.ViewSources.Generic.TableView;

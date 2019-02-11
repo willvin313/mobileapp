@@ -1,10 +1,12 @@
-﻿using System.Reactive.Disposables;
+﻿using System.Collections.Immutable;
+using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using MvvmCross.Platforms.Ios.Views;
 using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Daneel.Views.Settings;
+using Toggl.Daneel.ViewSources;
 using Toggl.Daneel.ViewSources.Generic.TableView;
 using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross.ViewModels;

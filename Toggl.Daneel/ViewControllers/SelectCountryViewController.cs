@@ -1,4 +1,7 @@
-﻿using System.Reactive;
+﻿using System;
+using System.Collections.Generic;
+using System.Reactive;
+using Toggl.Daneel.ViewSources;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using UIKit;
@@ -7,6 +10,7 @@ using System.Threading.Tasks;
 using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Daneel.Views.CountrySelection;
 using Toggl.Foundation;
+using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Multivac.Extensions;
 using Toggl.Daneel.ViewSources.Generic.TableView;
 
@@ -34,7 +38,7 @@ namespace Toggl.Daneel.ViewControllers
 
             var source = new CustomTableViewSource<string, SelectableCountryViewModel>(
                 CountryViewCell.CellConfiguration(CountryViewCell.Identifier));
-                
+
             CountriesTableView.Source = source;
 
             source.Rx().ModelSelected()
