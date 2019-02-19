@@ -30,6 +30,7 @@
         public const string GdprButton = "SignUpGdprButton";
         public const string GdprCancelButton = "SignUpGdprCancelButton";
         public const string ErrorLabel = "SignUpError";
+        public const string CountryButton = "CountryButton";
     }
 
     public static class ForgotPassword
@@ -64,7 +65,7 @@
     public static class NewProject
     {
         public const string ChangeClient = "ChangeClientButton";
-        public const string CreateButton = "CreateProjectButton"; 
+        public const string CreateButton = "CreateProjectButton";
         public const string ChangeWorkspace = "ChangeWorkspaceButton";
         public const string TogglePrivateProject = "PrivateProjectSwitchContainer";
     }
