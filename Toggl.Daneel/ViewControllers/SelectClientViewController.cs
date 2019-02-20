@@ -8,6 +8,7 @@ using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Daneel.Views.Client;
 using Toggl.Daneel.ViewSources;
+using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Multivac.Extensions;
@@ -18,8 +19,6 @@ namespace Toggl.Daneel.ViewControllers
     [ModalCardPresentation]
     public partial class SelectClientViewController : KeyboardAwareViewController<SelectClientViewModel>, IDismissableViewController
     {
-        private ClientTableViewSource tableViewSource = new ClientTableViewSource();
-
         public SelectClientViewController()
             : base(nameof(SelectClientViewController))
         {
@@ -29,13 +28,18 @@ namespace Toggl.Daneel.ViewControllers
         {
             base.ViewDidLoad();
 
+            TitleLabel.Text = Resources.Clients;
+            SearchTextField.Placeholder = Resources.AddFilterClients;
+
             SuggestionsTableView.RegisterNibForCellReuse(ClientViewCell.Nib, ClientViewCell.Identifier);
             SuggestionsTableView.RegisterNibForCellReuse(CreateClientViewCell.Nib, CreateClientViewCell.Identifier);
             SuggestionsTableView.SeparatorStyle = UITableViewCellSeparatorStyle.None;
+
+            var tableViewSource = new ClientTableViewSource(SuggestionsTableView);
             SuggestionsTableView.Source = tableViewSource;
 
             ViewModel.Clients
-                .Subscribe(replaceClients)
+                .Subscribe(SuggestionsTableView.Rx().ReloadItems(tableViewSource))
                 .DisposedBy(DisposeBag);
 
             CloseButton.Rx()
@@ -46,7 +50,7 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(ViewModel.FilterText)
                 .DisposedBy(DisposeBag);
 
-            tableViewSource.ClientSelected
+            tableViewSource.Rx().ModelSelected()
                 .Subscribe(ViewModel.SelectClient.Inputs)
                 .DisposedBy(DisposeBag);
 
@@ -57,12 +61,6 @@ namespace Toggl.Daneel.ViewControllers
         {
             ViewModel.Close.Execute(Unit.Default);
             return true;
-        }
-
-        private void replaceClients(IEnumerable<SelectableClientBaseViewModel> clients)
-        {
-            tableViewSource.SetNewClients(clients);
-            SuggestionsTableView.ReloadData();
         }
 
         protected override void KeyboardWillShow(object sender, UIKeyboardEventArgs e)

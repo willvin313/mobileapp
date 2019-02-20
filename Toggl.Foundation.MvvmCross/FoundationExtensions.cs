@@ -48,7 +48,8 @@ namespace Toggl.Foundation.MvvmCross
                     foundation.TimeService,
                     foundation.AnalyticsService,
                     foundation.LastTimeUsageStorage,
-                    foundation.Scheduler);
+                    foundation.Scheduler,
+                    foundation.StopwatchProvider);
 
             ITogglDataSource createDataSource(ITogglApi api)
             {
@@ -57,8 +58,6 @@ namespace Toggl.Foundation.MvvmCross
                         foundation.Database,
                         foundation.TimeService,
                         createSyncManager(api),
-                        foundation.NotificationService,
-                        foundation.ShortcutCreator,
                         foundation.AnalyticsService)
                     .RegisterServices();
 
@@ -92,11 +91,9 @@ namespace Toggl.Foundation.MvvmCross
             Mvx.RegisterSingleton(foundation.Scheduler);
             Mvx.RegisterSingleton(foundation.ApiFactory);
             Mvx.RegisterSingleton(foundation.TimeService);
-            Mvx.RegisterSingleton(foundation.MailService);
             Mvx.RegisterSingleton(foundation.RatingService);
             Mvx.RegisterSingleton(foundation.ShortcutCreator);
             Mvx.RegisterSingleton(foundation.LicenseProvider);
-            Mvx.RegisterSingleton(foundation.FeedbackService);
             Mvx.RegisterSingleton(foundation.ShortcutCreator);
             Mvx.RegisterSingleton(foundation.AnalyticsService);
             Mvx.RegisterSingleton(foundation.PlatformInfo);
@@ -118,12 +115,6 @@ namespace Toggl.Foundation.MvvmCross
             Mvx.RegisterSingleton(foundation.PrivateSharedStorageService);
             Mvx.RegisterSingleton(foundation.PasswordManagerService ?? new StubPasswordManagerService());
             Mvx.RegisterSingleton(foundation.RxActionFactory);
-
-            // Feedback service is obsolete and is used only in the Android App and should be removed soon
-            if (foundation.FeedbackService != null)
-            {
-                Mvx.RegisterSingleton(foundation.FeedbackService);
-            }
         }
     }
 }

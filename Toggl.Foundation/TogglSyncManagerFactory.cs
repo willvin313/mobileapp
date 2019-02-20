@@ -3,6 +3,7 @@ using System.Reactive.Concurrency;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.DataSources.Interfaces;
+using IStopwatchProvider = Toggl.Foundation.Diagnostics.IStopwatchProvider;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Models;
 using Toggl.Foundation.Models.Interfaces;
@@ -30,16 +31,17 @@ namespace Toggl.Foundation
             ITimeService timeService,
             IAnalyticsService analyticsService,
             ILastTimeUsageStorage lastTimeUsageStorage,
-            IScheduler scheduler)
+            IScheduler scheduler,
+            IStopwatchProvider stopwatchProvider)
         {
             var queue = new SyncStateQueue();
             var entryPoints = new StateMachineEntryPoints();
-            var transitions = new TransitionHandlerProvider();
+            var transitions = new TransitionHandlerProvider(analyticsService);
             ConfigureTransitions(transitions, database, api, dataSource, scheduler, timeService, analyticsService, entryPoints, queue);
             var stateMachine = new StateMachine(transitions, scheduler);
             var orchestrator = new StateMachineOrchestrator(stateMachine, entryPoints);
 
-            return new SyncManager(queue, orchestrator, analyticsService, lastTimeUsageStorage, timeService);
+            return new SyncManager(queue, orchestrator, analyticsService, lastTimeUsageStorage, timeService, stopwatchProvider);
         }
 
         public static void ConfigureTransitions(
@@ -53,8 +55,8 @@ namespace Toggl.Foundation
             StateMachineEntryPoints entryPoints,
             ISyncStateQueue queue)
         {
-            var minutesLeakyBucket = new LeakyBucket(timeService, slotsPerWindow: 60, movingWindowSize: TimeSpan.FromSeconds(60));
-            var secondsLeakyBucket = new LeakyBucket(timeService, slotsPerWindow: 3, movingWindowSize: TimeSpan.FromSeconds(1));
+            var minutesLeakyBucket = new LeakyBucket(timeService, analyticsService, slotsPerWindow: 60, movingWindowSize: TimeSpan.FromSeconds(60));
+            var secondsLeakyBucket = new LeakyBucket(timeService, analyticsService, slotsPerWindow: 3, movingWindowSize: TimeSpan.FromSeconds(1));
             var rateLimiter = new RateLimiter(secondsLeakyBucket, scheduler);
 
             configurePullTransitions(transitions, database, api, dataSource, timeService, analyticsService, scheduler, entryPoints.StartPullSync, minutesLeakyBucket, rateLimiter, queue);
@@ -273,6 +275,8 @@ namespace Toggl.Foundation
             var deleteOlderEntries = new DeleteOldTimeEntriesState(timeService, dataSource.TimeEntries);
             var deleteUnsnecessaryProjectPlaceholders = new DeleteUnnecessaryProjectPlaceholdersState(dataSource.Projects, dataSource.TimeEntries);
 
+            var checkForInaccessibleWorkspaces = new CheckForInaccessibleWorkspacesState(dataSource);
+
             var deleteInaccessibleTimeEntries = new DeleteInaccessibleTimeEntriesState(dataSource.TimeEntries);
             var deleteInaccessibleTags = new DeleteNonReferencedInaccessibleTagsState(dataSource.Tags, dataSource.TimeEntries);
             var deleteInaccessibleTasks = new DeleteNonReferencedInaccessibleTasksState(dataSource.Tasks, dataSource.TimeEntries);
@@ -292,7 +296,10 @@ namespace Toggl.Foundation
             transitions.ConfigureTransition(entryPoint, deleteOlderEntries);
             transitions.ConfigureTransition(deleteOlderEntries.Done, deleteUnsnecessaryProjectPlaceholders);
 
-            transitions.ConfigureTransition(deleteUnsnecessaryProjectPlaceholders.Done, deleteInaccessibleTimeEntries);
+            transitions.ConfigureTransition(deleteUnsnecessaryProjectPlaceholders.Done, checkForInaccessibleWorkspaces);
+            transitions.ConfigureTransition(checkForInaccessibleWorkspaces.NoInaccessibleWorkspaceFound, new DeadEndState());
+            transitions.ConfigureTransition(checkForInaccessibleWorkspaces.FoundInaccessibleWorkspaces, deleteInaccessibleTimeEntries);
+
             transitions.ConfigureTransition(deleteInaccessibleTimeEntries.Done, deleteInaccessibleTags);
             transitions.ConfigureTransition(deleteInaccessibleTags.Done, deleteInaccessibleTasks);
             transitions.ConfigureTransition(deleteInaccessibleTasks.Done, deleteInaccessibleProjects);

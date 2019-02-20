@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FsCheck;
@@ -20,6 +22,7 @@ using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Foundation.Tests.Mocks;
+using Toggl.Foundation.Tests.TestExtensions;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Xunit;
@@ -215,7 +218,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 viewModel.ShouldShowOnboarding.Subscribe(observer);
 
                 TestScheduler.Start();
-                observer.Messages.Single().Value.Value.Should().BeTrue();
+                observer.SingleEmittedValue().Should().BeTrue();
             }
 
             [Fact, LogIfTooSlow]
@@ -228,7 +231,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 viewModel.ShouldShowOnboarding.Subscribe(observer);
                 TestScheduler.Start();
 
-                observer.Messages.Single().Value.Value.Should().BeFalse();
+                observer.SingleEmittedValue().Should().BeFalse();
             }
 
             [Fact, LogIfTooSlow]
@@ -835,8 +838,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     Start = calendarItem.StartTime,
                     Duration = (long)calendarItem.Duration.Value.TotalSeconds + 10
                 };
-                DataSource.TimeEntries
-                    .GetById(Arg.Any<long>())
+                InteractorFactory.GetTimeEntryById(Arg.Any<long>())
+                    .Execute()
                     .Returns(Observable.Return(timeEntry));
 
                 ViewModel.OnUpdateTimeEntry.Execute(calendarItem);
@@ -852,8 +855,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     Start = calendarItem.StartTime.Add(TimeSpan.FromHours(1)),
                     Duration = (long)calendarItem.Duration.Value.TotalSeconds
                 };
-                DataSource.TimeEntries
-                    .GetById(Arg.Any<long>())
+                InteractorFactory.GetTimeEntryById(Arg.Any<long>())
+                    .Execute()
                     .Returns(Observable.Return(timeEntry));
 
                 ViewModel.OnUpdateTimeEntry.Execute(calendarItem);
@@ -869,14 +872,211 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     Start = calendarItem.StartTime.Add(TimeSpan.FromHours(1)),
                     Duration = (long)calendarItem.Duration.Value.TotalSeconds + 10
                 };
-                DataSource.TimeEntries
-                    .GetById(Arg.Any<long>())
+                InteractorFactory.GetTimeEntryById(Arg.Any<long>())
+                    .Execute()
                     .Returns(Observable.Return(timeEntry));
 
                 ViewModel.OnUpdateTimeEntry.Execute(calendarItem);
 
                 AnalyticsService.TimeEntryChangedFromCalendar.Received().Track(CalendarChangeEvent.Duration);
                 AnalyticsService.TimeEntryChangedFromCalendar.Received().Track(CalendarChangeEvent.StartTime);
+            }
+        }
+
+        public sealed class TheCalendarEventLongPressedAction : CalendarViewModelTest
+        {
+            private CalendarItem calendarEvent = new CalendarItem(
+                "id",
+                CalendarItemSource.Calendar,
+                new DateTimeOffset(2018, 8, 20, 10, 0, 0, TimeSpan.Zero),
+                new TimeSpan(45),
+                "This is a calendar event",
+                CalendarIconKind.None,
+                color: "#ff0000",
+                timeEntryId: TimeEntryId,
+                calendarId: "abcd-1234-abcd-1234");
+
+            [Fact, LogIfTooSlow]
+            public async Task PresentsTwoOptionsToTheUserWhenTheEventStartsInTheFuture()
+            {
+                TimeService.CurrentDateTime.Returns(calendarEvent.StartTime - TimeSpan.FromHours(1));
+
+                ViewModel.OnCalendarEventLongPressed.Inputs.OnNext(calendarEvent);
+
+                await DialogService.Received().Select(
+                    Arg.Any<string>(),
+                    Arg.Is<IEnumerable<(string, CalendarItem?)>>(options => options.Count() == 2),
+                    Arg.Any<int>());
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task PresentsThreeOptionsToTheUserWhenTheEventStartsInThePast()
+            {
+                TimeService.CurrentDateTime.Returns(calendarEvent.StartTime + TimeSpan.FromHours(1));
+
+                ViewModel.OnCalendarEventLongPressed.Inputs.OnNext(calendarEvent);
+
+                await DialogService.Received().Select(
+                    Arg.Any<string>(),
+                    Arg.Is<IEnumerable<(string, CalendarItem?)>>(options => options.Count() == 3),
+                    Arg.Any<int>());
+            }
+
+            [Fact, LogIfTooSlow]
+            public void DoesNotCreateAnyTimeEntryWhenUserSelectsTheCancelOption()
+            {
+                DialogService.Select<CalendarItem?>(null, null, 0)
+                    .ReturnsForAnyArgs(Observable.Return<CalendarItem?>(null));
+
+                ViewModel.OnCalendarEventLongPressed.Inputs.OnNext(calendarEvent);
+
+                InteractorFactory
+                    .DidNotReceive()
+                    .CreateTimeEntry(Arg.Any<ITimeEntryPrototype>());
+            }
+
+            [Fact, LogIfTooSlow]
+            public void AllowsCopyingOfTheCalendarEventIntoATimeEntry()
+            {
+                selectOptionByOptionText(Resources.CalendarCopyEventToTimeEntry);
+
+                ViewModel.OnCalendarEventLongPressed.Inputs.OnNext(calendarEvent);
+
+                InteractorFactory
+                    .Received()
+                    .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(
+                        te => te.StartTime == calendarEvent.StartTime && te.Duration == calendarEvent.Duration));
+            }
+
+            [Fact, LogIfTooSlow]
+            public void AllowsStartingTheCalendarEventWithTheStartTimeSetToNow()
+            {
+                selectOptionByOptionText(Resources.CalendarStartNow);
+
+                ViewModel.OnCalendarEventLongPressed.Inputs.OnNext(calendarEvent);
+
+                InteractorFactory
+                    .Received()
+                    .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(
+                        te => te.StartTime == Now && te.Duration == null));
+            }
+
+            [Fact, LogIfTooSlow]
+            public void AllowsStartingTheCalendarEventWithTheStartTimeSetToTheCalendarEventStartWhenItStartsInThePast()
+            {
+                TimeService.CurrentDateTime.Returns(calendarEvent.StartTime + TimeSpan.FromMinutes(37));
+                selectOptionByOptionText(Resources.CalendarStartWhenTheEventStarts);
+
+                ViewModel.OnCalendarEventLongPressed.Inputs.OnNext(calendarEvent);
+
+                InteractorFactory
+                    .Received()
+                    .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(
+                        te => te.StartTime == calendarEvent.StartTime && te.Duration == null));
+            }
+
+            private void selectOptionByOptionText(string text)
+            {
+                DialogService.Select<CalendarItem?>(null, null, 0)
+                    .ReturnsForAnyArgs(callInfo =>
+                    {
+                        var copyOption = callInfo.Arg<IEnumerable<(string, CalendarItem?)>>()
+                            .Single(option => option.Item1 == text)
+                            .Item2;
+                        return Observable.Return(copyOption);
+                    });
+            }
+        }
+
+        public sealed class TheTimeTrackedTodayProperty : CalendarViewModelTest
+        {
+            private readonly ISubject<DurationFormat> durationFormatSubject = new Subject<DurationFormat>();
+            private readonly ISubject<TimeSpan> trackedTimeSubject = new Subject<TimeSpan>();
+
+            private static readonly TimeSpan duration = TimeSpan.FromHours(1.5);
+
+            [Theory, LogIfTooSlow]
+            [InlineData(DurationFormat.Classic, "00 sec")]
+            [InlineData(DurationFormat.Improved, "0:00:00")]
+            [InlineData(DurationFormat.Decimal, "00.00 h")]
+            public void StartsWithZero(DurationFormat format, string expectedOutput)
+            {
+                var observer = TestScheduler.CreateObserver<string>();
+                ViewModel.TimeTrackedToday.Subscribe(observer);
+
+                durationFormatSubject.OnNext(format);
+                TestScheduler.Start();
+
+                observer.Messages.First().Value.Value.Should().Be(expectedOutput);
+            }
+
+            [Theory, LogIfTooSlow]
+            [InlineData(DurationFormat.Classic, "01:30:00")]
+            [InlineData(DurationFormat.Improved, "1:30:00")]
+            [InlineData(DurationFormat.Decimal, "01.50 h")]
+            public void EmitsCorrectlyFormattedTimeBasedOnUsersPreferences(DurationFormat format, string expectedOutput)
+            {
+                var observer = TestScheduler.CreateObserver<string>();
+                ViewModel.TimeTrackedToday.Subscribe(observer);
+
+                durationFormatSubject.OnNext(format);
+                trackedTimeSubject.OnNext(duration);
+                TestScheduler.Start();
+
+                observer.Messages.Skip(1).First().Value.Value.Should().Be(expectedOutput);
+            }
+
+            protected override void AdditionalSetup()
+            {
+                var preferencesObservable =
+                    durationFormatSubject.Select(format => new MockPreferences { DurationFormat = format } as IThreadSafePreferences);
+
+                DataSource.Preferences.Current
+                    .Returns(preferencesObservable);
+                InteractorFactory.ObserveTimeTrackedToday().Execute()
+                    .Returns(trackedTimeSubject.AsObservable());
+            }
+        }
+
+        public sealed class TheCurrentDateProperty : CalendarViewModelTest
+        {
+            private readonly ISubject<DateFormat> dateFormatSubject = new Subject<DateFormat>();
+            private readonly ISubject<DateTimeOffset> dateSubject = new Subject<DateTimeOffset>();
+
+            private static readonly DateTimeOffset date = new DateTimeOffset(2019, 01, 19, 23, 50, 00, TimeSpan.FromHours(-1));
+
+            public static IEnumerable<object[]> DatesAndPreferences()
+                => new[]
+                {
+                    new object[] { DateFormat.FromLocalizedDateFormat("YYYY-MM-DD") },
+                    new object[] { DateFormat.FromLocalizedDateFormat("DD.MM.YYYY") },
+                    new object[] { DateFormat.FromLocalizedDateFormat("DD/MM") }
+                };
+
+            [Theory, LogIfTooSlow]
+            [MemberData(nameof(DatesAndPreferences))]
+            public void EmitsCorrectlyFormattedTimeBasedOnUsersPreferences(DateFormat format)
+            {
+                var expectedOutput = date.ToLocalTime().ToString(format.Long, CultureInfo.InvariantCulture);
+                var observer = TestScheduler.CreateObserver<string>();
+                ViewModel.CurrentDate.Subscribe(observer);
+
+                dateFormatSubject.OnNext(format);
+                dateSubject.OnNext(date);
+                TestScheduler.Start();
+
+                observer.Messages.First().Value.Value.Should().Be(expectedOutput);
+            }
+
+            protected override void AdditionalSetup()
+            {
+                var preferencesObservable =
+                    dateFormatSubject.Select(format => new MockPreferences { DateFormat = format } as IThreadSafePreferences);
+
+                DataSource.Preferences.Current
+                    .Returns(preferencesObservable);
+                TimeService.CurrentDateTimeObservable
+                    .Returns(dateSubject.AsObservable());
             }
         }
     }

@@ -9,6 +9,7 @@ using FsCheck;
 using FsCheck.Xunit;
 using Microsoft.Reactive.Testing;
 using NSubstitute;
+using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DTOs;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Parameters;
@@ -17,6 +18,7 @@ using Toggl.Foundation.MvvmCross.ViewModels.Settings;
 using Toggl.Foundation.Sync;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Foundation.Tests.Mocks;
+using Toggl.Foundation.Tests.TestExtensions;
 using Toggl.Multivac;
 using Xunit;
 
@@ -50,7 +52,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     PlatformInfo,
                     DialogService,
                     UserPreferences,
-                    FeedbackService,
                     AnalyticsService,
                     UserAccessManager,
                     InteractorFactory,
@@ -59,7 +60,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     PrivateSharedStorageService,
                     IntentDonationService,
                     StopwatchProvider,
-                    RxActionFactory);
+                    RxActionFactory,
+                    SchedulerProvider);
             }
 
             protected virtual void SetupObservables()
@@ -76,7 +78,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 bool useUserAccessManager,
                 bool useDialogService,
                 bool useUserPreferences,
-                bool useFeedbackService,
                 bool useAnalyticsService,
                 bool useInteractorFactory,
                 bool useplatformInfo,
@@ -85,13 +86,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 bool usePrivateSharedStorageService,
                 bool useIntentDonationService,
                 bool useStopwatchProvider,
-                bool useRxActionFactory)
+                bool useRxActionFactory,
+                bool useSchedulerProvider)
             {
                 var dataSource = useDataSource ? DataSource : null;
                 var platformInfo = useplatformInfo ? PlatformInfo : null;
                 var dialogService = useDialogService ? DialogService : null;
                 var userPreferences = useUserPreferences ? UserPreferences : null;
-                var feedbackService = useFeedbackService ? FeedbackService : null;
                 var analyticsService = useAnalyticsService ? AnalyticsService : null;
                 var userAccessManager = useUserAccessManager ? UserAccessManager : null;
                 var onboardingStorage = useOnboardingStorage ? OnboardingStorage : null;
@@ -101,6 +102,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var intentDonationService = useIntentDonationService ? IntentDonationService : null;
                 var privateSharedStorageService = usePrivateSharedStorageService ? PrivateSharedStorageService : null;
                 var rxActionFactory = useRxActionFactory ? RxActionFactory : null;
+                var schedulerProvider = useSchedulerProvider ? SchedulerProvider : null;
 
                 Action tryingToConstructWithEmptyParameters =
                     () => new SettingsViewModel(
@@ -108,7 +110,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         platformInfo,
                         dialogService,
                         userPreferences,
-                        feedbackService,
                         analyticsService,
                         userAccessManager,
                         interactorFactory,
@@ -117,7 +118,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         privateSharedStorageService,
                         intentDonationService,
                         stopwatchProvider,
-                        rxActionFactory);
+                        rxActionFactory,
+                        schedulerProvider);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
@@ -142,9 +144,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     syncingObserver.Messages.Clear();
 
                     ProgressSubject.OnNext(state);
+                    TestScheduler.Start();
+                    TestScheduler.Stop();
 
-                    var isSynced = syncedObserver.Messages.Single().Value.Value;
-                    var isRunningSync = syncingObserver.Messages.Single().Value.Value;
+                    var isSynced = syncedObserver.SingleEmittedValue();
+                    var isRunningSync = syncingObserver.SingleEmittedValue();
 
                     (isRunningSync && isSynced).Should().BeFalse();
                 }
@@ -164,8 +168,10 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     observer.Messages.Clear();
 
                     ProgressSubject.OnNext(state);
+                    TestScheduler.Start();
+                    TestScheduler.Stop();
 
-                    var isRunningSync = observer.Messages.Single().Value.Value;
+                    var isRunningSync = observer.SingleEmittedValue();
                     isRunningSync.Should().Be(state == SyncProgress.Syncing);
                 }
             }
@@ -186,8 +192,10 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     observer.Messages.Clear();
 
                     ProgressSubject.OnNext(state);
+                    TestScheduler.Start();
+                    TestScheduler.Stop();
 
-                    var isSynced = observer.Messages.Single().Value.Value;
+                    var isSynced = observer.SingleEmittedValue();
                     isSynced.Should().Be(state == SyncProgress.Synced);
                 }
             }
@@ -204,6 +212,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 UserSubject.OnNext(new MockUser { Email = Email.From("newmail@mail.com") });
                 UserSubject.OnNext(new MockUser { Email = Email.From("newmail@mail.com") });
                 UserSubject.OnNext(new MockUser { Email = Email.From("differentmail@mail.com") });
+                TestScheduler.Start();
 
                 observer.Messages.Count.Should().Be(2);
             }
@@ -220,6 +229,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 UserSubject.OnNext(new MockUser { ImageUrl = "http://toggl.com/image.jpg" });
                 UserSubject.OnNext(new MockUser { ImageUrl = "http://toggl.com/image.jpg" });
                 UserSubject.OnNext(new MockUser { ImageUrl = "http://toggl.com/image2.jpg" });
+                TestScheduler.Start();
 
                 observer.Messages.Count.Should().Be(2);
             }
@@ -233,6 +243,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 UserSubject.OnNext(new MockUser { ImageUrl = "http://toggl.com/image.jpg" });
                 UserSubject.OnNext(new MockUser { ImageUrl = "http://toggl.com/image.jpg" });
                 UserSubject.OnNext(new MockUser { ImageUrl = "http://toggl.com/image2.jpg" });
+                TestScheduler.Start();
 
                 InteractorFactory.Received(2).GetUserAvatar(Arg.Any<string>());
             }
@@ -255,25 +266,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task CallsLogoutOnTheDataSource()
+            public async Task ExecutesTheLogoutInteractor()
             {
                 doNotShowConfirmationDialog();
 
-                ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
-
-                await UserAccessManager.Received().Logout();
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task ResetsUserPreferences()
-            {
-                doNotShowConfirmationDialog();
-
                 ViewModel.TryLogout.Execute();
-                TestScheduler.Start();
 
-                UserPreferences.Received().Reset();
+                await InteractorFactory.Received().Logout(LogoutSource.Settings).Execute();
             }
 
             [Fact, LogIfTooSlow]
@@ -281,8 +281,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 doNotShowConfirmationDialog();
 
-                ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
+                ViewModel.TryLogout.Execute();
 
                 await NavigationService.Received().Navigate<LoginViewModel>();
             }
@@ -292,8 +292,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 ProgressSubject.OnNext(SyncProgress.Synced);
 
-                ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
+                ViewModel.TryLogout.Execute();
 
                 await DataSource.Received().HasUnsyncedData();
             }
@@ -303,8 +303,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 doNotShowConfirmationDialog();
 
-                ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
+                ViewModel.TryLogout.Execute();
 
                 await DialogService.DidNotReceiveWithAnyArgs().Confirm("", "", "", "");
             }
@@ -315,8 +315,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 DataSource.HasUnsyncedData().Returns(Observable.Return(false));
                 ProgressSubject.OnNext(SyncProgress.Syncing);
 
-                ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
+                ViewModel.TryLogout.Execute();
 
                 await DialogService.ReceivedWithAnyArgs().Confirm("", "", "", "");
             }
@@ -327,8 +327,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 DataSource.HasUnsyncedData().Returns(Observable.Return(true));
                 ProgressSubject.OnNext(SyncProgress.Syncing);
 
-                ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
+                ViewModel.TryLogout.Execute();
 
                 await DialogService.ReceivedWithAnyArgs().Confirm("", "", "", "");
             }
@@ -343,10 +343,10 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     Arg.Any<string>(),
                     Arg.Any<string>()).Returns(Observable.Return(false));
 
-                ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
+                ViewModel.TryLogout.Execute();
 
-                await UserAccessManager.DidNotReceive().Logout();
+                InteractorFactory.DidNotReceive().Logout(Arg.Any<LogoutSource>());
                 await NavigationService.DidNotReceive().Navigate<LoginViewModel>();
             }
 
@@ -360,50 +360,17 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     Arg.Any<string>(),
                     Arg.Any<string>()).Returns(Observable.Return(true));
 
-                ViewModel.TryLogout.Execute();
                 TestScheduler.Start();
+                ViewModel.TryLogout.Execute();
 
-                await UserAccessManager.Received().Logout();
+                await InteractorFactory.Received().Logout(LogoutSource.Settings).Execute();
                 await NavigationService.Received().Navigate<LoginViewModel>();
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task TracksLogoutEvent()
-            {
-                doNotShowConfirmationDialog();
-
-                ViewModel.TryLogout.Execute();
-                TestScheduler.Start();
-
-                AnalyticsService.Logout.Received().Track(Analytics.LogoutSource.Settings);
             }
 
             private void doNotShowConfirmationDialog()
             {
                 DataSource.HasUnsyncedData().Returns(Observable.Return(false));
                 ProgressSubject.OnNext(SyncProgress.Synced);
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task ClearsPrivateSharedStorage()
-            {
-                doNotShowConfirmationDialog();
-
-                ViewModel.TryLogout.Execute();
-                TestScheduler.Start();
-
-                PrivateSharedStorageService.Received().ClearAll();
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task ClearsDonatedIntents()
-            {
-                doNotShowConfirmationDialog();
-
-                ViewModel.TryLogout.Execute();
-                TestScheduler.Start();
-
-                IntentDonationService.Received().ClearAll();
             }
         }
 
@@ -443,14 +410,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 TestScheduler.Start();
 
                 await NavigationService.Received()
-                    .Navigate<SelectWorkspaceViewModel, WorkspaceParameters, long>(Arg.Any<WorkspaceParameters>());
+                    .Navigate<SelectWorkspaceViewModel, long, long>(Arg.Any<long>());
             }
 
             [Fact, LogIfTooSlow]
             public async Task UpdatesTheUserWithTheReceivedWorspace()
             {
                 NavigationService
-                    .Navigate<SelectWorkspaceViewModel, WorkspaceParameters, long>(Arg.Any<WorkspaceParameters>())
+                    .Navigate<SelectWorkspaceViewModel, long, long>(Arg.Any<long>())
                     .Returns(Task.FromResult(workspaceId));
 
                 ViewModel.PickDefaultWorkspace.Execute();
@@ -466,7 +433,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task StartsTheSyncAlgorithm()
             {
                 NavigationService
-                    .Navigate<SelectWorkspaceViewModel, WorkspaceParameters, long>(Arg.Any<WorkspaceParameters>())
+                    .Navigate<SelectWorkspaceViewModel, long, long>(Arg.Any<long>())
                     .Returns(Task.FromResult(workspaceId));
 
                 ViewModel.PickDefaultWorkspace.Execute();
@@ -842,17 +809,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 viewModel.IsFeedbackSuccessViewShowing.StartWith(true).Subscribe(observer);
                 viewModel.CloseFeedbackSuccessView();
-                observer.Messages.Last().Value.Value.Should().BeFalse();
-            }
-        }
+                TestScheduler.Start();
 
-        public sealed class TheSubmitFeedbackUsingEmailMethod : SettingsViewModelTest
-        {
-            [Fact, LogIfTooSlow]
-            public async Task CallsTheFeedbackService()
-            {
-                await ViewModel.SubmitFeedbackUsingEmail();
-                await FeedbackService.Received().SubmitFeedback();
+                observer.LastEmittedValue().Should().BeFalse();
             }
         }
 

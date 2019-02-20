@@ -2,6 +2,7 @@
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Toggl.Foundation.Analytics;
+using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.Exceptions;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
@@ -19,8 +20,11 @@ namespace Toggl.Foundation.Sync
         private readonly IAnalyticsService analyticsService;
         private readonly ILastTimeUsageStorage lastTimeUsageStorage;
         private readonly ITimeService timeService;
+        private readonly IStopwatchProvider stopwatchProvider;
 
         private bool isFrozen;
+
+        private IStopwatch syncTimeStopwatch;
 
         private readonly ISubject<SyncProgress> progress;
         private readonly ISubject<Exception> errors;
@@ -38,19 +42,22 @@ namespace Toggl.Foundation.Sync
             IStateMachineOrchestrator orchestrator,
             IAnalyticsService analyticsService,
             ILastTimeUsageStorage lastTimeUsageStorage,
-            ITimeService timeService)
+            ITimeService timeService,
+            IStopwatchProvider stopwatchProvider)
         {
             Ensure.Argument.IsNotNull(queue, nameof(queue));
             Ensure.Argument.IsNotNull(orchestrator, nameof(orchestrator));
             Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(lastTimeUsageStorage, nameof(lastTimeUsageStorage));
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
+            Ensure.Argument.IsNotNull(stopwatchProvider, nameof(stopwatchProvider));
 
             this.queue = queue;
             this.orchestrator = orchestrator;
             this.analyticsService = analyticsService;
             this.lastTimeUsageStorage = lastTimeUsageStorage;
             this.timeService = timeService;
+            this.stopwatchProvider = stopwatchProvider;
 
             progress = new BehaviorSubject<SyncProgress>(SyncProgress.Unknown);
             ProgressObservable = progress.AsObservable();
@@ -119,6 +126,10 @@ namespace Toggl.Foundation.Sync
         {
             lock (stateLock)
             {
+                analyticsService.SyncCompleted.Track();
+                syncTimeStopwatch?.Stop();
+                syncTimeStopwatch = null;
+
                 IsRunningSync = false;
 
                 if (result is Success)
@@ -143,6 +154,9 @@ namespace Toggl.Foundation.Sync
 
         private void processError(Exception error)
         {
+            analyticsService.TrackAnonymized(error);
+            analyticsService.SyncFailed.Track(error.GetType().FullName, error.Message, error.StackTrace);
+
             queue.Clear();
             orchestrator.Start(Sleep);
 
@@ -162,7 +176,6 @@ namespace Toggl.Foundation.Sync
             else
             {
                 progress.OnNext(SyncProgress.Failed);
-                analyticsService.TrackAnonymized(error);
             }
 
             if (error is ClientDeprecatedException
@@ -186,7 +199,14 @@ namespace Toggl.Foundation.Sync
         {
             if (IsRunningSync) return;
 
+            if (syncTimeStopwatch == null)
+            {
+                syncTimeStopwatch = stopwatchProvider.Create(MeasuredOperation.Sync);
+                syncTimeStopwatch.Start();
+            }
             var state = isFrozen ? Sleep : queue.Dequeue();
+            analyticsService.SyncOperationStarted.Track(state.ToString());
+
             IsRunningSync = state != Sleep;
 
             if (IsRunningSync && progress.FirstAsync().Wait() != SyncProgress.Syncing)

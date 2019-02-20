@@ -70,7 +70,6 @@ namespace Toggl.Daneel
             var scheduler = Scheduler.Default;
             var timeService = new TimeService(scheduler);
             var topViewControllerProvider = (ITopViewControllerProvider)Presenter;
-            var mailService = new MailServiceIos(topViewControllerProvider);
             var dialogService = new DialogServiceIos(topViewControllerProvider);
             var platformInfo = new PlatformInfoIos();
             var suggestionProviderContainer = new SuggestionProviderContainer(
@@ -90,7 +89,7 @@ namespace Toggl.Daneel
             var calendarService = new CalendarServiceIos(permissionsService);
             var notificationService = new NotificationServiceIos(permissionsService, timeService);
             var backgroundSyncService = new BackgroundSyncServiceIos();
-            var backgroundService = new BackgroundService(timeService);
+            var backgroundService = new BackgroundService(timeService, analyticsService);
             var automaticSyncingService = new AutomaticSyncingService(backgroundService, timeService, analyticsService);
             var errorHandlingService = new ErrorHandlingService(navigationService, settingsStorage);
 
@@ -99,7 +98,6 @@ namespace Toggl.Daneel
                     .ForClient(userAgent, appVersion)
                     .WithDatabase(database)
                     .WithScheduler(scheduler)
-                    .WithMailService(mailService)
                     .WithTimeService(timeService)
                     .WithApiEnvironment(environment)
                     .WithGoogleService<GoogleServiceIos>()
@@ -134,7 +132,6 @@ namespace Toggl.Daneel
                     .WithPasswordManagerService<OnePasswordServiceIos>()
                     .WithErrorHandlingService(errorHandlingService)
                     .WithSyncErrorHandlingService(new SyncErrorHandlingService(errorHandlingService))
-                    .WithFeedbackService(new FeedbackService(userAgent, mailService, dialogService, platformInfo))
                     .WithRxActionFactory(new RxActionFactory(schedulerProvider))
                     .Build();
 

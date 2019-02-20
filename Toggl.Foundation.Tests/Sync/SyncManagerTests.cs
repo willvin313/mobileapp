@@ -18,6 +18,7 @@ using static Toggl.Foundation.Sync.SyncState;
 using Toggl.Ultrawave.Exceptions;
 using Toggl.Ultrawave.Network;
 using Toggl.Foundation.Exceptions;
+using Toggl.Foundation.Diagnostics;
 
 namespace Toggl.Foundation.Tests.Sync
 {
@@ -32,13 +33,14 @@ namespace Toggl.Foundation.Tests.Sync
             protected IAnalyticsService AnalyticsService { get; } = Substitute.For<IAnalyticsService>();
             protected ILastTimeUsageStorage LastTimeUsageStorage { get; } = Substitute.For<ILastTimeUsageStorage>();
             protected ITimeService TimeService { get; } = Substitute.For<ITimeService>();
+            protected IStopwatchProvider StopwatchProvider = Substitute.For<IStopwatchProvider>();
             protected ISyncManager SyncManager { get; }
 
             protected SyncManagerTestBase()
             {
                 Orchestrator.SyncCompleteObservable.Returns(OrchestratorSyncComplete.AsObservable());
                 Orchestrator.StateObservable.Returns(OrchestratorStates.AsObservable());
-                SyncManager = new SyncManager(Queue, Orchestrator, AnalyticsService, LastTimeUsageStorage, TimeService);
+                SyncManager = new SyncManager(Queue, Orchestrator, AnalyticsService, LastTimeUsageStorage, TimeService, StopwatchProvider);
             }
         }
 
@@ -46,16 +48,23 @@ namespace Toggl.Foundation.Tests.Sync
         {
             [Theory, LogIfTooSlow]
             [ConstructorData]
-            public void ThrowsIfAnyArgumentIsNull(bool useQueue, bool useOrchestrator, bool useAnalyticsService, bool useLastTimeUsageStorage, bool useTimeService)
+            public void ThrowsIfAnyArgumentIsNull(
+                bool useQueue, 
+                bool useOrchestrator, 
+                bool useAnalyticsService, 
+                bool useLastTimeUsageStorage, 
+                bool useTimeService,
+                bool useStopwatchProvider)
             {
                 var queue = useQueue ? Queue : null;
                 var orchestrator = useOrchestrator ? Orchestrator : null;
                 var analyticsService = useAnalyticsService ? AnalyticsService : null;
                 var lastTimeUsageStorage = useLastTimeUsageStorage ? LastTimeUsageStorage : null;
                 var timeService = useTimeService ? TimeService : null;
+                var stopwatchProvider = useStopwatchProvider ? StopwatchProvider : null;
 
                 // ReSharper disable once ObjectCreationAsStatement
-                Action constructor = () => new SyncManager(queue, orchestrator, analyticsService, lastTimeUsageStorage, timeService);
+                Action constructor = () => new SyncManager(queue, orchestrator, analyticsService, lastTimeUsageStorage, timeService, stopwatchProvider);
 
                 constructor.Should().Throw<ArgumentNullException>();
             }
@@ -330,6 +339,13 @@ namespace Toggl.Foundation.Tests.Sync
                     Queue.Dequeue();
                 });
             }
+
+            [Fact]
+            public void TracksSyncOperationStarted()
+            {
+                SyncManager.PushSync();
+                AnalyticsService.Received().SyncOperationStarted.Track(SyncState.Push.ToString());
+            }
         }
 
         public sealed class TheForceFullSyncMethod : SyncMethodTests
@@ -372,6 +388,13 @@ namespace Toggl.Foundation.Tests.Sync
 
                 LastTimeUsageStorage.Received().SetSuccessfulFullSync(now);
             }
+
+            [Fact]
+            public void TracksSyncOperationStarted()
+            {
+                SyncManager.ForceFullSync();
+                AnalyticsService.Received().SyncOperationStarted.Track(SyncState.Pull.ToString());
+            }
         }
 
         public sealed class TheCleanUpMethod : SyncMethodTests
@@ -389,6 +412,13 @@ namespace Toggl.Foundation.Tests.Sync
                     Queue.QueueCleanUp();
                     Queue.Dequeue();
                 });
+            }
+
+            [Fact]
+            public void TracksSyncOperationStarted()
+            {
+                SyncManager.CleanUp();
+                AnalyticsService.Received().SyncOperationStarted.Track(SyncState.CleanUp.ToString());
             }
         }
 
@@ -682,6 +712,18 @@ namespace Toggl.Foundation.Tests.Sync
                     new object[] { new ApiDeprecatedException(Substitute.For<IRequest>(), Substitute.For<IResponse>()) },
                     new object[] { new UnauthorizedException(Substitute.For<IRequest>(), Substitute.For<IResponse>()),  }
                 };
+
+            [Fact]
+            public void TracksSyncCompleted()
+            {
+                SyncProgress? emitted = null;
+                Queue.Dequeue().Returns(Sleep);
+
+                OrchestratorSyncComplete.OnNext(new Success(Pull));
+                SyncManager.ProgressObservable.Subscribe(progress => emitted = progress);
+
+                AnalyticsService.Received().SyncCompleted.Track();
+            }
         }
 
         public sealed class ErrorHandling : SyncManagerTestBase
@@ -760,7 +802,6 @@ namespace Toggl.Foundation.Tests.Sync
 
                 OrchestratorSyncComplete.OnNext(new Error(exception));
 
-                AnalyticsService.DidNotReceive().TrackAnonymized(Arg.Any<OfflineException>());
                 AnalyticsService.OfflineModeDetected.Received().Track();
             }
 
@@ -784,6 +825,16 @@ namespace Toggl.Foundation.Tests.Sync
                 Orchestrator.Received().Start(Arg.Is(Push));
             }
 
+            [Fact, LogIfTooSlow]
+            public void TracksSyncError()
+            {
+                var exception = new Exception();
+
+                OrchestratorSyncComplete.OnNext(new Error(exception));
+
+                AnalyticsService.Received().TrackAnonymized(exception);
+                AnalyticsService.Received().SyncFailed.Track(exception.GetType().FullName, exception.Message, exception.StackTrace);
+            }
         }
     }
 }

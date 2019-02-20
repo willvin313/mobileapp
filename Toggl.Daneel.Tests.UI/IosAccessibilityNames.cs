@@ -44,6 +44,7 @@
     {
         public const string StartTimeEntryButton = "MainStartTimeEntry";
         public const string StopTimeEntryButton = "MainStopTimeEntry";
+        public const string TimeEntriesCollection = "TimeEntriesCollection";
     }
 
     public static class StartTimeEntry
@@ -53,5 +54,18 @@
         public const string DescriptionText = "StartTimeEntryDescription";
         public const string DialogDiscard = "Discard";
         public const string DialogCancel = "Cancel";
+    }
+
+    public static class EditTimeEntry
+    {
+        public const string EditTags = "EditTimeEntryTags";
+    }
+
+    public static class NewProject
+    {
+        public const string ChangeClient = "ChangeClientButton";
+        public const string CreateButton = "CreateProjectButton"; 
+        public const string ChangeWorkspace = "ChangeWorkspaceButton";
+        public const string TogglePrivateProject = "PrivateProjectSwitchContainer";
     }
 }

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.MvvmCross.ViewModels;
-using Toggl.Foundation.Tests.Extensions;
+using Toggl.Foundation.Tests.TestExtensions;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
@@ -45,7 +45,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     UserPreferences,
                     AnalyticsService,
                     SchedulerProvider,
-                    RxActionFactory);
+                    RxActionFactory,
+                    InteractorFactory);
         }
 
         public sealed class TheConstructor : TokenResetViewModelTest
@@ -59,7 +60,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 bool useUserPreferences,
                 bool useAnalyticsService,
                 bool useSchedulerProvider,
-                bool useRxActionFactory
+                bool useRxActionFactory,
+                bool useInteractorFactory
             )
             {
                 var userAccessManager = useUserAccessManager ? UserAccessManager : null;
@@ -70,6 +72,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var analyticsService = useAnalyticsService ? AnalyticsService : null;
                 var schedulerProvider = useSchedulerProvider ? SchedulerProvider : null;
                 var rxActionFactory = useRxActionFactory ? RxActionFactory : null;
+                var interactorFactory = useInteractorFactory ? InteractorFactory : null;
 
                 Action tryingToConstructWithEmptyParameters =
                     () => new TokenResetViewModel(
@@ -80,7 +83,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         userPreferences,
                         analyticsService,
                         schedulerProvider,
-                        rxActionFactory);
+                        rxActionFactory,
+                        interactorFactory);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
@@ -97,7 +101,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.Password.OnNext(InvalidPassword.ToString());
 
                 TestScheduler.Start();
-                nextIsEnabledObserver.LastValue().Should().BeFalse();
+                nextIsEnabledObserver.LastEmittedValue().Should().BeFalse();
             }
 
             [Fact, LogIfTooSlow]
@@ -108,7 +112,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.Password.OnNext(ValidPassword.ToString());
 
                 TestScheduler.Start();
-                nextIsEnabledObserver.LastValue().Should().BeTrue();
+                nextIsEnabledObserver.LastEmittedValue().Should().BeTrue();
             }
 
             [Fact, LogIfTooSlow]
@@ -123,7 +127,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.Done.Execute();
 
                 TestScheduler.Start();
-                nextIsEnabledObserver.LastValue().Should().BeFalse();
+                nextIsEnabledObserver.LastEmittedValue().Should().BeFalse();
             }
         }
 
@@ -136,7 +140,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.Password.OnNext(ValidPassword.ToString());
 
                 TestScheduler.Start();
-                passwordObserver.LastValue().Should().Be(ValidPassword);
+                passwordObserver.LastEmittedValue().Should().Be(ValidPassword);
             }
         }
 
@@ -192,7 +196,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.Done.Execute();
                 TestScheduler.Start();
 
-                isLoadingObserver.LastValue().Should().BeFalse();
+                isLoadingObserver.LastEmittedValue().Should().BeFalse();
             }
 
             [Fact, LogIfTooSlow]
@@ -207,7 +211,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 TestScheduler.Start();
                 var messages = isLoadingObserver.Messages.ToList();
-                isLoadingObserver.LastValue().Should().BeFalse();
+                isLoadingObserver.LastEmittedValue().Should().BeFalse();
             }
 
             [Fact, LogIfTooSlow]
@@ -243,18 +247,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SignOut.Execute();
 
                 TestScheduler.Start();
-                await UserAccessManager.Received().Logout();
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task ResetsUserPreferences()
-            {
-                await setup();
-
-                ViewModel.SignOut.Execute();
-
-                TestScheduler.Start();
-                UserPreferences.Received().Reset();
+                await InteractorFactory.Received().Logout(LogoutSource.TokenReset).Execute();
             }
 
             [Fact, LogIfTooSlow]
@@ -288,18 +281,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SignOut.Execute();
 
                 TestScheduler.Start();
-                await DataSource.DidNotReceive().Logout();
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task TracksLogoutEvent()
-            {
-                await setup();
-
-                ViewModel.SignOut.Execute();
-
-                TestScheduler.Start();
-                AnalyticsService.Logout.Received().Track(LogoutSource.TokenReset);
+                InteractorFactory.DidNotReceive().Logout(Arg.Any<LogoutSource>());
             }
         }
     }

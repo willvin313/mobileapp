@@ -1,25 +1,33 @@
-﻿using System.Threading.Tasks;
-using MvvmCross.Binding.BindingContext;
-using MvvmCross.Platforms.Ios.Views;
+﻿using System.Reactive;
+using System.Reactive.Disposables;
+using System.Threading.Tasks;
+using Toggl.Daneel.Extensions;
+using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Daneel.Presentation.Attributes;
+using Toggl.Daneel.Views.Settings;
 using Toggl.Daneel.ViewSources;
+using Toggl.Daneel.ViewSources.Generic.TableView;
+using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Multivac.Extensions;
 
 namespace Toggl.Daneel.ViewControllers
 {
     [ModalCardPresentation]
-    public partial class SelectDurationFormatViewController
-        : MvxViewController<SelectDurationFormatViewModel>,
-          IDismissableViewController
+    public partial class SelectDurationFormatViewController : ReactiveViewController<SelectDurationFormatViewModel>, IDismissableViewController
     {
+        private const int rowHeight = 48;
+
+        CompositeDisposable disposeBag = new CompositeDisposable();
+
         public SelectDurationFormatViewController()
-            : base(nameof(SelectDurationFormatViewController), null)
+            : base(nameof(SelectDurationFormatViewController))
         {
         }
 
         public async Task<bool> Dismiss()
         {
-            await ViewModel.CloseCommand.ExecuteAsync();
+            ViewModel.Close.Execute();
             return true;
         }
 
@@ -27,21 +35,32 @@ namespace Toggl.Daneel.ViewControllers
         {
             base.ViewDidLoad();
 
-            var source = new DurationFormatsTableViewSource(DurationFormatsTableView);
+            TitleLabel.Text = Resources.DurationFormat;
+
+            DurationFormatsTableView.RowHeight = rowHeight;
+            DurationFormatsTableView.RegisterNibForCellReuse(DurationFormatViewCell.Nib, DurationFormatViewCell.Identifier);
+
+            var source = new CustomTableViewSource<Unit, SelectableDurationFormatViewModel>(
+                DurationFormatViewCell.CellConfiguration(DurationFormatViewCell.Identifier),
+                ViewModel.DurationFormats
+            );
+
             DurationFormatsTableView.Source = source;
 
-            var bindingSet = this.CreateBindingSet<SelectDurationFormatViewController, SelectDurationFormatViewModel>();
+            source.Rx().ModelSelected()
+                .Subscribe(ViewModel.SelectDurationFormat.Inputs)
+                .DisposedBy(disposeBag);
 
-            bindingSet.Bind(source).To(vm => vm.DurationFormats);
+            BackButton.Rx()
+                .BindAction(ViewModel.Close)
+                .DisposedBy(disposeBag);
+        }
 
-            bindingSet.Bind(BackButton).To(vm => vm.CloseCommand);
-
-            bindingSet.Bind(source)
-                      .For(v => v.SelectionChangedCommand)
-                      .To(vm => vm.SelectDurationFormatCommand);
-
-            bindingSet.Apply();
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (!disposing) return;
+            disposeBag.Dispose();
         }
     }
 }
-

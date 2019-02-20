@@ -37,7 +37,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private long? clientId;
         private long workspaceId;
         private long initialWorkspaceId;
-        private HashSet<string> projectNames = new HashSet<string>();
+        private long noClientId = 0;
+        private Dictionary<long, HashSet<string>> projectNamesWithClient = new Dictionary<long, HashSet<string>>();
         private IStopwatch navigationFromStartTimeEntryViewModelStopwatch;
 
         public bool IsPrivate { get; set; }
@@ -140,18 +141,42 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private async Task setupNameAlreadyTakenError()
         {
-            var existingProjectNames = await dataSource.Projects
-                                        .GetAll(project => project.WorkspaceId == workspaceId)
-                                        .Select(projects => projects.Select(p => p.Name));
+            projectNamesWithClient.Clear();
+            var projectsInWorkspace = await dataSource.Projects.GetAll(project => project.WorkspaceId == workspaceId);
 
-            projectNames.Clear();
-            projectNames.AddRange(existingProjectNames);
-
-            IsNameAlreadyTaken = projectNames.Contains(TrimmedName);
+            projectsInWorkspace.ForEach(project =>
+            {
+                var key = project.ClientId ?? noClientId;
+                if (projectNamesWithClient.ContainsKey(key))
+                {
+                    projectNamesWithClient[key].Add(project.Name);
+                }
+                else
+                {
+                    projectNamesWithClient[key] = new HashSet<string> { project.Name };
+                }
+            });
+            updateIsNameAlreadyTaken();
         }
 
         private void OnNameChanged()
-            => IsNameAlreadyTaken = projectNames.Contains(TrimmedName);
+        {
+            updateIsNameAlreadyTaken();
+        }
+
+        private void updateIsNameAlreadyTaken()
+        {
+            var key = clientId ?? noClientId;
+            HashSet<string> projectNames;
+            if (projectNamesWithClient.TryGetValue(key, out projectNames))
+            {
+                IsNameAlreadyTaken = projectNames.Contains(TrimmedName);
+            }
+            else
+            {
+                IsNameAlreadyTaken = false;
+            }
+        }
 
         private async Task pickColor()
         {
@@ -200,10 +225,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private async Task pickWorkspace()
         {
-            var parameters = WorkspaceParameters.Create(workspaceId, Resources.Workspaces, allowQuerying: false);
             var selectedWorkspaceId =
                 await navigationService
-                    .Navigate<SelectWorkspaceViewModel, WorkspaceParameters, long>(parameters);
+                    .Navigate<SelectWorkspaceViewModel, long, long>(workspaceId);
 
             if (selectedWorkspaceId == workspaceId) return;
 
@@ -231,14 +255,16 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             if (selectedClientId.Value == 0)
             {
-                selectedClientId = null;
+                clientId = null;
                 ClientName = "";
+                updateIsNameAlreadyTaken();
                 return;
             }
 
-            var client = await dataSource.Clients.GetById(selectedClientId.Value);
+            var client = await interactorFactory.GetClientById(selectedClientId.Value).Execute();
             clientId = client.Id;
             ClientName = client.Name;
+            updateIsNameAlreadyTaken();
         }
 
         private void pickRandomColor()

@@ -21,8 +21,6 @@ using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
-using static Toggl.Foundation.Helper.Constants;
-using SelectTimeOrigin = Toggl.Foundation.MvvmCross.Parameters.SelectTimeParameters.Origin;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels
 {
@@ -57,9 +55,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private BehaviorSubject<bool> hasProjectSubject = new BehaviorSubject<bool>(false);
         private BehaviorSubject<Unit> projectTaskClientSubject = new BehaviorSubject<Unit>(Unit.Default);
-       
+
         [Obsolete("This observable should be converted into separate observables for project, task and client as part of RXFactor.")]
-        public IObservable<Unit> ProjectTaskOrClientChanged { get; } 
+        public IObservable<Unit> ProjectTaskOrClientChanged { get; }
 
         public IObservable<bool> HasProject { get; }
 
@@ -87,14 +85,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public bool IsEditingDescription { get; set; }
 
-        [DependsOn(nameof(Description))]
-        public int DescriptionRemainingLength
-            => MaxTimeEntryDescriptionLengthInBytes - Description.LengthInBytes();
-
-        [DependsOn(nameof(DescriptionRemainingLength))]
-        public bool DescriptionLimitExceeded
-            => DescriptionRemainingLength < 0;
-
         public string Project { get; set; }
 
         public string ProjectColor { get; set; }
@@ -108,22 +98,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         [DependsOn(nameof(StartTime), nameof(StopTime))]
         public TimeSpan Duration
             => (StopTime ?? timeService.CurrentDateTime) - StartTime;
-
-        public TimeSpan DisplayedDuration
-        {
-            get => Duration;
-            set
-            {
-                if (stopTime.HasValue)
-                {
-                    StopTime = StartTime + value;
-                }
-                else
-                {
-                    StartTime = timeService.CurrentDateTime - value;
-                }
-            }
-        }
 
         [DependsOn(nameof(IsTimeEntryRunning))]
         public DurationFormat DurationFormat => IsTimeEntryRunning ? DurationFormat.Improved : durationFormat;
@@ -186,15 +160,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public IMvxCommand StopCommand { get; }
 
-        public IMvxAsyncCommand<SelectTimeOrigin> StopTimeEntryCommand { get; }
-
         public IMvxAsyncCommand DeleteCommand { get; }
 
         public IMvxAsyncCommand CloseCommand { get; }
 
         public IMvxAsyncCommand SelectDurationCommand { get; }
-
-        public IMvxAsyncCommand<SelectTimeOrigin> SelectTimeCommand { get; }
 
         public IMvxAsyncCommand SelectStartTimeCommand { get; }
 
@@ -244,13 +214,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             CloseCommand = new MvxAsyncCommand(CloseWithConfirmation);
 
             StopCommand = new MvxCommand(stopTimeEntry, () => IsTimeEntryRunning);
-            StopTimeEntryCommand = new MvxAsyncCommand<SelectTimeOrigin>(onStopTimeEntryCommand);
 
             SelectStartTimeCommand = new MvxAsyncCommand(selectStartTime, canExecute);
             SelectStopTimeCommand = new MvxAsyncCommand(selectStopTime, canExecute);
             SelectStartDateCommand = new MvxAsyncCommand(selectStartDate, canExecute);
             SelectDurationCommand = new MvxAsyncCommand(selectDuration, canExecute);
-            SelectTimeCommand = new MvxAsyncCommand<SelectTimeOrigin>(selectTime, _ => canExecute());
 
             SelectProjectCommand = new MvxAsyncCommand(selectProject);
             SelectTagsCommand = new MvxAsyncCommand(selectTags, canExecute);
@@ -279,7 +247,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             stopwatchFromMainLog = stopwatchProvider.Get(MeasuredOperation.EditTimeEntryFromMainLog);
             stopwatchProvider.Remove(MeasuredOperation.EditTimeEntryFromMainLog);
 
-            var timeEntry = await dataSource.TimeEntries.GetById(Id);
+            var timeEntry = await interactorFactory.GetTimeEntryById(Id).Execute();
             originalTimeEntry = timeEntry;
 
             Description = timeEntry.Description;
@@ -439,57 +407,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             await editDuration(true);
         }
 
-        private async Task selectTime(SelectTimeOrigin origin)
-        {
-            var tapSource = getTapSourceFromSelectTimeOrigin(origin);
-            analyticsService.EditViewTapped.Track(tapSource);
-
-            var parameters = SelectTimeParameters
-                .CreateFromOrigin(origin, BeginningOfWeek, StartTime, StopTime)
-                .WithFormats(DateFormat, TimeFormat);
-
-            var data = await navigationService
-                .Navigate<SelectTimeViewModel, SelectTimeParameters, SelectTimeResultsParameters>(parameters)
-                .ConfigureAwait(false);
-
-            if (data == null)
-                return;
-
-            StartTime = data.Start;
-            StopTime = data.Stop;
-        }
-
-        private EditViewTapSource getTapSourceFromSelectTimeOrigin(SelectTimeOrigin origin)
-        {
-            switch (origin)
-            {
-                case SelectTimeOrigin.StartTime:
-                case SelectTimeOrigin.StartDate:
-                    return EditViewTapSource.StartTime;
-                case SelectTimeOrigin.StopTime:
-                case SelectTimeOrigin.StopDate:
-                    return EditViewTapSource.StopTime;
-                case SelectTimeOrigin.Duration:
-                    return EditViewTapSource.Duration;
-                default:
-                    throw new ArgumentException("Binding parameter is incorrect.");
-            }
-        }
-
         private void stopTimeEntry()
         {
             StopTime = timeService.CurrentDateTime;
-        }
-
-        private async Task onStopTimeEntryCommand(SelectTimeOrigin origin)
-        {
-            if (IsTimeEntryRunning)
-            {
-                StopTime = timeService.CurrentDateTime;
-                return;
-            }
-
-            await SelectTimeCommand.ExecuteAsync(origin);
         }
 
         private async Task selectProject()
@@ -524,14 +444,14 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 return;
             }
 
-            var project = await dataSource.Projects.GetById(projectId.Value);
+            var project = await interactorFactory.GetProjectById(projectId.Value).Execute();
             clearTagsIfNeeded(workspaceId, project.WorkspaceId);
             Project = project.DisplayName();
             Client = project.Client?.Name;
             ProjectColor = project.DisplayColor();
             workspaceId = project.WorkspaceId;
 
-            Task = taskId.HasValue ? (await dataSource.Tasks.GetById(taskId.Value)).Name : "";
+            Task = taskId.HasValue ? (await interactorFactory.GetTaskById(taskId.Value).Execute()).Name : "";
 
             projectTaskClientSubject.OnNext(Unit.Default);
 

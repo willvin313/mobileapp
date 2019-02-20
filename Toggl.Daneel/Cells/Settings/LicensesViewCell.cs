@@ -1,7 +1,6 @@
 ﻿using System;
 using Foundation;
 using MvvmCross.Plugin.Color.Platforms.Ios;
-using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Multivac;
 using UIKit;
 
@@ -9,6 +8,7 @@ namespace Toggl.Daneel.Cells.Settings
 {
     public sealed partial class LicensesViewCell : BaseTableViewCell<License>
     {
+        public static readonly string Identifier = nameof(LicensesViewCell);
         public static readonly NSString Key = new NSString(nameof(LicensesViewCell));
         public static readonly UINib Nib;
 
@@ -32,7 +32,7 @@ namespace Toggl.Daneel.Cells.Settings
             base.AwakeFromNib();
 
             GrayBackground.Layer.BorderWidth = 1;
-            GrayBackground.Layer.BorderColor = Color.Licenses.Border.ToNativeColor().CGColor;
+            GrayBackground.Layer.BorderColor = Foundation.MvvmCross.Helper.Color.Licenses.Border.ToNativeColor().CGColor;
         }
 
         protected override void UpdateView()

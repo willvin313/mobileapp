@@ -1,9 +1,10 @@
-﻿using System.Reactive.Linq;
-using System.Threading.Tasks;
+﻿using System.Reactive;
 using CoreGraphics;
+using Foundation;
 using Toggl.Daneel.Cells;
 using Toggl.Daneel.Presentation.Attributes;
-using Toggl.Daneel.ViewSources;
+using Toggl.Daneel.ViewSources.Generic.TableView;
+using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using UIKit;
 
@@ -24,12 +25,15 @@ namespace Toggl.Daneel.ViewControllers
         {
             base.ViewDidLoad();
 
+            HeadingLabel.Text = Resources.SetDefaultWorkspace;
+            DescriptionLabel.Text = Resources.SelectDefaultWorkspaceDescription;
+
             View.ClipsToBounds = true;
 
             WorkspacesTableView.RegisterNibForCellReuse(SelectDefaultWorkspaceTableViewCell.Nib, SelectDefaultWorkspaceTableViewCell.Identifier);
-            var tableViewSource = new ListTableViewSource<SelectableWorkspaceViewModel, SelectDefaultWorkspaceTableViewCell>(
-                ViewModel.Workspaces,
-                SelectDefaultWorkspaceTableViewCell.Identifier
+            var tableViewSource = new CustomTableViewSource<Unit, SelectableWorkspaceViewModel>(
+                SelectDefaultWorkspaceTableViewCell.CellConfiguration(SelectDefaultWorkspaceTableViewCell.Identifier),
+                ViewModel.Workspaces
             );
             tableViewSource.OnItemTapped = onWorkspaceTapped;
             WorkspacesTableView.Source = tableViewSource;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using CoreGraphics;
@@ -24,8 +25,13 @@ namespace Toggl.Daneel.Views.Calendar
 
         private CGPoint firstPoint;
 
+        private TimeSpan? previousDuration;
+
         private readonly ISubject<(DateTimeOffset, TimeSpan)> createFromSpanSuject = new Subject<(DateTimeOffset, TimeSpan)>();
+
         public IObservable<(DateTimeOffset, TimeSpan)> CreateFromSpan => createFromSpanSuject.AsObservable();
+
+        private List<DateTimeOffset> allItemsStartAndEndTime;
 
         public CalendarCollectionViewCreateFromSpanHelper(
             UICollectionView collectionView,
@@ -52,23 +58,24 @@ namespace Toggl.Daneel.Views.Calendar
         private void onLongPress(UILongPressGestureRecognizer gesture)
         {
             var point = gesture.LocationInView(CollectionView);
+            var isEditing = dataSource.IsEditing && itemIndexPath != null;
 
             switch (gesture.State)
             {
-                case UIGestureRecognizerState.Began:
+                case UIGestureRecognizerState.Began when !dataSource.IsEditing && dataSource.CalendarItemAtPoint(point) == null:
                     longPressBegan(point);
                     break;
 
-                case UIGestureRecognizerState.Changed:
+                case UIGestureRecognizerState.Changed when isEditing:
                     longPressChanged(point);
                     break;
 
-                case UIGestureRecognizerState.Ended:
+                case UIGestureRecognizerState.Ended when isEditing:
                     longPressEnded(point);
                     break;
 
-                case UIGestureRecognizerState.Cancelled:
-                case UIGestureRecognizerState.Failed:
+                case UIGestureRecognizerState.Cancelled when isEditing:
+                case UIGestureRecognizerState.Failed when isEditing:
                     dataSource.RemoveItemView(itemIndexPath);
                     dataSource.StopEditing();
                     itemIndexPath = null;
@@ -78,8 +85,7 @@ namespace Toggl.Daneel.Views.Calendar
 
         private void longPressBegan(CGPoint point)
         {
-            if (dataSource.IsEditing || dataSource.CalendarItemAtPoint(point) != null)
-                return;
+            allItemsStartAndEndTime = dataSource.AllItemsStartAndEndTime();
 
             dataSource.StartEditing();
             firstPoint = point;
@@ -88,18 +94,13 @@ namespace Toggl.Daneel.Views.Calendar
             itemIndexPath = dataSource.InsertItemView(startTime, defaultDuration);
             impactFeedback.ImpactOccurred();
             selectionFeedback.Prepare();
+            previousDuration = defaultDuration;
         }
 
         private bool isDraggingDown(CGPoint point) => firstPoint.Y < point.Y;
 
         private void longPressChanged(CGPoint point)
         {
-            if (itemIndexPath == null)
-                return;
-
-            if (Math.Abs(LastPoint.Y - point.Y) < CalendarCollectionViewLayout.HourHeight / 4)
-                return;
-
             LastPoint = point;
 
             DateTimeOffset startTime;
@@ -108,7 +109,7 @@ namespace Toggl.Daneel.Views.Calendar
             if (isDraggingDown(point))
             {
                 startTime = Layout.DateAtPoint(firstPoint).RoundDownToClosestQuarter();
-                endTime = Layout.DateAtPoint(LastPoint).RoundUpToClosestQuarter();
+                endTime = NewEndTimeWithDynamicDuration(point, allItemsStartAndEndTime);
 
                 if (point.Y > BottomAutoScrollLine)
                     StartAutoScrolDown(longPressChanged);
@@ -117,7 +118,7 @@ namespace Toggl.Daneel.Views.Calendar
             }
             else
             {
-                startTime = Layout.DateAtPoint(LastPoint).RoundDownToClosestQuarter();
+                startTime = NewStartTimeWithDynamicDuration(point, allItemsStartAndEndTime);
                 endTime = Layout.DateAtPoint(firstPoint).RoundDownToClosestQuarter();
 
                 if (point.Y < TopAutoScrollLine)
@@ -129,14 +130,17 @@ namespace Toggl.Daneel.Views.Calendar
             var duration = endTime - startTime;
 
             dataSource.UpdateItemView(itemIndexPath, startTime, duration);
-            selectionFeedback.SelectionChanged();
+
+            if (duration != previousDuration)
+            {
+                selectionFeedback.SelectionChanged();
+                previousDuration = duration;
+            }
         }
 
         private void longPressEnded(CGPoint point)
         {
-            if (itemIndexPath == null)
-                return;
-
+            previousDuration = null;
             LastPoint = point;
 
             DateTimeOffset startTime;
