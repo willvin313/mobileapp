@@ -198,5 +198,11 @@ namespace Toggl.Tests.UI
                 app.WaitForElement(tag);
             }
         }
+
+        [Test]
+        public void ContinueTimeEntryBySwipeFromExisting() 
+        {
+
+        }
     }
 }
