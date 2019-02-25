@@ -351,12 +351,12 @@ namespace Toggl.Ultrawave.Tests.Integration
                 var email = RandomEmail.GenerateValid();
                 var password = "s3cr3tzzz".ToPassword();
 
-                var user = await unauthenticatedTogglApi
+                Action signingUp = () => unauthenticatedTogglApi
                     .User
-                    .SignUp(email, password, true, 237, "");
+                    .SignUp(email, password, true, 237, "")
+                    .Wait();
 
-                user.Id.Should().BeGreaterThan(0);
-                user.Email.Should().Be(email);
+                signingUp.Should().Throw<BadRequestException>();
             }
         }
 
