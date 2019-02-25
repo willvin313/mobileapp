@@ -353,7 +353,7 @@ namespace Toggl.Ultrawave.Tests.Integration
 
                 Action signingUp = () => unauthenticatedTogglApi
                     .User
-                    .SignUp(email, password, true, 237, "")
+                    .SignUp(email, password, true, 237, "A-made-up-tz")
                     .Wait();
 
                 signingUp.Should().Throw<BadRequestException>();
