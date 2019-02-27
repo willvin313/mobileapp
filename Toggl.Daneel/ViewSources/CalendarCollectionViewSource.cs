@@ -202,7 +202,6 @@ namespace Toggl.Daneel.ViewSources
             layout.IsEditing = false;
             layoutAttributes = calculateLayoutAttributes();
             layout.InvalidateLayoutForVisibleItems();
-            editingItemIndexPath = null;
         }
 
         public NSIndexPath InsertItemView(DateTimeOffset startTime, TimeSpan duration)

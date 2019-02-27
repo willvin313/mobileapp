@@ -206,12 +206,6 @@ namespace Toggl.Daneel.Views.Calendar
         private UICollectionViewLayoutAttributes layoutAttributesForHourView(NSIndexPath indexPath)
             => LayoutAttributesForSupplementaryView(HourSupplementaryViewKind, indexPath);
 
-        private UICollectionViewLayoutAttributes layoutAttributesForEditingHourView(NSIndexPath indexPath)
-            => LayoutAttributesForSupplementaryView(EditingHourSupplementaryViewKind, indexPath);
-
-        private UICollectionViewLayoutAttributes layoutAttributesForCurrentTime()
-            => LayoutAttributesForSupplementaryView(CurrentTimeSupplementaryViewKind, NSIndexPath.FromItemSection(0, 0));
-
         private IEnumerable<NSIndexPath> indexPathsForVisibleItemsInRect(CGRect rect)
         {
             var minHour = (int)Math.Floor(rect.GetMinY() / HourHeight).Clamp(0, hoursPerDay);
