@@ -14,6 +14,7 @@ using Toggl.Multivac.Extensions;
 using System.Linq;
 using Toggl.Foundation.Calendar;
 using System.Reactive;
+using Toggl.Giskard.ViewHelpers.Calendar;
 using Toggl.Multivac;
 
 namespace Toggl.Giskard.Fragments
@@ -37,6 +38,9 @@ namespace Toggl.Giskard.Fragments
             var calendarAdapter = new CalendarAdapter(view.Context, timeService,displayMetrics.WidthPixels);
             calendarRecyclerView.SetTimeService(timeService);
             calendarRecyclerView.SetAdapter(calendarAdapter);
+
+            var calendarItemTouchHelper = new CalendarEditItemTouchHelper();
+            calendarItemTouchHelper.AttachToRecyclerView(calendarRecyclerView);
 
             timeService
                 .CurrentDateTimeObservable
@@ -90,6 +94,14 @@ namespace Toggl.Giskard.Fragments
 
             ViewModel.ShouldShowOnboarding
                 .Subscribe(onboardingVisibilityChanged)
+                .DisposedBy(DisposeBag);
+
+            calendarItemTouchHelper.ItemInEditModeClearedObservable
+                .Subscribe(_ => calendarAdapter.ClearItemInEditMode())
+                .DisposedBy(DisposeBag);
+
+            calendarAdapter.ViewHolderInEditModeSubject
+                .Subscribe(calendarItemTouchHelper.UpdateViewInEditMode)
                 .DisposedBy(DisposeBag);
 
             return view;

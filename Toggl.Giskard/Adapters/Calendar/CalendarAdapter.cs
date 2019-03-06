@@ -30,8 +30,9 @@ namespace Toggl.Giskard.Adapters.Calendar
         private readonly LayoutAnchorsCalculator layoutAnchorsCalculator;
         private CompositeDisposable disposeBag = new CompositeDisposable();
 
-        private readonly ISubject<CalendarItem> firstTapSubject = new Subject<CalendarItem>();
+        private readonly ISubject<(CalendarItem, RecyclerView.ViewHolder)> firstTapSubject = new Subject<(CalendarItem, RecyclerView.ViewHolder)>();
         private readonly ISubject<CalendarItem> calendarItemTappedSubject = new Subject<CalendarItem>();
+        private readonly ISubject<RecyclerView.ViewHolder> viewHolderInEditModeSubject = new Subject<RecyclerView.ViewHolder>();
 
         private readonly object updateLock = new object();
         private bool isUpdateRunning;
@@ -44,6 +45,9 @@ namespace Toggl.Giskard.Adapters.Calendar
         public IObservable<CalendarItem> CalendarItemTappedObservable
             => calendarItemTappedSubject.AsObservable();
 
+        public IObservable<RecyclerView.ViewHolder> ViewHolderInEditModeSubject
+            => viewHolderInEditModeSubject.AsObservable();
+
         private CalendarItem? calendarItemInEditMode;
 
         public CalendarAdapter(Context context, ITimeService timeService, int screenWidth)
@@ -53,7 +57,7 @@ namespace Toggl.Giskard.Adapters.Calendar
 
             anchors = Enumerable.Range(0, 24).Select(_ => new Anchor(56.DpToPixels(context), new AnchorData[0])).ToList();
 
-            firstTapSubject.Subscribe(onFirstTap)
+            firstTapSubject.Subscribe(onItemTap)
                 .DisposedBy(disposeBag);
         }
 
@@ -68,7 +72,6 @@ namespace Toggl.Giskard.Adapters.Calendar
             {
                 var calendarItem = items[position - anchorCount];
                 calendarEntryViewHolder.Item = calendarItem;
-                calendarEntryViewHolder.SetIsInEditMode(calendarItemIsInEditMode(calendarItem));
             }
         }
 
@@ -88,7 +91,7 @@ namespace Toggl.Giskard.Adapters.Calendar
                 case anchoredViewType:
                     return new CalendarEntryViewHolder(LayoutInflater.From(parent.Context).Inflate(Resource.Layout.CalendarEntryCell, parent, false))
                     {
-                        TappedSubject = firstTapSubject
+                        ItemTappedSubject = firstTapSubject
                     };
 
                 default:
@@ -117,6 +120,11 @@ namespace Toggl.Giskard.Adapters.Calendar
             return false;
         }
 
+        public void ClearItemInEditMode()
+        {
+            NeedsToClearItemInEditMode();
+        }
+
         public void UpdateItems(ObservableGroupedOrderedCollection<CalendarItem> calendarItems, bool hasCalendarsLinked)
         {
             lock (updateLock)
@@ -138,8 +146,9 @@ namespace Toggl.Giskard.Adapters.Calendar
             }
         }
 
-        private void onFirstTap(CalendarItem calendarItem)
+        private void onItemTap((CalendarItem calendarItem, RecyclerView.ViewHolder holder) itemTapped)
         {
+            var calendarItem = itemTapped.calendarItem;
             if (calendarItem.Source == CalendarItemSource.Calendar)
             {
                 if (calendarItemInEditMode.HasValue)
@@ -154,7 +163,7 @@ namespace Toggl.Giskard.Adapters.Calendar
 
             if (calendarItemInEditMode == null || touchesOtherItem(calendarItem))
             {
-                updateCalendarItemInEditMode(calendarItem);
+                updateCalendarItemInEditMode(calendarItem, itemTapped.holder);
                 return;
             }
 
@@ -167,36 +176,13 @@ namespace Toggl.Giskard.Adapters.Calendar
 
         private void clearItemInEditMode()
         {
-            updateCalendarItemInEditMode(null);
+            updateCalendarItemInEditMode(null, null);
         }
 
-        private void updateCalendarItemInEditMode(CalendarItem? newCalendarItemInEditMode)
+        private void updateCalendarItemInEditMode(CalendarItem? newCalendarItemInEditMode, RecyclerView.ViewHolder holder)
         {
-            var oldPosition = findCalendarItemInEditModeAdapterPosition();
             calendarItemInEditMode = newCalendarItemInEditMode;
-
-            if (oldPosition >= 0)
-            {
-                NotifyItemChanged(oldPosition);
-            }
-
-            var newPosition = findCalendarItemInEditModeAdapterPosition();
-            if (newPosition >= 0)
-            {
-                NotifyItemChanged(newPosition);
-            }
-        }
-
-        private int findCalendarItemInEditModeAdapterPosition()
-        {
-            if (items.Count <= 0 || !calendarItemInEditMode.HasValue)
-                return -1;
-
-            var calendarItemIndex = items.IndexOf(calendarItemInEditMode.Value);
-
-            return calendarItemIndex >= 0
-                ? calendarItemIndex + anchorCount
-                : calendarItemIndex;
+            viewHolderInEditModeSubject.OnNext(holder);
         }
 
         private void processUpdate(IList<CalendarItem> calendarItems, bool hasCalendarsLinked)
@@ -217,18 +203,9 @@ namespace Toggl.Giskard.Adapters.Calendar
 
         private void dispatchUpdates(IList<CalendarItem> newItems, List<Anchor> newAnchors, DiffUtil.DiffResult diffResult)
         {
-            var calendarItemInEditModeBeforeUpdate = calendarItemInEditMode;
-
-            updateCalendarItemInEditMode(null);
-
             items = newItems;
             anchors = newAnchors;
             diffResult.DispatchUpdatesTo(this);
-
-            if (calendarItemInEditModeBeforeUpdate.HasValue)
-            {
-                fixCurrentCalendarItemInEditMode(calendarItemInEditModeBeforeUpdate.Value);
-            }
 
             lock (updateLock)
             {
@@ -242,19 +219,6 @@ namespace Toggl.Giskard.Adapters.Calendar
                 {
                     isUpdateRunning = false;
                 }
-            }
-        }
-
-        private void fixCurrentCalendarItemInEditMode(CalendarItem calendarItemInEditModeBeforeUpdate)
-        {
-            var newCalendarItemInEditMode = items.FirstOrDefault(calendarItem =>
-                    calendarItem.Source == CalendarItemSource.TimeEntry
-                    && calendarItem.Id == calendarItemInEditModeBeforeUpdate.Id);
-
-            var defaultCalendarItem = default(CalendarItem);
-            if (newCalendarItemInEditMode.Source != defaultCalendarItem.Source && newCalendarItemInEditMode.Id != defaultCalendarItem.Id)
-            {
-                updateCalendarItemInEditMode(newCalendarItemInEditMode);
             }
         }
 
