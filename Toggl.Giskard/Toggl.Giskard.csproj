@@ -416,6 +416,7 @@
     <Compile Include="TemplateSelectors\SelectTagsTemplateSelector.cs" />
     <Compile Include="ViewHelpers\BarChartData.cs" />
     <Compile Include="ViewHelpers\BarChartDayLabel.cs" />
+    <Compile Include="ViewHelpers\Calendar\CalendarEditItemTouchHelper.cs" />
     <Compile Include="ViewHelpers\CopyLessSpannableFactory.cs" />
     <Compile Include="ViewHelpers\DatePickerListener.cs" />
     <Compile Include="ViewHelpers\MainRecyclerViewTouchCallback.cs" />
