@@ -64,14 +64,15 @@ namespace Toggl.Tests.UI
         public void TappingTheUndoButtonBringsBackTheDeletedTimeEntry()
         {
             var description = "some time entry";
-            app.CreateTimeEntry(description);
+            var projectName = "Fuking project";
+            app.CreateTimeEntry(description, projectName);
             app.SwipeEntryToDelete(description);
 
-            app.AssertNoTimeEntryInTheLog(description);
+            app.AssertNoTimeEntryInTheLog(description, projectName);
 
             app.TapSnackBarButton("UNDO");
 
-            app.AssertTimeEntryInTheLog(description);
+            app.AssertTimeEntryInTheLog(description, projectName);
         }
     }
 }

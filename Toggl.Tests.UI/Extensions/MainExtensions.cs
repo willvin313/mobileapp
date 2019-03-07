@@ -82,9 +82,9 @@ namespace Toggl.Tests.UI.Extensions
             app.Tap(StartTimeEntry.DialogDiscard);
         }
 
-        public static void TapOnTimeEntryWithDescription(this IApp app, string description)
+        public static void TapOnTimeEntry(this IApp app, string description, string projectName = null)
         {
-            var timeEntryCellSelector = queryForTimeEntryCell(description);
+            var timeEntryCellSelector = queryForTimeEntryCell(description, projectName);
             app.WaitForElement(timeEntryCellSelector);
             app.Tap(timeEntryCellSelector);
         }
@@ -135,23 +135,37 @@ namespace Toggl.Tests.UI.Extensions
             return timeEntryViews[0].Rect;
         }
 
-        public static void AssertTimeEntryInTheLog(this IApp app, string description)
+        public static void AssertTimeEntryInTheLog(this IApp app, string description, string projectName = null)
         {
-            var timeEntryExists = app.Query(queryForTimeEntryCell(description)).Any();
+            var timeEntryExists = app.Query(queryForTimeEntryCell(description, projectName)).Any();
+
+            var projectInsert = string.IsNullOrEmpty(projectName)
+                ? ""
+                : $" and project \"{projectName}\"";
 
             if (!timeEntryExists)
-                throw new NoTimeEntryException($"Expected to find a time entry with description \"{description}\", but didn't find one");
+                throw new NoTimeEntryException($"Expected to find a time entry with description \"{description}\"{projectInsert}, but didn't find one");
         }
 
-        public static void AssertNoTimeEntryInTheLog(this IApp app, string description)
+        public static void AssertNoTimeEntryInTheLog(this IApp app, string description, string projectName = null)
         {
-            var timeEntryExists = app.Query(queryForTimeEntryCell(description)).Any();
+            var timeEntryExists = app.Query(queryForTimeEntryCell(description, projectName)).Any();
+
+            var projectInsert = string.IsNullOrEmpty(projectName)
+                ? ""
+                : $" and project \"{projectName}\"";
 
             if (timeEntryExists)
-                throw new TimeEntryFoundException($"Expected to find no time entry with description \"{description}\", but found one");
+                throw new TimeEntryFoundException($"Expected to find no time entry with description \"{description}\"{projectInsert}, but found one");
         }
 
-        private static Func<AppQuery, AppQuery> queryForTimeEntryCell(string timeEntryDescription)
-            => x => x.Marked(Main.TimeEntryRow).Descendant().Text(timeEntryDescription);
+        private static Func<AppQuery, AppQuery> queryForTimeEntryCell(string timeEntryDescription, string projectName = null)
+        {
+            if (string.IsNullOrEmpty(projectName))
+                return x => x.Marked(Main.TimeEntryRow).Descendant().Text(timeEntryDescription);
+
+            return x => x.Marked(Main.TimeEntryRow).Descendant().Text(timeEntryDescription).Sibling().Contains(projectName);
+
+        }
     }
 }

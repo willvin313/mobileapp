@@ -27,7 +27,7 @@ namespace Toggl.Tests.UI
             app.StartTimeEntryWithDescription(initialDescription);
             app.StopTimeEntry();
 
-            app.TapOnTimeEntryWithDescription(initialDescription);
+            app.TapOnTimeEntry(initialDescription);
 
             app.WaitForElement(EditTimeEntry.EditDescription);
             app.Tap(EditTimeEntry.EditDescription);
@@ -49,7 +49,7 @@ namespace Toggl.Tests.UI
             var projectName = "this is a project";
             app.StartTimeEntryWithDescription(timeEntryDescription);
             app.StopTimeEntry();
-            app.TapOnTimeEntryWithDescription(timeEntryDescription);
+            app.TapOnTimeEntry(timeEntryDescription);
 
             app.WaitForElement(EditTimeEntry.EditProject);
             app.Tap(EditTimeEntry.EditProject);
@@ -76,7 +76,7 @@ namespace Toggl.Tests.UI
             var newProjectName = "This is a different project";
             app.CreateTimeEntry(timeEntryDescription, projectName);
 
-            app.TapOnTimeEntryWithDescription(timeEntryDescription);
+            app.TapOnTimeEntry(timeEntryDescription);
 
             app.WaitForElement(EditTimeEntry.EditProject);
             app.Tap(EditTimeEntry.EditProject);
@@ -98,7 +98,7 @@ namespace Toggl.Tests.UI
             app.CreateProject(projectName);
             app.CreateTimeEntry(timeEntryDescription);
 
-            app.TapOnTimeEntryWithDescription(timeEntryDescription);
+            app.TapOnTimeEntry(timeEntryDescription);
 
             app.WaitForElement(EditTimeEntry.EditProject);
             app.Tap(EditTimeEntry.EditProject);
@@ -121,7 +121,7 @@ namespace Toggl.Tests.UI
             app.CreateProject(newProjectName);
             app.CreateTimeEntry(timeEntryDescription, assignedProjectName);
 
-            app.TapOnTimeEntryWithDescription(timeEntryDescription);
+            app.TapOnTimeEntry(timeEntryDescription);
 
             app.WaitForElement(EditTimeEntry.EditProject);
             app.Tap(EditTimeEntry.EditProject);
@@ -135,6 +135,22 @@ namespace Toggl.Tests.UI
             app.Tap(EditTimeEntry.Confirm);
 
             app.WaitForTimeEntryWithProject(newProjectName);
+        }
+
+        [Test]
+        public void RemovingProjectFromATimeEntry()
+        {
+            var description = "Doing things";
+            var projectName = "Some project";
+            app.CreateTimeEntry(description, projectName);
+            app.AssertTimeEntryInTheLog(description, projectName);
+
+            app.TapOnTimeEntry(description, projectName);
+            app.Tap(EditTimeEntry.EditProject);
+            app.TapNoProjectCell();
+            app.Tap(EditTimeEntry.Confirm);
+
+            app.AssertTimeEntryInTheLog(description);
         }
     }
 }

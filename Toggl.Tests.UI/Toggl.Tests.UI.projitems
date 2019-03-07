@@ -29,6 +29,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\AppQueryExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Exceptions\NoTimeEntryException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Exceptions\TimeEntryFoundException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\SelectProjectExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Helpers\" />
