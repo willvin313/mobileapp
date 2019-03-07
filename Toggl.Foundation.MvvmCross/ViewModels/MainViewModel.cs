@@ -165,7 +165,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     .TrackException<InvalidOperationException, IThreadSafeWorkspace>("MainViewModel.Init")
                     .Execute()
                     .SelectMany(workspace => interactorFactory
-                        .CreateTimeEntry(description.AsTimeEntryPrototype(TimeService.CurrentDateTime, workspace.Id))
+                        .CreateTimeEntry(description.AsTimeEntryPrototype(TimeService.CurrentDateTime, workspace.Id), TimeEntryStartOrigin.Timer)
                         .Execute())
                     .Subscribe()
                     .DisposedBy(disposeBag);

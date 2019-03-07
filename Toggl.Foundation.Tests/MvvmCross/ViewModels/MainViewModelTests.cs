@@ -783,7 +783,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         .Received()
                         .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(
                                 te => te.Description == description
-                                   && te.WorkspaceId == defaultWorkspace.Id))
+                                   && te.WorkspaceId == defaultWorkspace.Id), TimeEntryStartOrigin.Timer)
                         .Execute();
                 }
             }

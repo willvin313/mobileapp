@@ -1281,14 +1281,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     await ViewModel.DoneCommand.ExecuteAsync();
 
-                    InteractorFactory.Received().CreateTimeEntry(ViewModel);
+                    InteractorFactory.Received().CreateTimeEntry(ViewModel, TimeEntryStartOrigin.Timer);
                 }
 
                 [Fact, LogIfTooSlow]
                 public async Task ExecutesTheCreateTimeEntryInteractor()
                 {
                     var mockedInteractor = Substitute.For<IInteractor<IObservable<IThreadSafeTimeEntry>>>();
-                    InteractorFactory.CreateTimeEntry(Arg.Any<ITimeEntryPrototype>()).Returns(mockedInteractor);
+                    InteractorFactory.CreateTimeEntry(Arg.Any<ITimeEntryPrototype>(), TimeEntryStartOrigin.Timer).Returns(mockedInteractor);
 
                     await ViewModel.DoneCommand.ExecuteAsync();
 
@@ -1309,7 +1309,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     InteractorFactory.Received().CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(timeEntry =>
                         timeEntry.Description.Length == 0
-                    ));
+                    ), TimeEntryStartOrigin.Timer);
                 }
 
                 [Theory, LogIfTooSlow]
@@ -1326,7 +1326,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     InteractorFactory.Received().CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(timeEntry =>
                         timeEntry.Description == trimmed
-                    ));
+                    ), TimeEntryStartOrigin.Timer);
                 }
 
                 [Property]
@@ -1341,7 +1341,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     InteractorFactory.Received().CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(timeEntry =>
                         timeEntry.Duration.HasValue
-                    ));
+                    ), TimeEntryStartOrigin.Manual);
                 }
 
                 [Fact, LogIfTooSlow]
@@ -1354,7 +1354,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     InteractorFactory.Received().CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(timeEntry =>
                         timeEntry.Duration.HasValue == false
-                    ));
+                    ), TimeEntryStartOrigin.Timer);
                 }
 
                 private TagSuggestion tagSuggestionFromInt(int i)

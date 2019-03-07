@@ -615,7 +615,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private async Task done()
         {
-            await interactorFactory.CreateTimeEntry(this).Execute();
+            await interactorFactory.CreateTimeEntry(this, Duration.HasValue ? TimeEntryStartOrigin.Manual : TimeEntryStartOrigin.Timer).Execute();
             await navigationService.Close(this);
         }
 

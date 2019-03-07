@@ -18,7 +18,7 @@ namespace Toggl.Foundation.Interactors
     {
         #region Time Entries
 
-        IInteractor<IObservable<IThreadSafeTimeEntry>> CreateTimeEntry(ITimeEntryPrototype prototype);
+        IInteractor<IObservable<IThreadSafeTimeEntry>> CreateTimeEntry(ITimeEntryPrototype prototype, TimeEntryStartOrigin origin);
 
         IInteractor<IObservable<IThreadSafeTimeEntry>> StartSuggestion(Suggestion suggestion);
 

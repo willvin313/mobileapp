@@ -32,18 +32,6 @@ namespace Toggl.Foundation.Interactors
             IIntentDonationService intentDonationService,
             ITimeEntryPrototype prototype,
             DateTimeOffset startTime,
-            TimeSpan? duration)
-            : this(idProvider, timeService, dataSource, analyticsService, intentDonationService, prototype, startTime, duration,
-                prototype.Duration.HasValue ? TimeEntryStartOrigin.Manual : TimeEntryStartOrigin.Timer) { }
-
-        public CreateTimeEntryInteractor(
-            IIdProvider idProvider,
-            ITimeService timeService,
-            ITogglDataSource dataSource,
-            IAnalyticsService analyticsService,
-            IIntentDonationService intentDonationService,
-            ITimeEntryPrototype prototype,
-            DateTimeOffset startTime,
             TimeSpan? duration,
             TimeEntryStartOrigin origin)
         {
