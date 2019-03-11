@@ -32,6 +32,8 @@ using static Toggl.Foundation.MvvmCross.Helper.Animation;
 
 namespace Toggl.Daneel.ViewControllers
 {
+    using MainLogSection = AnimatableSectionModel<DaySummaryViewModel, LogItemViewModel, IMainLogKey>;
+
     [TabPresentation]
     public partial class MainViewController : ReactiveViewController<MainViewModel>
     {
@@ -108,7 +110,7 @@ namespace Toggl.Daneel.ViewControllers
             TimeEntriesLogTableView.Source = tableViewSource;
 
             ViewModel.TimeEntries
-                .Subscribe(TimeEntriesLogTableView.Rx().AnimateSections<AnimatableSectionModel<DaySummaryViewModel, LogItemViewModel, IMainLogKey>, DaySummaryViewModel, LogItemViewModel, IMainLogKey>(tableViewSource))
+                .Subscribe(TimeEntriesLogTableView.Rx().AnimateSections<MainLogSection, DaySummaryViewModel, LogItemViewModel, IMainLogKey>(tableViewSource))
                 .DisposedBy(disposeBag);
 
             ViewModel.ShouldReloadTimeEntryLog
