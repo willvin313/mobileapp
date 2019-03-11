@@ -1,11 +1,12 @@
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Multivac;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog
 {
-    public sealed class GroupId
+    public sealed class GroupId : IEquatable<GroupId>
     {
         private readonly DateTime date;
         private readonly string description;
@@ -28,18 +29,22 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog
 
         public override bool Equals(object obj)
         {
-            if (obj is GroupId otherGroup)
-            {
-                return otherGroup.date == date
-                    && otherGroup.description == description
-                    && otherGroup.workspaceId == workspaceId
-                    && otherGroup.projectId == projectId
-                    && otherGroup.taskId == taskId
-                    && otherGroup.isBillable == isBillable
-                    && otherGroup.tagIds.SequenceEqual(tagIds);
-            }
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj is GroupId other && Equals(other);
+        }
 
-            return false;
+        public bool Equals(GroupId other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return date.Equals(other.date)
+                   && string.Equals(description, other.description)
+                   && workspaceId == other.workspaceId
+                   && projectId == other.projectId
+                   && taskId == other.taskId
+                   && isBillable == other.isBillable
+                   && Equals(tagIds, other.tagIds);
         }
 
         public override int GetHashCode()

@@ -12,7 +12,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog.Identity
         }
 
         public bool Equals(IMainLogKey other)
-            => other is TimeEntriesGroupKey groupKey && groupId == groupKey.groupId;
+            => other is TimeEntriesGroupKey groupKey && groupId.Equals(groupKey.groupId);
 
         public override bool Equals(object obj)
         {
