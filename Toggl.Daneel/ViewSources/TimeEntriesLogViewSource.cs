@@ -11,12 +11,13 @@ using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog;
+using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog.Identity;
 using Toggl.Multivac.Extensions;
 using UIKit;
 
 namespace Toggl.Daneel.ViewSources
 {
-    using MainLogSection = AnimatableSectionModel<DaySummaryViewModel, LogItemViewModel>;
+    using MainLogSection = AnimatableSectionModel<DaySummaryViewModel, LogItemViewModel, IMainLogKey>;
 
     public sealed class TimeEntriesLogViewSource
         : BaseTableViewSource<MainLogSection, DaySummaryViewModel, LogItemViewModel>

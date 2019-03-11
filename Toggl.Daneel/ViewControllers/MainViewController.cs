@@ -16,10 +16,13 @@ using Toggl.Daneel.Views;
 using Toggl.Daneel.ViewSources;
 using Toggl.Foundation;
 using Toggl.Foundation.Analytics;
+using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Foundation.MvvmCross.Onboarding.MainView;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog;
+using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog.Identity;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Extensions;
 using Toggl.PrimeRadiant.Onboarding;
@@ -105,7 +108,7 @@ namespace Toggl.Daneel.ViewControllers
             TimeEntriesLogTableView.Source = tableViewSource;
 
             ViewModel.TimeEntries
-                .Subscribe(TimeEntriesLogTableView.Rx().AnimateSections(tableViewSource))
+                .Subscribe(TimeEntriesLogTableView.Rx().AnimateSections<AnimatableSectionModel<DaySummaryViewModel, LogItemViewModel, IMainLogKey>, DaySummaryViewModel, LogItemViewModel, IMainLogKey>(tableViewSource))
                 .DisposedBy(disposeBag);
 
             ViewModel.ShouldReloadTimeEntryLog

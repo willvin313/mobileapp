@@ -28,11 +28,13 @@ namespace Toggl.Daneel.Extensions.Reactive
             });
         }
 
-        public static IObserver<IEnumerable<TSection>> AnimateSections<TSection, THeader, TModel>(
-            this IReactive<UITableView> reactive, BaseTableViewSource<TSection, THeader, TModel> dataSource)
-            where TSection : IAnimatableSectionModel<THeader, TModel>, new()
-            where TModel : IDiffable, IEquatable<TModel>
-            where THeader : IDiffable
+        public static IObserver<IEnumerable<TSection>> AnimateSections<TSection, THeader, TModel, TKey>(
+            this IReactive<UITableView> reactive,
+            BaseTableViewSource<TSection, THeader, TModel> dataSource)
+            where TKey : IEquatable<TKey>
+            where TSection : IAnimatableSectionModel<THeader, TModel, TKey>, new()
+            where TModel : IDiffable<TKey>, IEquatable<TModel>
+            where THeader : IDiffable<TKey>
         {
             return Observer.Create<IEnumerable<TSection>>(finalSections =>
             {
@@ -52,7 +54,7 @@ namespace Toggl.Daneel.Extensions.Reactive
                     return;
                 }
 
-                var diff = new Diffing<TSection, THeader, TModel>(initialSections, finalSections);
+                var diff = new Diffing<TSection, THeader, TModel, TKey>(initialSections, finalSections);
                 var changeset = diff.ComputeDifferences();
 
                 // The changesets have to be applied one after another. Not in one transaction.
@@ -81,10 +83,13 @@ namespace Toggl.Daneel.Extensions.Reactive
             });
         }
 
-        private static void performChangesetUpdates<TSection, THeader, TModel>(this UITableView tableView, Diffing<TSection, THeader, TModel>.Changeset changes)
-            where TSection : IAnimatableSectionModel<THeader, TModel>, new()
-            where TModel : IDiffable, IEquatable<TModel>
-            where THeader : IDiffable
+        private static void performChangesetUpdates<TSection, THeader, TModel, TKey>(
+            this UITableView tableView,
+            Diffing<TSection, THeader, TModel, TKey>.Changeset changes)
+            where TKey : IEquatable<TKey>
+            where TSection : IAnimatableSectionModel<THeader, TModel, TKey>, new()
+            where TModel : IDiffable<TKey>, IEquatable<TModel>
+            where THeader : IDiffable<TKey>
 
         {
             NSIndexSet newIndexSet(List<int> indexes)
