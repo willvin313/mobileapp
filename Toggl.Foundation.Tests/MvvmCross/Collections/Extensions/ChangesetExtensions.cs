@@ -54,7 +54,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections.Extensions
         }
 
 
-        public static bool OnlyContains<TSection, THeader, TItem>(this Diffing<TSection, THeader, TItem>.Changeset changeset,
+        public static bool OnlyContains<TSection, THeader, TItem, TKey>(
+            this Diffing<TSection, THeader, TItem, TKey>.Changeset changeset,
             int insertedSections = 0,
             int deletedSections = 0,
             int movedSections = 0,
@@ -64,9 +65,10 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections.Extensions
             int movedItems = 0,
             int updatedItems = 0
         )
-            where TSection : IAnimatableSectionModel<THeader, TItem>, new()
-            where THeader : IDiffable
-            where TItem : IDiffable, IEquatable<TItem>
+            where TKey : IEquatable<TKey>
+            where TSection : IAnimatableSectionModel<THeader, TItem, TKey>, new()
+            where THeader : IDiffable<TKey>
+            where TItem : IDiffable<TKey>, IEquatable<TItem>
         {
             if (changeset.InsertedSections.Count != insertedSections)
             {
@@ -111,13 +113,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections.Extensions
             return true;
         }
 
-        public static List<TSection> Apply<TSection, THeader, TElement>(
-            this Diffing<TSection, THeader, TElement>.Changeset changeset,
+        public static List<TSection> Apply<TSection, THeader, TElement, TKey>(
+            this Diffing<TSection, THeader, TElement, TKey>.Changeset changeset,
             List<TSection> original
         )
-            where TSection : IAnimatableSectionModel<THeader, TElement>, new()
-            where THeader : IDiffable
-            where TElement : IDiffable, IEquatable<TElement>
+            where TKey : IEquatable<TKey>
+            where TSection : IAnimatableSectionModel<THeader, TElement, TKey>, new()
+            where THeader : IDiffable<TKey>
+            where TElement : IDiffable<TKey>, IEquatable<TElement>
         {
             var afterDeletesAndUpdates = changeset.applyDeletesAndUpdates(original);
             var afterSectionMovesAndInserts = changeset.applySectionMovesAndInserts(afterDeletesAndUpdates);
@@ -126,13 +129,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections.Extensions
             return afterItemInsertsAndMoves;
         }
 
-        private static List<TSection> applyDeletesAndUpdates<TSection, THeader, TElement>(
-            this Diffing<TSection, THeader, TElement>.Changeset changeset,
+        private static List<TSection> applyDeletesAndUpdates<TSection, THeader, TElement, TKey>(
+            this Diffing<TSection, THeader, TElement, TKey>.Changeset changeset,
             List<TSection> original
         )
-            where TSection : IAnimatableSectionModel<THeader, TElement>, new()
-            where THeader : IDiffable
-            where TElement : IDiffable, IEquatable<TElement>
+            where TKey : IEquatable<TKey>
+            where TSection : IAnimatableSectionModel<THeader, TElement, TKey>, new()
+            where THeader : IDiffable<TKey>
+            where TElement : IDiffable<TKey>, IEquatable<TElement>
         {
             var resultAfterDeletesAndUpdates =
                 SectionModelTypeWrapper<TSection, THeader, TElement>.Wrap(original);
@@ -174,13 +178,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections.Extensions
             return SectionModelTypeWrapper<TSection, THeader, TElement>.Unwrap(resultAfterDeletesAndUpdates);
         }
 
-        private static List<TSection> applySectionMovesAndInserts<TSection, THeader, TElement>(
-            this Diffing<TSection, THeader, TElement>.Changeset changeset,
+        private static List<TSection> applySectionMovesAndInserts<TSection, THeader, TElement, TKey>(
+            this Diffing<TSection, THeader, TElement, TKey>.Changeset changeset,
             List<TSection> original
         )
-            where TSection : IAnimatableSectionModel<THeader, TElement>, new()
-            where THeader : IDiffable
-            where TElement : IDiffable, IEquatable<TElement>
+            where TKey : IEquatable<TKey>
+            where TSection : IAnimatableSectionModel<THeader, TElement, TKey>, new()
+            where THeader : IDiffable<TKey>
+            where TElement : IDiffable<TKey>, IEquatable<TElement>
         {
             if (changeset.UpdatedSections.Count != 0) {
                 throw new Exception("Section updates aren't supported");
@@ -238,13 +243,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections.Extensions
             return results;
         }
 
-        private static List<TSection> applyItemInsertsAndMoves<TSection, THeader, TElement>(
-            this Diffing<TSection, THeader, TElement>.Changeset changeset,
+        private static List<TSection> applyItemInsertsAndMoves<TSection, THeader, TElement, TKey>(
+            this Diffing<TSection, THeader, TElement, TKey>.Changeset changeset,
             List<TSection> original
         )
-            where TSection : IAnimatableSectionModel<THeader, TElement>, new()
-            where THeader : IDiffable
-            where TElement : IDiffable, IEquatable<TElement>
+            where TKey : IEquatable<TKey>
+            where TSection : IAnimatableSectionModel<THeader, TElement, TKey>, new()
+            where THeader : IDiffable<TKey>
+            where TElement : IDiffable<TKey>, IEquatable<TElement>
         {
             var resultAfterInsertsAndMoves = original;
 

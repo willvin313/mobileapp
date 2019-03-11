@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Toggl.Foundation.Tests.MvvmCross.Collections
 {
-    public class DiffableInt : IDiffable
+    public class DiffableInt : IDiffable<long>
     {
         public int Value { get; set; }
         public long Identity { get; }
@@ -22,7 +22,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections
         }
     }
 
-    public class TestItem : IDiffable, IEquatable<TestItem>
+    public class TestItem : IDiffable<long>, IEquatable<TestItem>
     {
         public int Id { get; set; }
         public string Value { get; set; }
@@ -56,7 +56,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections
         }
     }
 
-    public class TestSectionModel : AnimatableSectionModel<DiffableInt, TestItem>
+    public class TestSectionModel : AnimatableSectionModel<DiffableInt, TestItem, long>
     {
         public TestSectionModel()
         {
@@ -101,7 +101,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections
                 })
             };
 
-            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem>(initial, final);
+            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem, long>(initial, final);
             var differences = diff.ComputeDifferences();
 
             differences.Count.Should().Be(1);
@@ -132,7 +132,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections
                 })
             };
 
-            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem>(initial, final);
+            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem, long>(initial, final);
             var differences = diff.ComputeDifferences();
 
             differences.Count.Should().Be(1);
@@ -164,7 +164,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections
                 })
             };
 
-            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem>(initial, final);
+            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem, long>(initial, final);
             var differences = diff.ComputeDifferences();
 
             differences.Count.Should().Be(1);
@@ -196,7 +196,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections
                 })
             };
 
-            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem>(initial, final);
+            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem, long>(initial, final);
             var differences = diff.ComputeDifferences();
 
             differences.Count.Should().Be(1);
@@ -228,7 +228,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections
                 })
             };
 
-            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem>(initial, final);
+            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem, long>(initial, final);
             var differences = diff.ComputeDifferences();
 
             differences.Count.Should().Be(1);
@@ -270,7 +270,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections
                 })
             };
 
-            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem>(initial, final);
+            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem, long>(initial, final);
             var differences = diff.ComputeDifferences();
 
             differences.Count.Should().Be(1);
@@ -295,7 +295,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections
 
             var final = new List<TestSectionModel>();
 
-            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem>(initial, final);
+            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem, long>(initial, final);
             var differences = diff.ComputeDifferences();
 
             differences.Count.Should().Be(1);
@@ -350,7 +350,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections
                 }),
             };
 
-            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem>(initial, final);
+            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem, long>(initial, final);
             var differences = diff.ComputeDifferences();
 
             differences.Count.Should().Be(1);
@@ -405,7 +405,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections
                 })
             };
 
-            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem>(initial, final);
+            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem, long>(initial, final);
             var differences = diff.ComputeDifferences();
 
             differences.Count.Should().Be(1);
@@ -431,12 +431,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections
                 })
             };
 
-            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem>(initial, initial);
+            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem, long>(initial, initial);
             Action tryingToComputeDifferences =
                 () => diff.ComputeDifferences();
 
             tryingToComputeDifferences.Should()
-                .Throw<DuplicateItemException>()
+                .Throw<DuplicateItemException<long>>()
                 .Where(exception => exception.DuplicatedIdentity == 1111);
         }
 
@@ -455,12 +455,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections
                 })
             };
 
-            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem>(initial, initial);
+            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem, long>(initial, initial);
             Action tryingToComputeDifferences =
                 () => diff.ComputeDifferences();
 
             tryingToComputeDifferences.Should()
-                .Throw<DuplicateSectionException>()
+                .Throw<DuplicateSectionException<long>>()
                 .Where(exception => exception.DuplicatedIdentity == 1);
         }
     }
@@ -491,7 +491,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections
                 TestSectionModel.Create(1, new(int, string)[] { })
             };
 
-            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem>(initial, final);
+            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem, long>(initial, final);
             var differences = diff.ComputeDifferences();
 
             initial.Apply(differences).Should().BeEquivalentTo(final);
@@ -531,7 +531,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections
                 })
             };
 
-            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem>(initial, final);
+            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem, long>(initial, final);
             var differences = diff.ComputeDifferences();
 
             initial.Apply(differences).Should().BeEquivalentTo(final);
@@ -629,7 +629,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections
                 })
             };
 
-            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem>(initial, final);
+            var diff = new Diffing<TestSectionModel, DiffableInt, TestItem, long>(initial, final);
             var differences = diff.ComputeDifferences();
 
             initial.Apply(differences).Should().BeEquivalentTo(final);
@@ -666,7 +666,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.Collections
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var diffing = new Diffing<TestSectionModel, DiffableInt, TestItem>(initial, final);
+            var diffing = new Diffing<TestSectionModel, DiffableInt, TestItem, long>(initial, final);
             var differences = diffing.ComputeDifferences();
 
             stopwatch.Stop();
