@@ -4,14 +4,15 @@ using System.Linq;
 
 namespace Toggl.Foundation.MvvmCross.Collections
 {
-    public class AnimatableSectionModel<THeader, TItem> : IAnimatableSectionModel<THeader, TItem>
-        where THeader : IDiffable
-        where TItem : IDiffable, IEquatable<TItem>
+    public class AnimatableSectionModel<THeader, TItem, TKey> : IAnimatableSectionModel<THeader, TItem, TKey>
+        where TKey : IEquatable<TKey>
+        where THeader : IDiffable<TKey>
+        where TItem : IDiffable<TKey>, IEquatable<TItem>
     {
         public THeader Header { get; private set; }
         public List<TItem> Items { get; private set; }
 
-        public long Identity { get; private set; }
+        public TKey Identity { get; private set; }
 
         public AnimatableSectionModel()
         {

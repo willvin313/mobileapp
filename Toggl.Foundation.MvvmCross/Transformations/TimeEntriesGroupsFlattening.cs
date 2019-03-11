@@ -8,6 +8,7 @@ using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog;
+using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog.Identity;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant;
@@ -16,7 +17,7 @@ using static Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog.LogItemVisuali
 namespace Toggl.Foundation.MvvmCross.Transformations
 {
     using LogGrouping = IGrouping<DateTime, IThreadSafeTimeEntry>;
-    using MainLogSection = AnimatableSectionModel<DaySummaryViewModel, LogItemViewModel>;
+    using MainLogSection = AnimatableSectionModel<DaySummaryViewModel, LogItemViewModel, IMainLogKey>;
 
     internal sealed class TimeEntriesGroupsFlattening
     {

@@ -16,6 +16,7 @@ using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Transformations;
 using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog;
+using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog.Identity;
 using Toggl.Foundation.Services;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
@@ -38,7 +39,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private IDisposable delayedDeletionDisposable;
         private long[] timeEntriesToDelete;
 
-        public IObservable<IEnumerable<AnimatableSectionModel<DaySummaryViewModel, LogItemViewModel>>> TimeEntries { get; }
+        public IObservable<IEnumerable<AnimatableSectionModel<DaySummaryViewModel, LogItemViewModel, IMainLogKey>>> TimeEntries { get; }
         public IObservable<bool> Empty { get; }
         public IObservable<int> Count { get; }
         public IObservable<int?> TimeEntriesPendingDeletion { get; }
