@@ -4,10 +4,11 @@ using System.Linq;
 
 namespace Toggl.Foundation.MvvmCross.Collections.Diffing
 {
-    public sealed class Diffing<TSection, THeader, TElement>
-        where TSection : IAnimatableSectionModel<THeader, TElement>, new()
-        where TElement : IDiffable, IEquatable<TElement>
-        where THeader : IDiffable
+    public sealed class Diffing<TSection, THeader, TElement, TKey>
+        where TKey : IEquatable<TKey>
+        where TSection : IAnimatableSectionModel<THeader, TElement, TKey>, new()
+        where TElement : IDiffable<TKey>, IEquatable<TElement>
+        where THeader : IDiffable<TKey>
     {
         public class Changeset
         {
@@ -118,7 +119,7 @@ namespace Toggl.Foundation.MvvmCross.Collections.Diffing
 
                 if (initialSectionData[initialSectionIndex].MoveIndex.HasValue)
                 {
-                    throw new DuplicateSectionException(section.Identity);
+                    throw new DuplicateSectionException<TKey>(section.Identity);
                 }
 
                 initialSectionData[initialSectionIndex].MoveIndex = i;
@@ -551,9 +552,9 @@ namespace Toggl.Foundation.MvvmCross.Collections.Diffing
             return new List<Changeset>(new[] { changeset });
         }
 
-        private static Dictionary<long, int> indexSections(List<TSection> sections)
+        private static Dictionary<TKey, int> indexSections(List<TSection> sections)
         {
-            Dictionary<long, int> indexedSections = new Dictionary<long, int>();
+            Dictionary<TKey, int> indexedSections = new Dictionary<TKey, int>();
 
             for (int i = 0; i < sections.Count; i++)
             {
@@ -561,7 +562,7 @@ namespace Toggl.Foundation.MvvmCross.Collections.Diffing
 
                 if (indexedSections.ContainsKey(section.Identity))
                 {
-                    throw new DuplicateSectionException(section.Identity);
+                    throw new DuplicateSectionException<TKey>(section.Identity);
                 }
 
                 indexedSections[section.Identity] = i;
@@ -574,7 +575,7 @@ namespace Toggl.Foundation.MvvmCross.Collections.Diffing
             IReadOnlyList<List<TElement>> initialItemCache,
             IReadOnlyList<List<TElement>> finalItemCache)
         {
-            var initialIdentities = new List<long>();
+            var initialIdentities = new List<TKey>();
             var initialItemPaths = new List<ItemPath>();
 
             for (int i = 0; i < initialItemCache.Count; i++)
@@ -597,7 +598,7 @@ namespace Toggl.Foundation.MvvmCross.Collections.Diffing
                 .Select(items => Enumerable.Range(0, items.Count).Select(_ => ItemAssociatedData.Initial()).ToList())
                 .ToList();
 
-            var dictionary = new Dictionary<long, int>();
+            var dictionary = new Dictionary<TKey, int>();
 
             for (int i = 0; i < initialIdentities.Count; i++)
             {
@@ -608,7 +609,7 @@ namespace Toggl.Foundation.MvvmCross.Collections.Diffing
                     var existingValueItemPathIndex = dictionary[identity];
                     var itemPath = initialItemPaths[existingValueItemPathIndex];
                     var item = initialItemCache[itemPath.sectionIndex][itemPath.itemIndex];
-                    throw new DuplicateItemException(item.Identity);
+                    throw new DuplicateItemException<TKey>(item.Identity);
                 }
 
                 dictionary[identity] = i;
@@ -632,7 +633,7 @@ namespace Toggl.Foundation.MvvmCross.Collections.Diffing
                     var itemPath = initialItemPaths[initialItemPathIndex];
                     if (initialItemData[itemPath.sectionIndex][itemPath.itemIndex].MoveIndex != null)
                     {
-                        throw new DuplicateItemException(item.Identity);
+                        throw new DuplicateItemException<TKey>(item.Identity);
                     }
 
                     initialItemData[itemPath.sectionIndex][itemPath.itemIndex].MoveIndex = new ItemPath(i, j);

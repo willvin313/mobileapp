@@ -2,11 +2,11 @@ using System;
 
 namespace Toggl.Foundation.MvvmCross.Collections.Diffing
 {
-    public sealed class DuplicateItemException : Exception
+    public sealed class DuplicateItemException<TKey> : Exception
     {
-        public long DuplicatedIdentity { get; }
+        public TKey DuplicatedIdentity { get; }
 
-        public DuplicateItemException(long identity)
+        public DuplicateItemException(TKey identity)
         {
             DuplicatedIdentity = identity;
         }
