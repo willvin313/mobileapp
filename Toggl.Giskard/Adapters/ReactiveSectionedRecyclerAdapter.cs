@@ -14,7 +14,8 @@ using Toggl.Giskard.ViewHolders;
 
 namespace Toggl.Giskard.Adapters
 {
-    public abstract class ReactiveSectionedRecyclerAdapter<TModel, TModelWrapper, TSectionHeaderModel, TSectionHeaderWrapper, TItemViewHolder, TSectionViewHolder> : RecyclerView.Adapter
+    public abstract class ReactiveSectionedRecyclerAdapter<TModel, TModelWrapper, TSectionHeaderModel, TSectionHeaderWrapper, TItemViewHolder, TSectionViewHolder, TKey> : RecyclerView.Adapter
+        where TKey : IEquatable<TKey>
         where TItemViewHolder : BaseRecyclerViewHolder<TModelWrapper>
         where TSectionViewHolder : BaseRecyclerViewHolder<TSectionHeaderWrapper>
         where TSectionHeaderModel : class
@@ -146,9 +147,9 @@ namespace Toggl.Giskard.Adapters
 
         protected abstract TItemViewHolder CreateItemViewHolder(ViewGroup parent);
 
-        protected abstract long IdFor(TModel item);
+        protected abstract TKey IdFor(TModel item);
 
-        protected abstract long IdForSection(TSectionHeaderModel section);
+        protected abstract TKey IdForSection(TSectionHeaderModel section);
 
         protected abstract TModelWrapper Wrap(TModel item);
 
@@ -175,9 +176,9 @@ namespace Toggl.Giskard.Adapters
             public IReadOnlyList<TModel> Section { get; }
             public TSectionHeaderModel SectionHeader { get; }
             public TSectionHeaderWrapper WrappedSection { get; }
-            public long Id { get; }
+            public TKey Id { get; }
 
-            public FlatItemInfo(TModel item, Func<TModel, long> idProvider, Func<TModel, TModelWrapper> wrapper)
+            public FlatItemInfo(TModel item, Func<TModel, TKey> idProvider, Func<TModel, TModelWrapper> wrapper)
             {
                 ViewType = ItemViewType;
                 Item = item;
@@ -188,7 +189,7 @@ namespace Toggl.Giskard.Adapters
                 WrappedSection = default(TSectionHeaderWrapper);
             }
 
-            public FlatItemInfo(IReadOnlyList<TModel> section, TSectionHeaderModel header, Func<TSectionHeaderModel, long> idProvider, Func<TSectionHeaderModel, TSectionHeaderWrapper> wrapper)
+            public FlatItemInfo(IReadOnlyList<TModel> section, TSectionHeaderModel header, Func<TSectionHeaderModel, TKey> idProvider, Func<TSectionHeaderModel, TSectionHeaderWrapper> wrapper)
             {
                 ViewType = SectionViewType;
                 Item = default(TModel);
@@ -274,7 +275,7 @@ namespace Toggl.Giskard.Adapters
                 var newItem = newItems[newItemPosition - headerOffset];
 
                 return oldItem.ViewType == newItem.ViewType
-                       && oldItem.Id == newItem.Id;
+                       && oldItem.Id.Equals(newItem.Id);
             }
 
             public override int NewListSize => newItems.Count + headerOffset;
