@@ -3,9 +3,10 @@ using System.Collections.Generic;
 
 namespace Toggl.Foundation.MvvmCross.Collections
 {
-    public interface IDiffable
+    public interface IDiffable<TKey>
+        where TKey : IEquatable<TKey>
     {
-        long Identity { get; }
+        TKey Identity { get; }
     }
 
     public interface ISectionModel<THeader, TItem>
@@ -15,7 +16,8 @@ namespace Toggl.Foundation.MvvmCross.Collections
         void Initialize(THeader header, IEnumerable<TItem> items);
     }
 
-    public interface IAnimatableSectionModel<TSection, TItem> : ISectionModel<TSection, TItem>, IDiffable
-        where TItem : IDiffable, IEquatable<TItem>
+    public interface IAnimatableSectionModel<TSection, TItem, TKey> : ISectionModel<TSection, TItem>, IDiffable<TKey>
+        where TKey : IEquatable<TKey>
+        where TItem : IDiffable<TKey>, IEquatable<TItem>
     { }
 }

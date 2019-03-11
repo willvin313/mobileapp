@@ -2,11 +2,12 @@ using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Toggl.Foundation.MvvmCross.Collections;
+using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog.Identity;
 using Toggl.Multivac;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog
 {
-    public sealed class LogItemViewModel : IDiffable, IEquatable<LogItemViewModel>
+    public sealed class LogItemViewModel : IDiffable<IMainLogKey>, IEquatable<LogItemViewModel>
     {
         public GroupId GroupId { get; }
         public long[] RepresentedTimeEntriesIds { get; }
@@ -27,7 +28,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog
         public bool NeedsSync { get; }
         public bool CanContinue { get; }
 
-        public long Identity { get; }
+        public IMainLogKey Identity { get; }
 
         public bool IsTimeEntryGroupHeader =>
             VisualizationIntent == LogItemVisualizationIntent.ExpandedGroupHeader ||
@@ -63,8 +64,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog
             NeedsSync = needsSync;
             CanContinue = canSync && !isInaccessible;
 
-            var idNormalizationFactor = IsTimeEntryGroupHeader ? -1 : 1;
-            Identity = idNormalizationFactor * RepresentedTimeEntriesIds.First();
+            Identity = IsTimeEntryGroupHeader
+                ? new TimeEntriesGroupKey(groupId) as IMainLogKey
+                : new SingleTimeEntryKey(representedTimeEntriesIds.Single());
         }
 
         public bool Equals(LogItemViewModel other)
