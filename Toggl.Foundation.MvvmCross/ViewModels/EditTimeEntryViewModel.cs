@@ -73,7 +73,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private BehaviorSubject<DateTimeOffset> startTimeSubject;
         public IObservable<DateTimeOffset> StartTime { get; private set; }
 
-        private BehaviorSubject<TimeSpan?> durationSubject;
+        private ISubject<TimeSpan?> durationSubject;
         public IObservable<TimeSpan> Duration { get; private set; }
 
         public IObservable<DateTimeOffset?> StopTime { get; private set; }
@@ -166,13 +166,19 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             StartTime = startTimeObservable
                 .AsDriver(default(DateTimeOffset), schedulerProvider);
 
-            durationSubject = new BehaviorSubject<TimeSpan?>(null);
-            Duration = Observable
-                .CombineLatest(
-                    startTimeObservable, durationSubject, timeService.CurrentDateTimeObservable,
-                    calculateDisplayedDuration)
-                .DistinctUntilChanged()
-                .AsDriver(TimeSpan.Zero, schedulerProvider);
+            var now = timeService.CurrentDateTimeObservable.StartWith(timeService.CurrentDateTime);
+            durationSubject = new ReplaySubject<TimeSpan?>(bufferSize: 1);
+            Duration =
+                durationSubject
+                    .Select(duration
+                        => duration.HasValue
+                            ? Observable.Return(duration.Value)
+                            : now.CombineLatest(
+                                startTimeObservable,
+                                (currentTime, startTime) => currentTime - startTime))
+                    .Switch()
+                    .DistinctUntilChanged()
+                    .AsDriver(TimeSpan.Zero, schedulerProvider);
 
             var stopTimeObservable = Observable.CombineLatest(startTimeObservable, durationSubject, calculateStopTime)
                 .DistinctUntilChanged();
@@ -308,9 +314,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             disposeBag?.Dispose();
         }
 
-        private TimeSpan calculateDisplayedDuration(DateTimeOffset start, TimeSpan? duration, DateTimeOffset currentTime)
-            => duration ?? (currentTime - start);
-
         private DateTimeOffset? calculateStopTime(DateTimeOffset start, TimeSpan? duration)
             => duration.HasValue ? start + duration : null;
 
@@ -418,7 +421,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             var isDurationInitiallyFocused = tapSource == EditViewTapSource.Duration;
 
-            var duration = durationSubject.Value;
+            var duration = await durationSubject.FirstAsync();
             var startTime = startTimeSubject.Value;
             var currentDuration = DurationParameter.WithStartAndDuration(startTime, duration);
             var editDurationParam = new EditDurationParameters(currentDuration, false, isDurationInitiallyFocused);
@@ -445,7 +448,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private async Task<bool> closeWithConfirmation()
         {
-            if (isDirty)
+            if (await isDirty())
             {
                 var userConfirmedDiscardingChanges = await dialogService.ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
 
@@ -457,16 +460,19 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             return true;
         }
 
-        private bool isDirty
-            => originalTimeEntry == null
-            || originalTimeEntry.Description != Description.Value
-            || originalTimeEntry.WorkspaceId != workspaceId
-            || originalTimeEntry.ProjectId != projectId
-            || originalTimeEntry.TaskId != taskId
-            || originalTimeEntry.Start != startTimeSubject.Value
-            || !originalTimeEntry.TagIds.SetEquals(tagIds)
-            || originalTimeEntry.Billable != isBillableSubject.Value
-            || originalTimeEntry.Duration != (long?)durationSubject.Value?.TotalSeconds;
+        private async Task<bool> isDirty()
+        {
+            var duration = await durationSubject.FirstAsync();
+            return originalTimeEntry == null
+                || originalTimeEntry.Description != Description.Value
+                || originalTimeEntry.WorkspaceId != workspaceId
+                || originalTimeEntry.ProjectId != projectId
+                || originalTimeEntry.TaskId != taskId
+                || originalTimeEntry.Start != startTimeSubject.Value
+                || !originalTimeEntry.TagIds.SetEquals(tagIds)
+                || originalTimeEntry.Billable != isBillableSubject.Value
+                || originalTimeEntry.Duration != (long?)duration?.TotalSeconds;
+        }
 
         private async Task save()
         {
@@ -474,12 +480,13 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             var timeEntries = await interactorFactory.GetMultipleTimeEntriesById(TimeEntryIds).Execute();
 
+            var duration = await durationSubject.FirstAsync();
             var commonTimeEntryData = new EditTimeEntryDto
             {
                 Id = TimeEntryIds.First(),
                 Description = Description.Value?.Trim() ?? string.Empty,
                 StartTime = startTimeSubject.Value,
-                StopTime = calculateStopTime(startTimeSubject.Value, durationSubject.Value),
+                StopTime = calculateStopTime(startTimeSubject.Value, duration),
                 ProjectId = projectId,
                 TaskId = taskId,
                 Billable = isBillableSubject.Value,

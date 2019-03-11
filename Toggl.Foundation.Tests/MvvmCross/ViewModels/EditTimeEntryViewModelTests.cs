@@ -626,8 +626,23 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
         public sealed class TheDurationProperty : InitializableEditTimeEntryViewModelTest
         {
+            private readonly TimeSpan oneSecond = TimeSpan.FromSeconds(1);
+
+            protected override void AdditionalSetup()
+            {
+                base.AdditionalSetup();
+
+                TimeService.CurrentDateTimeObservable.Returns(
+                    Observable.Interval(TimeSpan.FromSeconds(1), TestScheduler).Select(n =>
+                    {
+                        var now = Now + (n + 1) * TimeSpan.FromSeconds(1);
+                        TimeService.CurrentDateTime.Returns(now);
+                        return now;
+                    }));
+            }
+
             [Fact, LogIfTooSlow]
-            public async Task ReturnsValidDurationForRunningTimeEntry()
+            public async Task ReturnsValidDurationForRunningTimeEntryWithoutAnyDelay()
             {
                 AdjustTimeEntries(TimeEntriesIds, te =>
                 {
@@ -638,9 +653,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserverFor(ViewModel.Duration);
 
                 await ViewModel.Initialize();
-                TestScheduler.Start();
+                TestScheduler.AdvanceBy(TimeSpan.FromSeconds(3).Ticks + 1);
 
-                observer.LastEmittedValue().Should().Be(OneHour);
+                observer.Messages.AssertEqual(
+                    OnNext(1, OneHour),
+                    OnNext(oneSecond.Ticks + 1, OneHour + oneSecond),
+                    OnNext(2 * oneSecond.Ticks + 1, OneHour + 2 * oneSecond),
+                    OnNext(3 * oneSecond.Ticks + 1, OneHour + 3 * oneSecond));
             }
 
             [Fact, LogIfTooSlow]
@@ -649,9 +668,32 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserverFor(ViewModel.Duration);
 
                 await ViewModel.Initialize();
-                TestScheduler.Start();
+                TestScheduler.AdvanceBy(TimeSpan.FromSeconds(3).Ticks);
 
-                observer.LastEmittedValue().Should().Be(OneHour);
+                observer.Messages.AssertEqual(OnNext(1, OneHour));
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task StopsTickingWhenTheTimeEntryIsStopped()
+            {
+                AdjustTimeEntries(TimeEntriesIds, te =>
+                {
+                    te.Start = Now - OneHour;
+                    te.Duration = null;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.Duration);
+
+                await ViewModel.Initialize();
+                TestScheduler.AdvanceBy(TimeSpan.FromSeconds(3).Ticks);
+                ViewModel.StopTimeEntry.Execute();
+                TestScheduler.AdvanceBy(TimeSpan.FromSeconds(3).Ticks);
+
+                observer.Messages.AssertEqual(
+                    OnNext(1, OneHour),
+                    OnNext(oneSecond.Ticks + 1, OneHour + oneSecond),
+                    OnNext(2 * oneSecond.Ticks + 1, OneHour + 2 * oneSecond),
+                    OnNext(3 * oneSecond.Ticks + 1, OneHour + 3 * oneSecond));
             }
         }
 
