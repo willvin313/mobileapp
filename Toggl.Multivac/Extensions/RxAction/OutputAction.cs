@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reactive;
 using System.Reactive.Concurrency;
-using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 
@@ -14,8 +13,13 @@ namespace Toggl.Multivac.Extensions
         {
         }
 
-        public IObservable<TOutput> Execute()
-            => Execute(Unit.Default);
+        public void Execute()
+        {
+            Inputs.OnNext(Unit.Default);
+        }
+
+        public IObservable<TOutput> ExecuteWithCompletion()
+            => ExecuteWithCompletion(Unit.Default);
 
         public static OutputAction<TOutput> FromAsync(Func<Task<TOutput>> asyncAction, IScheduler mainScheduler, IObservable<bool> enabledIf = null)
         {

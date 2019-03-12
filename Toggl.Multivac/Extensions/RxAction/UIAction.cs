@@ -15,8 +15,11 @@ namespace Toggl.Multivac.Extensions
         {
         }
 
-        public IObservable<Unit> Execute()
+        public void Execute()
             => Execute(Unit.Default);
+
+        public IObservable<Unit> ExecuteWithCompletion()
+            => ExecuteWithCompletion(Unit.Default);
 
         public static UIAction FromAction(Action action, IScheduler mainScheduler, IObservable<bool> enabledIf = null)
         {
@@ -45,9 +48,9 @@ namespace Toggl.Multivac.Extensions
 
     public static class RxActionExtensions
     {
-        public static IObservable<Unit> Execute(this UIAction action)
+        public static void Execute(this UIAction action)
         {
-            return action.Execute(Unit.Default);
+            action.Execute(Unit.Default);
         }
     }
 }

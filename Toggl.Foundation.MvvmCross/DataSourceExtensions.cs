@@ -15,7 +15,6 @@ namespace Toggl.Foundation.MvvmCross
             Mvx.RegisterSingleton(self.Projects);
             Mvx.RegisterSingleton(self.TimeEntries);
             Mvx.RegisterSingleton(self.SyncManager);
-            Mvx.RegisterSingleton(self.ReportsProvider);
 
             return self;
         }

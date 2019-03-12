@@ -214,6 +214,10 @@ namespace Toggl.Giskard.Activities
                 .Subscribe(onEmptyStateVisibilityChanged)
                 .DisposedBy(DisposeBag);
 
+            ViewModel.ShouldShowRatingView
+                .Subscribe(setupRatingViewVisibility)
+                .DisposedBy(DisposeBag);
+
             setupOnboardingSteps();
             onCreateStopwatch.Stop();
         }
@@ -227,7 +231,7 @@ namespace Toggl.Giskard.Activities
             return Extensions.TimeEntryExtensions.ToProjectTaskClient(hasProject, te.Project?.Name, te.Project?.Color, te.Task?.Name, te.Project?.Client?.Name);
         }
 
-        public void SetupRatingViewVisibility(bool isVisible)
+        private void setupRatingViewVisibility(bool isVisible)
         {
             mainRecyclerAdapter.SetupRatingViewVisibility(isVisible);
         }

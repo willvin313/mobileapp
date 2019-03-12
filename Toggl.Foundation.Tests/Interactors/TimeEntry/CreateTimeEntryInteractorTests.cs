@@ -255,7 +255,7 @@ namespace Toggl.Foundation.Tests.Interactors
         public sealed class TheCreateTimeEntryInteractor : BaseCreateTimeEntryInteractorTest
         {
             protected override IObservable<IDatabaseTimeEntry> CallInteractor(ITimeEntryPrototype prototype)
-                => InteractorFactory.CreateTimeEntry(prototype).Execute();
+                => InteractorFactory.CreateTimeEntry(prototype, prototype.Duration.HasValue ? TimeEntryStartOrigin.Manual : TimeEntryStartOrigin.Timer).Execute();
 
             [Fact, LogIfTooSlow]
             public async Task RegistersTheEventAsATimerEventIfManualModeIsDisabled()

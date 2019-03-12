@@ -10,6 +10,7 @@
 
 namespace Toggl.Foundation {
     using System;
+    using System.Reflection;
     
     
     /// <summary>
@@ -2403,6 +2404,18 @@ namespace Toggl.Foundation {
         public static string YourProfile {
             get {
                 return ResourceManager.GetString("YourProfile", resourceCulture);
+            }
+        }
+        
+        public static string NumberOfTasksPlural {
+            get {
+                return ResourceManager.GetString("NumberOfTasksPlural", resourceCulture);
+            }
+        }
+        
+        public static string NumberOfTasksSingular {
+            get {
+                return ResourceManager.GetString("NumberOfTasksSingular", resourceCulture);
             }
         }
     }

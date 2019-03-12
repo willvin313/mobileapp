@@ -240,7 +240,7 @@ namespace Toggl.Daneel.ViewControllers
 
         public async Task<bool> Dismiss()
         {
-            return await ViewModel.Close.Execute();
+            return await ViewModel.Close.ExecuteWithCompletion();
         }
 
         private void prepareViews()

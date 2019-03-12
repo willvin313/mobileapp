@@ -893,7 +893,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task ClosesTheViewModelIfNothingChanged()
             {
                 await ViewModel.Initialize();
-                _ = ViewModel.Close.Execute();
+                ViewModel.Close.Execute();
                 TestScheduler.Start();
 
                 await NavigationService.Received().Close(Arg.Is(ViewModel));
@@ -905,7 +905,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 await ViewModel.Initialize();
                 ViewModel.Description.Accept("Something Else");
 
-                _ = ViewModel.Close.Execute();
+                ViewModel.Close.Execute();
                 TestScheduler.Start();
 
                 await DialogService.Received().ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
@@ -929,8 +929,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Returns(selectProjectParameter);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.SelectProject.Execute();
-                _ = ViewModel.Close.Execute();
+                ViewModel.SelectProject.Execute();
+                ViewModel.Close.Execute();
                 TestScheduler.Start();
 
                 await DialogService.Received().ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
@@ -954,8 +954,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Returns(selectProjectParameter);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.SelectProject.Execute();
-                _ = ViewModel.Close.Execute();
+                ViewModel.SelectProject.Execute();
+                ViewModel.Close.Execute();
                 TestScheduler.Start();
 
                 await DialogService.Received().ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
@@ -979,8 +979,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Returns(selectProjectParameter);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.SelectProject.Execute();
-                _ = ViewModel.Close.Execute();
+                ViewModel.SelectProject.Execute();
+                ViewModel.Close.Execute();
                 TestScheduler.Start();
 
                 await DialogService.Received().ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
@@ -1001,8 +1001,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Returns(newDurationParameter);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.EditTimes.Execute(EditViewTapSource.StartTime);
-                _ = ViewModel.Close.Execute();
+                ViewModel.EditTimes.Execute(EditViewTapSource.StartTime);
+                ViewModel.Close.Execute();
                 TestScheduler.Start();
 
                 await DialogService.Received().ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
@@ -1025,8 +1025,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Returns(newDurationParameter);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.EditTimes.Execute(EditViewTapSource.Duration);
-                _ = ViewModel.Close.Execute();
+                ViewModel.EditTimes.Execute(EditViewTapSource.Duration);
+                ViewModel.Close.Execute();
                 TestScheduler.Start();
 
                 await DialogService.Received().ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
@@ -1046,8 +1046,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 });
 
                 await ViewModel.Initialize();
-                _ = ViewModel.StopTimeEntry.Execute();
-                _ = ViewModel.Close.Execute();
+                ViewModel.StopTimeEntry.Execute();
+                ViewModel.Close.Execute();
                 TestScheduler.Start();
 
                 await DialogService.Received().ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
@@ -1064,8 +1064,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 });
 
                 await ViewModel.Initialize();
-                _ = ViewModel.ToggleBillable.Execute();
-                _ = ViewModel.Close.Execute();
+                ViewModel.ToggleBillable.Execute();
+                ViewModel.Close.Execute();
                 TestScheduler.Start();
 
                 await DialogService.Received().ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
@@ -1086,8 +1086,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 await ViewModel.Initialize();
                 TestScheduler.Start();
-                _ = ViewModel.SelectTags.Execute();
-                _ = ViewModel.Close.Execute();
+                ViewModel.SelectTags.Execute();
+                ViewModel.Close.Execute();
                 TestScheduler.Start();
 
                 await DialogService.Received().ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
@@ -1103,7 +1103,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 await ViewModel.Initialize();
                 TestScheduler.Start();
                 ViewModel.Description.Accept("This changes the description.");
-                _ = ViewModel.Close.Execute();
+                ViewModel.Close.Execute();
                 TestScheduler.Start();
 
                 await NavigationService.Received().Close(ViewModel);
@@ -1119,7 +1119,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 await ViewModel.Initialize();
                 TestScheduler.Start();
                 ViewModel.Description.Accept("This changes the description.");
-                _ = ViewModel.Close.Execute();
+                ViewModel.Close.Execute();
                 TestScheduler.Start();
 
                 await NavigationService.DidNotReceive().Close(ViewModel);
@@ -1166,7 +1166,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserverFor(ViewModel.StopTime);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.StopTimeEntry.Execute();
+                ViewModel.StopTimeEntry.Execute();
                 TestScheduler.Start();
 
                 observer.LastEmittedValue().Should().Be(Now);
@@ -1183,7 +1183,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserverFor(ViewModel.IsTimeEntryRunning);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.StopTimeEntry.Execute();
+                ViewModel.StopTimeEntry.Execute();
                 TestScheduler.Start();
 
                 observer.LastEmittedValue().Should().BeFalse();
@@ -1255,7 +1255,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task SetsTheOnboardingStorageFlag()
             {
                 await ViewModel.Initialize();
-                _ = ViewModel.SelectProject.Execute();
+                ViewModel.SelectProject.Execute();
                 TestScheduler.Start();
 
                 OnboardingStorage.Received().SelectsProject();
@@ -1268,7 +1268,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserverFor(ViewModel.ProjectClientTask);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.SelectProject.Execute();
+                ViewModel.SelectProject.Execute();
                 TestScheduler.Start();
 
                 observer.LastEmittedValue().Project.Should().Be(selectedProjectName);
@@ -1282,7 +1282,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserverFor(ViewModel.ProjectClientTask);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.SelectProject.Execute();
+                ViewModel.SelectProject.Execute();
                 TestScheduler.Start();
 
                 observer.LastEmittedValue().Client.Should().Be(selectedClientName);
@@ -1295,7 +1295,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserverFor(ViewModel.ProjectClientTask);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.SelectProject.Execute();
+                ViewModel.SelectProject.Execute();
                 TestScheduler.Start();
 
                 observer.LastEmittedValue().Task.Should().Be(selectedTaskName);
@@ -1308,7 +1308,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserverFor(ViewModel.ProjectClientTask);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.SelectProject.Execute();
+                ViewModel.SelectProject.Execute();
                 TestScheduler.Start();
 
                 observer.LastEmittedValue().Task.Should().BeNull();
@@ -1321,7 +1321,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserverFor(ViewModel.Tags);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.SelectProject.Execute();
+                ViewModel.SelectProject.Execute();
                 TestScheduler.Start();
 
                 observer.LastEmittedValue().Should().HaveCount(0);
@@ -1334,7 +1334,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserverFor(ViewModel.Tags);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.SelectProject.Execute();
+                ViewModel.SelectProject.Execute();
                 TestScheduler.Start();
 
                 AnalyticsService.Received().EditEntrySelectProject.Track();
@@ -1399,7 +1399,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 prepareInteractorAndNavigationResults();
 
                 await ViewModel.Initialize();
-                _ = ViewModel.SelectTags.Execute();
+                ViewModel.SelectTags.Execute();
                 TestScheduler.Start();
 
                 await NavigationService
@@ -1425,7 +1425,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 prepareInteractorAndNavigationResults(expectedTagsIds);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.SelectTags.Execute();
+                ViewModel.SelectTags.Execute();
                 TestScheduler.Start();
 
                 observer.LastEmittedValue().Should().BeEquivalentTo(expectedTags);
@@ -1437,7 +1437,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 prepareInteractorAndNavigationResults();
 
                 await ViewModel.Initialize();
-                _ = ViewModel.SelectTags.Execute();
+                ViewModel.SelectTags.Execute();
                 TestScheduler.Start();
 
                 AnalyticsService.Received().EditEntrySelectTag.Track();
@@ -1452,7 +1452,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task TracksBillableTap()
             {
                 await ViewModel.Initialize();
-                _ = ViewModel.ToggleBillable.Execute();
+                ViewModel.ToggleBillable.Execute();
                 TestScheduler.Start();
 
                 AnalyticsService.Received()
@@ -1473,7 +1473,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observable = TestScheduler.CreateObserverFor(ViewModel.IsBillable);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.ToggleBillable.Execute();
+                ViewModel.ToggleBillable.Execute();
                 TestScheduler.Start();
 
                 observable.LastEmittedValue().Should().Be(!initialValue);
@@ -1495,7 +1495,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserverFor(ViewModel.IsSyncErrorMessageVisible);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.DismissSyncErrorMessage.Execute();
+                ViewModel.DismissSyncErrorMessage.Execute();
                 TestScheduler.Start();
 
                 observer.LastEmittedValue().Should().BeFalse();
@@ -1529,7 +1529,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 });
 
                 await ViewModel.Initialize();
-                _ = ViewModel.EditTimes.Execute(tapSource);
+                ViewModel.EditTimes.Execute(tapSource);
                 TestScheduler.Start();
 
                 AnalyticsService.Received().EditViewTapped.Track(tapSource);
@@ -1545,7 +1545,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 });
 
                 await ViewModel.Initialize();
-                _ = ViewModel.EditTimes.Execute(EditViewTapSource.StartTime);
+                ViewModel.EditTimes.Execute(EditViewTapSource.StartTime);
                 TestScheduler.Start();
 
                 await NavigationService
@@ -1563,7 +1563,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 });
 
                 await ViewModel.Initialize();
-                _ = ViewModel.EditTimes.Execute(EditViewTapSource.Duration);
+                ViewModel.EditTimes.Execute(EditViewTapSource.Duration);
                 TestScheduler.Start();
 
                 await NavigationService
@@ -1586,7 +1586,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 });
 
                 await ViewModel.Initialize();
-                _ = ViewModel.EditTimes.Execute(EditViewTapSource.Duration);
+                ViewModel.EditTimes.Execute(EditViewTapSource.Duration);
                 TestScheduler.Start();
 
                 await NavigationService
@@ -1604,7 +1604,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserverFor(ViewModel.StartTime);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.EditTimes.Execute(EditViewTapSource.Duration);
+                ViewModel.EditTimes.Execute(EditViewTapSource.Duration);
                 TestScheduler.Start();
 
                 observer.LastEmittedValue().Should().Be(selectedStartTime);
@@ -1617,7 +1617,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserverFor(ViewModel.Duration);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.EditTimes.Execute(EditViewTapSource.Duration);
+                ViewModel.EditTimes.Execute(EditViewTapSource.Duration);
                 TestScheduler.Start();
 
                 observer.LastEmittedValue().Should().Be(selectedDuration.Value);
@@ -1631,7 +1631,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserverFor(ViewModel.StopTime);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.EditTimes.Execute(EditViewTapSource.Duration);
+                ViewModel.EditTimes.Execute(EditViewTapSource.Duration);
                 TestScheduler.Start();
 
                 observer.LastEmittedValue().Should().Be(expectedStopTime);
@@ -1663,7 +1663,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task AsksForDestructiveActionConfirmationForSingleTimeEntry()
             {
                 await ViewModel.Initialize();
-                _ = ViewModel.Delete.Execute();
+                ViewModel.Delete.Execute();
                 TestScheduler.Start();
 
                 await DialogService.Received().ConfirmDestructiveAction(
@@ -1676,7 +1676,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 AdjustTimeEntries(TimeEntriesGroupIds, te => te);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.Delete.Execute();
+                ViewModel.Delete.Execute();
                 TestScheduler.Start();
 
                 await DialogService.Received().ConfirmDestructiveAction(
@@ -1692,7 +1692,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Returns(falseObservable);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.Delete.Execute();
+                ViewModel.Delete.Execute();
                 TestScheduler.Start();
 
                 await InteractorFactory.DeleteTimeEntry(Arg.Any<long>()).DidNotReceive().Execute();
@@ -1709,7 +1709,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 AdjustTimeEntries(TimeEntriesGroupIds, te => te);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.Delete.Execute();
+                ViewModel.Delete.Execute();
                 TestScheduler.Start();
 
                 await InteractorFactory.DeleteTimeEntry(Arg.Any<long>()).DidNotReceive().Execute();
@@ -1720,7 +1720,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task InitiatesPushSyncOnDeleteConfirmationForSingleTimeEntry()
             {
                 await ViewModel.Initialize();
-                _ = ViewModel.Delete.Execute();
+                ViewModel.Delete.Execute();
                 TestScheduler.Start();
 
                 DataSource.SyncManager.Received().InitiatePushSync();
@@ -1732,7 +1732,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 AdjustTimeEntries(TimeEntriesGroupIds, te => te);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.Delete.Execute();
+                ViewModel.Delete.Execute();
                 TestScheduler.Start();
 
                 DataSource.SyncManager.Received().InitiatePushSync();
@@ -1742,7 +1742,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task ClosesViewModelAfterDeletionForSingleTimeEntry()
             {
                 await ViewModel.Initialize();
-                _ = ViewModel.Delete.Execute();
+                ViewModel.Delete.Execute();
                 TestScheduler.Start();
 
                 await NavigationService.Received().Close(ViewModel);
@@ -1754,7 +1754,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 AdjustTimeEntries(TimeEntriesGroupIds, te => te);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.Delete.Execute();
+                ViewModel.Delete.Execute();
                 TestScheduler.Start();
 
                 await NavigationService.Received().Close(ViewModel);
@@ -1764,7 +1764,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task TracksDeletionOfSingleTimeEntryUsingTheAnaltyticsService()
             {
                 await ViewModel.Initialize();
-                _ = ViewModel.Delete.Execute();
+                ViewModel.Delete.Execute();
                 TestScheduler.Start();
 
                 AnalyticsService.DeleteTimeEntry.Received().Track();
@@ -1776,7 +1776,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 AdjustTimeEntries(TimeEntriesGroupIds, te => te);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.Delete.Execute();
+                ViewModel.Delete.Execute();
                 TestScheduler.Start();
 
                 AnalyticsService.DeleteTimeEntry.Received().Track();
@@ -1801,8 +1801,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var interactor = SetupUpdateInteractor(entries);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.EditTimes.Execute(EditViewTapSource.StartDate);
-                _ = ViewModel.Save.Execute();
+                ViewModel.EditTimes.Execute(EditViewTapSource.StartDate);
+                ViewModel.Save.Execute();
                 TestScheduler.Start();
 
                 InteractorFactory
@@ -1818,7 +1818,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task SetsTheOnboardingStorageFlag()
             {
                 await ViewModel.Initialize();
-                _ = ViewModel.Save.Execute();
+                ViewModel.Save.Execute();
                 TestScheduler.Start();
 
                 OnboardingStorage.Received().EditedTimeEntry();
@@ -1830,7 +1830,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var interactor = SetupUpdateInteractor(entries);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.Save.Execute();
+                ViewModel.Save.Execute();
                 TestScheduler.Start();
 
                 InteractorFactory
@@ -1846,8 +1846,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var interactor = SetupUpdateInteractor(new[] { timeEntry });
 
                 await ViewModel.Initialize();
-                _ = ViewModel.StopTimeEntry.Execute();
-                _ = ViewModel.Save.Execute();
+                ViewModel.StopTimeEntry.Execute();
+                ViewModel.Save.Execute();
                 TestScheduler.Start();
 
                 InteractorFactory
@@ -1863,7 +1863,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var interactor = SetupUpdateInteractor(entries);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.Save.Execute();
+                ViewModel.Save.Execute();
                 TestScheduler.Start();
 
                 InteractorFactory
@@ -1878,7 +1878,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 SetupUpdateInteractor(entries);
 
                 await ViewModel.Initialize();
-                _ = ViewModel.Save.Execute();
+                ViewModel.Save.Execute();
                 TestScheduler.Start();
 
                 await NavigationService.Received().Close(ViewModel);
@@ -1892,7 +1892,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Returns(Observable.Throw<IEnumerable<IThreadSafeTimeEntry>>(new Exception()));
 
                 await ViewModel.Initialize();
-                _ = ViewModel.Save.Execute();
+                ViewModel.Save.Execute();
                 TestScheduler.Start();
 
                 await NavigationService.Received().Close(ViewModel);

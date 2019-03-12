@@ -5,8 +5,8 @@ using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Login;
 using Toggl.Foundation.MvvmCross.Services;
-using Toggl.Foundation.Services;
 using Toggl.Foundation.Sync;
+using Toggl.Multivac.Extensions;
 using Toggl.Ultrawave;
 
 namespace Toggl.Foundation.MvvmCross
@@ -14,6 +14,7 @@ namespace Toggl.Foundation.MvvmCross
     public static class FoundationExtensions
     {
         private const int newUserThreshold = 60;
+        private static IDisposable loginDisposable;
         private static readonly TimeSpan retryDelayLimit = TimeSpan.FromSeconds(60);
 
         public static MvvmCrossFoundation.Builder StartRegisteringPlatformServices(this TogglFoundation.Builder builder)
@@ -61,7 +62,7 @@ namespace Toggl.Foundation.MvvmCross
                         foundation.AnalyticsService)
                     .RegisterServices();
 
-                Mvx.RegisterSingleton<ITogglApi>(api);
+                Mvx.RegisterSingleton(api);
                 Mvx.ConstructAndRegisterSingleton<IInteractorFactory, InteractorFactory>();
                 Mvx.ConstructAndRegisterSingleton<IAutocompleteProvider, AutocompleteProvider>();
 
@@ -71,7 +72,11 @@ namespace Toggl.Foundation.MvvmCross
             }
 
             var userAccessManager =
-                new UserAccessManager(foundation.ApiFactory, foundation.Database, foundation.GoogleService, foundation.ShortcutCreator, foundation.PrivateSharedStorageService, createDataSource);
+                new UserAccessManager(foundation.ApiFactory, foundation.Database, foundation.GoogleService, foundation.PrivateSharedStorageService, createDataSource);
+
+            loginDisposable = userAccessManager
+                    .UserLoggedIn
+                    .Subscribe(foundation.ShortcutCreator.OnLogin);
 
             Mvx.RegisterSingleton<IUserAccessManager>(userAccessManager);
 

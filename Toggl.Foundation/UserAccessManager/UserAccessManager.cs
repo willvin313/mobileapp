@@ -3,10 +3,8 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Toggl.Foundation.DataSources;
-using Toggl.Foundation.Interactors.UserAccess;
 using Toggl.Foundation.Models;
 using Toggl.Foundation.Services;
-using Toggl.Foundation.Shortcuts;
 using Toggl.Multivac;
 using Toggl.Multivac.Models;
 using Toggl.PrimeRadiant;
@@ -20,7 +18,6 @@ namespace Toggl.Foundation.Login
         private readonly IApiFactory apiFactory;
         private readonly ITogglDatabase database;
         private readonly IGoogleService googleService;
-        private readonly IApplicationShortcutCreator shortcutCreator;
         private readonly IPrivateSharedStorageService privateSharedStorageService;
         private readonly Func<ITogglApi, ITogglDataSource> createDataSource;
 
@@ -34,7 +31,6 @@ namespace Toggl.Foundation.Login
             IApiFactory apiFactory,
             ITogglDatabase database,
             IGoogleService googleService,
-            IApplicationShortcutCreator shortcutCreator,
             IPrivateSharedStorageService privateSharedStorageService,
             Func<ITogglApi, ITogglDataSource> createDataSource
         )
@@ -42,16 +38,14 @@ namespace Toggl.Foundation.Login
             Ensure.Argument.IsNotNull(database, nameof(database));
             Ensure.Argument.IsNotNull(apiFactory, nameof(apiFactory));
             Ensure.Argument.IsNotNull(googleService, nameof(googleService));
-            Ensure.Argument.IsNotNull(shortcutCreator, nameof(shortcutCreator));
             Ensure.Argument.IsNotNull(privateSharedStorageService, nameof(privateSharedStorageService));
             Ensure.Argument.IsNotNull(createDataSource, nameof(createDataSource));
 
             this.database = database;
             this.apiFactory = apiFactory;
             this.googleService = googleService;
-            this.privateSharedStorageService = privateSharedStorageService;
-            this.shortcutCreator = shortcutCreator;
             this.createDataSource = createDataSource;
+            this.privateSharedStorageService = privateSharedStorageService;
         }
 
         public IObservable<ITogglDataSource> Login(Email email, Password password)
@@ -69,7 +63,6 @@ namespace Toggl.Foundation.Login
                 .Select(User.Clean)
                 .SelectMany(database.User.Create)
                 .Select(dataSourceFromUser)
-                .Do(shortcutCreator.OnLogin)
                 .Do(userLoggedInSubject.OnNext);
         }
 
@@ -92,8 +85,7 @@ namespace Toggl.Foundation.Login
                 .SelectMany(_ => signUp(email, password, termsAccepted, countryId, timezone))
                 .Select(User.Clean)
                 .SelectMany(database.User.Create)
-                .Select(dataSourceFromUser)
-                .Do(shortcutCreator.OnLogin);
+                .Select(dataSourceFromUser);
         }
 
         public IObservable<ITogglDataSource> SignUpWithGoogle(bool termsAccepted, int countryId, string timezone)
@@ -118,7 +110,6 @@ namespace Toggl.Foundation.Login
                 .Select(dataSourceFromUser)
                 .Do(userLoggedInSubject.OnNext)
                 .Catch(Observable.Return<ITogglDataSource>(null))
-                .Do(shortcutCreator.OnLogin)
                 .Wait();
 
         public IObservable<ITogglDataSource> RefreshToken(Password password)
@@ -135,7 +126,6 @@ namespace Toggl.Foundation.Login
                 .Select(User.Clean)
                 .SelectMany(database.User.Update)
                 .Select(dataSourceFromUser)
-                .Do(shortcutCreator.OnLogin)
                 .Do(userLoggedInSubject.OnNext);
         }
 
@@ -164,7 +154,6 @@ namespace Toggl.Foundation.Login
                 .Select(User.Clean)
                 .SelectMany(database.User.Create)
                 .Select(dataSourceFromUser)
-                .Do(shortcutCreator.OnLogin)
                 .Do(userLoggedInSubject.OnNext);
         }
 
@@ -185,7 +174,6 @@ namespace Toggl.Foundation.Login
                 .Select(User.Clean)
                 .SelectMany(database.User.Create)
                 .Select(dataSourceFromUser)
-                .Do(shortcutCreator.OnLogin)
                 .Do(userLoggedInSubject.OnNext);
         }
     }

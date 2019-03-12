@@ -8,7 +8,7 @@ namespace Toggl.Foundation.Tests.TestExtensions
     public static class ITestableObserverExtensions
     {
         public static T SingleEmittedValue<T>(this ITestableObserver<T> observer)
-            => observer.Messages.Single().Value.Value;
+            => observer.Values().Single();
 
         public static T LastEmittedValue<T>(this ITestableObserver<T> observer)
             => observer.Values().Last();

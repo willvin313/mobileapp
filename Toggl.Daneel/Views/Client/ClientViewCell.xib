@@ -36,6 +36,9 @@
                     <constraint firstItem="Mfz-zn-1Vc" firstAttribute="centerY" secondItem="YTl-1W-gDM" secondAttribute="centerY" id="oxT-x4-76o"/>
                 </constraints>
             </tableViewCellContentView>
+            <accessibility key="accessibilityConfiguration" label="ClientViewCell">
+                <bool key="isElement" value="YES"/>
+            </accessibility>
             <constraints>
                 <constraint firstItem="c5k-9T-Bdv" firstAttribute="centerX" secondItem="cxk-wN-pdQ" secondAttribute="centerX" id="97d-nG-xvX"/>
                 <constraint firstItem="c5k-9T-Bdv" firstAttribute="width" secondItem="cxk-wN-pdQ" secondAttribute="width" id="Nvh-Am-ioj"/>

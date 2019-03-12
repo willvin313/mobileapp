@@ -65,7 +65,7 @@ namespace Toggl.Giskard.Activities
         {
             if (keyCode == Keycode.Back)
             {
-                ViewModel.Close.Execute();
+                ViewModel.Close.ExecuteWithCompletion();
                 return true;
             }
 

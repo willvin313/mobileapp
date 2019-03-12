@@ -313,8 +313,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
                 .TrackException<InvalidOperationException, IThreadSafeWorkspace>("CalendarViewModel.handleCalendarItem")
                 .Execute();
             var prototype = calendarItem.AsTimeEntryPrototype(workspace.Id);
-            analyticsService.TimeEntryStarted.Track(TimeEntryStartOrigin.CalendarEvent);
-            await interactorFactory.CreateTimeEntry(prototype).Execute();
+            await interactorFactory.CreateTimeEntry(prototype, TimeEntryStartOrigin.CalendarEvent).Execute();
         }
 
         private async Task durationSelected(DateTimeOffset startTime, TimeSpan duration)
@@ -324,8 +323,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
                 .Execute();
 
             var prototype = duration.AsTimeEntryPrototype(startTime, workspace.Id);
-            var timeEntry = await interactorFactory.CreateTimeEntry(prototype).Execute();
-            analyticsService.TimeEntryStarted.Track(TimeEntryStartOrigin.CalendarTapAndDrag);
+            var timeEntry = await interactorFactory.CreateTimeEntry(prototype, TimeEntryStartOrigin.CalendarTapAndDrag).Execute();
+
             await navigationService.Navigate<EditTimeEntryViewModel, long[]>(new[] { timeEntry.Id });
         }
 

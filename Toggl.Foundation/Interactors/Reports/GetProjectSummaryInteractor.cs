@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
-using Toggl.Foundation.Helper;
 using Toggl.Foundation.Models;
+using Toggl.Foundation.Reports;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.Multivac.Models;
@@ -14,21 +14,28 @@ using Toggl.Ultrawave;
 using Toggl.Ultrawave.ApiClients;
 using Toggl.Ultrawave.ApiClients.Interfaces;
 
-namespace Toggl.Foundation.Reports
+namespace Toggl.Foundation.Interactors
 {
-    public sealed class ReportsProvider : IReportsProvider
+    public sealed class GetProjectSummaryInteractor : IInteractor<IObservable<ProjectSummaryReport>>
     {
-        private readonly object listLock = new object();
+        private readonly long workspaceId;
+        private readonly DateTimeOffset startDate;
+        private readonly DateTimeOffset? endDate;
 
         private readonly IProjectsApi projectsApi;
+        private readonly ReportsMemoryCache memoryCache;
         private readonly IProjectsSummaryApi projectSummaryApi;
         private readonly ITimeEntriesReportsApi timeEntriesReportsApi;
         private readonly IRepository<IDatabaseProject> projectsRepository;
         private readonly IRepository<IDatabaseClient> clientsRepository;
 
-        private readonly IList<IProject> memoryCache = new List<IProject>();
-
-        public ReportsProvider(ITogglApi api, ITogglDatabase database)
+        public GetProjectSummaryInteractor(
+            ITogglApi api,
+            ITogglDatabase database,
+            ReportsMemoryCache memoryCache,
+            long workspaceId,
+            DateTimeOffset startDate,
+            DateTimeOffset? endDate)
         {
             Ensure.Argument.IsNotNull(api, nameof(api));
             Ensure.Argument.IsNotNull(database, nameof(database));
@@ -38,18 +45,22 @@ namespace Toggl.Foundation.Reports
             clientsRepository = database.Clients;
             projectSummaryApi = api.ProjectsSummary;
             timeEntriesReportsApi = api.TimeEntriesReports;
+
+            this.endDate = endDate;
+            this.startDate = startDate;
+            this.workspaceId = workspaceId;
+            this.memoryCache = memoryCache;
         }
 
-        public IObservable<ProjectSummaryReport> GetProjectSummary(
-            long workspaceId, DateTimeOffset startDate, DateTimeOffset? endDate)
+        public IObservable<ProjectSummaryReport> Execute()
             => projectSummaryApi
                 .GetByWorkspace(workspaceId, startDate, endDate)
                 .SelectMany(response => summaryReportFromResponse(response, workspaceId));
 
         private IObservable<ProjectSummaryReport> summaryReportFromResponse(IProjectsSummary response, long workspaceId)
         {
-            IObservable<ChartSegment[]> summarySegments = getChartSegmentsForWorkspace(response, workspaceId);
-            IObservable<long[]> projectIdsNotSynced = getProjectIdsNotSynced(response);
+            var summarySegments = getChartSegmentsForWorkspace(response, workspaceId);
+            var projectIdsNotSynced = getProjectIdsNotSynced(response);
 
             var result = Observable.CombineLatest(
                 summarySegments,
@@ -61,16 +72,14 @@ namespace Toggl.Foundation.Reports
         }
 
         private IObservable<ChartSegment[]> getChartSegmentsForWorkspace(IProjectsSummary projectsSummary, long workspaceId)
-        {
-            return projectsSummary.ProjectsSummaries
-                                  .Select(s => s.ProjectId)
-                                  .SelectNonNulls()
-                                  .Apply(ids => searchProjects(workspaceId, ids.ToArray()))
-                                  .Select(projectsInReport => getChartSegmentsForProjectsInReport(projectsSummary, projectsInReport))
-                                  .SelectMany(segmentsObservable => segmentsObservable.Merge())
-                                  .ToArray()
-                                  .Select(s => s.OrderByDescending(c => c.Percentage).ToArray());
-        }
+            => projectsSummary.ProjectsSummaries
+                .Select(s => s.ProjectId)
+                .SelectNonNulls()
+                .Apply(ids => searchProjects(workspaceId, ids.ToArray()))
+                .Select(projectsInReport => getChartSegmentsForProjectsInReport(projectsSummary, projectsInReport))
+                .SelectMany(segmentsObservable => segmentsObservable.Merge())
+                .ToArray()
+                .Select(s => s.OrderByDescending(c => c.Percentage).ToArray());
 
         private IEnumerable<IObservable<ChartSegment>> getChartSegmentsForProjectsInReport(IProjectsSummary projectsSummary, IList<IProject> projectsInReport)
         {
@@ -87,19 +96,17 @@ namespace Toggl.Foundation.Reports
         private IObservable<long[]> getProjectIdsNotSynced(IProjectsSummary response)
         {
             var summaryProjectIds = response.ProjectsSummaries
-                                                        .Select(s => s.ProjectId)
-                                                        .SelectNonNulls()
-                                                        .ToArray();
+                .Select(s => s.ProjectId)
+                .SelectNonNulls()
+                .ToArray();
 
-            var projectIdsNotSynced = Observable.Return(summaryProjectIds)
-                                                .SelectMany(projectsIdsNotInDatabase);
-            return projectIdsNotSynced;
+            return projectsIdsNotInDatabase(summaryProjectIds);
         }
 
         private IObservable<IClient> findClient(IProject project)
             => project != null && project.ClientId.HasValue
                 ? clientsRepository.GetAll()
-                    .SelectMany(clients => clients)
+                    .SelectMany(CommonFunctions.Identity)
                     .Where(c => c.Id == project.ClientId.Value)
                     .FirstOrDefaultAsync()
                 : Observable.Return<IClient>(null);
@@ -137,7 +144,7 @@ namespace Toggl.Foundation.Reports
                     ? databaseProjectsObservable
                     : databaseProjectsObservable
                         .Merge(searchMemoryAndApi(workspaceId, notInDatabaseIds))
-                        .SelectMany(list => list)
+                        .SelectMany(CommonFunctions.Identity)
                         .ToList();
             });
 
@@ -148,55 +155,32 @@ namespace Toggl.Foundation.Reports
                 .Catch(Observable.Return(Either<long, IProject>.WithLeft(id)));
 
         private IObservable<IList<IProject>> searchMemoryAndApi(long workspaceId, long[] projectIds) =>
-            Observable.Defer<IList<IProject>>(() =>
+            Observable.Defer(() =>
             {
-                lock (listLock)
-                {
-                    var projectsInMemory = projectIds.Select(tryGetProjectFromMemoryCache);
+                var projectsInMemory = memoryCache.TryGetProjects(projectIds);
 
-                    var notInMemoryIds = projectsInMemory.SelectAllLeft().ToArray();
-                    var memoryProjectsObservable =
-                        Observable.Return(projectsInMemory.SelectAllRight().ToList());
+                var notInMemoryIds = projectsInMemory.SelectAllLeft().ToArray();
+                var memoryProjectsObservable =
+                    Observable.Return(projectsInMemory.SelectAllRight().ToList());
 
-                    return notInMemoryIds.Length == 0
-                        ? memoryProjectsObservable
-                        : memoryProjectsObservable
-                            .Merge(searchApi(workspaceId, notInMemoryIds))
-                            .SelectMany(list => list)
-                            .ToList();
-                }
+                return notInMemoryIds.Length == 0
+                    ? memoryProjectsObservable
+                    : memoryProjectsObservable
+                        .Merge(searchApi(workspaceId, notInMemoryIds))
+                        .SelectMany(CommonFunctions.Identity)
+                        .ToList();
             });
-
-        private Either<long, IProject> tryGetProjectFromMemoryCache(long id)
-        {
-            var project = memoryCache.FirstOrDefault(p => p.Id == id);
-            return project == null
-                ? Either<long, IProject>.WithLeft(id)
-                : Either<long, IProject>.WithRight(project);
-        }
 
         private IObservable<List<IProject>> searchApi(long workspaceId, long[] projectIds)
             => projectsApi.Search(workspaceId, projectIds)
-                .Do(persistInMemoryCache);
-
-        private void persistInMemoryCache(List<IProject> apiProjects)
-        {
-            lock (listLock)
-            {
-                apiProjects.ForEach(memoryCache.Add);
-            }
-        }
+                .Do(memoryCache.PersistInCache);
 
         private IObservable<long[]> projectsIdsNotInDatabase(long[] projectIds)
-        {
-            var projectsIds = projectIds
+            => projectIds
                 .Select(id => tryGetProjectFromDatabase(id))
                 .Merge()
                 .ToList()
                 .Select(ids => ids.SelectAllLeft().ToArray())
                 .DefaultIfEmpty(Array.Empty<long>());
-
-            return projectsIds;
-        }
     }
 }

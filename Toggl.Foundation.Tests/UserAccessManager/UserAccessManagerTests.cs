@@ -22,7 +22,6 @@ using Toggl.Ultrawave;
 using Toggl.Ultrawave.Exceptions;
 using Toggl.Ultrawave.Network;
 using Xunit;
-using Xunit.Sdk;
 using FoundationUser = Toggl.Foundation.Models.User;
 using User = Toggl.Ultrawave.Models.User;
 
@@ -45,7 +44,6 @@ namespace Toggl.Foundation.Tests.Login
             protected IGoogleService GoogleService { get; } = Substitute.For<IGoogleService>();
             protected IAccessRestrictionStorage AccessRestrictionStorage { get; } = Substitute.For<IAccessRestrictionStorage>();
             protected ITogglDataSource DataSource { get; } = Substitute.For<ITogglDataSource>();
-            protected IApplicationShortcutCreator ApplicationShortcutCreator { get; } = Substitute.For<IApplicationShortcutCreator>();
             protected readonly IUserAccessManager UserAccessManager;
             protected IScheduler Scheduler { get; } = System.Reactive.Concurrency.Scheduler.Default;
             protected ITogglDataSource CreateDataSource(ITogglApi api) => DataSource;
@@ -55,7 +53,7 @@ namespace Toggl.Foundation.Tests.Login
 
             protected UserAccessManagerTest()
             {
-                UserAccessManager = new UserAccessManager(ApiFactory, Database, GoogleService, ApplicationShortcutCreator, PrivateSharedStorageService, CreateDataSource);
+                UserAccessManager = new UserAccessManager(ApiFactory, Database, GoogleService, PrivateSharedStorageService, CreateDataSource);
 
                 Api.User.Get().Returns(Observable.Return(User));
                 Api.User.SignUp(Email, Password, TermsAccepted, CountryId, Timezone).Returns(Observable.Return(User));
@@ -79,19 +77,17 @@ namespace Toggl.Foundation.Tests.Login
                 bool useApiFactory,
                 bool useDatabase,
                 bool useGoogleService,
-                bool useApplicationShortcutCreator,
                 bool useCreateDataSource,
                 bool usePrivateSharedStorageService)
             {
                 var database = useDatabase ? Database : null;
                 var apiFactory = useApiFactory ? ApiFactory : null;
                 var googleService = useGoogleService ? GoogleService : null;
-                var createDataSource = useCreateDataSource ? CreateDataSource : (Func<ITogglApi, ITogglDataSource>)null;
-                var shortcutCreator = useApplicationShortcutCreator ? ApplicationShortcutCreator : null;
                 var privateSharedStorageService = usePrivateSharedStorageService ? PrivateSharedStorageService : null;
+                var createDataSource = useCreateDataSource ? CreateDataSource : (Func<ITogglApi, ITogglDataSource>)null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new UserAccessManager(apiFactory, database, googleService, shortcutCreator, privateSharedStorageService, createDataSource);
+                    () => new UserAccessManager(apiFactory, database, googleService, privateSharedStorageService, createDataSource);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
@@ -170,14 +166,6 @@ namespace Toggl.Foundation.Tests.Login
                 await UserAccessManager
                         .Login(Email, Password)
                         .SingleAsync();
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task NotifiesShortcutCreatorAboutLogin()
-            {
-                await UserAccessManager.Login(Email, Password);
-
-                ApplicationShortcutCreator.Received().OnLogin(Arg.Any<ITogglDataSource>());
             }
 
             [Fact, LogIfTooSlow]
@@ -356,15 +344,7 @@ namespace Toggl.Foundation.Tests.Login
                         .SignUp(Email, Password, TermsAccepted, CountryId, Timezone)
                         .SingleAsync();
             }
-
-            [Fact, LogIfTooSlow]
-            public async Task NotifiesShortcutCreatorAboutLogin()
-            {
-                await UserAccessManager.SignUp(Email, Password, TermsAccepted, CountryId, Timezone);
-
-                ApplicationShortcutCreator.Received().OnLogin(Arg.Any<ITogglDataSource>());
-            }
-
+            
             [Fact, LogIfTooSlow]
             public void DoesNotRetryWhenTheApiThrowsSomethingOtherThanUserIsMissingApiTokenException()
             {
@@ -523,14 +503,6 @@ namespace Toggl.Foundation.Tests.Login
                 await UserAccessManager
                         .LoginWithGoogle()
                         .SingleAsync();
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task NotifiesShortcutCreatorAboutLogin()
-            {
-                await UserAccessManager.LoginWithGoogle();
-
-                ApplicationShortcutCreator.Received().OnLogin(Arg.Any<ITogglDataSource>());
             }
 
             [Fact, LogIfTooSlow]

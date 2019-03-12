@@ -66,6 +66,7 @@
                         </imageView>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0:00" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AGP-BI-wWT" userLabel="Time Label">
                             <rect key="frame" x="29" y="5.5" width="58" height="17"/>
+                            <accessibility key="accessibilityConfiguration" label="DurationLabel"/>
                             <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                             <nil key="textColor"/>
                             <nil key="highlightedColor"/>
@@ -99,6 +100,7 @@
                 <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" bounces="NO" text="￼" translatesAutoresizingMaskIntoConstraints="NO" id="R8W-w1-sEf">
                     <rect key="frame" x="16" y="44" width="343" height="68"/>
                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <accessibility key="accessibilityConfiguration" label="DescriptionTextField"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="68" id="u0i-Qv-oYj"/>
                     </constraints>

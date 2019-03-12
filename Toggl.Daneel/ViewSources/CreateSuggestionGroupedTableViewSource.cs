@@ -3,6 +3,7 @@ using System.Linq;
 using Foundation;
 using MvvmCross.Commands;
 using Toggl.Daneel.Views;
+using Toggl.Daneel.Views.EntityCreation;
 using Toggl.Foundation.MvvmCross.Collections;
 using UIKit;
 
@@ -12,7 +13,7 @@ namespace Toggl.Daneel.ViewSources
         : GroupedCollectionTableViewSource<WorkspaceGroupedCollection<T>, T>
         where T : class
     {
-        protected const string CreateEntityCellIdentifier = nameof(MvxCreateEntityViewCell);
+        protected const string CreateEntityCellIdentifier = nameof(CreateEntityViewCell);
 
         public string Text { get; set; }
 
@@ -34,7 +35,7 @@ namespace Toggl.Daneel.ViewSources
         protected CreateSuggestionGroupedTableViewSource(UITableView tableView, string cellIdentifier, string headerCellIdentifier)
             : base(tableView, cellIdentifier, headerCellIdentifier)
         {
-            tableView.RegisterNibForCellReuse(MvxCreateEntityViewCell.Nib, CreateEntityCellIdentifier);
+            tableView.RegisterNibForCellReuse(CreateEntityViewCell.Nib, CreateEntityCellIdentifier);
         }
 
         public override UIView GetViewForHeader(UITableView tableView, nint section)

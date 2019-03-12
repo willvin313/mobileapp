@@ -7,6 +7,7 @@ using FsCheck;
 using FsCheck.Xunit;
 using NSubstitute;
 using Toggl.Foundation.Helper;
+using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Reports;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Multivac.Extensions;
@@ -19,14 +20,15 @@ using Toggl.Ultrawave.ApiClients;
 using Toggl.Ultrawave.Models.Reports;
 using Xunit;
 
-namespace Toggl.Foundation.Tests.Reports
+namespace Toggl.Foundation.Tests.Interactors
 {
-    public sealed class ReportsProviderTests
+    public sealed class GetProjectSummaryInteractorTests
     {
-        public abstract class ReportsProviderTest
+        public abstract class GetProjectSummaryInteractorTest
         {
             protected ITogglApi Api { get; } = Substitute.For<ITogglApi>();
             protected ITogglDatabase Database { get; } = Substitute.For<ITogglDatabase>();
+            protected ReportsMemoryCache ReportsMemoryCache { get; set; } = new ReportsMemoryCache();
 
             protected IProjectsApi ProjectsApi { get; } = Substitute.For<IProjectsApi>();
             protected IProjectsSummaryApi ProjectsSummaryApi { get; } = Substitute.For<IProjectsSummaryApi>();
@@ -35,21 +37,28 @@ namespace Toggl.Foundation.Tests.Reports
             protected IRepository<IDatabaseClient> ClientsRepository { get; } =
                 Substitute.For<IRepository<IDatabaseClient>>();
 
-            protected IReportsProvider ReportsProvider { get; }
-
-            protected ReportsProviderTest()
+            protected GetProjectSummaryInteractorTest()
             {
                 Api.Projects.Returns(ProjectsApi);
                 Api.ProjectsSummary.Returns(ProjectsSummaryApi);
 
                 Database.Projects.Returns(ProjectsRepository);
                 Database.Clients.Returns(ClientsRepository);
-
-                ReportsProvider = new ReportsProvider(Api, Database);
             }
+
+            protected GetProjectSummaryInteractor GetInteractor(
+                long workspaceId, DateTimeOffset startDate, DateTimeOffset? endDate)
+                => new GetProjectSummaryInteractor(
+                    Api,
+                    Database,
+                    ReportsMemoryCache,
+                    workspaceId,
+                    startDate,
+                    endDate
+                );
         }
 
-        public sealed class Constructor : ReportsProviderTest
+        public sealed class Constructor : GetProjectSummaryInteractorTest
         {
             [Theory, LogIfTooSlow]
             [ConstructorData]
@@ -59,14 +68,18 @@ namespace Toggl.Foundation.Tests.Reports
                 var database = useDatabase ? Database : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new ReportsProvider(api, database);
+                    () => new GetProjectSummaryInteractor(
+                        api,
+                        database,
+                        ReportsMemoryCache, 0, DateTimeOffset.Now, null
+                    );
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
             }
         }
 
-        public sealed class TheGetProjectSummaryMethod : ReportsProviderTest
+        public sealed class TheGetProjectSummaryMethod : GetProjectSummaryInteractorTest
         {
             private const long workspaceId = 10;
 
@@ -87,7 +100,9 @@ namespace Toggl.Foundation.Tests.Reports
                 apiProjectsSummary.ProjectsSummaries.Returns(summaries);
                 configureRepositoryToReturn(actualProjectIds);
 
-                ReportsProvider.GetProjectSummary(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now).Wait();
+                GetInteractor(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now)
+                    .Execute()
+                    .Wait();
 
                 ProjectsRepository.Received()
                     .GetById(Arg.Is<long>(id => Array.IndexOf(actualProjectIds, id) >= 0));
@@ -106,7 +121,9 @@ namespace Toggl.Foundation.Tests.Reports
                 configureRepositoryToReturn(projectsInDb, projectsInApi);
                 configureApiToReturn(projectsInApi);
 
-                ReportsProvider.GetProjectSummary(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now).Wait();
+                GetInteractor(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now)
+                    .Execute()
+                    .Wait();
 
                 ProjectsApi.Received()
                     .Search(workspaceId, Arg.Is<long[]>(
@@ -126,7 +143,10 @@ namespace Toggl.Foundation.Tests.Reports
                 configureRepositoryToReturn(projectsInDb, projectsInApi);
                 configureApiToReturn(projectsInApi);
 
-                var lists = ReportsProvider.GetProjectSummary(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now).ToList().Wait();
+                var lists = GetInteractor(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now)
+                    .Execute()
+                    .ToList()
+                    .Wait();
 
                 lists.Should().HaveCount(1);
             }
@@ -136,16 +156,21 @@ namespace Toggl.Foundation.Tests.Reports
             {
                 var actualProjectIds = projectIds.Get.Select(i => (long)i.Get).Distinct().ToArray();
                 if (actualProjectIds.Length < 2) return;
-                
+
+                ReportsMemoryCache = new ReportsMemoryCache();
+
                 var projectsInDb = actualProjectIds.Where((i, id) => i % 2 == 0).ToArray();
                 var projectsInApi = actualProjectIds.Where((i, id) => i % 2 != 0).ToArray();
                 var summaries = getSummaryList(actualProjectIds);
                 apiProjectsSummary.ProjectsSummaries.Returns(summaries);
                 configureRepositoryToReturn(projectsInDb, projectsInApi);
                 configureApiToReturn(projectsInApi);
-
-                ReportsProvider.GetProjectSummary(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now).Wait();
-                var lists = ReportsProvider.GetProjectSummary(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now).ToList().Wait();
+                
+                GetInteractor(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now).Execute().Wait();
+                var lists = GetInteractor(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now)
+                    .Execute()
+                    .ToList()
+                    .Wait();
 
                 lists.Should().HaveCount(1);
             }
@@ -166,8 +191,8 @@ namespace Toggl.Foundation.Tests.Reports
                 configureRepositoryToReturn(projectsInDb, projectsInApi);
                 configureApiToReturn(projectsInApi);
 
-                ReportsProvider.GetProjectSummary(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now).Wait();
-                ReportsProvider.GetProjectSummary(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now).Wait();
+                GetInteractor(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now).Execute().Wait();
+                GetInteractor(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now).Execute().Wait();
 
                 ProjectsApi.Received(1)
                     .Search(workspaceId, Arg.Is<long[]>(
@@ -182,7 +207,9 @@ namespace Toggl.Foundation.Tests.Reports
                 apiProjectsSummary.ProjectsSummaries.Returns(summaries);
                 configureRepositoryToReturn(actualProjectIds);
 
-                ReportsProvider.GetProjectSummary(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now).Wait();
+                GetInteractor(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now)
+                    .Execute()
+                    .Wait();
 
                 ProjectsApi.DidNotReceive().Search(Arg.Any<long>(), Arg.Any<long[]>());
             }
@@ -197,8 +224,9 @@ namespace Toggl.Foundation.Tests.Reports
                 apiProjectsSummary.ProjectsSummaries.Returns(summaries);
                 configureRepositoryToReturn(actualProjectIds);
 
-                var report = ReportsProvider
-                    .GetProjectSummary(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now).Wait();
+                var report = GetInteractor(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now)
+                    .Execute()
+                    .Wait();
 
                 report.Segments.Single(s => s.Color == Color.NoProject).ProjectName.Should().Be(Resources.NoProject);
             }
@@ -218,8 +246,9 @@ namespace Toggl.Foundation.Tests.Reports
                 apiProjectsSummary.ProjectsSummaries.Returns(summaries);
                 configureRepositoryToReturn(actualProjectIds);
 
-                var report = ReportsProvider
-                    .GetProjectSummary(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now).Wait();
+                var report = GetInteractor(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now)
+                    .Execute()
+                    .Wait();
 
                 report.Segments.Should().BeInDescendingOrder(s => s.Percentage);
             }

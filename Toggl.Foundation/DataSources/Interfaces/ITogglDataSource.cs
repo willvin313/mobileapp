@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Reactive;
 using Toggl.Foundation.DataSources.Interfaces;
 using Toggl.Foundation.Models.Interfaces;
-using Toggl.Foundation.Reports;
 using Toggl.Foundation.Sync;
 using Toggl.PrimeRadiant.Models;
 using Toggl.Ultrawave.ApiClients;
@@ -22,8 +20,6 @@ namespace Toggl.Foundation.DataSources
         IDataSource<IThreadSafeWorkspaceFeatureCollection, IDatabaseWorkspaceFeatureCollection> WorkspaceFeatures { get; }
 
         ISyncManager SyncManager { get; }
-
-        IReportsProvider ReportsProvider { get; }
 
         IObservable<bool> HasUnsyncedData();
     }

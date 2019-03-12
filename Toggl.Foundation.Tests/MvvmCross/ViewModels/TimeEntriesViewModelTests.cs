@@ -202,9 +202,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var batchA = new long[] { 1, 2, 3 };
                 var batchB = new long[] { 4, 5 };
 
-                var observableA = viewModel.DelayDeleteTimeEntries.Execute(batchA);
+                var observableA = viewModel.DelayDeleteTimeEntries.ExecuteWithCompletion(batchA);
                 SchedulerProvider.TestScheduler.AdvanceBy(Constants.UndoTime.Ticks / 2);
-                var observableB = viewModel.DelayDeleteTimeEntries.Execute(batchB);
+                viewModel.DelayDeleteTimeEntries.Execute(batchB);
                 await observableA;
 
                 batchA.ForEach(id =>
@@ -218,7 +218,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 var batch = new long[] { 1, 2, 3 };
 
-                var observableA = viewModel.DelayDeleteTimeEntries.Execute(batch);
+                var observableA = viewModel.DelayDeleteTimeEntries.ExecuteWithCompletion(batch);
                 SchedulerProvider.TestScheduler.AdvanceBy(Constants.UndoTime.Ticks / 2);
                 await viewModel.FinalizeDelayDeleteTimeEntryIfNeeded();
                 SchedulerProvider.TestScheduler.AdvanceBy(Constants.UndoTime.Ticks / 4);
@@ -234,7 +234,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 var batch = new long[] { 1, 2, 3 };
 
-                var observableA = viewModel.DelayDeleteTimeEntries.Execute(batch);
+                var observableA = viewModel.DelayDeleteTimeEntries.ExecuteWithCompletion(batch);
                 SchedulerProvider.TestScheduler.AdvanceBy(Constants.UndoTime.Ticks / 2);
 
                 batch.ForEach(id =>

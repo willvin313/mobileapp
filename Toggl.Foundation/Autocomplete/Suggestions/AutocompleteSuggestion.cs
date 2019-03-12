@@ -1,11 +1,16 @@
-﻿namespace Toggl.Foundation.Autocomplete.Suggestions
+﻿using System;
+
+namespace Toggl.Foundation.Autocomplete.Suggestions
 {
-    public abstract class AutocompleteSuggestion
+    public abstract class AutocompleteSuggestion : IEquatable<AutocompleteSuggestion>
     {
         public string WorkspaceName { get; protected set; } = "";
 
         public long WorkspaceId { get; protected set; }
 
         public abstract override int GetHashCode();
+
+        public bool Equals(AutocompleteSuggestion other)
+            => GetHashCode() == other.GetHashCode();
     }
 }

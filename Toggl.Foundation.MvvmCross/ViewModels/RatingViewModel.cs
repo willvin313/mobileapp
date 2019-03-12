@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
@@ -31,6 +32,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private readonly BehaviorSubject<bool?> impressionSubject = new BehaviorSubject<bool?>(null);
         private readonly ISubject<bool> isFeedbackSuccessViewShowing = new Subject<bool>();
+        private readonly ISubject<Unit> hideRatingView = new Subject<Unit>();
 
         private bool impressionWasRegistered => impressionSubject.Value != null;
 
@@ -46,6 +48,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public IObservable<string> CallToActionButtonTitle { get; }
 
         public IObservable<bool> IsFeedbackSuccessViewShowing { get; }
+
+        public IObservable<Unit> HideRatingView { get; }
 
         public UIAction PerformMainAction { get; }
 
@@ -92,6 +96,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .AsDriver(this.schedulerProvider);
 
             IsFeedbackSuccessViewShowing = isFeedbackSuccessViewShowing.AsDriver(this.schedulerProvider);
+
+            HideRatingView = hideRatingView.AsDriver(this.schedulerProvider);
 
             PerformMainAction = rxActionFactory.FromAsync(performMainAction);
         }
@@ -219,9 +225,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private void hide()
         {
-            navigationService.ChangePresentation(
-                ToggleRatingViewVisibilityHint.Hide()
-            );
+            hideRatingView.OnNext(Unit.Default);
         }
     }
 }

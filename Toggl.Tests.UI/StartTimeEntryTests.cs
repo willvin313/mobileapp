@@ -114,6 +114,48 @@ namespace Toggl.Tests.UI
         }
 
         [Test]
+        public void CreatingATimeEntryWithAnExistingClientWorks()
+        {
+            // First a te with a new project and client
+            const string description = "Field Research ";
+            var projectName = "Meme Production";
+            var clientName = "The World Wide Web";
+            app.WaitForElement(StartTimeEntry.DescriptionTextField);
+            app.EnterText(description);
+            app.EnterText($"@{projectName}");
+            app.TapCreateProject(projectName);
+            app.Tap(EditProject.ChangeClient);
+            app.Tap(Client.AddFilterTextField);
+            app.EnterText(clientName);
+            app.TapCreateClient(clientName);
+            app.WaitForElement(EditProject.CreateButton);
+            app.Tap(EditProject.CreateButton);
+            app.Tap(StartTimeEntry.DoneButton);
+            app.Tap(Main.StopTimeEntryButton);
+
+            // Create the second te with the created client
+            const string secondDescription = "planting apple tree";
+            const string anotherProject = "garden makeover";
+            app.Tap(Main.StartTimeEntryButton);
+            app.WaitForElement(StartTimeEntry.DescriptionTextField);
+            app.EnterText($"{secondDescription} @{anotherProject}");
+            app.TapCreateProject(anotherProject);
+            app.Tap(EditProject.ChangeClient);
+            app.Tap(Client.AddFilterTextField);
+            app.EnterText(clientName);
+            app.TapSelectClient(clientName);
+            app.WaitForElement(EditProject.CreateButton);
+            app.Tap(EditProject.CreateButton);
+            app.Tap(StartTimeEntry.DoneButton);
+            app.Tap(Main.StopTimeEntryButton);
+            app.PullToRefresh();
+
+            app.WaitForElement(secondDescription);
+            app.WaitForElement(anotherProject);
+            app.WaitForElement(clientName);
+        }
+
+        [Test]
         public void CreatingATimeEntryWithASingleTagWorks()
         {
             const string description = "Working from home ";

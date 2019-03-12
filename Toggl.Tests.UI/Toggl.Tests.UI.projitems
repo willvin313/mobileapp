@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)MainTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)LoginTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StartManualTimeEntryTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StartTimeEntryTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OnboardingTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\User.cs" />
@@ -26,9 +27,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)ReportsTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EditTimeEntryTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\AppQueryExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\NoTimeEntryException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\TimeEntryFoundException.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Helpers\" />
     <Folder Include="$(MSBuildThisFileDirectory)Extensions\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Exceptions\" />
   </ItemGroup>
 </Project>

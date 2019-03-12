@@ -10,7 +10,8 @@ namespace Toggl.Multivac.Extensions
     {
     }
 
-    public class RxAction<TInput, TElement> : IDisposable
+    public class
+        RxAction<TInput, TElement> : IDisposable
     {
         public IObservable<Exception> Errors { get; }
         public IObservable<TElement> Elements { get; }
@@ -18,7 +19,7 @@ namespace Toggl.Multivac.Extensions
         public IObservable<bool> Enabled { get; }
         public ISubject<TInput> Inputs { get; }
 
-        private CompositeDisposable disposeBag { get; }
+        private CompositeDisposable disposeBag;
 
         private readonly IObservable<IObservable<TElement>> executionObservables;
 
@@ -82,7 +83,13 @@ namespace Toggl.Multivac.Extensions
                 .DisposedBy(disposeBag);
         }
 
-        public IObservable<TElement> Execute(TInput value)
+        public void Execute(TInput value)
+        {
+            Inputs.OnNext(value);
+        }
+
+
+        public IObservable<TElement> ExecuteWithCompletion(TInput value)
         {
             var subject = new ReplaySubject<TElement>();
 

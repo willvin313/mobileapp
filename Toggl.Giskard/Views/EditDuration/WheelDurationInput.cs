@@ -101,7 +101,7 @@ namespace Toggl.Giskard.Views.EditDuration
 
         public override bool OnKeyPreIme(Keycode keyCode, KeyEvent e)
         {
-            if (keyCode == Keycode.Back)
+            if (keyCode == Keycode.Back || keyCode == Keycode.Enter)
             {
                 this.RemoveFocus();
             }

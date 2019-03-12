@@ -32,13 +32,13 @@ namespace Toggl.Tests.UI.Extensions
 
             if (!string.IsNullOrEmpty(clientName))
             {
-                app.Tap(NewProject.ChangeClient);
+                app.Tap(EditProject.ChangeClient);
                 app.EnterText(clientName);
                 app.TapCreateClient(clientName);
             }
 
-            app.WaitForElement(NewProject.CreateButton);
-            app.Tap(NewProject.CreateButton);
+            app.WaitForElement(EditProject.CreateButton);
+            app.Tap(EditProject.CreateButton);
         }
     }
 }

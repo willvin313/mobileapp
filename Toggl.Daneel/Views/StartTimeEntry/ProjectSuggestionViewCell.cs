@@ -1,26 +1,33 @@
 ﻿using System;
+using System.Reactive.Disposables;
 using Foundation;
 using MvvmCross.Binding.BindingContext;
 using MvvmCross.Commands;
 using MvvmCross.Platforms.Ios.Binding;
 using MvvmCross.Platforms.Ios.Binding.Views;
 using MvvmCross.Plugin.Color;
+using MvvmCross.Plugin.Color.Platforms.Ios;
 using MvvmCross.Plugin.Visibility;
+using MvvmCross.UI;
+using Toggl.Daneel.Cells;
 using Toggl.Daneel.Combiners;
+using Toggl.Daneel.Extensions;
+using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Foundation.Autocomplete.Suggestions;
 using Toggl.Foundation.MvvmCross.Converters;
+using Toggl.Multivac.Extensions;
 using UIKit;
 
 namespace Toggl.Daneel.Views
 {
-    public partial class ProjectSuggestionViewCell : MvxTableViewCell
+    public partial class ProjectSuggestionViewCell : BaseTableViewCell<ProjectSuggestion>
     {
         private const float selectedProjectBackgroundAlpha = 0.12f;
 
         private const int fadeViewTrailingConstraintWithTasks = 72;
         private const int fadeViewTrailingConstraintWithoutTasks = 16;
 
-        public static readonly NSString Key = new NSString(nameof(ProjectSuggestionViewCell));
+        public static readonly string Identifier = nameof(ProjectSuggestionViewCell);
         public static readonly UINib Nib;
 
         public bool TopSeparatorHidden
@@ -35,6 +42,9 @@ namespace Toggl.Daneel.Views
             set => BottomSeparatorView.Hidden = value;
         }
 
+        public CompositeDisposable DisposeBag = new CompositeDisposable();
+        public IObservable<ProjectSuggestion> ToggleTasks { get; private set; }
+
         static ProjectSuggestionViewCell()
         {
             Nib = UINib.FromName(nameof(ProjectSuggestionViewCell), NSBundle.MainBundle);
@@ -45,8 +55,6 @@ namespace Toggl.Daneel.Views
             // Note: this .ctor should not contain any initialization logic.
         }
 
-        public IMvxCommand<ProjectSuggestion> ToggleTasksCommand { get; set; }
-
         public override void AwakeFromNib()
         {
             base.AwakeFromNib();
@@ -54,77 +62,41 @@ namespace Toggl.Daneel.Views
             FadeView.FadeRight = true;
             ClientNameLabel.LineBreakMode = UILineBreakMode.TailTruncation;
             ProjectNameLabel.LineBreakMode = UILineBreakMode.TailTruncation;
-            ToggleTasksButton.TouchUpInside += togglTasksButton;
-
-            this.DelayBind(() =>
-            {
-                var colorConverter = new MvxRGBValueConverter();
-                var taskCountConverter = new TaskCountValueConverter();
-                var visibilityConverter = new MvxVisibilityValueConverter();
-                var projectSelectedColorCombiner
-                    = new ProjectSelectedColorValueCombiner(selectedProjectBackgroundAlpha);
-                var fadeViewTrailingConstantConverter = new BoolToConstantValueConverter<nfloat>(
-                    fadeViewTrailingConstraintWithTasks,
-                    fadeViewTrailingConstraintWithoutTasks
-                );
-
-                var bindingSet = this.CreateBindingSet<ProjectSuggestionViewCell, ProjectSuggestion>();
-
-                //Text
-                bindingSet.Bind(ProjectNameLabel).To(vm => vm.ProjectName);
-                bindingSet.Bind(ClientNameLabel).To(vm => vm.ClientName);
-                bindingSet.Bind(AmountOfTasksLabel)
-                          .To(vm => vm.NumberOfTasks)
-                          .WithConversion(taskCountConverter);
-
-                //Color
-                bindingSet.Bind(ProjectNameLabel)
-                          .For(v => v.TextColor)
-                          .To(vm => vm.ProjectColor)
-                          .WithConversion(colorConverter);
-
-                bindingSet.Bind(ProjectDotView)
-                          .For(v => v.BackgroundColor)
-                          .To(vm => vm.ProjectColor)
-                          .WithConversion(colorConverter);
-
-                bindingSet.Bind(SelectedProjectView)
-                          .For(v => v.BackgroundColor)
-                          .ByCombining(
-                              projectSelectedColorCombiner,
-                              vm => vm.Selected,
-                              vm => vm.ProjectColor);
-
-                //Visibility
-                bindingSet.Bind(ToggleTaskImage)
-                          .For(v => v.BindVisibility())
-                          .To(vm => vm.NumberOfTasks)
-                          .WithConversion(visibilityConverter);
-                
-                bindingSet.Bind(ToggleTasksButton)
-                          .For(v => v.BindVisibility())
-                          .To(vm => vm.NumberOfTasks)
-                          .WithConversion(visibilityConverter);
-
-                //Constraints
-                bindingSet.Bind(FadeViewTrailingConstraint)
-                          .For(c => c.Constant)
-                          .To(MvxViewModel => MvxViewModel.HasTasks)
-                          .WithConversion(fadeViewTrailingConstantConverter);
-                
-                bindingSet.Apply();
-            });
         }
 
-        protected override void Dispose(bool disposing)
+        public override void PrepareForReuse()
         {
-            base.Dispose(disposing);
-
-            if (!disposing) return;
-            ToggleTasksButton.TouchUpInside -= togglTasksButton;
+            base.PrepareForReuse();
+            
+            DisposeBag.Dispose();
+            DisposeBag = new CompositeDisposable();
         }
 
-        private void togglTasksButton(object sender, EventArgs e)
-            => ToggleTasksCommand?.Execute((ProjectSuggestion)DataContext);
+        protected override void UpdateView()
+        {            
+            ToggleTasks = ToggleTasksButton.Rx().Tap().SelectValue(Item);
+
+            //Text
+            ProjectNameLabel.Text = Item.ProjectName;
+            ClientNameLabel.Text = Item.ClientName;
+            AmountOfTasksLabel.Text = Item.FormattedNumberOfTasks();
+
+            //Color
+            var projectColor = MvxColor.ParseHexString(Item.ProjectColor).ToNativeColor();
+            ProjectNameLabel.TextColor = projectColor;
+            ProjectDotView.BackgroundColor = projectColor;
+            SelectedProjectView.BackgroundColor = Item.Selected
+                ? projectColor.ColorWithAlpha(selectedProjectBackgroundAlpha)
+                : UIColor.Clear;
+
+            //Visibility
+            ToggleTaskImage.Hidden = !Item.HasTasks;
+            ToggleTasksButton.Hidden = !Item.HasTasks;
+
+            //Constraints
+            FadeViewTrailingConstraint.Constant = Item.HasTasks
+                ? fadeViewTrailingConstraintWithTasks
+                : fadeViewTrailingConstraintWithoutTasks;
+        }
     }
 }

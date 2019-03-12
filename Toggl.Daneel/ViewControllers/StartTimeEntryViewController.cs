@@ -1,18 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using Foundation;
-using MvvmCross.Binding;
-using MvvmCross.Binding.BindingContext;
-using MvvmCross.Commands;
-using MvvmCross.Platforms.Ios.Binding;
 using MvvmCross.Plugin.Color.Platforms.Ios;
-using MvvmCross.Plugin.Visibility;
 using Toggl.Daneel.Autocomplete;
 using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Extensions.Reactive;
@@ -21,9 +16,6 @@ using Toggl.Daneel.ViewSources;
 using Toggl.Foundation;
 using Toggl.Foundation.Autocomplete;
 using Toggl.Foundation.Autocomplete.Suggestions;
-using Toggl.Foundation.MvvmCross.Combiners;
-using Toggl.Foundation.MvvmCross.Converters;
-using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Foundation.MvvmCross.Onboarding.CreationView;
 using Toggl.Foundation.MvvmCross.Onboarding.StartTimeEntryView;
@@ -83,105 +75,89 @@ namespace Toggl.Daneel.ViewControllers
 
             var source = new StartTimeEntryTableViewSource(SuggestionsTableView);
             SuggestionsTableView.Source = source;
-            source.ToggleTasksCommand = new MvxCommand<ProjectSuggestion>(toggleTaskSuggestions);
 
-            var invertedVisibilityConverter = new MvxInvertedVisibilityValueConverter();
-            var invertedBoolConverter = new BoolToConstantValueConverter<bool>(false, true);
-            var buttonColorConverter = new BoolToConstantValueConverter<UIColor>(
-                Color.StartTimeEntry.ActiveButton.ToNativeColor(),
-                Color.StartTimeEntry.InactiveButton.ToNativeColor()
-            );
-            var durationCombiner = new DurationValueCombiner();
+            source.Rx().ModelSelected()
+                .Subscribe(ViewModel.SelectSuggestion.Inputs)
+                .DisposedBy(DisposeBag);
 
-            var bindingSet = this.CreateBindingSet<StartTimeEntryViewController, StartTimeEntryViewModel>();
+            ViewModel.Suggestions
+                .Subscribe(SuggestionsTableView.Rx().ReloadSections(source))
+                .DisposedBy(DisposeBag);
 
-            //TableView
-            bindingSet.Bind(source)
-                      .For(v => v.ObservableCollection)
-                      .To(vm => vm.Suggestions);
+            source.ToggleTasks
+                .Subscribe(ViewModel.ToggleTasks.Inputs)
+                .DisposedBy(DisposeBag);
 
-            bindingSet.Bind(source)
-                      .For(v => v.UseGrouping)
-                      .To(vm => vm.UseGrouping);
-
-            bindingSet.Bind(source)
-                      .For(v => v.SelectSuggestionCommand)
-                      .To(vm => vm.SelectSuggestionCommand);
-
-            bindingSet.Bind(source)
-                      .For(v => v.CreateCommand)
-                      .To(vm => vm.CreateCommand);
-
-            bindingSet.Bind(source)
-                      .For(v => v.IsSuggestingProjects)
-                      .To(vm => vm.IsSuggestingProjects);
-
-            bindingSet.Bind(source)
-                      .For(v => v.Text)
-                      .To(vm => vm.CurrentQuery);
-
-            bindingSet.Bind(source)
-                      .For(v => v.SuggestCreation)
-                      .To(vm => vm.SuggestCreation);
-
-            bindingSet.Bind(source)
-                      .For(v => v.ShouldShowNoTagsInfoMessage)
-                      .To(vm => vm.ShouldShowNoTagsInfoMessage);
-
-            bindingSet.Bind(source)
-                      .For(v => v.ShouldShowNoProjectsInfoMessage)
-                      .To(vm => vm.ShouldShowNoProjectsInfoMessage);
+            TimeInput.Rx().Duration()
+                .Subscribe(ViewModel.SetRunningTime.Inputs)
+                .DisposedBy(DisposeBag);
 
             //Text
-            bindingSet.Bind(TimeInput)
-                      .For(v => v.Duration)
-                      .To(vm => vm.DisplayedTime)
-                      .Mode(MvxBindingMode.OneWayToSource);
 
-            bindingSet.Bind(TimeLabel)
-                      .For(v => v.Text)
-                      .ByCombining(durationCombiner,
-                          vm => vm.DisplayedTime,
-                          vm => vm.DisplayedTimeFormat);
+            ViewModel.DisplayedTime
+                .Subscribe(TimeLabel.Rx().Text())
+                .DisposedBy(DisposeBag);
 
-            bindingSet.Bind(Placeholder)
-                      .To(vm => vm.PlaceholderText);
+            Placeholder.Text = ViewModel.PlaceholderText;
 
-            //Buttons
-            bindingSet.Bind(TagsButton)
-                      .For(v => v.TintColor)
-                      .To(vm => vm.IsSuggestingTags)
-                      .WithConversion(buttonColorConverter);
+            // Buttons
+            UIColor booleanToColor(bool b) => b
+                ? Color.StartTimeEntry.ActiveButton.ToNativeColor()
+                : Color.StartTimeEntry.InactiveButton.ToNativeColor();
 
-            bindingSet.Bind(BillableButton)
-                      .For(v => v.TintColor)
-                      .To(vm => vm.IsBillable)
-                      .WithConversion(buttonColorConverter);
+            ViewModel.IsBillable
+                .Select(booleanToColor)
+                .Subscribe(BillableButton.Rx().TintColor())
+                .DisposedBy(DisposeBag);
 
-            bindingSet.Bind(ProjectsButton)
-                      .For(v => v.TintColor)
-                      .To(vm => vm.IsSuggestingProjects)
-                      .WithConversion(buttonColorConverter);
+            ViewModel.IsSuggestingTags
+                .Select(booleanToColor)
+                .Subscribe(TagsButton.Rx().TintColor())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.IsSuggestingProjects
+                .Select(booleanToColor)
+                .Subscribe(ProjectsButton.Rx().TintColor())
+                .DisposedBy(DisposeBag);
 
             //Visibility
-            bindingSet.Bind(BillableButtonWidthConstraint)
-                      .For(v => v.Constant)
-                      .To(vm => vm.IsBillableAvailable)
-                      .WithConversion(new BoolToConstantValueConverter<nfloat>(42, 0));
+            ViewModel.IsBillableAvailable
+                .Select(b => b ? (nfloat)42 : 0)
+                .Subscribe(BillableButtonWidthConstraint.Rx().Constant())
+                .DisposedBy(DisposeBag);
 
-            //Commands
-            bindingSet.Bind(DoneButton).To(vm => vm.DoneCommand);
-            bindingSet.Bind(CloseButton).To(vm => vm.BackCommand);
-            bindingSet.Bind(BillableButton).To(vm => vm.ToggleBillableCommand);
-            bindingSet.Bind(StartDateButton).To(vm => vm.SetStartDateCommand);
-            bindingSet.Bind(DateTimeButton).To(vm => vm.ChangeTimeCommand);
-            bindingSet.Bind(TagsButton).To(vm => vm.ToggleTagSuggestionsCommand);
-            bindingSet.Bind(ProjectsButton).To(vm => vm.ToggleProjectSuggestionsCommand);
+            // Actions
+            CloseButton.Rx()
+                .BindAction(ViewModel.Close)
+                .DisposedBy(DisposeBag);
 
-            bindingSet.Apply();
+            DoneButton.Rx()
+                .BindAction(ViewModel.Done)
+                .DisposedBy(DisposeBag);
+
+            BillableButton.Rx()
+                .BindAction(ViewModel.ToggleBillable)
+                .DisposedBy(DisposeBag);
+
+            StartDateButton.Rx()
+                .BindAction(ViewModel.SetStartDate)
+                .DisposedBy(DisposeBag);
+
+            DateTimeButton.Rx()
+                .BindAction(ViewModel.ChangeTime)
+                .DisposedBy(DisposeBag);
+
+            TagsButton.Rx()
+                .BindAction(ViewModel.ToggleTagSuggestions)
+                .DisposedBy(DisposeBag);
+
+            ProjectsButton.Rx()
+                .BindAction(ViewModel.ToggleProjectSuggestions)
+                .DisposedBy(DisposeBag);
 
             // Reactive
-            ViewModel.TextFieldInfoObservable
+            ViewModel.TextFieldInfo
+                .DistinctUntilChanged()
                 .Subscribe(onTextFieldInfo)
                 .DisposedBy(DisposeBag);
 
@@ -190,14 +166,16 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(isDescriptionEmptySubject)
                 .DisposedBy(DisposeBag);
 
-            DescriptionTextView.Rx().AttributedText()
-                .CombineLatest(DescriptionTextView.Rx().CursorPosition(), (text, _) => text)
-                .Where(_ => !isUpdatingDescriptionField)
+            Observable.CombineLatest(
+                    DescriptionTextView.Rx().AttributedText().SelectUnit(),
+                    DescriptionTextView.Rx().CursorPosition().SelectUnit()
+                )
+                .Select(_ => DescriptionTextView.AttributedText) // Programatically changing the text doesn't send an event, that's why we do this, to get the last version of the text
                 .SubscribeOn(ThreadPoolScheduler.Instance)
                 .Do(updatePlaceholder)
-                .Select(text => text.AsImmutableSpans((int)DescriptionTextView.SelectedRange.Location))
+                .Select(text => text.AsSpans((int)DescriptionTextView.SelectedRange.Location))
                 .ObserveOn(SynchronizationContext.Current)
-                .Subscribe(async info => await ViewModel.OnTextFieldInfoFromView(info))
+                .Subscribe(ViewModel.SetTextSpans.Inputs)
                 .DisposedBy(DisposeBag);
 
             source.TableRenderCallback = () =>
@@ -206,23 +184,25 @@ namespace Toggl.Daneel.ViewControllers
             };
         }
 
-        public async Task<bool> Dismiss()
+        public Task<bool> Dismiss()
         {
-            return await ViewModel.Close();
+            ViewModel.Close.Execute();
+            return Task.FromResult(true);
         }
 
         private void onTextFieldInfo(TextFieldInfo textFieldInfo)
         {
-            isUpdatingDescriptionField = true;
             var (attributedText, cursorPosition) = textFieldInfo.AsAttributedTextAndCursorPosition();
+            if (DescriptionTextView.AttributedText.GetHashCode() == attributedText.GetHashCode())
+                return;
 
             DescriptionTextView.InputDelegate = emptyInputDelegate; //This line is needed for when the user selects from suggestion and the iOS autocorrect is ready to add text at the same time. Without this line both will happen.
             DescriptionTextView.AttributedText = attributedText;
-
-            var positionToSet = DescriptionTextView.GetPosition(DescriptionTextView.BeginningOfDocument, cursorPosition);
+            var positionToSet =
+                DescriptionTextView.GetPosition(DescriptionTextView.BeginningOfDocument, cursorPosition);
             DescriptionTextView.SelectedTextRange = DescriptionTextView.GetTextRange(positionToSet, positionToSet);
+
             updatePlaceholder();
-            isUpdatingDescriptionField = false;
         }
 
         private void switchTimeLabelAndInput()
@@ -234,7 +214,7 @@ namespace Toggl.Daneel.ViewControllers
             TimeInputTrailingConstraint.Active = !TimeInput.Hidden;
         }
 
-        private void updatePlaceholder()
+        private void updatePlaceholder(NSAttributedString text = null)
         {
             Placeholder.UpdateVisibility(DescriptionTextView);
         }
@@ -326,7 +306,7 @@ namespace Toggl.Daneel.ViewControllers
             var offset = SuggestionsTableView.ContentOffset;
             var frameHeight = SuggestionsTableView.Frame.Height;
 
-            ViewModel.ToggleTaskSuggestionsCommand.Execute(parameter);
+            ViewModel.ToggleTasks.Execute(parameter);
 
             SuggestionsTableView.CorrectOffset(offset, frameHeight);
         }

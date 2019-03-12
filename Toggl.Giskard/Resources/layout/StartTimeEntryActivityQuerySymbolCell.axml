@@ -7,8 +7,8 @@
     android:background="@android:color/transparent"
     android:layout_height="48dp"
     android:layout_width="match_parent">
-    <TextView
-        local:MvxBind="Text Format('{0} {1}', Symbol, Description)"
+  <TextView
+        android:id="@+id/HintLabel"
         tools:text="# Search Projects"
         android:maxLines="1"
         android:gravity="left"

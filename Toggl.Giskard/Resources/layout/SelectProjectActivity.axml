@@ -23,6 +23,7 @@
             android:layout_width="56dp"
             android:layout_height="56dp" />
         <EditText
+            android:id="@+id/SelectProjectProjectNameEditText"
             local:MvxBind="Text Text"
             android:gravity="left"
             android:textSize="19sp"

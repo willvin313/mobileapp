@@ -10,7 +10,6 @@ namespace Toggl.Foundation.MvvmCross.Collections
 
         public SectionModel()
         {
-
         }
 
         public SectionModel(THeader header, IEnumerable<TItem> items)
@@ -24,5 +23,8 @@ namespace Toggl.Foundation.MvvmCross.Collections
             Header = header;
             Items = items.ToList();
         }
+
+        public static SectionModel<THeader, TItem> SingleElement(TItem item)
+            => new SectionModel<THeader, TItem>(default(THeader), new[] { item });
     }
 }
