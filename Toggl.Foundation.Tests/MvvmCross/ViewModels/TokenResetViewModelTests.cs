@@ -150,12 +150,13 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task DoesNotAttemptToLoginWhileThePasswordIsNotValid()
             {
                 ViewModel.Password.OnNext(InvalidPassword.ToString());
-                var executionObserver = TestScheduler.CreateObserver<Unit>();
+                var errors = TestScheduler.CreateObserver<Exception>();
+                ViewModel.Done.Errors.Subscribe(errors);
 
-                ViewModel.Done.Execute().Subscribe(executionObserver);
+                ViewModel.Done.Execute();
 
                 TestScheduler.Start();
-                executionObserver.Messages.Last().Value.Kind.Should().Be(NotificationKind.OnError);
+                errors.Messages.Count.Should().Be(1);
                 await UserAccessManager.DidNotReceive().RefreshToken(Arg.Any<Password>());
             }
 

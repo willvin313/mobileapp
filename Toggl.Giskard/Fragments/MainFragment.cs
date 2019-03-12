@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using Android.App;
 using Android.Graphics;
@@ -40,6 +41,8 @@ namespace Toggl.Giskard.Fragments
         private FirebaseStopwatchProviderAndroid localStopwatchProvider = new FirebaseStopwatchProviderAndroid();
         private CancellationTokenSource cardAnimationCancellation;
         private bool shouldShowRatingViewOnResume;
+        private ISubject<bool> visibilityChangedSubject = new BehaviorSubject<bool>(false);
+        private IObservable<bool> visibilityChanged => visibilityChangedSubject.AsObservable();
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
@@ -191,6 +194,10 @@ namespace Toggl.Giskard.Fragments
                 .Subscribe(onEmptyStateVisibilityChanged)
                 .DisposedBy(DisposeBag);
 
+            ViewModel.ShouldShowRatingView
+                .Subscribe(setupRatingViewVisibility)
+                .DisposedBy(DisposeBag);
+
             setupOnboardingSteps();
             onCreateStopwatch.Stop();
 
@@ -206,10 +213,15 @@ namespace Toggl.Giskard.Fragments
             return Extensions.TimeEntryExtensions.ToProjectTaskClient(hasProject, te.Project?.Name, te.Project?.Color, te.Task?.Name, te.Project?.Client?.Name);
         }
 
-        public void SetupRatingViewVisibility(bool isVisible)
+        private void setupRatingViewVisibility(bool isVisible)
         {
             mainRecyclerAdapter.SetupRatingViewVisibility(isVisible);
             shouldShowRatingViewOnResume = isVisible;
+        }
+
+        public void SetFragmentIsVisible(bool isVisible)
+        {
+            visibilityChangedSubject.OnNext(isVisible);
         }
 
         private void reload()

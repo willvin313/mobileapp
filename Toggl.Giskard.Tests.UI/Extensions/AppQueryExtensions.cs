@@ -4,7 +4,7 @@ using Xamarin.UITest;
 
 namespace Toggl.Tests.UI.Extensions
 {
-    public static class AppQueryExtensions
+    public static partial class AppQueryExtensions
     {
         public static void NavigateBack(this IApp app)
         {

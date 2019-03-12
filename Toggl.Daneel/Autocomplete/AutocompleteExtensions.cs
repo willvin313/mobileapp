@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using Foundation;
 using MvvmCross.Plugin.Color.Platforms.Ios;
@@ -68,10 +69,7 @@ namespace Toggl.Daneel.Autocomplete
                 Color.StartTimeEntry.TokenText.ToNativeColor(),
                 tokenFont);
 
-        public static IImmutableList<ISpan> AsImmutableSpans(this NSAttributedString text, int cursorPosition)
-            => text.AsSpans(cursorPosition).CollapseTextSpans().ToImmutableList();
-
-        private static IEnumerable<ISpan> AsSpans(this NSAttributedString text, int cursorPosition)
+        public static IEnumerable<ISpan> AsSpans(this NSAttributedString text, int cursorPosition)
         {
             var start = 0;
             bool queryTextSpanAlreadyUsed = false;

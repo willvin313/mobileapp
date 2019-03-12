@@ -99,6 +99,7 @@ namespace Toggl.Giskard.Fragments
 
             new StartTimeEntryOnboardingStep(ViewModel.OnboardingStorage)
                 .ManageDismissableTooltip(
+                    visibilityChanged,
                     playButtonTooltipPopupWindow,
                     playButton,
                     (popup, anchor) => popup.LeftVerticallyCenteredOffsetsTo(anchor, dpExtraRightMargin: 8),
@@ -119,6 +120,7 @@ namespace Toggl.Giskard.Fragments
 
             new StopTimeEntryOnboardingStep(ViewModel.OnboardingStorage, ViewModel.IsTimeEntryRunning)
                 .ManageDismissableTooltip(
+                    visibilityChanged,
                     stopButtonTooltipPopupWindow,
                     stopButton,
                     (popup, anchor) => popup.TopRightFrom(anchor, dpExtraBottomMargin: 8),
@@ -167,6 +169,7 @@ namespace Toggl.Giskard.Fragments
 
             editTimeEntryOnboardingStepDisposable = editTimeEntryOnboardingStep
                 .ManageVisibilityOf(
+                    visibilityChanged,
                     tapToEditPopup,
                     oldestVisibleTimeEntryViewHolder.ItemView,
                     (window, view) => PopupOffsets.FromDp(16, -4, Context));
@@ -234,6 +237,7 @@ namespace Toggl.Giskard.Fragments
 
             swipeRightOnboardingStepDisposable = swipeRightOnboardingStep
                 .ManageVisibilityOf(
+                    visibilityChanged,
                     swipeRightPopup,
                     lastTimeEntry.ItemView,
                     (window, view) => PopupOffsets.FromDp(16, -4, Context));
@@ -312,6 +316,7 @@ namespace Toggl.Giskard.Fragments
 
             swipeLeftOnboardingStepDisposable = swipeLeftOnboardingStep
                 .ManageVisibilityOf(
+                    visibilityChanged,
                     swipeLeftPopup,
                     lastTimeEntry.ItemView,
                     (window, view) => window.BottomRightOffsetsTo(view, -16, -4));

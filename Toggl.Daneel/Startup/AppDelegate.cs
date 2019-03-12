@@ -296,7 +296,7 @@ namespace Toggl.Daneel
                     .Execute();
 
                 var prototype = calendarItem.Description.AsTimeEntryPrototype(now, workspace.Id);
-                await interactorFactory.CreateTimeEntry(prototype).Execute();
+                await interactorFactory.CreateTimeEntry(prototype, TimeEntryStartOrigin.CalendarNotification).Execute();
                 completionHandler();
             });
         }

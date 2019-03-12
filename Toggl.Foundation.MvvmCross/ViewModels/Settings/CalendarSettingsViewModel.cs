@@ -57,6 +57,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Settings
         {
             PermissionGranted = await permissionsService.CalendarPermissionGranted;
 
+            if (!PermissionGranted)
+            {
+                UserPreferences.SetEnabledCalendars();
+            }
+
             await base.Initialize();
 
             calendarListVisible = PermissionGranted && SelectedCalendarIds.Any();
@@ -89,7 +94,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Settings
                 var authorized = await permissionsService.CalendarPermissionGranted;
                 if (!authorized)
                 {
-                    calendarListVisible = await permissionsService.RequestCalendarAuthorization();
+                    authorized = await permissionsService.RequestCalendarAuthorization();
+                    if (!authorized)
+                        await NavigationService.Navigate<CalendarPermissionDeniedViewModel, Unit>();
+
+                    calendarListVisible = await permissionsService.CalendarPermissionGranted;
                     ReloadCalendars();
                 }
                 else

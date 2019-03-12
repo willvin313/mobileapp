@@ -22,6 +22,7 @@ namespace Toggl.Giskard.Fragments
         private View durationFormatView;
         private View calendarSettingsView;
         private View smartRemindersView;
+        private View smartRemindersViewSeparator;
 
         private TextView nameTextView;
         private TextView emailTextView;
@@ -55,6 +56,7 @@ namespace Toggl.Giskard.Fragments
             durationFormatView = fragmentView.FindViewById(Resource.Id.SettingsDurationFormatView);
             calendarSettingsView = fragmentView.FindViewById(Resource.Id.CalendarSettingsView);
             smartRemindersView = fragmentView.FindViewById(Resource.Id.SmartRemindersView);
+            smartRemindersViewSeparator = fragmentView.FindViewById(Resource.Id.SmartRemindersViewSeparator);
             runningTimerNotificationsView = fragmentView.FindViewById(Resource.Id.SettingsRunningTimerNotificationsView);
             stoppedTimerNotificationsView = fragmentView.FindViewById(Resource.Id.SettingsStoppedTimerNotificationsView);
 

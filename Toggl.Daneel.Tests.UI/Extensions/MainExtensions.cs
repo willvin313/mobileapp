@@ -14,5 +14,10 @@ namespace Toggl.Tests.UI.Extensions
             app.TapNthCellInCollection(0);
             app.WaitForElement(EditTimeEntry.EditTags);
         }
+
+        public static void TapSnackBarButton(this IApp app, string buttonText)
+        {
+            app.Tap(x => x.Marked(Misc.SnackBar).Descendant().Text(buttonText));
+        }
     }
 }

@@ -38,6 +38,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
     {
         private readonly ISubject<Unit> loggingOutSubject = new Subject<Unit>();
         private readonly ISubject<bool> isFeedbackSuccessViewShowing = new Subject<bool>();
+        private readonly ISubject<bool> calendarPermissionGranted = new BehaviorSubject<bool>(false);
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
 
         private readonly ITogglDataSource dataSource;
@@ -217,7 +218,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     .DistinctUntilChanged()
                     .AsDriver(schedulerProvider);
 
-            IsCalendarSmartRemindersVisible = permissionsService.CalendarPermissionGranted
+            IsCalendarSmartRemindersVisible = calendarPermissionGranted.AsObservable()
                 .CombineLatest(userPreferences.EnabledCalendars.Select(ids => ids.Any()), CommonFunctions.And);
 
             CalendarSmartReminders = userPreferences.CalendarNotificationsSettings()
@@ -278,6 +279,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public override async Task Initialize()
         {
             await base.Initialize();
+            await checkCalendarPermissions();
             navigationFromMainViewModelStopwatch = stopwatchProvider.Get(MeasuredOperation.OpenSettingsView);
             stopwatchProvider.Remove(MeasuredOperation.OpenStartView);
         }
@@ -287,6 +289,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             base.ViewAppeared();
             navigationFromMainViewModelStopwatch?.Stop();
             navigationFromMainViewModelStopwatch = null;
+            checkCalendarPermissions();
         }
 
         public void CloseFeedbackSuccessView()
@@ -472,6 +475,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             await interactorFactory.UpdateUser(new EditUserDTO { BeginningOfWeek = newBeginningOfWeek }).Execute();
             dataSource.SyncManager.InitiatePushSync();
+        }
+
+        private async Task checkCalendarPermissions()
+        {
+            var authorized = await permissionsService.CalendarPermissionGranted;
+            calendarPermissionGranted.OnNext(authorized);
         }
     }
 }

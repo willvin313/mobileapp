@@ -24,8 +24,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
 
         protected readonly IUserPreferences UserPreferences;
+        protected readonly IMvxNavigationService NavigationService;
         private readonly IInteractorFactory interactorFactory;
-        private readonly IMvxNavigationService navigationService;
         private readonly IRxActionFactory rxActionFactory;
 
         private ISubject<bool> doneEnabledSubject = new BehaviorSubject<bool>(false);
@@ -57,8 +57,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
             Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
 
             this.UserPreferences = userPreferences;
+            this.NavigationService = navigationService; 
             this.interactorFactory = interactorFactory;
-            this.navigationService = navigationService;
             this.rxActionFactory = rxActionFactory;
 
             SelectCalendar = rxActionFactory.FromAction<SelectableUserCalendarViewModel>(toggleCalendarSelection);
@@ -128,9 +128,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
         }
 
         private Task close()
-            => navigationService.Close(this, InitialSelectedCalendarIds.ToArray());
+            => NavigationService.Close(this, InitialSelectedCalendarIds.ToArray());
 
         private Task done()
-            => navigationService.Close(this, SelectedCalendarIds.ToArray());
+            => NavigationService.Close(this, SelectedCalendarIds.ToArray());
     }
 }

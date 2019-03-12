@@ -115,8 +115,12 @@ namespace Toggl.Daneel.ViewControllers
 
             if (calendarInitialized) return;
 
-            calendarCollectionViewSource.DecelerationEndedObservable
+            calendarCollectionViewSource.CurrentPageNotScrollingObservable
                 .Subscribe(ViewModel.SetCurrentPage)
+                .DisposedBy(disposeBag);
+
+            calendarCollectionViewSource.CurrentPageWhileScrollingObservable
+                .Subscribe(ViewModel.UpdateMonth)
                 .DisposedBy(disposeBag);
 
             ViewModel.CurrentPageObservable

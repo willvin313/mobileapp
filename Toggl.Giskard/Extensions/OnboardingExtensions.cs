@@ -9,6 +9,7 @@ using Android.Widget;
 using MvvmCross.Base;
 using Toggl.Giskard.ViewHolders;
 using Toggl.Multivac;
+using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Extensions;
 using Toggl.PrimeRadiant.Onboarding;
 using Toggl.PrimeRadiant.Settings;
@@ -20,7 +21,13 @@ namespace Toggl.Giskard.Extensions
     {
         private const int windowTokenCheckInterval = 100;
 
-        public static IDisposable ManageDismissableTooltip(this IOnboardingStep step, PopupWindow tooltip, View anchor, Func<PopupWindow, View, PopupOffsets> popupOffsetsGenerator, IOnboardingStorage storage)
+        public static IDisposable ManageDismissableTooltip(
+            this IOnboardingStep step,
+            IObservable<bool> componentIsVisible,
+            PopupWindow tooltip,
+            View anchor,
+            Func<PopupWindow, View, PopupOffsets> popupOffsetsGenerator,
+            IOnboardingStorage storage)
         {
             Ensure.Argument.IsNotNull(tooltip, nameof(tooltip));
             Ensure.Argument.IsNotNull(anchor, nameof(anchor));
@@ -29,10 +36,15 @@ namespace Toggl.Giskard.Extensions
 
             dismissableStep.DismissByTapping(tooltip, () => { });
 
-            return dismissableStep.ManageVisibilityOf(tooltip, anchor, popupOffsetsGenerator);
+            return dismissableStep.ManageVisibilityOf(componentIsVisible, tooltip, anchor, popupOffsetsGenerator);
         }
 
-        public static IDisposable ManageVisibilityOf(this IOnboardingStep step, PopupWindow tooltip, View anchor, Func<PopupWindow, View, PopupOffsets> popupOffsetsGenerator)
+        public static IDisposable ManageVisibilityOf(
+            this IOnboardingStep step,
+            IObservable<bool> componentIsVisible,
+            PopupWindow tooltip,
+            View anchor,
+            Func<PopupWindow, View, PopupOffsets> popupOffsetsGenerator)
         {
             Ensure.Argument.IsNotNull(tooltip, nameof(tooltip));
             Ensure.Argument.IsNotNull(anchor, nameof(anchor));
@@ -50,6 +62,7 @@ namespace Toggl.Giskard.Extensions
             }
 
             return step.ShouldBeVisible
+                .CombineLatest(componentIsVisible, CommonFunctions.And)
                 .ObserveOn(SynchronizationContext.Current)
                 .combineWithWindowTokenAvailabilityFrom(anchor)
                 .Subscribe(toggleVisibilityOnMainThread);

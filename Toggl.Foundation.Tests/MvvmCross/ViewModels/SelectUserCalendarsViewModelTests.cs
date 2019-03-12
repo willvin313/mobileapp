@@ -44,6 +44,5 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
         }
 
-
     }
 }

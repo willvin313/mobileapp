@@ -14,7 +14,7 @@ namespace Toggl.Foundation.Interactors
 {
     public sealed partial class InteractorFactory : IInteractorFactory
     {
-        public IInteractor<IObservable<IThreadSafeTimeEntry>> CreateTimeEntry(ITimeEntryPrototype prototype)
+        public IInteractor<IObservable<IThreadSafeTimeEntry>> CreateTimeEntry(ITimeEntryPrototype prototype, TimeEntryStartOrigin origin)
             => new CreateTimeEntryInteractor(
                 idProvider,
                 timeService,
@@ -23,7 +23,8 @@ namespace Toggl.Foundation.Interactors
                 intentDonationService,
                 prototype,
                 prototype.StartTime,
-                prototype.Duration);
+                prototype.Duration,
+                origin);
 
         public IInteractor<IObservable<IThreadSafeTimeEntry>> ContinueTimeEntry(ITimeEntryPrototype prototype)
             => new CreateTimeEntryInteractor(

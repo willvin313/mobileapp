@@ -4,9 +4,6 @@ using System.Reactive.Linq;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources.Interfaces;
 using Toggl.Foundation.Models.Interfaces;
-using Toggl.Foundation.Reports;
-using Toggl.Foundation.Services;
-using Toggl.Foundation.Shortcuts;
 using Toggl.Foundation.Sync;
 using Toggl.Multivac;
 using Toggl.PrimeRadiant;
@@ -46,10 +43,6 @@ namespace Toggl.Foundation.DataSources
             TimeEntries = new TimeEntriesDataSource(database.TimeEntries, timeService, analyticsService);
 
             SyncManager = createSyncManager(this);
-
-            ReportsProvider = new ReportsProvider(api, database);
-
-            FeedbackApi = api.Feedback;
         }
 
         public ITimeEntriesSource TimeEntries { get; }
@@ -71,10 +64,6 @@ namespace Toggl.Foundation.DataSources
         public IDataSource<IThreadSafeWorkspaceFeatureCollection, IDatabaseWorkspaceFeatureCollection> WorkspaceFeatures { get; }
 
         public ISyncManager SyncManager { get; private set; }
-
-        public IReportsProvider ReportsProvider { get; }
-
-        public IFeedbackApi FeedbackApi { get; }
 
         public IObservable<bool> HasUnsyncedData()
             => Observable.Merge(

@@ -7,7 +7,7 @@
     android:layout_height="56dp"
     android:layout_width="match_parent">
     <TextView
-        local:MvxBind="Text Description; Visibility Visibility(Description)"
+        android:id="@+id/DescriptionLabel"
         android:maxLines="1"
         android:gravity="left"
         android:textSize="15sp"
@@ -20,8 +20,7 @@
         android:layout_centerVertical="true"
         android:layout_alignParentLeft="true" />
     <TextView
-        android:id="@+id/StartTimeEntryTimeEntryCellProjectLabel"
-        local:MvxBind="Text ProjectName; TextColor RGBA(ProjectColor); Visibility Visibility(ProjectName)"
+        android:id="@+id/ProjectLabel"
         tools:text="Design"
         android:maxLines="1"
         android:gravity="left"
@@ -35,8 +34,7 @@
         android:layout_centerVertical="true"
         android:layout_alignParentLeft="true" />
     <TextView
-        android:id="@+id/StartTimeEntryTimeEntryCellTaskLabel"
-        local:MvxBind="Text Format(': {0}', TaskName); TextColor RGBA(ProjectColor); Visibility Visibility(TaskName), ConverterParameter=true"
+        android:id="@+id/TaskLabel"
         tools:text=": Droid"
         android:maxLines="1"
         android:gravity="left"
@@ -47,9 +45,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_toRightOf="@id/StartTimeEntryTimeEntryCellProjectLabel" />
-    <TextView
-        local:MvxBind="Text ClientName; Visibility Visibility(ProjectName)"
+        android:layout_toRightOf="@id/ProjectLabel" />
+  <TextView
+        android:id="@+id/ClientNameLabel"
         tools:text="Toggl"
         android:maxLines="1"
         android:gravity="left"
@@ -61,7 +59,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_toRightOf="@id/StartTimeEntryTimeEntryCellTaskLabel" />
+        android:layout_toRightOf="@id/TaskLabel" />
     <View
         android:background="@drawable/TransparentToWhiteGradient"
         android:layout_width="40dp"

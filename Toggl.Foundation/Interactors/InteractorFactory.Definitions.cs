@@ -2,6 +2,7 @@
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.Login;
+using Toggl.Foundation.Reports;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Shortcuts;
 using Toggl.Foundation.Sync;
@@ -34,6 +35,7 @@ namespace Toggl.Foundation.Interactors
         private readonly ITogglDatabase database;
         private readonly IPrivateSharedStorageService privateSharedStorageService;
         private readonly IUserAccessManager userAccessManager;
+        private readonly ReportsMemoryCache reportsMemoryCache = new ReportsMemoryCache();
 
         public InteractorFactory(
             IIdProvider idProvider,

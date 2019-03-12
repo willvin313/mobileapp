@@ -25,6 +25,7 @@ namespace Toggl.Giskard.Activities
     {
         private readonly Dictionary<int, Fragment> fragments = new Dictionary<int, Fragment>();
         private Fragment activeFragment;
+        private bool activityResumedBefore = false;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -43,6 +44,17 @@ namespace Toggl.Giskard.Activities
                 .ItemSelected()
                 .Subscribe(onTabSelected)
                 .DisposedBy(DisposeBag);
+        }
+
+        protected override void OnResume()
+        {
+            base.OnResume();
+
+            if (!activityResumedBefore)
+            {
+                navigationView.SelectedItemId = Resource.Id.MainTabTimerItem;
+                activityResumedBefore = true;
+            }
         }
 
         private Fragment getCachedFragment(int itemId)
@@ -106,12 +118,18 @@ namespace Toggl.Giskard.Activities
         {
             var transaction = SupportFragmentManager.BeginTransaction();
 
+            if (activeFragment is MainFragment mainFragmentToHide)
+                mainFragmentToHide.SetFragmentIsVisible(false);
+
             if (fragment.IsAdded)
                 transaction.Hide(activeFragment).Show(fragment);
             else
                 transaction.Add(Resource.Id.CurrentTabFragmmentContainer, fragment).Hide(activeFragment);
 
             transaction.Commit();
+
+            if (fragment is MainFragment mainFragmentToShow)
+                mainFragmentToShow.SetFragmentIsVisible(true);
 
             activeFragment = fragment;
         }
@@ -120,19 +138,15 @@ namespace Toggl.Giskard.Activities
         {
             SupportFragmentManager.RemoveAllFragments();
 
-            var mainFragment = getCachedFragment(Resource.Id.MainTabTimerItem);
+            var mainFragment = getCachedFragment(Resource.Id.MainTabTimerItem) as MainFragment;
             SupportFragmentManager
                 .BeginTransaction()
                 .Add(Resource.Id.CurrentTabFragmmentContainer, mainFragment)
                 .Commit();
 
-            activeFragment = mainFragment;
-        }
+            mainFragment.SetFragmentIsVisible(true);
 
-        public void SetupRatingViewVisibility(bool isVisible)
-        {
-            var mainFragment = getCachedFragment(Resource.Id.MainTabTimerItem) as MainFragment;
-            mainFragment.SetupRatingViewVisibility(isVisible);
+            activeFragment = mainFragment;
         }
 
         internal void ToggleReportsCalendarState(bool forceHide)

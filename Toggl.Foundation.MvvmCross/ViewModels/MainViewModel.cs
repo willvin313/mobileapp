@@ -5,7 +5,6 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
-using MvvmCross.Commands;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 using Toggl.Foundation;
@@ -20,7 +19,6 @@ using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
-using Toggl.Foundation.MvvmCross.ViewModels.Hints;
 using Toggl.Foundation.MvvmCross.ViewModels.Reports;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Suggestions;
@@ -60,6 +58,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly RatingViewExperiment ratingViewExperiment;
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
 
+        private readonly ISubject<Unit> hideRatingView = new Subject<Unit>();
+
         public IObservable<bool> LogEmpty { get; }
         public IObservable<int> TimeEntriesCount { get; }
         public IObservable<bool> IsInManualMode { get; private set; }
@@ -73,6 +73,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public IObservable<bool> ShouldShowRunningTimeEntryNotification { get; private set; }
         public IObservable<bool> ShouldShowStoppedTimeEntryNotification { get; private set; }
         public IObservable<IThreadSafeTimeEntry> CurrentRunningTimeEntry { get; private set; }
+        public IObservable<bool> ShouldShowRatingView { get; private set; }
 
         public ObservableGroupedOrderedCollection<TimeEntryViewModel> TimeEntries => TimeEntriesViewModel.TimeEntries;
 
@@ -164,7 +165,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     .TrackException<InvalidOperationException, IThreadSafeWorkspace>("MainViewModel.Init")
                     .Execute()
                     .SelectMany(workspace => interactorFactory
-                        .CreateTimeEntry(description.AsTimeEntryPrototype(TimeService.CurrentDateTime, workspace.Id))
+                        .CreateTimeEntry(description.AsTimeEntryPrototype(TimeService.CurrentDateTime, workspace.Id), TimeEntryStartOrigin.Timer)
                         .Execute())
                     .Subscribe()
                     .DisposedBy(disposeBag);
@@ -266,10 +267,15 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     break;
             }
 
-            ratingViewExperiment
-                .RatingViewShouldBeVisible
-                .Subscribe(presentRatingViewIfNeeded)
-                .DisposedBy(disposeBag);
+            ShouldShowRatingView = Observable.Merge(
+                    ratingViewExperiment.RatingViewShouldBeVisible,
+                    RatingViewModel.HideRatingView.SelectValue(false),
+                    hideRatingView.AsObservable().SelectValue(false)
+                )
+                .Select(canPresentRating)
+                .DistinctUntilChanged()
+                .Do(trackRatingViewPresentation)
+                .AsDriver(SchedulerProvider);
 
             onboardingStorage.StopButtonWasTappedBefore
                              .Subscribe(hasBeen => hasStopButtonEverBeenUsed = hasBeen)
@@ -315,35 +321,43 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             analyticsService.Track(e);
         }
 
-        private void presentRatingViewIfNeeded(bool shouldBevisible)
+        private bool canPresentRating(bool shouldBeVisible)
         {
-            if (!shouldBevisible) return;
+            if (!shouldBeVisible) return false;
 
             var wasShownMoreThanOnce = onboardingStorage.NumberOfTimesRatingViewWasShown() > 1;
-            if (wasShownMoreThanOnce) return;
+            if (wasShownMoreThanOnce) return false;
 
             var lastOutcome = onboardingStorage.RatingViewOutcome();
             if (lastOutcome != null)
             {
                 var thereIsInteractionFormLastTime = lastOutcome != RatingViewOutcome.NoInteraction;
-                if (thereIsInteractionFormLastTime) return;
+                if (thereIsInteractionFormLastTime) return false;
             }
 
             var lastOutcomeTime = onboardingStorage.RatingViewOutcomeTime();
             if (lastOutcomeTime != null)
             {
                 var oneDayHasNotPassedSinceLastTime = lastOutcomeTime + TimeSpan.FromHours(24) > TimeService.CurrentDateTime;
-                if (oneDayHasNotPassedSinceLastTime && !wasShownMoreThanOnce) return;
+                if (oneDayHasNotPassedSinceLastTime && !wasShownMoreThanOnce) return false;
             }
 
-            navigationService.ChangePresentation(ToggleRatingViewVisibilityHint.Show());
+            return true;
+        }
+
+        private void trackRatingViewPresentation(bool shouldBeVisible)
+        {
+            if (!shouldBeVisible)
+                return;
+
             analyticsService.RatingViewWasShown.Track();
             onboardingStorage.SetDidShowRatingView();
             onboardingStorage.SetRatingViewOutcome(RatingViewOutcome.NoInteraction, TimeService.CurrentDateTime);
+
             TimeService.RunAfterDelay(TimeSpan.FromMinutes(ratingViewTimeout), () =>
             {
                 shouldHideRatingViewIfStillVisible = true;
-                navigationService.ChangePresentation(ToggleRatingViewVisibilityHint.Hide());
+                hideRatingView.OnNext(Unit.Default);
             });
         }
 
@@ -381,7 +395,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             if (shouldHideRatingViewIfStillVisible)
             {
                 shouldHideRatingViewIfStillVisible = false;
-                navigationService.ChangePresentation(ToggleRatingViewVisibilityHint.Hide());
+                hideRatingView.OnNext(Unit.Default);
             }
         }
 

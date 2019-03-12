@@ -48,6 +48,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
         private readonly IRxActionFactory rxActionFactory;
 
         private readonly ISubject<bool> shouldShowOnboardingSubject;
+        private readonly ISubject<bool> hasCalendarsLinkedSubject;
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
 
         public IObservable<bool> SettingsAreVisible { get; }
@@ -125,6 +126,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
 
             var isCompleted = onboardingStorage.CompletedCalendarOnboarding();
             shouldShowOnboardingSubject = new BehaviorSubject<bool>(!isCompleted);
+            hasCalendarsLinkedSubject = new BehaviorSubject<bool>(false);
 
             var onboardingObservable = shouldShowOnboardingSubject
                 .AsObservable()
@@ -155,7 +157,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
 
             GetStarted = rxActionFactory.FromAsync(getStarted);
             SkipOnboarding = rxActionFactory.FromAction(skipOnboarding);
-            LinkCalendars = rxActionFactory.FromAsync(linkCalendars);
+            LinkCalendars = rxActionFactory.FromAsync(() => linkCalendars(false));
             OnItemTapped = rxActionFactory.FromAsync<CalendarItem>(handleCalendarItem);
             OnCalendarEventLongPressed = rxActionFactory.FromAsync<CalendarItem>(handleCalendarEventLongPressed);
 
@@ -164,8 +166,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
                 .DistinctUntilChanged();
 
             HasCalendarsLinked = userPreferences.EnabledCalendars.CombineLatest(
-                permissionsService.CalendarPermissionGranted, (calendars, hasCalendarPermissions)
-                    => hasCalendarPermissions && calendars.Count > 0);
+                permissionsService.CalendarPermissionGranted, hasCalendarsLinkedSubject.AsObservable(),
+                (calendars, hasInitialCalendarPermissions, didLinkCalendars) => (hasInitialCalendarPermissions || didLinkCalendars) && calendars.Count > 0)
+                .DistinctUntilChanged();
 
             SelectCalendars = rxActionFactory.FromAsync(() => selectUserCalendars(false), SettingsAreVisible);
 
@@ -242,18 +245,19 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
         private async Task getStarted()
         {
             analyticsService.CalendarOnboardingStarted.Track();
-            await linkCalendars();
+            await linkCalendars(true);
 
             onboardingStorage.SetCompletedCalendarOnboarding();
             shouldShowOnboardingSubject.OnNext(false);
         }
 
-        private async Task linkCalendars()
+        private async Task linkCalendars(bool isOnboarding)
         {
             var calendarPermissionGranted = await permissionsService.RequestCalendarAuthorization();
+            hasCalendarsLinkedSubject.OnNext(calendarPermissionGranted);
             if (calendarPermissionGranted)
             {
-                await selectUserCalendars(true);
+                await selectUserCalendars(isOnboarding);
                 var notificationPermissionGranted = await permissionsService.RequestNotificationAuthorization();
                 userPreferences.SetCalendarNotificationsEnabled(notificationPermissionGranted);
             }
@@ -339,8 +343,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
                 .TrackException<InvalidOperationException, IThreadSafeWorkspace>("CalendarViewModel.handleCalendarItem")
                 .Execute();
             var prototype = calendarItem.AsTimeEntryPrototype(workspace.Id);
-            analyticsService.TimeEntryStarted.Track(TimeEntryStartOrigin.CalendarEvent);
-            await interactorFactory.CreateTimeEntry(prototype).Execute();
+            await interactorFactory.CreateTimeEntry(prototype, TimeEntryStartOrigin.CalendarEvent).Execute();
         }
 
         private async Task durationSelected(DateTimeOffset startTime, TimeSpan duration)
@@ -350,8 +353,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
                 .Execute();
 
             var prototype = duration.AsTimeEntryPrototype(startTime, workspace.Id);
-            var timeEntry = await interactorFactory.CreateTimeEntry(prototype).Execute();
-            analyticsService.TimeEntryStarted.Track(TimeEntryStartOrigin.CalendarTapAndDrag);
+            var timeEntry = await interactorFactory.CreateTimeEntry(prototype, TimeEntryStartOrigin.CalendarTapAndDrag).Execute();
+
             await navigationService.Navigate<EditTimeEntryViewModel, long>(timeEntry.Id);
         }
 

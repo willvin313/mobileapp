@@ -842,6 +842,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserver<bool>();
                 var viewModel = CreateViewModel();
 
+                await viewModel.Initialize();
+                TestScheduler.Start();
+
                 viewModel.IsCalendarSmartRemindersVisible.Subscribe(observer);
 
                 observer.Messages.First().Value.Value.Should().BeTrue();
@@ -855,6 +858,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 var observer = TestScheduler.CreateObserver<bool>();
                 var viewModel = CreateViewModel();
+
+                await viewModel.Initialize();
+                TestScheduler.Start();
 
                 viewModel.IsCalendarSmartRemindersVisible.Subscribe(observer);
 
@@ -870,9 +876,34 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var observer = TestScheduler.CreateObserver<bool>();
                 var viewModel = CreateViewModel();
 
+                await viewModel.Initialize();
+                TestScheduler.Start();
+
                 viewModel.IsCalendarSmartRemindersVisible.Subscribe(observer);
 
                 observer.Messages.First().Value.Value.Should().BeFalse();
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task EmitsAgainWhenCalendarPermissionsChangeAfterViewAppears()
+            {
+                PermissionsService.CalendarPermissionGranted.Returns(Observable.Return(false), Observable.Return(true));
+                UserPreferences.EnabledCalendars.Returns(Observable.Return(new List<string>() { "1" }));
+
+                var observer = TestScheduler.CreateObserver<bool>();
+                var viewModel = CreateViewModel();
+
+                await viewModel.Initialize();
+                TestScheduler.Start();
+
+                viewModel.IsCalendarSmartRemindersVisible.Subscribe(observer);
+
+                viewModel.ViewAppeared();
+
+                var messages = observer.Messages.Select(msg => msg.Value.Value);
+
+                messages.First().Should().BeFalse();
+                messages.Last().Should().BeTrue();
             }
         }
     }

@@ -1587,5 +1587,17 @@ namespace Toggl.Foundation {
                 return ResourceManager.GetString("EditingTwentyFourHoursFormat", resourceCulture);
             }
         }
+        
+        public static string NumberOfTasksPlural {
+            get {
+                return ResourceManager.GetString("NumberOfTasksPlural", resourceCulture);
+            }
+        }
+        
+        public static string NumberOfTasksSingular {
+            get {
+                return ResourceManager.GetString("NumberOfTasksSingular", resourceCulture);
+            }
+        }
     }
 }

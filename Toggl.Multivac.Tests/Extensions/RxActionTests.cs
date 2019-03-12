@@ -1,8 +1,11 @@
 using System;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading.Tasks;
+using FluentAssertions;
 using Microsoft.Reactive.Testing;
 using Toggl.Multivac.Extensions;
 using Xunit;
@@ -11,6 +14,91 @@ namespace Toggl.Multivac.Tests
 {
     public sealed class RxActionTests
     {
+        public sealed class TheConstructor : ReactiveTest
+        {
+            [Fact, LogIfTooSlow]
+            public void CompletesWhenCreatedFromAction()
+            {
+                var testScheduler = new TestScheduler();
+
+                void actionFunction(int n)
+                {
+                    return;
+                }
+
+                var action = InputAction<int>.FromAction(actionFunction, testScheduler);
+
+                var observer = testScheduler.CreateObserver<Unit>();
+                action.ExecuteWithCompletion(2).Subscribe(observer);
+
+                testScheduler.Start();
+                observer.Messages.Count.Should().Be(2);
+                observer.Messages.Last().Value.Kind.Should().Be(NotificationKind.OnCompleted);
+            }
+
+            [Fact, LogIfTooSlow]
+            public void CompletesWhenCreatedFromObservable()
+            {
+                var testScheduler = new TestScheduler();
+
+                IObservable<Unit> observableFunction(int n)
+                {
+                    return Observable.Return(default(Unit));
+                }
+
+                var action = InputAction<int>.FromObservable(observableFunction, testScheduler);
+
+                var observer = testScheduler.CreateObserver<Unit>();
+                action.ExecuteWithCompletion(2).Subscribe(observer);
+
+                testScheduler.Start();
+                observer.Messages.Count.Should().Be(2);
+                observer.Messages.Last().Value.Kind.Should().Be(NotificationKind.OnCompleted);
+            }
+
+            [Fact, LogIfTooSlow]
+            public void CompletesWhenCreatedFromTask()
+            {
+                var testScheduler = new TestScheduler();
+
+                Task asyncFunction(int n)
+                {
+                    return Task.FromResult(default(Unit));
+                }
+
+                var action = InputAction<int>.FromAsync(asyncFunction, testScheduler);
+
+                var observer = testScheduler.CreateObserver<Unit>();
+
+                action.ExecuteWithCompletion(2).Subscribe(observer);
+                testScheduler.Start();
+
+                observer.Messages.Count.Should().Be(2);
+                observer.Messages.Last().Value.Kind.Should().Be(NotificationKind.OnCompleted);
+            }
+
+            [Fact, LogIfTooSlow]
+            public void CompletesWhenCreatedFromAsyncTask()
+            {
+                var testScheduler = new TestScheduler();
+
+                async Task asyncFunction(int n)
+                {
+                    await Task.FromResult(default(Unit));
+                }
+
+                var action = InputAction<int>.FromAsync(asyncFunction, testScheduler);
+
+                var observer = testScheduler.CreateObserver<Unit>();
+
+                action.ExecuteWithCompletion(2).Subscribe(observer);
+                testScheduler.Start();
+
+                observer.Messages.Count.Should().Be(2);
+                observer.Messages.Last().Value.Kind.Should().Be(NotificationKind.OnCompleted);
+            }
+        }
+
         public sealed class TheErrorsProperty : ReactiveTest
         {
             [Fact, LogIfTooSlow]
@@ -96,32 +184,6 @@ namespace Toggl.Multivac.Tests
                     OnNext(0, true),
                     OnNext(300, false),
                     OnNext(331, true)
-                );
-            }
-        }
-
-        public sealed class TheExecuteMethod : ReactiveTest
-        {
-            [Fact, LogIfTooSlow]
-            public void ReturnsTheResultsOfTheOperation()
-            {
-                var testScheduler = new TestScheduler();
-                var observer = testScheduler.CreateObserver<string>();
-                var observable = testScheduler.CreateColdObservable(
-                    OnNext(10, "0"),
-                    OnNext(20, "1"),
-                    OnCompleted<string>(30)
-                );
-
-                var action = new RxAction<Unit, string>(_ => observable, testScheduler);
-
-                testScheduler.Schedule(TimeSpan.FromTicks(300), () => action.Execute(Unit.Default).Subscribe(observer));
-                testScheduler.Start();
-
-                observer.Messages.AssertEqual(
-                    OnNext(311, "0"),
-                    OnNext(321, "1"),
-                    OnCompleted<string>(331)
                 );
             }
         }

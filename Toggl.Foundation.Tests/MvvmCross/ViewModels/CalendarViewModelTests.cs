@@ -60,7 +60,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Returns(Observable.Return(workspace));
 
                 InteractorFactory
-                    .CreateTimeEntry(Arg.Any<ITimeEntryPrototype>())
+                    .CreateTimeEntry(Arg.Any<ITimeEntryPrototype>(), TimeEntryStartOrigin.CalendarEvent)
+                    .Execute()
+                    .Returns(Observable.Return(timeEntry));
+
+                InteractorFactory
+                    .CreateTimeEntry(Arg.Any<ITimeEntryPrototype>(), TimeEntryStartOrigin.CalendarTapAndDrag)
                     .Execute()
                     .Returns(Observable.Return(timeEntry));
 
@@ -176,20 +181,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public void TracksTheAppropriateEventToTheAnalyticsService()
-            {
-                ViewModel.Init(eventId);
-
-                AnalyticsService.TimeEntryStarted.Received().Track(TimeEntryStartOrigin.CalendarEvent);
-            }
-
-            [Fact, LogIfTooSlow]
             public async Task CreatesATimeEntryUsingTheCalendarItemInfo()
             {
                 ViewModel.Init(eventId);
 
                 await InteractorFactory
-                    .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(p => p.Description == calendarItem.Description))
+                    .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(p => p.Description == calendarItem.Description), TimeEntryStartOrigin.CalendarEvent)
                     .Received()
                     .Execute();
             }
@@ -200,7 +197,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.Init(eventId);
 
                 await InteractorFactory
-                    .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(p => p.WorkspaceId == DefaultWorkspaceId))
+                    .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(p => p.WorkspaceId == DefaultWorkspaceId), TimeEntryStartOrigin.CalendarEvent)
                     .Received()
                     .Execute();
             }
@@ -374,12 +371,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
         }
 
-        public sealed class TheGetStartedAction : CalendarViewModelTest
+        public abstract class LinkCalendarsTest : CalendarViewModelTest
         {
+            protected abstract UIAction Action { get; }
+
             [Fact, LogIfTooSlow]
             public async Task RequestsCalendarPermission()
             {
-                ViewModel.GetStarted.Execute();
+                Action.Execute();
                 TestScheduler.Start();
 
                 await PermissionsService.Received().RequestCalendarAuthorization();
@@ -390,7 +389,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 PermissionsService.RequestCalendarAuthorization().Returns(Observable.Return(false));
 
-                ViewModel.GetStarted.Execute();
+                Action.Execute();
 
                 NavigationService.Received().Navigate<CalendarPermissionDeniedViewModel, Unit>();
             }
@@ -403,7 +402,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     Observable.Return(new UserCalendar[] { new UserCalendar() })
                 );
 
-                ViewModel.GetStarted.Execute();
+                Action.Execute();
                 TestScheduler.Start();
 
                 await NavigationService
@@ -419,7 +418,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     Observable.Return(new UserCalendar[0])
                 );
 
-                ViewModel.GetStarted.Execute();
+                Action.Execute();
                 TestScheduler.Start();
 
                 await NavigationService.DidNotReceive().Navigate<SelectUserCalendarsViewModel, string[]>();
@@ -440,11 +439,60 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     Observable.Return(new UserCalendar[] { new UserCalendar() })
                 );
 
-                viewModel.GetStarted.Execute(Unit.Default);
+                Action.Execute(Unit.Default);
                 TestScheduler.Start();
 
                 InteractorFactory.Received().SetEnabledCalendars(calendarIds).Execute();
             }
+
+            [Fact, LogIfTooSlow]
+            public async Task RequestsNotificationsPermissionIfCalendarPermissionWasGranted()
+            {
+                PermissionsService.RequestCalendarAuthorization().Returns(Observable.Return(true));
+                NavigationService.Navigate<SelectUserCalendarsViewModel, string[]>().Returns(new string[0]);
+
+                Action.Execute(Unit.Default);
+                TestScheduler.Start();
+
+                await PermissionsService.Received().RequestNotificationAuthorization();
+            }
+
+            [Theory, LogIfTooSlow]
+            [InlineData(true)]
+            [InlineData(false)]
+            public async Task SetsTheNotificationPropertyAfterAskingForPermission(bool permissionWasGiven)
+            {
+                PermissionsService.RequestCalendarAuthorization().Returns(Observable.Return(true));
+                NavigationService.Navigate<SelectUserCalendarsViewModel, string[]>().Returns(new string[0]);
+                PermissionsService.RequestNotificationAuthorization().Returns(Observable.Return(permissionWasGiven));
+
+                Action.Execute();
+                TestScheduler.Start();
+
+                UserPreferences.Received().SetCalendarNotificationsEnabled(Arg.Is(permissionWasGiven));
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task DoesNotRequestNotificationsPermissionIfCalendarPermissionWasNotGranted()
+            {
+                PermissionsService.RequestCalendarAuthorization().Returns(Observable.Return(false));
+                NavigationService.Navigate<SelectUserCalendarsViewModel, string[]>().Returns(new string[0]);
+
+                Action.Execute();
+                TestScheduler.Start();
+
+                await PermissionsService.DidNotReceive().RequestNotificationAuthorization();
+            }
+        }
+
+        public sealed class TheLinkCalendarsAction : LinkCalendarsTest
+        {
+            protected override UIAction Action => ViewModel.LinkCalendars;
+        }
+
+        public sealed class TheGetStartedAction : LinkCalendarsTest
+        {
+            protected override UIAction Action => ViewModel.GetStarted;
 
             [Fact, LogIfTooSlow]
             public async Task SetsCalendarOnboardingAsCompletedIfUserGrantsAccess()
@@ -452,7 +500,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 PermissionsService.RequestCalendarAuthorization().Returns(Observable.Return(true));
                 NavigationService.Navigate<SelectUserCalendarsViewModel, string[]>().Returns(new string[0]);
 
-                 ViewModel.GetStarted.Execute(Unit.Default);
+                Action.Execute(Unit.Default);
 
                 OnboardingStorage.Received().SetCompletedCalendarOnboarding();
             }
@@ -478,45 +526,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 TestScheduler.Start();
 
                 AnalyticsService.CalendarOnboardingStarted.Received().Track();
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task RequestsNotificationsPermissionIfCalendarPermissionWasGranted()
-            {
-                PermissionsService.RequestCalendarAuthorization().Returns(Observable.Return(true));
-                NavigationService.Navigate<SelectUserCalendarsViewModel, string[]>().Returns(new string[0]);
-
-                ViewModel.GetStarted.Execute(Unit.Default);
-                TestScheduler.Start();
-
-                await PermissionsService.Received().RequestNotificationAuthorization();
-            }
-
-            [Theory, LogIfTooSlow]
-            [InlineData(true)]
-            [InlineData(false)]
-            public async Task SetsTheNotificationPropertyAfterAskingForPermission(bool permissionWasGiven)
-            {
-                PermissionsService.RequestCalendarAuthorization().Returns(Observable.Return(true));
-                NavigationService.Navigate<SelectUserCalendarsViewModel, string[]>().Returns(new string[0]);
-                PermissionsService.RequestNotificationAuthorization().Returns(Observable.Return(permissionWasGiven));
-
-                ViewModel.GetStarted.Execute();
-                TestScheduler.Start();
-
-                UserPreferences.Received().SetCalendarNotificationsEnabled(Arg.Is(permissionWasGiven));
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task DoesNotRequestNotificationsPermissionIfCalendarPermissionWasNotGranted()
-            {
-                PermissionsService.RequestCalendarAuthorization().Returns(Observable.Return(false));
-                NavigationService.Navigate<SelectUserCalendarsViewModel, string[]>().Returns(new string[0]);
-
-                ViewModel.GetStarted.Execute();
-                TestScheduler.Start();
-
-                await PermissionsService.DidNotReceive().RequestNotificationAuthorization();
             }
         }
 
@@ -716,53 +725,48 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     await NavigationService.Received().Navigate<EditTimeEntryViewModel, long>(Arg.Is(TimeEntryId));
                 }
             }
+        }
 
-            public sealed class WhenHandlingCalendarItems : TheOnItemTappedAction
+        public sealed class WhenHandlingCalendarItems : CalendarViewModelTest
+        {
+            private CalendarItem CalendarItem { get; } = new CalendarItem(
+                "id",
+                CalendarItemSource.Calendar,
+                new DateTimeOffset(2018, 08, 10, 0, 15, 0, TimeSpan.Zero),
+                TimeSpan.FromMinutes(10),
+                "Meeting with someone",
+                CalendarIconKind.Event
+            );
+
+            [Fact, LogIfTooSlow]
+            public async Task CreatesATimeEntryUsingTheCalendarItemInfo()
             {
-                protected override void EnsureEventWasTracked()
-                {
-                    AnalyticsService.TimeEntryStarted.Received().Track(TimeEntryStartOrigin.CalendarEvent);
-                }
+                ViewModel.OnItemTapped.Execute(CalendarItem);
+                TestScheduler.Start();
 
-                protected override CalendarItem CalendarItem { get; } = new CalendarItem(
-                    "id",
-                    CalendarItemSource.Calendar,
-                    new DateTimeOffset(2018, 08, 10, 0, 15, 0, TimeSpan.Zero),
-                    TimeSpan.FromMinutes(10),
-                    "Meeting with someone",
-                    CalendarIconKind.Event
-                );
+                await InteractorFactory
+                    .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(p => p.Description == CalendarItem.Description), TimeEntryStartOrigin.CalendarEvent)
+                    .Received()
+                    .Execute();
+            }
 
-                [Fact, LogIfTooSlow]
-                public async Task CreatesATimeEntryUsingTheCalendarItemInfo()
-                {
-                    ViewModel.OnItemTapped.Execute(CalendarItem);
-                    TestScheduler.Start();
+            [Fact, LogIfTooSlow]
+            public async Task CreatesATimeEntryInTheDefaultWorkspace()
+            {
+                ViewModel.OnItemTapped.Execute(CalendarItem);
+                TestScheduler.Start();
 
-                    await InteractorFactory
-                        .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(p => p.Description == CalendarItem.Description))
-                        .Received()
-                        .Execute();
-                }
-
-                [Fact, LogIfTooSlow]
-                public async Task CreatesATimeEntryInTheDefaultWorkspace()
-                {
-                    ViewModel.OnItemTapped.Execute(CalendarItem);
-                    TestScheduler.Start();
-
-                    await InteractorFactory
-                        .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(p => p.WorkspaceId == DefaultWorkspaceId))
-                        .Received()
-                        .Execute();
-                }
+                await InteractorFactory
+                    .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(p => p.WorkspaceId == DefaultWorkspaceId), TimeEntryStartOrigin.CalendarEvent)
+                    .Received()
+                    .Execute();
             }
         }
 
         public sealed class TheOnDurationSelectedAction : CalendarViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task CreatesATimeEntryWithTheSelectedStartDate()
+            public void CreatesATimeEntryWithTheSelectedStartDate()
             {
                 var now = DateTimeOffset.UtcNow;
                 var duration = TimeSpan.FromMinutes(30);
@@ -771,8 +775,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.OnDurationSelected.Execute(tuple);
                 TestScheduler.Start();
 
-                await InteractorFactory
-                    .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(p => p.StartTime == now))
+                InteractorFactory
+                    .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(p => p.StartTime == now), TimeEntryStartOrigin.CalendarTapAndDrag)
                     .Received()
                     .Execute();
             }
@@ -788,7 +792,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 TestScheduler.Start();
 
                 await InteractorFactory
-                    .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(p => p.Duration == duration))
+                    .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(p => p.Duration == duration), TimeEntryStartOrigin.CalendarTapAndDrag)
                     .Received()
                     .Execute();
             }
@@ -804,7 +808,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 TestScheduler.Start();
 
                 await InteractorFactory
-                    .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(p => p.WorkspaceId == DefaultWorkspaceId))
+                    .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(p => p.WorkspaceId == DefaultWorkspaceId), TimeEntryStartOrigin.CalendarTapAndDrag)
                     .Received()
                     .Execute();
             }
@@ -820,19 +824,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 TestScheduler.Start();
 
                 await NavigationService.Received().Navigate<EditTimeEntryViewModel, long>(Arg.Is(TimeEntryId));
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task TracksTheTimeEntryCreatedFromCalendarTappingEventToTheAnalyticsService()
-            {
-                var now = DateTimeOffset.UtcNow;
-                var duration = TimeSpan.FromMinutes(30);
-                var tuple = (now, duration);
-
-                ViewModel.OnDurationSelected.Execute(tuple);
-                TestScheduler.Start();
-
-                AnalyticsService.TimeEntryStarted.Received().Track(TimeEntryStartOrigin.CalendarTapAndDrag);
             }
         }
 
@@ -965,7 +956,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 InteractorFactory
                     .DidNotReceive()
-                    .CreateTimeEntry(Arg.Any<ITimeEntryPrototype>());
+                    .CreateTimeEntry(Arg.Any<ITimeEntryPrototype>(), TimeEntryStartOrigin.CalendarEvent);
             }
 
             [Fact, LogIfTooSlow]
@@ -978,7 +969,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 InteractorFactory
                     .Received()
                     .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(
-                        te => te.StartTime == calendarEvent.StartTime && te.Duration == calendarEvent.Duration));
+                        te => te.StartTime == calendarEvent.StartTime && te.Duration == calendarEvent.Duration), TimeEntryStartOrigin.CalendarEvent);
             }
 
             [Fact, LogIfTooSlow]
@@ -991,7 +982,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 InteractorFactory
                     .Received()
                     .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(
-                        te => te.StartTime == Now && te.Duration == null));
+                        te => te.StartTime == Now && te.Duration == null), TimeEntryStartOrigin.CalendarEvent);
             }
 
             [Fact, LogIfTooSlow]
@@ -1005,7 +996,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 InteractorFactory
                     .Received()
                     .CreateTimeEntry(Arg.Is<ITimeEntryPrototype>(
-                        te => te.StartTime == calendarEvent.StartTime && te.Duration == null));
+                        te => te.StartTime == calendarEvent.StartTime && te.Duration == null), TimeEntryStartOrigin.CalendarEvent);
             }
 
             private void selectOptionByOptionText(string text)

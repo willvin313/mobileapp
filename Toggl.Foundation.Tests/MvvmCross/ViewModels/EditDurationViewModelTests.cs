@@ -11,6 +11,7 @@ using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Tests.TestExtensions;
 using Toggl.Foundation.Tests.Generators;
+using Toggl.Multivac.Extensions;
 using Xunit;
 using Task = System.Threading.Tasks.Task;
 
@@ -349,10 +350,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.IsEditingStartTime.Subscribe(startObserver);
                 ViewModel.IsEditingStopTime.Subscribe(stopObserver);
 
-                Observable.Concat(
-                    Observable.Defer(() => ViewModel.EditStartTime.Execute()),
-                    Observable.Defer(() => ViewModel.EditStartTime.Execute())
-                    )
+                ViewModel.EditStartTime.ExecuteSequentally(times: 2)
                     .Subscribe();
 
                 TestScheduler.Start();
@@ -425,10 +423,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.IsEditingStartTime.Subscribe(startObserver);
                 ViewModel.IsEditingStopTime.Subscribe(stopObserver);
 
-                Observable.Concat(
-                        Observable.Defer(() => ViewModel.EditStopTime.Execute()),
-                        Observable.Defer(() => ViewModel.EditStopTime.Execute())
-                    )
+                ViewModel.EditStopTime.ExecuteSequentally(2)
                     .Subscribe();
 
                 TestScheduler.Start();

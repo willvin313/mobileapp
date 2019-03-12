@@ -75,7 +75,7 @@ namespace Toggl.Giskard.Fragments
                 .DisposedBy(DisposeBag);
 
             headerLinkCalendarsButton.Rx().Tap()
-                .Subscribe(ViewModel.GetStarted.Inputs)
+                .Subscribe(ViewModel.LinkCalendars.Inputs)
                 .DisposedBy(DisposeBag);
 
             calendarAdapter.CalendarItemTappedObservable

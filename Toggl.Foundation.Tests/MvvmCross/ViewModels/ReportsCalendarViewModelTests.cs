@@ -177,7 +177,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.Initialize().Wait();
                 ViewModel.CurrentMonthObservable.Subscribe(observer);
 
-                ViewModel.SetCurrentPage(currentPage);
+                ViewModel.UpdateMonth(currentPage);
 
                 TestScheduler.Start();
                 var receivedValue = observer.Values().Last();
