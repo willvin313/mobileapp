@@ -2,7 +2,6 @@
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Firebase.RemoteConfig;
-using Toggl.Foundation.Exceptions;
 using Toggl.Foundation.Services;
 using Toggl.Multivac;
 
@@ -10,7 +9,7 @@ namespace Toggl.Daneel.Services
 {
     public sealed class RemoteConfigServiceIos : IRemoteConfigService
     {
-        public void SetupDefaults(string plistName)
+        public RemoteConfigServiceIos(string plistName)
         {
             var remoteConfig = RemoteConfig.SharedInstance;
             remoteConfig.SetDefaults(plistFileName: plistName);

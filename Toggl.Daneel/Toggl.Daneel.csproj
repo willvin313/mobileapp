@@ -687,6 +687,7 @@
     <Compile Include="Extensions\Reactive\UIViewExtensions.cs" />
     <Compile Include="Services\IntentDonationServiceIos.cs" />
     <Compile Include="Services\UserDefaultsStorageIos.cs" />
+    <Compile Include="Startup\IosDependencyContainer.cs" />
     <Compile Include="Startup\IOSSchedulerProvider.cs" />
     <Compile Include="Startup\Setup.cs" />
     <Compile Include="Startup\SetupTargetFactories.cs">
