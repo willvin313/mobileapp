@@ -1,4 +1,5 @@
 using System;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
@@ -80,16 +81,24 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             ISchedulerProvider schedulerProvider,
             IRxActionFactory rxActionFactory)
         {
-            Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
-            Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
-            Ensure.Argument.IsNotNull(onboardingStorage, nameof(onboardingStorage));
-            Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
-            Ensure.Argument.IsNotNull(passwordManagerService, nameof(passwordManagerService));
-            Ensure.Argument.IsNotNull(errorHandlingService, nameof(errorHandlingService));
-            Ensure.Argument.IsNotNull(lastTimeUsageStorage, nameof(lastTimeUsageStorage));
-            Ensure.Argument.IsNotNull(timeService, nameof(timeService));
-            Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
-            Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
+            try
+            {
+                Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
+                Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
+                Ensure.Argument.IsNotNull(onboardingStorage, nameof(onboardingStorage));
+                Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
+                Ensure.Argument.IsNotNull(passwordManagerService, nameof(passwordManagerService));
+                Ensure.Argument.IsNotNull(errorHandlingService, nameof(errorHandlingService));
+                Ensure.Argument.IsNotNull(lastTimeUsageStorage, nameof(lastTimeUsageStorage));
+                Ensure.Argument.IsNotNull(timeService, nameof(timeService));
+                Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
+                Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
 
             this.timeService = timeService;
             this.userAccessManager = userAccessManager;
@@ -248,11 +257,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Login();
         }
 
-        private async void onInteractorFactory(ISyncManager syncManager)
+        private async void onInteractorFactory(Unit syncManager)
         {
             lastTimeUsageStorage.SetLogin(timeService.CurrentDateTime);
 
-            await syncManager.ForceFullSync();
+            // TODO: Fix this
+            //await syncManager.ForceFullSync();
 
             onboardingStorage.SetIsNewUser(false);
 

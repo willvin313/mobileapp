@@ -294,13 +294,14 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .Subscribe(onInteractorFactory, onError, onCompleted);
         }
 
-        private async void onInteractorFactory(ISyncManager syncManager)
+        private async void onInteractorFactory(Unit syncManager)
         {
             successfulSignupSubject.OnNext(Unit.Default);
 
             lastTimeUsageStorage.SetLogin(timeService.CurrentDateTime);
 
-            await syncManager.ForceFullSync();
+            //TODO: Fix this
+            //await syncManager.ForceFullSync();
 
             onboardingStorage.SetIsNewUser(true);
             onboardingStorage.SetUserSignedUp();

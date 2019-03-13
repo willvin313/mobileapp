@@ -145,12 +145,13 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .Select(Multivac.Password.From)
                 .ThrowIf(password => !password.IsValid, new InvalidOperationException())
                 .SelectMany(userAccessManager.RefreshToken)
-                .Do(onSyncManager)
+                .Do(onLogin)
                 .SelectUnit();
 
-        private void onSyncManager(ISyncManager syncManager)
+        private void onLogin()
         {
-            syncManager.ForceFullSync();
+            // TODO: Fix this
+            //syncManager.ForceFullSync();
 
             navigationService.ForkNavigate<MainTabBarViewModel, MainViewModel>();
         }
