@@ -310,18 +310,10 @@ namespace Toggl.Daneel.ViewControllers
 
             DescriptionTextView.TextColor = textColor;
 
-            foreach (var label in getLabelsToChangeColorWhenEditingInaccessibleEntry())
-            {
-                label.TextColor = textColor;
-            }
-        }
-
-        IEnumerable<UILabel> getLabelsToChangeColorWhenEditingInaccessibleEntry()
-        {
-            yield return StartTimeLabel;
-            yield return StartDateLabel;
-            yield return EndTimeLabel;
-            yield return DurationLabel;
+            StartTimeLabel.TextColor = textColor;
+            StartDateLabel.TextColor = textColor;
+            EndTimeLabel.TextColor = textColor;
+            DurationLabel.TextColor = textColor;
         }
 
         private void centerTextVertically(UITextView textView)

@@ -34,6 +34,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog
             VisualizationIntent == LogItemVisualizationIntent.ExpandedGroupHeader ||
             VisualizationIntent == LogItemVisualizationIntent.CollapsedGroupHeader;
 
+        public bool BelongsToGroup =>
+            VisualizationIntent == LogItemVisualizationIntent.GroupItem;
+
         public LogItemViewModel(
             GroupId groupId,
             long[] representedTimeEntriesIds,

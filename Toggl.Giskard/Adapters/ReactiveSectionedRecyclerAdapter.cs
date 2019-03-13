@@ -55,7 +55,7 @@ namespace Toggl.Giskard.Adapters
             return currentItems[position - HeaderOffset].ViewType;
         }
 
-        protected TModel getItemAt(int position)
+        protected TModel GetItemAt(int position)
         {
             return currentItems[position - HeaderOffset].Item;
         }

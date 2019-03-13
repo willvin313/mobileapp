@@ -26,7 +26,7 @@ namespace Toggl.Foundation.Interactors
                 prototype.Duration,
                 origin);
 
-        public IInteractor<IObservable<IThreadSafeTimeEntry>> ContinueTimeEntry(ITimeEntryPrototype prototype)
+        public IInteractor<IObservable<IThreadSafeTimeEntry>> ContinueTimeEntry(ITimeEntryPrototype prototype, ContinueTimeEntryMode continueMode)
             => new CreateTimeEntryInteractor(
                 idProvider,
                 timeService,
@@ -36,7 +36,7 @@ namespace Toggl.Foundation.Interactors
                 prototype,
                 timeService.CurrentDateTime,
                 null,
-                TimeEntryStartOrigin.Continue);
+                (TimeEntryStartOrigin)continueMode);
 
         public IInteractor<IObservable<IThreadSafeTimeEntry>> StartSuggestion(Suggestion suggestion)
             => new CreateTimeEntryInteractor(
@@ -51,11 +51,7 @@ namespace Toggl.Foundation.Interactors
             TimeEntryStartOrigin.Suggestion);
 
         public IInteractor<IObservable<IThreadSafeTimeEntry>> ContinueMostRecentTimeEntry()
-            => new ContinueMostRecentTimeEntryInteractor(
-                idProvider,
-                timeService,
-                dataSource,
-                analyticsService);
+            => new ContinueMostRecentTimeEntryInteractor(idProvider, timeService, dataSource, analyticsService);
 
         public IInteractor<IObservable<Unit>> DeleteTimeEntry(long id)
             => new DeleteTimeEntryInteractor(timeService, dataSource.TimeEntries, this, id);

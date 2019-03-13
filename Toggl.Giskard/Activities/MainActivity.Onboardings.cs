@@ -202,7 +202,7 @@ namespace Toggl.Giskard.Activities
                 }
             });
 
-            swipeToContinueWasUsedDisposable = mainRecyclerAdapter.ContinueTimeEntrySubject
+            swipeToContinueWasUsedDisposable = mainRecyclerAdapter.ContinueTimeEntry
                 .Subscribe(_ =>
                 {
                     swipeRightOnboardingStep.Dismiss();

@@ -93,9 +93,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public UIAction OpenSettings { get; private set; }
         public UIAction OpenSyncFailures { get; private set; }
         public InputAction<bool> StartTimeEntry { get; private set; }
-        public InputAction<long[]> SelectTimeEntry { get; private set; }
+        public InputAction<(long[], EditTimeEntryOrigin)> SelectTimeEntry { get; private set; }
         public InputAction<TimeEntryStopOrigin> StopTimeEntry { get; private set; }
-        public InputAction<long> ContinueTimeEntry { get; private set; }
+        public InputAction<(long, ContinueTimeEntryMode)> ContinueTimeEntry { get; private set; }
 
         public ITimeService TimeService { get; }
 
@@ -252,8 +252,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             OpenReports = rxActionFactory.FromAsync(openReports);
             OpenSettings = rxActionFactory.FromAsync(openSettings);
             OpenSyncFailures = rxActionFactory.FromAsync(openSyncFailures);
-            SelectTimeEntry = rxActionFactory.FromAsync<long[]>(timeEntrySelected);
-            ContinueTimeEntry = rxActionFactory.FromObservable<long>(continueTimeEntry);
+            SelectTimeEntry = rxActionFactory.FromAsync<(long[], EditTimeEntryOrigin)>(timeEntrySelected);
+            ContinueTimeEntry = rxActionFactory.FromObservable<(long, ContinueTimeEntryMode)>(continueTimeEntry);
             StartTimeEntry = rxActionFactory.FromAsync<bool>(startTimeEntry, IsTimeEntryRunning.Invert());
             StopTimeEntry = rxActionFactory.FromAsync<TimeEntryStopOrigin>(stopTimeEntry, IsTimeEntryRunning);
 
@@ -427,20 +427,23 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             return navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(parameter);
         }
 
-        private IObservable<Unit> continueTimeEntry(long timeEntryId)
+        private IObservable<Unit> continueTimeEntry((long, ContinueTimeEntryMode) continueInfo)
         {
+            var (timeEntryId, continueMode) = continueInfo;
             return interactorFactory.GetTimeEntryById(timeEntryId).Execute()
                 .Select(timeEntry => timeEntry.AsTimeEntryPrototype())
                 .SelectMany(prototype =>
-                    interactorFactory.ContinueTimeEntry(prototype).Execute())
+                    interactorFactory.ContinueTimeEntry(prototype, continueMode).Execute())
                 .Do(_ => onboardingStorage.SetTimeEntryContinued())
                 .SelectUnit();
         }
 
-        private async Task timeEntrySelected(long[] timeEntryIds)
+        private async Task timeEntrySelected((long[], EditTimeEntryOrigin) timeEntrySelection)
         {
             if (isEditViewOpen)
                 return;
+
+            var (timeEntryIds, origin) = timeEntrySelection;
 
             onboardingStorage.TimeEntryWasTapped();
 
@@ -452,6 +455,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             var editTimeEntryStopwatch = stopwatchProvider.CreateAndStore(MeasuredOperation.EditTimeEntryFromMainLog);
             editTimeEntryStopwatch.Start();
 
+            analyticsService.EditViewOpened.Track(origin);
             await navigate<EditTimeEntryViewModel, long[]>(timeEntryIds);
 
             lock (isEditViewOpenLock)

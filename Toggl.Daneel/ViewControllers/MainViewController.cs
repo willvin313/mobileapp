@@ -134,13 +134,13 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(onTableScroll)
                 .DisposedBy(DisposeBag);
 
-            var continueTimeEntry = Observable.Merge(
-                tableViewSource.ContinueTap,
-                tableViewSource.SwipeToContinue
-            );
+            tableViewSource.ContinueTap
+                .Select(item => timeEntryContinuation(item, false))
+                .Subscribe(ViewModel.ContinueTimeEntry.Inputs)
+                .DisposedBy(DisposeBag);
 
-            continueTimeEntry
-                .Select(logItem => logItem.RepresentedTimeEntriesIds.First())
+            tableViewSource.SwipeToContinue
+                .Select(item => timeEntryContinuation(item, true))
                 .Subscribe(ViewModel.ContinueTimeEntry.Inputs)
                 .DisposedBy(DisposeBag);
 
@@ -150,7 +150,7 @@ namespace Toggl.Daneel.ViewControllers
                 .DisposedBy(DisposeBag);
 
             tableViewSource.Rx().ModelSelected()
-                .Select(model => model.RepresentedTimeEntriesIds)
+                .Select(editEventInfo)
                 .Subscribe(ViewModel.SelectTimeEntry.Inputs)
                 .DisposedBy(DisposeBag);
 
@@ -187,7 +187,7 @@ namespace Toggl.Daneel.ViewControllers
             CurrentTimeEntryCard.Rx().Tap()
                 .WithLatestFrom(ViewModel.CurrentRunningTimeEntry, (_, te) => te)
                 .Where(te => te != null)
-                .Select(te => new[] { te.Id })
+                .Select(te => (new[] { te.Id }, EditTimeEntryOrigin.RunningTimeEntryCard))
                 .Subscribe(ViewModel.SelectTimeEntry.Inputs)
                 .DisposedBy(DisposeBag);
 
@@ -297,6 +297,37 @@ namespace Toggl.Daneel.ViewControllers
 
             suggestionsContaier.AddSubview(suggestionsView);
             suggestionsView.ConstrainInView(suggestionsContaier);
+        }
+
+        private (long[], EditTimeEntryOrigin) editEventInfo(LogItemViewModel item)
+        {
+            var origin = item.IsTimeEntryGroupHeader
+                ? EditTimeEntryOrigin.GroupHeader
+                : item.BelongsToGroup
+                    ? EditTimeEntryOrigin.GroupTimeEntry
+                    : EditTimeEntryOrigin.SingleTimeEntry;
+
+            return (item.RepresentedTimeEntriesIds, origin);
+        }
+
+        private (long, ContinueTimeEntryMode) timeEntryContinuation(LogItemViewModel itemViewModel, bool isSwipe)
+        {
+            var continueMode = default(ContinueTimeEntryMode);
+
+            if (isSwipe)
+            {
+                continueMode = itemViewModel.IsTimeEntryGroupHeader
+                    ? ContinueTimeEntryMode.TimeEntriesGroupSwipe
+                    : ContinueTimeEntryMode.SingleTimeEntrySwipe;
+            }
+            else
+            {
+                continueMode = itemViewModel.IsTimeEntryGroupHeader
+                    ? ContinueTimeEntryMode.TimeEntriesGroupContinueButton
+                    : ContinueTimeEntryMode.SingleTimeEntryContinueButton;
+            }
+
+            return (itemViewModel.RepresentedTimeEntriesIds.First(), continueMode);
         }
 
         public override void ViewWillAppear(bool animated)
@@ -484,8 +515,11 @@ namespace Toggl.Daneel.ViewControllers
             var swipeUpRunningCardGesture = new UISwipeGestureRecognizer(async () =>
             {
                 var currentlyRunningTimeEntry = await ViewModel.CurrentRunningTimeEntry.FirstAsync();
-                if (currentlyRunningTimeEntry == null) return;
-                await ViewModel.SelectTimeEntry.ExecuteWithCompletion(new[] { currentlyRunningTimeEntry.Id });
+                if (currentlyRunningTimeEntry == null) 
+                    return;
+
+                var selectTimeEntryData = (new[] { currentlyRunningTimeEntry.Id }, EditTimeEntryOrigin.RunningTimeEntryCard);
+                await ViewModel.SelectTimeEntry.ExecuteWithCompletion(selectTimeEntryData);
             });
             swipeUpRunningCardGesture.Direction = UISwipeGestureRecognizerDirection.Up;
             CurrentTimeEntryCard.AddGestureRecognizer(swipeUpRunningCardGesture);
@@ -551,7 +585,7 @@ namespace Toggl.Daneel.ViewControllers
             // the spider at any time.
             WelcomeBackView.RemoveFromSuperview();
             TimeEntriesLogTableView.AddSubview(WelcomeBackView);
-            NSLayoutConstraint.ActivateConstraints(new []
+            NSLayoutConstraint.ActivateConstraints(new[]
             {
                 WelcomeBackView.CenterXAnchor.ConstraintEqualTo(TimeEntriesLogTableView.CenterXAnchor),
                 WelcomeBackView.TopAnchor.ConstraintEqualTo(TimeEntriesLogTableView.TopAnchor, welcomeViewTopDistance),

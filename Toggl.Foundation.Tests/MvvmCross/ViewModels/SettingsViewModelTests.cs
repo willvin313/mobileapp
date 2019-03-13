@@ -561,6 +561,21 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 await DataSource.SyncManager.Received().PushSync();
             }
+
+            [Property, LogIfTooSlow]
+            public void TracksEventWhenToggled(bool initialState)
+            {
+                var analyticsEvent = Substitute.For<IAnalyticsEvent<bool>>();
+                AnalyticsService.GroupTimeEntriesSettingsChanged.Returns(analyticsEvent);
+                var preferences = new MockPreferences { CollapseTimeEntries = initialState };
+                var expectedState = !initialState;
+
+                PreferencesSubject.OnNext(preferences);
+                ViewModel.ToggleTimeEntriesGrouping.Execute();
+                TestScheduler.Start();
+
+                analyticsEvent.Received().Track(expectedState);
+            }
         }
 
         public sealed class TheSelectDateFormatMethod : SettingsViewModelTest

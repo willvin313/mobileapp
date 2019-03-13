@@ -40,7 +40,7 @@ namespace Toggl.Giskard.ViewHelpers
 
             if (direction == ItemTouchHelper.Right)
             {
-                adapter.ContinueTimeEntry(swipedPosition);
+                adapter.ContinueTimeEntryBySwiping(swipedPosition);
             }
             else
             {

@@ -81,7 +81,7 @@ namespace Toggl.Foundation.Tests.AnalyticsService
                 eventToDictionaryResult[nameof(StartTimeEntryEvent.NumberOfTags)].Should().Be(numberOfTags.ToString());
             }
 
-            private StartTimeEntryEvent createTimeEntryEvent(TimeEntryStartOrigin origin = TimeEntryStartOrigin.Continue, bool valueForBooleans = false, int numberOfTags = 0)
+            private StartTimeEntryEvent createTimeEntryEvent(TimeEntryStartOrigin origin = TimeEntryStartOrigin.SingleTimeEntryContinueButton, bool valueForBooleans = false, int numberOfTags = 0)
                 => new StartTimeEntryEvent(origin, valueForBooleans, valueForBooleans, valueForBooleans, numberOfTags, valueForBooleans, valueForBooleans);
         }
 

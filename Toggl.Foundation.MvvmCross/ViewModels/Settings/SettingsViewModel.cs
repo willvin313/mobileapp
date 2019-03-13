@@ -149,7 +149,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IsSynced = dataSource.SyncManager
                 .ProgressObservable
                 .SelectMany(checkSynced)
-                .AsDriver(schedulerProvider);;
+                .AsDriver(schedulerProvider);
 
             IsRunningSync =
                 dataSource.SyncManager
@@ -193,13 +193,13 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     .Select(user => user.BeginningOfWeek)
                     .DistinctUntilChanged()
                     .Select(beginningOfWeek => beginningOfWeek.ToString())
-                    .AsDriver(schedulerProvider);;
+                    .AsDriver(schedulerProvider);
 
             DateFormat =
                 dataSource.Preferences.Current
                     .Select(preferences => preferences.DateFormat.Localized)
                     .DistinctUntilChanged()
-                    .AsDriver(schedulerProvider);;
+                    .AsDriver(schedulerProvider);
 
             DurationFormat =
                 dataSource.Preferences.Current
@@ -445,9 +445,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             await changeDefaultWorkspace(selectedWorkspaceId);
         }
 
-        private async Task toggleTimeEntriesGrouping() 
+        private async Task toggleTimeEntriesGrouping()
         {
-            await updatePreferences(collapseTimeEntries: !currentPreferences.CollapseTimeEntries);
+            var newValue = !currentPreferences.CollapseTimeEntries;
+            analyticsService.GroupTimeEntriesSettingsChanged.Track(newValue);
+            await updatePreferences(collapseTimeEntries: newValue);
         }
 
         private async Task selectDurationFormat()

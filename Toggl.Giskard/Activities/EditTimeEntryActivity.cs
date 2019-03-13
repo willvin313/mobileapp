@@ -126,6 +126,10 @@ namespace Toggl.Giskard.Activities
                 .Subscribe(groupDurationTextView.Rx().TextObserver())
                 .DisposedBy(DisposeBag);
 
+            ViewModel.IsInaccessible
+               .Subscribe(adjustUIForInaccessibleTimeEntry)
+               .DisposedBy(DisposeBag);
+
             ViewModel.ProjectClientTask
                 .Select(generateProjectTaskClientFormattedString)
                 .Subscribe(projectTaskClientTextView.Rx().TextFormattedObserver())
@@ -133,11 +137,6 @@ namespace Toggl.Giskard.Activities
 
             projectButton.Rx().Tap()
                 .Subscribe(ViewModel.SelectProject.Inputs)
-                .DisposedBy(DisposeBag);
-
-            ViewModel.IsInaccessible
-                .Invert()
-                .Subscribe(tagsButton.Rx().IsVisible())
                 .DisposedBy(DisposeBag);
 
             ViewModel.Tags
@@ -163,14 +162,6 @@ namespace Toggl.Giskard.Activities
 
             ViewModel.IsBillable
                 .Subscribe(billableSwitch.Rx().CheckedObserver())
-                .DisposedBy(DisposeBag);
-
-            ViewModel.IsInaccessible
-                .Subscribe(billableButton.Rx().Enabled())
-                .DisposedBy(DisposeBag);
-
-            ViewModel.IsInaccessible
-                .Subscribe(billableSwitch.Rx().Enabled())
                 .DisposedBy(DisposeBag);
 
             billableButton.Rx().Tap()
@@ -234,7 +225,7 @@ namespace Toggl.Giskard.Activities
                 .DisposedBy(DisposeBag);
 
             ViewModel.IsTimeEntryRunning
-                .Select(isRunning => !isRunning && !ViewModel.IsEditingGroup )
+                .Select(isRunning => !isRunning && !ViewModel.IsEditingGroup)
                 .Subscribe(stoppedTimeEntryStopTimeElements.Rx().IsVisible())
                 .DisposedBy(DisposeBag);
 
@@ -252,6 +243,21 @@ namespace Toggl.Giskard.Activities
             deleteButton.Rx().Tap()
                 .Subscribe(ViewModel.Delete.Inputs)
                 .DisposedBy(DisposeBag);
+        }
+
+        private void adjustUIForInaccessibleTimeEntry(bool isInaccessible)
+        {
+            descriptionEditText.Enabled = !isInaccessible;
+
+            changeStartTimeButton.Enabled = !isInaccessible;
+            changeStopTimeButton.Enabled = !isInaccessible;
+            changeDurationButton.Enabled = !isInaccessible;
+            stopTimeEntryButton.Enabled = !isInaccessible;
+
+            billableButton.Enabled = !isInaccessible;
+            billableSwitch.Enabled = !isInaccessible;
+
+            tagsButton.Enabled = !isInaccessible;
         }
 
         private ISpannable generateProjectTaskClientFormattedString(EditTimeEntryViewModel.ProjectClientTaskInfo projectClientTask)

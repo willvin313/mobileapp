@@ -77,7 +77,8 @@ namespace Toggl.Giskard.Activities
             playButton.Rx().BindAction(ViewModel.StartTimeEntry, _ => false, ButtonEventType.LongPress).DisposedBy(DisposeBag);
 
             timeEntryCard.Rx().Tap()
-                .WithLatestFrom(ViewModel.CurrentRunningTimeEntry, (_, te) => new[] { te.Id })
+                .WithLatestFrom(ViewModel.CurrentRunningTimeEntry,
+                    (_, te) => (new[] { te.Id }, EditTimeEntryOrigin.RunningTimeEntryCard))
                 .Subscribe(ViewModel.SelectTimeEntry.Inputs)
                 .DisposedBy(DisposeBag);
 
@@ -155,12 +156,12 @@ namespace Toggl.Giskard.Activities
                 .DisposedBy(DisposeBag);
 
             mainRecyclerAdapter.TimeEntryTaps
-                .Select(te => te.RepresentedTimeEntriesIds)
+                .Select(editEventInfo)
                 .Subscribe(ViewModel.SelectTimeEntry.Inputs)
                 .DisposedBy(DisposeBag);
 
-            mainRecyclerAdapter.ContinueTimeEntrySubject
-                .Select(vm => vm.RepresentedTimeEntriesIds.First())
+            mainRecyclerAdapter.ContinueTimeEntry
+                .Select(vm => (vm.LogItem.RepresentedTimeEntriesIds.First(), vm.ContinueMode))
                 .Subscribe(ViewModel.ContinueTimeEntry.Inputs)
                 .DisposedBy(DisposeBag);
 
@@ -291,6 +292,17 @@ namespace Toggl.Giskard.Activities
             {
                 ViewModel.Refresh.Execute();
             }
+        }
+
+        private (long[], EditTimeEntryOrigin) editEventInfo(LogItemViewModel item)
+        {
+            var origin = item.IsTimeEntryGroupHeader
+                ? EditTimeEntryOrigin.GroupHeader
+                : item.BelongsToGroup
+                    ? EditTimeEntryOrigin.GroupTimeEntry
+                    : EditTimeEntryOrigin.SingleTimeEntry;
+
+            return (item.RepresentedTimeEntriesIds, origin);
         }
 
         private void onTimeEntryCardVisibilityChanged(bool visible)

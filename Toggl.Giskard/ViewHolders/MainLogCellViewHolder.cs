@@ -22,6 +22,7 @@ using System.Reactive.Disposables;
 using Android.Support.V4.Content;
 using Toggl.Multivac.Extensions;
 using System.Reactive.Linq;
+using Toggl.Foundation.Analytics;
 
 namespace Toggl.Giskard.ViewHolders
 {
@@ -67,7 +68,7 @@ namespace Toggl.Giskard.ViewHolders
         public bool CanSync => Item.ViewModel.CanContinue;
 
         public View MainLogContentView { get; private set; }
-        public Subject<LogItemViewModel> ContinueButtonTappedSubject { get; set; }
+        public Subject<(LogItemViewModel, ContinueTimeEntryMode)> ContinueButtonTappedSubject { get; set; }
         public Subject<GroupId> ToggleGroupExpansionSubject { get; set; }
 
         private GroupId groupId;
@@ -125,7 +126,11 @@ namespace Toggl.Giskard.ViewHolders
 
         private void onContinueClick(object sender, EventArgs e)
         {
-            ContinueButtonTappedSubject?.OnNext(Item.ViewModel);
+            var continueMode = Item.ViewModel.IsTimeEntryGroupHeader
+                ? ContinueTimeEntryMode.TimeEntriesGroupContinueButton
+                : ContinueTimeEntryMode.SingleTimeEntryContinueButton;
+
+            ContinueButtonTappedSubject?.OnNext((Item.ViewModel, ContinueTimeEntryMode.SingleTimeEntryContinueButton));
         }
 
         private ConstraintLayout.LayoutParams getWhitePaddingWidthDependentOnIcons()
