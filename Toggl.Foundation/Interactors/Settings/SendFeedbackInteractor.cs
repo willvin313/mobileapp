@@ -16,25 +16,28 @@ namespace Toggl.Foundation.Interactors.Settings
 {
     public class SendFeedbackInteractor : IInteractor<IObservable<Unit>>
     {
-        private readonly IFeedbackApi feedbackApi;
-
-        private readonly ISingletonDataSource<IThreadSafeUser> userDataSource;
-
-        private readonly IDataSource<IThreadSafeWorkspace, IDatabaseWorkspace> workspacesDataSource;
-
-        private readonly IDataSource<IThreadSafeTimeEntry, IDatabaseTimeEntry> timeEntriesDataSource;
-
-        private readonly IPlatformInfo platformInfo;
-
-        private readonly IUserPreferences userPreferences;
-
-        private readonly ILastTimeUsageStorage lastTimeUsageStorage;
-
-        private readonly ITimeService timeService;
-
-        private readonly UserAgent userAgent;
+        public const string LastLogin = "Last login";
+        public const string PhoneModel = "Phone model";
+        public const string ManualModeIsOn = "Manual mode is on";
+        public const string AppNameAndVersion = "App name and version";
+        public const string OperatingSystem = "Platform and OS version";
+        public const string LastSyncAttempt = "Time of last attempted sync";
+        public const string DeviceTime = "Device's time when sending this feedback";
+        public const string LastSuccessfulSync = "Time of last successful full sync";
+        public const string NumberOfUnsyncedTimeEntries = "Number of unsynced time entries";
+        public const string NumberOfWorkspaces = "Number of workspaces available to the user";
+        public const string NumberOfUnsyncableTimeEntries = "Number of unsyncable time entries";
+        public const string NumberOfTimeEntries = "Number of time entries in our database in total";
 
         private readonly string message;
+        private readonly ITimeService timeService;
+        private readonly IFeedbackApi feedbackApi;
+        private readonly IPlatformInfo platformInfo;
+        private readonly IUserPreferences userPreferences;
+        private readonly ILastTimeUsageStorage lastTimeUsageStorage;
+        private readonly ISingletonDataSource<IThreadSafeUser> userDataSource;
+        private readonly IDataSource<IThreadSafeWorkspace, IDatabaseWorkspace> workspacesDataSource;
+        private readonly IDataSource<IThreadSafeTimeEntry, IDatabaseTimeEntry> timeEntriesDataSource;
 
         public SendFeedbackInteractor(
             IFeedbackApi feedbackApi,
@@ -45,55 +48,28 @@ namespace Toggl.Foundation.Interactors.Settings
             IUserPreferences userPreferences,
             ILastTimeUsageStorage lastTimeUsageStorage,
             ITimeService timeService,
-            UserAgent userAgent,
             string message)
         {
+            Ensure.Argument.IsNotNull(message, nameof(message));
             Ensure.Argument.IsNotNull(feedbackApi, nameof(feedbackApi));
-            Ensure.Argument.IsNotNull(userDataSource, nameof(userDataSource));
-            Ensure.Argument.IsNotNull(workspacesDataSource, nameof(workspacesDataSource));
-            Ensure.Argument.IsNotNull(timeEntriesDataSource, nameof(timeEntriesDataSource));
+            Ensure.Argument.IsNotNull(timeService, nameof(timeService));
             Ensure.Argument.IsNotNull(platformInfo, nameof(platformInfo));
+            Ensure.Argument.IsNotNull(userDataSource, nameof(userDataSource));
             Ensure.Argument.IsNotNull(userPreferences, nameof(userPreferences));
             Ensure.Argument.IsNotNull(lastTimeUsageStorage, nameof(lastTimeUsageStorage));
-            Ensure.Argument.IsNotNull(timeService, nameof(timeService));
-            Ensure.Argument.IsNotNull(userAgent, nameof(userAgent));
-            Ensure.Argument.IsNotNull(message, nameof(message));
+            Ensure.Argument.IsNotNull(workspacesDataSource, nameof(workspacesDataSource));
+            Ensure.Argument.IsNotNull(timeEntriesDataSource, nameof(timeEntriesDataSource));
 
+            this.message = message;
             this.feedbackApi = feedbackApi;
+            this.timeService = timeService;
+            this.platformInfo = platformInfo;
             this.userDataSource = userDataSource;
+            this.userPreferences = userPreferences;
             this.workspacesDataSource = workspacesDataSource;
             this.timeEntriesDataSource = timeEntriesDataSource;
-            this.platformInfo = platformInfo;
-            this.userPreferences = userPreferences;
             this.lastTimeUsageStorage = lastTimeUsageStorage;
-            this.timeService = timeService;
-            this.userAgent = userAgent;
-            this.message = message;
         }
-
-        public static string PhoneModel { get; } = "Phone model";
-
-        public static string OperatingSystem { get; } = "Platform and OS version";
-
-        public static string AppNameAndVersion { get; } = "App name and version";
-
-        public static string NumberOfWorkspaces { get; } = "Number of workspaces available to the user";
-
-        public static string NumberOfTimeEntries { get; } = "Number of time entries in our database in total";
-
-        public static string NumberOfUnsyncedTimeEntries { get; } = "Number of unsynced time entries";
-
-        public static string NumberOfUnsyncableTimeEntries { get; } = "Number of unsyncable time entries";
-
-        public static string LastSyncAttempt { get; } = "Time of last attempted sync";
-
-        public static string LastSuccessfulSync { get; } = "Time of last successful full sync";
-
-        public static string LastLogin { get; } = "Last login";
-
-        public static string DeviceTime { get; } = "Device's time when sending this feedback";
-
-        public static string ManualModeIsOn { get; } = "Manual mode is on";
 
         private IObservable<int> workspacesCount
             => workspacesDataSource
@@ -134,7 +110,7 @@ namespace Toggl.Foundation.Interactors.Settings
             {
                 [PhoneModel] = platformInfo.PhoneModel,
                 [OperatingSystem] = platformInfo.OperatingSystem,
-                [AppNameAndVersion] = $"{userAgent.Name}/{userAgent.Version}",
+                [AppNameAndVersion] = $"{platformInfo.Platform.ToString()}/{platformInfo.Version}",
                 [NumberOfWorkspaces] = workspaces.ToString(),
                 [NumberOfTimeEntries] = timeEntries.ToString(),
                 [NumberOfUnsyncedTimeEntries] = unsyncedTimeEntries.ToString(),
