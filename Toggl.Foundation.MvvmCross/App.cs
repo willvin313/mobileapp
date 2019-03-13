@@ -1,64 +1,59 @@
 ﻿using System;
 using System.Reactive.Linq;
-using MvvmCross;
 using MvvmCross.Plugin;
 using MvvmCross.ViewModels;
-using Toggl.Foundation.Interactors;
-using Toggl.Foundation.Login;
-using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Multivac;
-using Toggl.PrimeRadiant.Settings;
 
 namespace Toggl.Foundation.MvvmCross
 {
     public sealed class App<TFirstViewModelWhenNotLoggedIn> : MvxApplication
         where TFirstViewModelWhenNotLoggedIn : MvxViewModel
     {
+        private readonly UiDependencyContainer dependencyContainer;
+
+        public App()
+        {
+        }
+
+        public App(UiDependencyContainer dependencyContainer)
+        {
+            this.dependencyContainer = dependencyContainer;
+        }
+        
         public override void Initialize()
         {
-            RegisterCustomAppStart<AppStart<TFirstViewModelWhenNotLoggedIn>>();
+            var appStart = new AppStart<TFirstViewModelWhenNotLoggedIn>(this, dependencyContainer);
+            RegisterAppStart(appStart);
         }
 
         public override void LoadPlugins(IMvxPluginManager pluginManager)
         {
         }
+
+        protected override IMvxViewModelLocator CreateDefaultViewModelLocator()
+            => new TogglViewModelLocator(dependencyContainer);
     }
 
-    [Multivac.Preserve(AllMembers = true)]
+    [Preserve(AllMembers = true)]
     public sealed class AppStart<TFirstViewModelWhenNotLoggedIn> : MvxAppStart
         where TFirstViewModelWhenNotLoggedIn : MvxViewModel
     {
-        private readonly ITimeService timeService;
-        private readonly IUserAccessManager userAccessManager;
-        private readonly IOnboardingStorage onboardingStorage;
-        private readonly IForkingNavigationService navigationService;
-        private readonly IAccessRestrictionStorage accessRestrictionStorage;
+        private readonly UiDependencyContainer dependencyContainer;
 
-        public AppStart(
-            IMvxApplication app,
-            ITimeService timeService,
-            IUserAccessManager userAccessManager,
-            IOnboardingStorage onboardingStorage,
-            IForkingNavigationService navigationService,
-            IAccessRestrictionStorage accessRestrictionStorage)
-            : base (app, navigationService)
+        public AppStart(IMvxApplication app, UiDependencyContainer dependencyContainer)
+            : base (app, dependencyContainer.NavigationService.Value)
         {
-            Ensure.Argument.IsNotNull(timeService, nameof(timeService));
-            Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
-            Ensure.Argument.IsNotNull(onboardingStorage, nameof(onboardingStorage));
-            Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
-            Ensure.Argument.IsNotNull(accessRestrictionStorage, nameof(accessRestrictionStorage));
-
-            this.timeService = timeService;
-            this.userAccessManager = userAccessManager;
-            this.onboardingStorage = onboardingStorage;
-            this.navigationService = navigationService;
-            this.accessRestrictionStorage = accessRestrictionStorage;
+            this.dependencyContainer = dependencyContainer;
         }
 
         protected override async void NavigateToFirstViewModel(object hint = null)
         {
+            var timeService = dependencyContainer.TimeService.Value;
+            var navigationService = dependencyContainer.NavigationService.Value;
+            var onboardingStorage = dependencyContainer.OnboardingStorage.Value;
+            var accessRestrictionStorage = dependencyContainer.AccessRestrictionStorage.Value;
+
             onboardingStorage.SetFirstOpened(timeService.CurrentDateTime);
 
             if (accessRestrictionStorage.IsApiOutdated() || accessRestrictionStorage.IsClientOutdated())
@@ -67,20 +62,20 @@ namespace Toggl.Foundation.MvvmCross
                 return;
             }
 
-            if (!userAccessManager.TryInitializingAccessToUserData(out var syncManager, out var interactorFactory))
+            if (!dependencyContainer.UserAccessManager.CheckIfLoggedIn())
             {
                 await navigationService.Navigate<TFirstViewModelWhenNotLoggedIn>();
                 return;
             }
-
-            var user = await interactorFactory.GetCurrentUser().Execute();
+            
+            var user = await dependencyContainer.InteractorFactory.Value.GetCurrentUser().Execute();
             if (accessRestrictionStorage.IsUnauthorized(user.ApiToken))
             {
                 await navigationService.Navigate<TokenResetViewModel>();
                 return;
             }
 
-            syncManager.ForceFullSync().Subscribe();
+            dependencyContainer.SyncManager.Value.ForceFullSync().Subscribe();
 
             await navigationService.ForkNavigate<MainTabBarViewModel, MainViewModel>();
         }
