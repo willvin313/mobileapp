@@ -7,6 +7,7 @@ using Toggl.Foundation.Models;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Sync;
 using Toggl.Multivac;
+using Toggl.Multivac.Extensions;
 using Toggl.Multivac.Models;
 using Toggl.PrimeRadiant;
 using Toggl.Ultrawave;
@@ -16,40 +17,34 @@ namespace Toggl.Foundation.Login
 {
     public sealed class UserAccessManager : IUserAccessManager
     {
-        private readonly IApiFactory apiFactory;
-        private readonly ITogglDatabase database;
-        private readonly IGoogleService googleService;
-        private readonly IPrivateSharedStorageService privateSharedStorageService;
-        private readonly Func<ITogglApi, (ISyncManager, IInteractorFactory)> initializeAfterLogin;
+        private readonly Lazy<IApiFactory> apiFactory;
+        private readonly Lazy<ITogglDatabase> database;
+        private readonly Lazy<IGoogleService> googleService;
+        private readonly Lazy<IPrivateSharedStorageService> privateSharedStorageService;
 
-        private readonly ISubject<Unit> userLoggedInSubject = new Subject<Unit>();
+        private readonly ISubject<ITogglApi> userLoggedInSubject = new Subject<ITogglApi>();
         private readonly ISubject<Unit> userLoggedOutSubject = new Subject<Unit>();
 
-        public IObservable<Unit> UserLoggedIn => userLoggedInSubject.AsObservable();
+        public IObservable<ITogglApi> UserLoggedIn => userLoggedInSubject.AsObservable();
         public IObservable<Unit> UserLoggedOut => userLoggedOutSubject.AsObservable();
 
         public UserAccessManager(
-            IApiFactory apiFactory,
-            ITogglDatabase database,
-            IGoogleService googleService,
-            IPrivateSharedStorageService privateSharedStorageService,
-            Func<ITogglApi, (ISyncManager, IInteractorFactory)> initializeAfterLogin
-        )
+            Lazy<IApiFactory> apiFactory,
+            Lazy<ITogglDatabase> database,
+            Lazy<IGoogleService> googleService,
+            Lazy<IPrivateSharedStorageService> privateSharedStorageService)
         {
             Ensure.Argument.IsNotNull(database, nameof(database));
             Ensure.Argument.IsNotNull(apiFactory, nameof(apiFactory));
             Ensure.Argument.IsNotNull(googleService, nameof(googleService));
             Ensure.Argument.IsNotNull(privateSharedStorageService, nameof(privateSharedStorageService));
-            Ensure.Argument.IsNotNull(initializeAfterLogin, nameof(initializeAfterLogin));
 
             this.database = database;
             this.apiFactory = apiFactory;
             this.googleService = googleService;
-            this.initializeAfterLogin = initializeAfterLogin;
-            this.privateSharedStorageService = privateSharedStorageService;
         }
 
-        public IObservable<ISyncManager> Login(Email email, Password password)
+        public IObservable<Unit> Login(Email email, Password password)
         {
             if (!email.IsValid)
                 throw new ArgumentException($"A valid {nameof(email)} must be provided when trying to login");
@@ -58,44 +53,45 @@ namespace Toggl.Foundation.Login
 
             var credentials = Credentials.WithPassword(email, password);
 
-            return database
+            return database.Value
                 .Clear()
-                .SelectMany(_ => apiFactory.CreateApiWith(credentials).User.Get())
+                .SelectMany(_ => apiFactory.Value.CreateApiWith(credentials).User.Get())
                 .Select(User.Clean)
-                .SelectMany(database.User.Create)
-                .Select(initializeFor)
-                .Select(initializedServices => initializedServices.syncManager)
-                .Do(_ => userLoggedInSubject.OnNext(Unit.Default));
+                .SelectMany(database.Value.User.Create)
+                .Select(apiFromUser)
+                .Do(userLoggedInSubject.OnNext)
+                .SelectUnit();
         }
 
-        public IObservable<ISyncManager> LoginWithGoogle()
-            => database
+        public IObservable<Unit> LoginWithGoogle()
+            => database.Value
                 .Clear()
-                .SelectMany(_ => googleService.LogOutIfNeeded())
-                .SelectMany(_ => googleService.GetAuthToken())
+                .SelectMany(_ => googleService.Value.LogOutIfNeeded())
+                .SelectMany(_ => googleService.Value.GetAuthToken())
                 .SelectMany(loginWithGoogle);
 
-        public IObservable<ISyncManager> SignUp(Email email, Password password, bool termsAccepted, int countryId, string timezone)
+        public IObservable<Unit> SignUp(Email email, Password password, bool termsAccepted, int countryId, string timezone)
         {
             if (!email.IsValid)
                 throw new ArgumentException($"A valid {nameof(email)} must be provided when trying to signup");
             if (!password.IsValid)
                 throw new ArgumentException($"A valid {nameof(password)} must be provided when trying to signup");
 
-            return database
+            return database.Value
                 .Clear()
                 .SelectMany(_ => signUp(email, password, termsAccepted, countryId, timezone))
                 .Select(User.Clean)
-                .SelectMany(database.User.Create)
-                .Select(initializeFor)
-                .Select(initializedServices => initializedServices.syncManager);
+                .SelectMany(database.Value.User.Create)
+                .Select(apiFromUser)
+                .Do(userLoggedInSubject.OnNext)
+                .SelectUnit();
         }
 
-        public IObservable<ISyncManager> SignUpWithGoogle(bool termsAccepted, int countryId, string timezone)
-            => database
+        public IObservable<Unit> SignUpWithGoogle(bool termsAccepted, int countryId, string timezone)
+            => database.Value
                 .Clear()
-                .SelectMany(_ => googleService.LogOutIfNeeded())
-                .SelectMany(_ => googleService.GetAuthToken())
+                .SelectMany(_ => googleService.Value.LogOutIfNeeded())
+                .SelectMany(_ => googleService.Value.GetAuthToken())
                 .SelectMany(authToken => signUpWithGoogle(authToken, termsAccepted, countryId, timezone));
 
         public IObservable<string> ResetPassword(Email email)
@@ -103,47 +99,34 @@ namespace Toggl.Foundation.Login
             if (!email.IsValid)
                 throw new ArgumentException($"A valid {nameof(email)} must be provided when trying to reset forgotten password.");
 
-            var api = apiFactory.CreateApiWith(Credentials.None);
+            var api = apiFactory.Value.CreateApiWith(Credentials.None);
             return api.User.ResetPassword(email);
         }
 
-        public bool TryInitializingAccessToUserData(out ISyncManager syncManager, out IInteractorFactory interactorFactory)
-        {
-            try
-            {
-                var user = database.User.Single().Wait();
+        public bool CheckIfLoggedIn()
+            => database.Value
+                .User.Single()
+                .Do(user => userLoggedInSubject.OnNext(apiFromUser(user)))
+                .SelectValue(true)
+                .Catch(Observable.Return(false))
+                .Wait();
 
-                (syncManager, interactorFactory) = initializeFor(user);
-
-                userLoggedInSubject.OnNext(Unit.Default);
-
-                return true;
-            }
-            catch
-            {
-                syncManager = null;
-                interactorFactory = null;
-                return false;
-            }
-        }
-
-
-        public IObservable<ISyncManager> RefreshToken(Password password)
+        public IObservable<Unit> RefreshToken(Password password)
         {
             if (!password.IsValid)
                 throw new ArgumentException($"A valid {nameof(password)} must be provided when trying to refresh token");
 
-            return database.User
+            return database.Value.User
                 .Single()
                 .Select(user => user.Email)
                 .Select(email => Credentials.WithPassword(email, password))
-                .Select(apiFactory.CreateApiWith)
+                .Select(apiFactory.Value.CreateApiWith)
                 .SelectMany(api => api.User.Get())
                 .Select(User.Clean)
-                .SelectMany(database.User.Update)
-                .Select(initializeFor)
-                .Select(initializedServices => initializedServices.syncManager)
-                .Do(_ => userLoggedInSubject.OnNext(Unit.Default));
+                .SelectMany(database.Value.User.Update)
+                .Select(apiFromUser)
+                .Do(userLoggedInSubject.OnNext)
+                .SelectUnit();
         }
 
         public void OnUserLoggedOut()
@@ -151,49 +134,49 @@ namespace Toggl.Foundation.Login
             userLoggedOutSubject.OnNext(Unit.Default);
         }
 
-        private (ISyncManager syncManager, IInteractorFactory interactorFactory) initializeFor(IUser user)
+        private ITogglApi apiFromUser(IUser user)
         {
-            privateSharedStorageService.SaveApiToken(user.ApiToken);
-            privateSharedStorageService.SaveUserId(user.Id);
+            privateSharedStorageService.Value.SaveApiToken(user.ApiToken);
+            privateSharedStorageService.Value.SaveUserId(user.Id);
 
             var newCredentials = Credentials.WithApiToken(user.ApiToken);
-            var api = apiFactory.CreateApiWith(newCredentials);
-            return initializeAfterLogin(api);
+            var api = apiFactory.Value.CreateApiWith(newCredentials);
+            return api;
         }
 
-        private IObservable<ISyncManager> loginWithGoogle(string googleToken)
+        private IObservable<Unit> loginWithGoogle(string googleToken)
         {
             var credentials = Credentials.WithGoogleToken(googleToken);
 
             return Observable
-                .Return(apiFactory.CreateApiWith(credentials))
+                .Return(apiFactory.Value.CreateApiWith(credentials))
                 .SelectMany(api => api.User.GetWithGoogle())
                 .Select(User.Clean)
-                .SelectMany(database.User.Create)
-                .Select(initializeFor)
-                .Select(initializedServices => initializedServices.syncManager)
-                .Do(_ => userLoggedInSubject.OnNext(Unit.Default));
+                .SelectMany(database.Value.User.Create)
+                .Select(apiFromUser)
+                .Do(userLoggedInSubject.OnNext)
+                .SelectUnit();
         }
 
         private IObservable<IUser> signUp(Email email, Password password, bool termsAccepted, int countryId, string timezone)
         {
-            return apiFactory
+            return apiFactory.Value
                 .CreateApiWith(Credentials.None)
                 .User
                 .SignUp(email, password, termsAccepted, countryId, timezone);
         }
 
 
-        private IObservable<ISyncManager> signUpWithGoogle(string googleToken, bool termsAccepted, int countryId, string timezone)
+        private IObservable<Unit> signUpWithGoogle(string googleToken, bool termsAccepted, int countryId, string timezone)
         {
-            var api = apiFactory.CreateApiWith(Credentials.None);
+            var api = apiFactory.Value.CreateApiWith(Credentials.None);
             return api.User
                 .SignUpWithGoogle(googleToken, termsAccepted, countryId, timezone)
                 .Select(User.Clean)
-                .SelectMany(database.User.Create)
-                .Select(initializeFor)
-                .Select(initializedServices => initializedServices.syncManager)
-                .Do(_ => userLoggedInSubject.OnNext(Unit.Default));
+                .SelectMany(database.Value.User.Create)
+                .Select(apiFromUser)
+                .Do(userLoggedInSubject.OnNext)
+                .SelectUnit();
         }
     }
 }

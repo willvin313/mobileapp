@@ -1,4 +1,5 @@
-﻿using Toggl.Foundation.Analytics;
+﻿using System;
+using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.Login;
@@ -10,90 +11,102 @@ using Toggl.Multivac;
 using Toggl.PrimeRadiant;
 using Toggl.PrimeRadiant.Settings;
 using Toggl.Ultrawave;
-using Toggl.Ultrawave.Network;
 
 namespace Toggl.Foundation.Interactors
 {
     [Preserve(AllMembers = true)]
     public sealed partial class InteractorFactory : IInteractorFactory
     {
-        private readonly IIdProvider idProvider;
-        private readonly ITimeService timeService;
-        private readonly ITogglDataSource dataSource;
         private readonly ITogglApi api;
-        private readonly IUserPreferences userPreferences;
-        private readonly IAnalyticsService analyticsService;
-        private readonly INotificationService notificationService;
-        private readonly IIntentDonationService intentDonationService;
-        private readonly IApplicationShortcutCreator shortcutCreator;
-        private readonly ILastTimeUsageStorage lastTimeUsageStorage;
-        private readonly IPlatformInfo platformInfo;
-        private readonly UserAgent userAgent;
-        private readonly ICalendarService calendarService;
-        private readonly ISyncManager syncManager;
-        private readonly IStopwatchProvider stopwatchProvider;
-        private readonly ITogglDatabase database;
-        private readonly IPrivateSharedStorageService privateSharedStorageService;
         private readonly IUserAccessManager userAccessManager;
+        private readonly Lazy<IIdProvider> lazyIdProvider;
+        private readonly Lazy<ITogglDatabase> lazyDatabase;
+        private readonly Lazy<ISyncManager> lazySyncManager;
+        private readonly Lazy<ITimeService> lazyTimeService;
+        private readonly Lazy<IPlatformInfo> lazyPlatformInfo;
+        private readonly Lazy<ITogglDataSource> lazyDataSource;
+        private readonly Lazy<IUserPreferences> lazyUserPreferences;
+        private readonly Lazy<ICalendarService> lazyCalendarService;
+        private readonly Lazy<IAnalyticsService> lazyAnalyticsService;
+        private readonly Lazy<IStopwatchProvider> lazyStopwatchProvider;
+        private readonly Lazy<INotificationService> lazyNotificationService;
+        private readonly Lazy<ILastTimeUsageStorage> lazyLastTimeUsageStorage;
+        private readonly Lazy<IApplicationShortcutCreator> lazyShortcutCreator;
+        private readonly Lazy<IIntentDonationService> lazyIntentDonationService;
+        private readonly Lazy<IPrivateSharedStorageService> lazyPrivateSharedStorageService;
         private readonly ReportsMemoryCache reportsMemoryCache = new ReportsMemoryCache();
 
-        public InteractorFactory(
-            IIdProvider idProvider,
-            ITimeService timeService,
-            ITogglDataSource dataSource,
-            ITogglApi api,
-            IUserPreferences userPreferences,
-            IAnalyticsService analyticsService,
-            INotificationService notificationService,
-            IIntentDonationService intentDonationService,
-            IApplicationShortcutCreator shortcutCreator,
-            ILastTimeUsageStorage lastTimeUsageStorage,
-            IPlatformInfo platformInfo,
-            UserAgent userAgent,
-            ICalendarService calendarService,
-            ISyncManager syncManager,
-            IStopwatchProvider stopwatchProvider,
-            ITogglDatabase database,
-            IPrivateSharedStorageService privateSharedStorageService,
-            IUserAccessManager userAccessManager)
-        {
-            Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
-            Ensure.Argument.IsNotNull(api, nameof(api));
-            Ensure.Argument.IsNotNull(idProvider, nameof(idProvider));
-            Ensure.Argument.IsNotNull(timeService, nameof(timeService));
-            Ensure.Argument.IsNotNull(userPreferences, nameof(userPreferences));
-            Ensure.Argument.IsNotNull(shortcutCreator, nameof(shortcutCreator));
-            Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
-            Ensure.Argument.IsNotNull(notificationService, nameof(notificationService));
-            Ensure.Argument.IsNotNull(intentDonationService, nameof(intentDonationService));
-            Ensure.Argument.IsNotNull(lastTimeUsageStorage, nameof(lastTimeUsageStorage));
-            Ensure.Argument.IsNotNull(platformInfo, nameof(platformInfo));
-            Ensure.Argument.IsNotNull(userAgent, nameof(userAgent));
-            Ensure.Argument.IsNotNull(calendarService, nameof(calendarService));
-            Ensure.Argument.IsNotNull(syncManager, nameof(syncManager));
-            Ensure.Argument.IsNotNull(stopwatchProvider, nameof(stopwatchProvider));
-            Ensure.Argument.IsNotNull(database, nameof(database));
-            Ensure.Argument.IsNotNull(privateSharedStorageService, nameof(privateSharedStorageService));
-            Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
+        private ITogglDatabase database => lazyDatabase.Value;
+        private IIdProvider idProvider => lazyIdProvider.Value;
+        private ITimeService timeService => lazyTimeService.Value;
+        private ISyncManager syncManager => lazySyncManager.Value;
+        private ITogglDataSource dataSource => lazyDataSource.Value;
+        private IPlatformInfo platformInfo => lazyPlatformInfo.Value;
+        private IUserPreferences userPreferences => lazyUserPreferences.Value;
+        private ICalendarService calendarService => lazyCalendarService.Value;
+        private IAnalyticsService analyticsService => lazyAnalyticsService.Value;
+        private IStopwatchProvider stopwatchProvider => lazyStopwatchProvider.Value;
+        private IApplicationShortcutCreator shortcutCreator => lazyShortcutCreator.Value;
+        private INotificationService notificationService => lazyNotificationService.Value;
+        private ILastTimeUsageStorage lastTimeUsageStorage => lazyLastTimeUsageStorage.Value;
+        private IIntentDonationService intentDonationService => lazyIntentDonationService.Value;
+        private IPrivateSharedStorageService privateSharedStorageService => lazyPrivateSharedStorageService.Value;
 
-            this.dataSource = dataSource;
+        public InteractorFactory(
+            ITogglApi api,
+            IUserAccessManager userAccessManager,
+            Lazy<IIdProvider> idProvider,
+            Lazy<ITogglDatabase> database,
+            Lazy<ITimeService> timeService,
+            Lazy<ISyncManager> syncManager,
+            Lazy<IPlatformInfo> platformInfo,
+            Lazy<ITogglDataSource> dataSource,
+            Lazy<ICalendarService> calendarService,
+            Lazy<IUserPreferences> userPreferences,
+            Lazy<IAnalyticsService> analyticsService,
+            Lazy<IStopwatchProvider> stopwatchProvider,
+            Lazy<INotificationService> notificationService,
+            Lazy<ILastTimeUsageStorage> lastTimeUsageStorage,
+            Lazy<IApplicationShortcutCreator> shortcutCreator,
+            Lazy<IIntentDonationService> intentDonationService,
+            Lazy<IPrivateSharedStorageService> privateSharedStorageService)
+        {
+            Ensure.Argument.IsNotNull(api, nameof(api));
+            Ensure.Argument.IsNotNull(database, nameof(database));
+            Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
+            Ensure.Argument.IsNotNull(idProvider, nameof(idProvider));
+            Ensure.Argument.IsNotNull(syncManager, nameof(syncManager));
+            Ensure.Argument.IsNotNull(timeService, nameof(timeService));
+            Ensure.Argument.IsNotNull(platformInfo, nameof(platformInfo));
+            Ensure.Argument.IsNotNull(calendarService, nameof(calendarService));
+            Ensure.Argument.IsNotNull(shortcutCreator, nameof(shortcutCreator));
+            Ensure.Argument.IsNotNull(userPreferences, nameof(userPreferences));
+            Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
+            Ensure.Argument.IsNotNull(stopwatchProvider, nameof(stopwatchProvider));
+            Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
+            Ensure.Argument.IsNotNull(notificationService, nameof(notificationService));
+            Ensure.Argument.IsNotNull(lastTimeUsageStorage, nameof(lastTimeUsageStorage));
+            Ensure.Argument.IsNotNull(intentDonationService, nameof(intentDonationService));
+            Ensure.Argument.IsNotNull(privateSharedStorageService, nameof(privateSharedStorageService));
+
             this.api = api;
-            this.idProvider = idProvider;
-            this.timeService = timeService;
-            this.userPreferences = userPreferences;
-            this.shortcutCreator = shortcutCreator;
-            this.analyticsService = analyticsService;
-            this.notificationService = notificationService;
-            this.intentDonationService = intentDonationService;
-            this.lastTimeUsageStorage = lastTimeUsageStorage;
-            this.platformInfo = platformInfo;
-            this.userAgent = userAgent;
-            this.calendarService = calendarService;
-            this.syncManager = syncManager;
-            this.stopwatchProvider = stopwatchProvider;
-            this.database = database;
-            this.privateSharedStorageService = privateSharedStorageService;
             this.userAccessManager = userAccessManager;
+
+            lazyDatabase = database;
+            lazyDataSource = dataSource;
+            lazyIdProvider = idProvider;
+            lazySyncManager = syncManager;
+            lazyTimeService = timeService;
+            lazyPlatformInfo = platformInfo;
+            lazyCalendarService = calendarService;
+            lazyUserPreferences = userPreferences;
+            lazyShortcutCreator = shortcutCreator;
+            lazyAnalyticsService = analyticsService;
+            lazyStopwatchProvider = stopwatchProvider;
+            lazyNotificationService = notificationService;
+            lazyLastTimeUsageStorage = lastTimeUsageStorage;
+            lazyIntentDonationService = intentDonationService;
+            lazyPrivateSharedStorageService = privateSharedStorageService;
         }
     }
 }
