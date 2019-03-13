@@ -26,4 +26,27 @@
   <ItemGroup>
     <Folder Include="ViewModels\Settings\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ViewModelLocator.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ViewModelLocator.tt</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="ViewModelLocator.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ViewModelLocator.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="ViewModelLocator.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ViewModelLocator.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>
