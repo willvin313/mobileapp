@@ -305,6 +305,7 @@
     <Compile Include="Adapters\SelectTagsRecyclerAdapter.cs" />
     <Compile Include="Activities\SelectProjectActivity.cs" />
     <Compile Include="Adapters\SelectProjectRecyclerAdapter.cs" />
+    <Compile Include="Startup\AndroidDependencyContainer.cs" />
     <Compile Include="ViewHolders\StartTimeEntry\SuggestionRecyclerViewHolder.cs" />
     <Compile Include="ViewHolders\StartTimeEntry\ProjectSuggestionViewHolder.cs" />
     <Compile Include="ViewHolders\StartTimeEntry\TimeEntrySuggestionViewHolder.cs" />
