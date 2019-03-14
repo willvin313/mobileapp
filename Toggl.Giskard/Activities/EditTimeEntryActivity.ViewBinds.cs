@@ -11,7 +11,7 @@ namespace Toggl.Giskard.Activities
     public sealed partial class EditTimeEntryActivity : ReactiveActivity<EditTimeEntryViewModel>
     {
         private View closeButton;
-        private View confirmButton;
+        private TextView confirmButton;
         private EditText descriptionEditText;
 
         private Group singleTimeEntryModeViews;
@@ -54,7 +54,7 @@ namespace Toggl.Giskard.Activities
         protected override void InitializeViews()
         {
             closeButton = FindViewById(CloseButton);
-            confirmButton = FindViewById(ConfirmButton);
+            confirmButton = FindViewById<TextView>(ConfirmButton);
             descriptionEditText = FindViewById<EditText>(DescriptionEditText);
 
             singleTimeEntryModeViews = FindViewById<Group>(SingleTimeEntryModeViews);

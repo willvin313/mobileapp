@@ -12,14 +12,15 @@ using Toggl.Giskard.Extensions.Reactive;
 using Toggl.Multivac.Extensions;
 using Toggl.Foundation.Extensions;
 using Android.Text;
-using TimeEntryExtensions = Toggl.Giskard.Extensions.TimeEntryExtensions;
-using TextResources = Toggl.Foundation.Resources;
-using TagsAdapter = Toggl.Giskard.Adapters.SimpleAdapter<string>;
 using Android.Support.V7.Widget;
 using System.Linq;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.MvvmCross.Transformations;
 using Toggl.Giskard.ViewHolders;
+using TimeEntryExtensions = Toggl.Giskard.Extensions.TimeEntryExtensions;
+using TextResources = Toggl.Foundation.Resources;
+using TagsAdapter = Toggl.Giskard.Adapters.SimpleAdapter<string>;
+using static Toggl.Giskard.Resource.String;
 
 namespace Toggl.Giskard.Activities
 {
@@ -101,8 +102,14 @@ namespace Toggl.Giskard.Activities
                 .DisposedBy(DisposeBag);
 
             confirmButton.Rx().Tap()
-                .Subscribe(ViewModel.Save.Inputs)
+                .Select(_ => descriptionEditText.HasFocus)
+                .Subscribe(handleConfirmClick)
                 .DisposedBy(DisposeBag);
+
+            descriptionEditText.Rx().FocusChanged()
+                .Select(isFocused => isFocused ? Done : Save)
+                .Select(Resources.GetString)
+                .Subscribe(confirmButton.Rx().TextObserver());
 
             descriptionEditText.Rx().Text()
                 .Subscribe(ViewModel.Description.Accept)
@@ -260,6 +267,18 @@ namespace Toggl.Giskard.Activities
             tagsButton.Enabled = !isInaccessible;
         }
 
+        private void handleConfirmClick(bool hasFocus)
+        {
+            if (hasFocus)
+            {
+                descriptionEditText.RemoveFocus();
+            }
+            else
+            {
+                ViewModel.Save.Execute();
+            }
+        }
+        
         private ISpannable generateProjectTaskClientFormattedString(EditTimeEntryViewModel.ProjectClientTaskInfo projectClientTask)
             => TimeEntryExtensions.ToProjectTaskClient(
                     projectClientTask.HasProject,

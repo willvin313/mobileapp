@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Disposables;
 using Foundation;
 using Toggl.Daneel.Extensions;
 using UIKit;
@@ -12,6 +13,8 @@ namespace Toggl.Daneel.Views
 
         public static readonly NSString Key = new NSString(nameof(TimeEntriesLogHeaderView));
         public static readonly UINib Nib;
+
+        public CompositeDisposable DisposeBag { get; private set; } = new CompositeDisposable();
 
         static TimeEntriesLogHeaderView()
         {
@@ -29,6 +32,13 @@ namespace Toggl.Daneel.Views
 
             ContentView.BackgroundColor = UIColor.White;
             DurationLabel.Font = DurationLabel.Font.GetMonospacedDigitFont();
+        }
+
+        public override void PrepareForReuse()
+        {
+            base.PrepareForReuse();
+            DisposeBag.Dispose();
+            DisposeBag = new CompositeDisposable();
         }
 
         public void Update(DaySummaryViewModel viewModel)

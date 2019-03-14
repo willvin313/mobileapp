@@ -120,6 +120,7 @@ namespace Toggl.Daneel.Views
 
         private void presentAsCollapsedGroupHeader(int groupSize)
         {
+            TimeEntryContentLeadingConstraint.Constant = 0;
             GroupSizeLabel.Text = groupSize.ToString();
             GroupSizeContainer.Hidden = false;
             GroupSizeContainer.UserInteractionEnabled = true;
@@ -132,6 +133,7 @@ namespace Toggl.Daneel.Views
 
         private void presentAsExpandedGroupHeader(int groupSize)
         {
+            TimeEntryContentLeadingConstraint.Constant = 0;
             GroupSizeLabel.Text = groupSize.ToString();
             GroupSizeContainer.Hidden = false;
             GroupSizeContainer.UserInteractionEnabled = true;
@@ -144,10 +146,12 @@ namespace Toggl.Daneel.Views
         private void presentAsSingleTimeEntry()
         {
             GroupSizeContainer.Hidden = true;
+            TimeEntryContentLeadingConstraint.Constant = 16;
         }
 
         private void presentAsTimeEntryInAGroup()
         {
+            TimeEntryContentLeadingConstraint.Constant = 0;
             GroupSizeContainer.Hidden = false;
             GroupSizeContainer.UserInteractionEnabled = false;
             GroupSizeBackground.Hidden = true;

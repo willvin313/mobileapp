@@ -55,6 +55,9 @@ namespace Toggl.Daneel.Views
 		UIKit.UIView TagIcon { get; set; }
 
 		[Outlet]
+		UIKit.NSLayoutConstraint TimeEntryContentLeadingConstraint { get; set; }
+
+		[Outlet]
 		[GeneratedCode ("iOS Designer", "1.0")]
 		UIKit.UILabel TimeLabel { get; set; }
 
@@ -122,6 +125,11 @@ namespace Toggl.Daneel.Views
 			if (TagIcon != null) {
 				TagIcon.Dispose ();
 				TagIcon = null;
+			}
+
+			if (TimeEntryContentLeadingConstraint != null) {
+				TimeEntryContentLeadingConstraint.Dispose ();
+				TimeEntryContentLeadingConstraint = null;
 			}
 
 			if (TimeLabel != null) {

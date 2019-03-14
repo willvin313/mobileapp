@@ -4,6 +4,7 @@ using Android.Text;
 using Android.Widget;
 using Java.Lang;
 using Toggl.Foundation.MvvmCross.Reactive;
+using static Android.Views.View;
 
 namespace Toggl.Giskard.Extensions.Reactive
 {
@@ -18,6 +19,11 @@ namespace Toggl.Giskard.Extensions.Reactive
             => Observable
                 .FromEventPattern<TextChangedEventArgs>(e => reactive.Base.TextChanged += e, e => reactive.Base.TextChanged -= e)
                 .Select(args => ((EditText)args.Sender).TextFormatted);
+
+        public static IObservable<bool> FocusChanged(this IReactive<TextView> reactive)
+            => Observable
+                .FromEventPattern<FocusChangeEventArgs>(e => reactive.Base.FocusChange += e, e => reactive.Base.FocusChange -= e)
+                .Select(args => ((EditText)args.Sender).HasFocus);
 
         public static Action<string> TextObserver(this IReactive<TextView> reactive, bool ignoreUnchanged = false)
         {

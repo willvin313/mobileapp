@@ -105,7 +105,13 @@ namespace Toggl.Daneel.ViewControllers
             setupTableViewHeader();
 
             // Table view
-            tableViewSource = new TimeEntriesLogViewSource();
+            IObservable<DaySummaryViewModel> headerForSection(int s)
+                => ViewModel.TimeEntries
+                    .Select(sections => sections.ToList()[s])
+                    .Select(section => section.Header);
+
+            tableViewSource = new TimeEntriesLogViewSource(headerForSection);
+            tableViewSource.ObservedHeaders = ViewModel.TimeEntries.Select(e => e.Select(section => section.Header));
 
             TimeEntriesLogTableView.Source = tableViewSource;
 
@@ -515,7 +521,7 @@ namespace Toggl.Daneel.ViewControllers
             var swipeUpRunningCardGesture = new UISwipeGestureRecognizer(async () =>
             {
                 var currentlyRunningTimeEntry = await ViewModel.CurrentRunningTimeEntry.FirstAsync();
-                if (currentlyRunningTimeEntry == null) 
+                if (currentlyRunningTimeEntry == null)
                     return;
 
                 var selectTimeEntryData = (new[] { currentlyRunningTimeEntry.Id }, EditTimeEntryOrigin.RunningTimeEntryCard);

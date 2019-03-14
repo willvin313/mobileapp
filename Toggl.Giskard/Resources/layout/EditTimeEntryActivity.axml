@@ -60,7 +60,7 @@
             android:fontFamily="sans-serif-medium"
             android:gravity="center_vertical"
             android:padding="16dp"
-            android:text="@string/Done"
+            android:text="@string/Save"
             android:textAllCaps="true"
             android:textColor="@android:color/white"
             android:textSize="14sp" />
