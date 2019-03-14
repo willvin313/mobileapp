@@ -72,7 +72,7 @@ namespace Toggl.Giskard.Services
             var settingsIntent = new Intent();
             settingsIntent.SetAction(Settings.ActionApplicationDetailsSettings);
             settingsIntent.AddCategory(Intent.CategoryDefault);
-            settingsIntent.SetData(Uri.Parse("package:com.toggl.giskard"));
+            settingsIntent.SetData(Uri.Parse("package:com.toggl.giskard.adhoc"));
             settingsIntent.AddFlags(ActivityFlags.NewTask);
             settingsIntent.AddFlags(ActivityFlags.NoHistory);
             settingsIntent.AddFlags(ActivityFlags.ExcludeFromRecents);
