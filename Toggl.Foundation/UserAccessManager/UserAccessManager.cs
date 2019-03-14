@@ -42,6 +42,7 @@ namespace Toggl.Foundation.Login
             this.database = database;
             this.apiFactory = apiFactory;
             this.googleService = googleService;
+            this.privateSharedStorageService = privateSharedStorageService;
         }
 
         public IObservable<Unit> Login(Email email, Password password)
