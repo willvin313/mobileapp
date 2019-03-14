@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
-using CoreAnimation;
-using CoreImage;
-using CoreText;
 using Foundation;
 using Toggl.Daneel.ViewSources;
-using Toggl.Daneel.ViewSources.Generic;
+using Toggl.Daneel.ViewSources.Generic.TableView;
 using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Collections.Diffing;
 using Toggl.Foundation.MvvmCross.Reactive;
@@ -28,9 +25,9 @@ namespace Toggl.Daneel.Extensions.Reactive
             });
         }
 
-        public static IObserver<IEnumerable<TSection>> AnimateSections<TSection, THeader, TModel, TKey>(
+        internal static IObserver<IEnumerable<TSection>> AnimateSections<TSection, THeader, TModel, TKey>(
             this IReactive<UITableView> reactive,
-            BaseTableViewSource<TSection, THeader, TModel> dataSource)
+            AnimatableTableViewSource<TSection, THeader, TModel, TKey> dataSource)
             where TKey : IEquatable<TKey>
             where TSection : IAnimatableSectionModel<THeader, TModel, TKey>, new()
             where TModel : IDiffable<TKey>, IEquatable<TModel>

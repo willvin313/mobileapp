@@ -110,7 +110,7 @@ namespace Toggl.Daneel.ViewControllers
             TimeEntriesLogTableView.Source = tableViewSource;
 
             ViewModel.TimeEntries
-                .Subscribe(TimeEntriesLogTableView.Rx().AnimateSections<MainLogSection, DaySummaryViewModel, LogItemViewModel, IMainLogKey>(tableViewSource))
+                .Subscribe(TimeEntriesLogTableView.Rx().AnimateSections(tableViewSource))
                 .DisposedBy(disposeBag);
 
             ViewModel.ShouldReloadTimeEntryLog
