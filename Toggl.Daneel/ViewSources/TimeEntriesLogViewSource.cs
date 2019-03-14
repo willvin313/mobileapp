@@ -6,7 +6,6 @@ using CoreGraphics;
 using Foundation;
 using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Daneel.Views;
-using Toggl.Daneel.ViewSources.Generic.TableView;
 using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Extensions;
@@ -19,8 +18,8 @@ namespace Toggl.Daneel.ViewSources
 {
     using MainLogSection = AnimatableSectionModel<DaySummaryViewModel, LogItemViewModel, IMainLogKey>;
 
-    internal sealed class TimeEntriesLogViewSource
-        : AnimatableTableViewSource<MainLogSection, DaySummaryViewModel, LogItemViewModel, IMainLogKey>
+    public sealed class TimeEntriesLogViewSource
+        : BaseTableViewSource<MainLogSection, DaySummaryViewModel, LogItemViewModel>
     {
         public delegate IObservable<DaySummaryViewModel> ObservableHeaderForSection(int section);
 
