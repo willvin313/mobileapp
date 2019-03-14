@@ -24,6 +24,7 @@ using ProjectClientTaskInfo = Toggl.Foundation.MvvmCross.ViewModels.EditTimeEntr
 using Microsoft.Reactive.Testing;
 using Toggl.Multivac.Extensions;
 using Toggl.Foundation.Extensions;
+using static Toggl.Foundation.Helper.Constants;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 {
@@ -84,7 +85,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
         public abstract class InitializableEditTimeEntryViewModelTest : EditTimeEntryViewModelTest
         {
-            protected IEnumerable<IThreadSafeTimeEntry> entries;
+            protected IEnumerable<MockTimeEntry> entries;
             protected long[] TimeEntriesIds { get; set; }
 
             public InitializableEditTimeEntryViewModelTest() : this(SingleTimeEntryId)
@@ -1637,6 +1638,112 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 observer.LastEmittedValue().Should().Be(expectedStopTime);
             }
         }
+
+        public sealed class TheSelectStartDateAction : InitializableEditTimeEntryViewModelTest
+        {
+            private MockTimeEntry entry => entries.Single();
+
+            [Fact]
+            public async Task OpensTheSelectDateTimeViewModel()
+            {
+                ViewModel.Prepare(SingleTimeEntryId);
+                await ViewModel.Initialize();
+
+                ViewModel.SelectStartDate.Execute();
+                TestScheduler.Start();
+
+                await NavigationService.Received()
+                    .Navigate<SelectDateTimeViewModel, DateTimePickerParameters, DateTimeOffset>(
+                        Arg.Any<DateTimePickerParameters>());
+            }
+
+            [Fact]
+            public async Task OpensTheSelectDateTimeViewModelWithCorrectLimitsForARunningTimeEntry()
+            {
+                entry.Duration = null;
+
+                ViewModel.Prepare(SingleTimeEntryId);
+                await ViewModel.Initialize();
+                ViewModel.SelectStartDate.Execute();
+                TestScheduler.Start();
+
+                await NavigationService.Received()
+                    .Navigate<SelectDateTimeViewModel, DateTimePickerParameters, DateTimeOffset>(
+                        Arg.Is<DateTimePickerParameters>(param => param.MinDate == Now - MaxTimeEntryDuration && param.MaxDate == Now));
+            }
+
+            [Fact]
+            public async Task OpensTheSelectDateTimeViewModelWithCorrectLimitsForAStoppedTimeEntry()
+            {
+                entry.Duration = 123;
+
+                ViewModel.Prepare(SingleTimeEntryId);
+                await ViewModel.Initialize();
+                ViewModel.SelectStartDate.Execute();
+                TestScheduler.Start();
+
+                await NavigationService.Received()
+                    .Navigate<SelectDateTimeViewModel, DateTimePickerParameters, DateTimeOffset>(
+                        Arg.Is<DateTimePickerParameters>(param => param.MinDate == EarliestAllowedStartTime && param.MaxDate == LatestAllowedStartTime));
+            }
+
+            [Theory]
+            [InlineData(true)]
+            [InlineData(false)]
+            public async Task ChangesTheStartTimeToTheSelectedStartDate(bool isRunning)
+            {
+                var startTime = Now.AddMonths(-1);
+                entry.Duration = isRunning ? (long?)null : 2 * 60;
+                NavigationService
+                    .Navigate<SelectDateTimeViewModel, DateTimePickerParameters, DateTimeOffset>(Arg.Any<DateTimePickerParameters>())
+                    .Returns(startTime);
+
+                ViewModel.Prepare(SingleTimeEntryId);
+                await ViewModel.Initialize();
+                ViewModel.SelectStartDate.Execute();
+                TestScheduler.Start();
+
+                entry.Start.Should().NotBe(startTime);
+            }
+
+            [Fact]
+            public async Task DoesNotChangeDurationForAStoppedTimeEntry()
+            {
+                entry.Duration = 2 * 60;
+                NavigationService
+                    .Navigate<SelectDateTimeViewModel, DateTimePickerParameters, DateTimeOffset>(Arg.Any<DateTimePickerParameters>())
+                    .Returns(entry.Start - TimeSpan.FromDays(1));
+
+                ViewModel.Prepare(SingleTimeEntryId);
+                await ViewModel.Initialize();
+                var durationObserver = TestScheduler.CreateObserver<TimeSpan>();
+                ViewModel.Duration.Subscribe(durationObserver);
+                ViewModel.SelectStartDate.Execute();
+                TestScheduler.Start();
+
+                durationObserver.LastEmittedValue().Should().Be(TimeSpan.FromSeconds(entry.Duration.Value));
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task TracksStartDateTap()
+            {
+                var newStartTime = entry.Start.AddHours(1);
+                NavigationService
+                    .Navigate<SelectDateTimeViewModel, DateTimePickerParameters, DateTimeOffset>(
+                        Arg.Any<DateTimePickerParameters>())
+                    .Returns(newStartTime);
+
+                ViewModel.Prepare(SingleTimeEntryId);
+                ViewModel.Initialize().Wait();
+                ViewModel.SelectStartDate.Execute();
+                TestScheduler.Start();
+
+                AnalyticsService.Received()
+                    .EditViewTapped
+                    .Track(Arg.Is(EditViewTapSource.StartDate));
+            }
+        }
+
 
         public sealed class TheDeleteAction : InitializableEditTimeEntryViewModelTest
         {

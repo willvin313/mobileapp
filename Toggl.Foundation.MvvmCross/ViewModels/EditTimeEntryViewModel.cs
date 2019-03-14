@@ -78,6 +78,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public IObservable<DateTimeOffset?> StopTime { get; private set; }
 
+        private bool isRunning;
         public IObservable<bool> IsTimeEntryRunning { get; private set; }
 
         public TimeSpan GroupDuration { get; private set; }
@@ -101,6 +102,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public UIAction SelectTags { get; private set; }
         public UIAction ToggleBillable { get; private set; }
         public InputAction<EditViewTapSource> EditTimes { get; private set; }
+        public UIAction SelectStartDate { get; }
         public UIAction StopTimeEntry { get; private set; }
         public UIAction DismissSyncErrorMessage { get; private set; }
         public UIAction Save { get; private set; }
@@ -187,7 +189,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             var isTimeEntryRunningObservable = stopTimeObservable
                 .Select(stopTime => !stopTime.HasValue)
+                .Do(value => isRunning = value)
                 .DistinctUntilChanged();
+
             IsTimeEntryRunning = isTimeEntryRunningObservable
                 .AsDriver(false, schedulerProvider);
 
@@ -221,6 +225,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             SelectTags = actionFactory.FromAsync(selectTags);
             ToggleBillable = actionFactory.FromAction(toggleBillable);
             EditTimes = actionFactory.FromAsync<EditViewTapSource>(editTimes);
+            SelectStartDate = actionFactory.FromAsync(selectStartDate);
             StopTimeEntry = actionFactory.FromAction(stopTimeEntry, isTimeEntryRunningObservable);
             DismissSyncErrorMessage = actionFactory.FromAction(dismissSyncErrorMessage);
             Save = actionFactory.FromAsync(save);
@@ -433,6 +438,22 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             startTimeSubject.OnNext(selectedDuration.Start);
             if (selectedDuration.Duration.HasValue)
                 durationSubject.OnNext(selectedDuration.Duration);
+        }
+
+        private async Task selectStartDate()
+        {
+            analyticsService.EditViewTapped.Track(EditViewTapSource.StartDate);
+
+            var startTime = startTimeSubject.Value;
+            var parameters = isRunning
+                ? DateTimePickerParameters.ForStartDateOfRunningTimeEntry(startTime, timeService.CurrentDateTime)
+                : DateTimePickerParameters.ForStartDateOfStoppedTimeEntry(startTime);
+
+            var selectedStartTime = await navigationService
+                .Navigate<SelectDateTimeViewModel, DateTimePickerParameters, DateTimeOffset>(parameters)
+                .ConfigureAwait(false);
+
+            startTimeSubject.OnNext(selectedStartTime);
         }
 
         private void stopTimeEntry()

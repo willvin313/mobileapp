@@ -167,8 +167,7 @@ namespace Toggl.Daneel.ViewControllers
                 .DisposedBy(DisposeBag);
 
             StartDateView.Rx().Tap()
-                .SelectValue(EditViewTapSource.StartDate)
-                .Subscribe(ViewModel.EditTimes.Inputs)
+                .Subscribe(ViewModel.SelectStartDate.Inputs)
                 .DisposedBy(DisposeBag);
 
             ViewModel.IsTimeEntryRunning
