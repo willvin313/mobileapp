@@ -1,4 +1,5 @@
-﻿using Android.Content;
+﻿using Android.App;
+using Android.Content;
 using MvvmCross;
 using MvvmCross.Binding;
 using MvvmCross.Droid.Support.V7.AppCompat;
@@ -25,19 +26,16 @@ namespace Toggl.Giskard
     {
         public Setup()
         {
-            #if !USE_PRODUCTION_API
+#if !USE_PRODUCTION_API
             System.Net.ServicePointManager.ServerCertificateValidationCallback
                   += (sender, certificate, chain, sslPolicyErrors) => true;
 #endif
-            try
-            {
-                AndroidDependencyContainer.Instance = new AndroidDependencyContainer();
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            var applicationContext = Application.Context;
+            var packageInfo = applicationContext.PackageManager.GetPackageInfo(applicationContext.PackageName, 0);
+
+            AndroidDependencyContainer.Instance = new AndroidDependencyContainer(packageInfo.VersionName);
         }
+
         protected override MvxBindingBuilder CreateBindingBuilder() => new TogglBindingBuilder();
 
         protected override IMvxNavigationService InitializeNavigationService(IMvxViewModelLocatorCollection collection)
@@ -46,16 +44,8 @@ namespace Toggl.Giskard
             Mvx.RegisterSingleton(loader);
 
             var container = AndroidDependencyContainer.Instance;
-            try
-            {
-                container.ForkingNavigationService =
-                    new NavigationService(null, loader, container.AnalyticsService.Value, Platform.Daneel);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                throw;
-            }
+            container.ForkingNavigationService =
+                new NavigationService(null, loader, container.AnalyticsService.Value, Platform.Giskard);
 
             Mvx.RegisterSingleton<IMvxNavigationService>(container.ForkingNavigationService);
             return container.ForkingNavigationService;

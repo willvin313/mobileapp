@@ -22,8 +22,10 @@ namespace Toggl.Foundation
 {
     public abstract class DependencyContainer
     {
-        private Lazy<ITogglApi> api;
+        private readonly UserAgent userAgent;
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
+
+        private Lazy<ITogglApi> api;
 
         // Non lazy
         public ApiEnvironment ApiEnvironment { get; }
@@ -61,8 +63,10 @@ namespace Toggl.Foundation
         public Lazy<IPrivateSharedStorageService> PrivateSharedStorageService { get; }
         public Lazy<ISuggestionProviderContainer> SuggestionProviderContainer { get; }
 
-        protected DependencyContainer(ApiEnvironment apiEnvironment)
+        protected DependencyContainer(ApiEnvironment apiEnvironment, UserAgent userAgent)
         {
+            this.userAgent = userAgent;
+
             ApiEnvironment = apiEnvironment;
 
             SyncManager = new Lazy<ISyncManager>(unusableDependency<ISyncManager>);
@@ -77,6 +81,7 @@ namespace Toggl.Foundation
             RatingService = new Lazy<IRatingService>(CreateRatingService);
             CalendarService = new Lazy<ICalendarService>(CreateCalendarService);
             LicenseProvider = new Lazy<ILicenseProvider>(CreateLicenseProvider);
+            RxActionFactory = new Lazy<IRxActionFactory>(CreateRxActionFactory);
             UserPreferences = new Lazy<IUserPreferences>(CreateUserPreferences);
             AnalyticsService = new Lazy<IAnalyticsService>(CreateAnalyticsService);
             StopwatchProvider = new Lazy<IStopwatchProvider>(CreateStopwatchProvider);
@@ -111,8 +116,7 @@ namespace Toggl.Foundation
                 .Subscribe(_ => recreateLazyDependenciesForLogout())
                 .DisposedBy(disposeBag);
         }
-
-        protected abstract IApiFactory CreateApiFactory();
+        
         protected abstract ITogglDatabase CreateDatabase();
         protected abstract IPlatformInfo CreatePlatformInfo();
         protected abstract IGoogleService CreateGoogleService();
@@ -147,6 +151,12 @@ namespace Toggl.Foundation
 
         protected virtual ITogglDataSource CreateDataSource()
             => new TogglDataSource(Database.Value, TimeService.Value, AnalyticsService.Value);
+
+        protected virtual IRxActionFactory CreateRxActionFactory()
+            => new RxActionFactory(SchedulerProvider.Value);
+
+        protected virtual IApiFactory CreateApiFactory()
+            => new ApiFactory(ApiEnvironment, userAgent);
 
         protected virtual IInteractorFactory CreateInteractorFactory() => new InteractorFactory(
             api.Value,

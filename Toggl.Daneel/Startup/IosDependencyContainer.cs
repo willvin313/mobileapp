@@ -30,23 +30,20 @@ namespace Toggl.Daneel
 #else
             ApiEnvironment.Staging;
 #endif
-
-        private readonly UserAgent userAgent;
+        
         private readonly Lazy<SettingsStorage> settingsStorage;
 
         public IForkingNavigationService ForkingNavigationService { get; internal set; }
 
         public ITopViewControllerProvider TopViewControllerProvider { get; }
 
-        public IosDependencyContainer(ITopViewControllerProvider topViewControllerProvider)
-            : base(environment)
+        public IosDependencyContainer(ITopViewControllerProvider topViewControllerProvider, string version)
+            : base(environment, new UserAgent(clientName, version))
         {
             TopViewControllerProvider = topViewControllerProvider;
-
-            var version = NSBundle.MainBundle.InfoDictionary["CFBundleShortVersionString"].ToString();
+            
             var appVersion = Version.Parse(version);
             
-            userAgent = new UserAgent(clientName, version);
             settingsStorage = new Lazy<SettingsStorage>(() => new SettingsStorage(appVersion, KeyValueStorage.Value));
         }
 
@@ -54,9 +51,6 @@ namespace Toggl.Daneel
 
         protected override IAnalyticsService CreateAnalyticsService()
             => new AnalyticsServiceIos();
-
-        protected override IApiFactory CreateApiFactory()
-            => new ApiFactory(environment, userAgent);
 
         protected override IBackgroundSyncService CreateBackgroundSyncService()
             => new BackgroundSyncServiceIos();

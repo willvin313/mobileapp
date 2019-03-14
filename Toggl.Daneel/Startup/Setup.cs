@@ -1,4 +1,5 @@
-﻿using MvvmCross;
+﻿using Foundation;
+using MvvmCross;
 using MvvmCross.Navigation;
 using MvvmCross.Platforms.Ios.Core;
 using MvvmCross.Platforms.Ios.Presenters;
@@ -21,14 +22,13 @@ namespace Toggl.Daneel
             #if !USE_PRODUCTION_API
             System.Net.ServicePointManager.ServerCertificateValidationCallback
                   += (sender, certificate, chain, sslPolicyErrors) => true;
-            #endif
-
-            IosDependencyContainer.Instance = new IosDependencyContainer(Presenter as ITopViewControllerProvider);
+#endif
+            var version = NSBundle.MainBundle.InfoDictionary["CFBundleShortVersionString"].ToString();
+            IosDependencyContainer.Instance = new IosDependencyContainer(Presenter as ITopViewControllerProvider, version);
         }
 
         protected override IMvxApplication CreateApp()
         {
-            IosDependencyContainer.Instance = new IosDependencyContainer(Presenter as ITopViewControllerProvider);
             var app = new App<OnboardingViewModel>(IosDependencyContainer.Instance);
             return app;
         }

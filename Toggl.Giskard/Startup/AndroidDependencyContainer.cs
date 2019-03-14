@@ -32,21 +32,15 @@ namespace Toggl.Giskard
             ApiEnvironment.Staging;
 #endif
 
-        private readonly UserAgent userAgent;
         private readonly Lazy<SettingsStorage> settingsStorage;
 
         public IForkingNavigationService ForkingNavigationService { get; internal set; }
 
-        public AndroidDependencyContainer()
-            : base(environment)
+        public AndroidDependencyContainer(string version)
+            : base(environment, new UserAgent(clientName, version))
         {
-            var applicationContext = Application.Context;
-            const string clientName = "Giskard";
-            var packageInfo = applicationContext.PackageManager.GetPackageInfo(applicationContext.PackageName, 0);
-            var version = packageInfo.VersionName;
             var appVersion = Version.Parse(version);
-
-            userAgent = new UserAgent(clientName, version);
+            
             settingsStorage = new Lazy<SettingsStorage>(() => new SettingsStorage(appVersion, KeyValueStorage.Value));
         }
 
@@ -54,9 +48,6 @@ namespace Toggl.Giskard
 
         protected override IAnalyticsService CreateAnalyticsService()
             => new AnalyticsServiceAndroid();
-
-        protected override IApiFactory CreateApiFactory()
-            => new ApiFactory(environment, userAgent);
 
         protected override IBackgroundSyncService CreateBackgroundSyncService()
             => new BackgroundSyncServiceAndroid();

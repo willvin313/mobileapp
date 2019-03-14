@@ -3,6 +3,7 @@ using Toggl.PrimeRadiant.Settings;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.Services;
 using Toggl.Ultrawave;
+using Toggl.Ultrawave.Network;
 
 namespace Toggl.Foundation.MvvmCross
 {
@@ -17,8 +18,8 @@ namespace Toggl.Foundation.MvvmCross
         public Lazy<IPasswordManagerService> PasswordManagerService { get; }
         public Lazy<IAccessRestrictionStorage> AccessRestrictionStorage { get; }
 
-        protected UiDependencyContainer(ApiEnvironment apiEnvironment)
-            : base(apiEnvironment)
+        protected UiDependencyContainer(ApiEnvironment apiEnvironment, UserAgent userAgent)
+            : base(apiEnvironment, userAgent)
         {
             DialogService = new Lazy<IDialogService>(CreateDialogService);
             BrowserService = new Lazy<IBrowserService>(CreateBrowserService);
