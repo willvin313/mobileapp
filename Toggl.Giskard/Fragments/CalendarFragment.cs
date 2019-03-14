@@ -34,7 +34,7 @@ namespace Toggl.Giskard.Fragments
             calendarRecyclerView.SetLayoutManager(calendarLayoutManager);
             var displayMetrics = new DisplayMetrics();
             Activity.WindowManager.DefaultDisplay.GetMetrics(displayMetrics);
-            var calendarAdapter = new CalendarAdapter(view.Context, timeService,displayMetrics.WidthPixels);
+            var calendarAdapter = new CalendarAdapter(view.Context, timeService, displayMetrics.WidthPixels);
             calendarRecyclerView.SetTimeService(timeService);
             calendarRecyclerView.SetAdapter(calendarAdapter);
 
@@ -62,7 +62,9 @@ namespace Toggl.Giskard.Fragments
             ViewModel.CalendarItems.CollectionChange
                 .SelectUnit()
                 .StartWith(Unit.Default)
-                .Subscribe(_ => updateCalendarEventsCount())
+                .Select(_ => calculateCalendarEventsCount())
+                .ObserveOn(schedulerProvider.MainScheduler)
+                .Subscribe(updateCalendarEventsCount)
                 .DisposedBy(DisposeBag);
 
             ViewModel.TimeTrackedToday
@@ -84,8 +86,7 @@ namespace Toggl.Giskard.Fragments
 
             calendarRecyclerView.EmptySpansTouchedObservable
                 .Where(_ => !calendarAdapter.NeedsToClearItemInEditMode())
-                .Select(span => (span, TimeSpan.FromMinutes(30)))
-                .Subscribe(ViewModel.OnDurationSelected.Inputs)
+                .Subscribe(ViewModel.CreateTimeEntryAtOffset.Inputs)
                 .DisposedBy(DisposeBag);
 
             ViewModel.ShouldShowOnboarding
@@ -103,6 +104,7 @@ namespace Toggl.Giskard.Fragments
                 {
                     initializeOnboardingView();
                 }
+
                 onboardingView.Visibility = ViewStates.Visible;
             }
             else if (onboardingView != null)
@@ -126,15 +128,18 @@ namespace Toggl.Giskard.Fragments
                 .DisposedBy(DisposeBag);
         }
 
-        private void updateCalendarEventsCount()
+        private void updateCalendarEventsCount(int count)
         {
-            var count = ViewModel
+            var text = Context.GetString(Resource.String.TotalEvents, count.ToString());
+            headerCalendarEventsTextView.Text = text;
+        }
+
+        private int calculateCalendarEventsCount()
+        {
+            return ViewModel
                 .CalendarItems
                 .SelectMany(group => group.Where(item => item.Source == CalendarItemSource.Calendar))
                 .Count();
-
-            var text = Context.GetString(Resource.String.TotalEvents, count.ToString());
-            headerCalendarEventsTextView.Text = text;
         }
 
         private void configureHeaderDate(DateTimeOffset offset)

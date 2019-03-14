@@ -67,9 +67,21 @@ namespace Toggl.Giskard.Adapters.Calendar
             if (holder is CalendarEntryViewHolder calendarEntryViewHolder)
             {
                 var calendarItem = items[position - anchorCount];
+                var firstAnchor = getCalendarItemFirstAnchor(calendarItem);
+
+                var anchorData = firstAnchor.AnchoredData.FirstOrDefault(data => data.AdapterPosition == position);
+                if (anchorData.AdapterPosition == 0) return;
+
+                calendarEntryViewHolder.UpdateAnchoringInfo(anchorData);
                 calendarEntryViewHolder.Item = calendarItem;
                 calendarEntryViewHolder.SetIsInEditMode(calendarItemIsInEditMode(calendarItem));
             }
+        }
+
+        private Anchor getCalendarItemFirstAnchor(CalendarItem calendarItem)
+        {
+            var startingHour = calendarItem.StartTime.ToLocalTime().Hour;
+            return anchors[startingHour];
         }
 
         private bool calendarItemIsInEditMode(CalendarItem calendarItem)

@@ -18,6 +18,7 @@ using Toggl.Foundation.DataSources;
 using Toggl.Foundation.DTOs;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Models.Interfaces;
+using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
 using Toggl.Foundation.Tests.Generators;
@@ -27,6 +28,7 @@ using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Xunit;
 using ITimeEntryPrototype = Toggl.Foundation.Models.ITimeEntryPrototype;
+using Notification = System.Reactive.Notification;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 {
@@ -490,6 +492,119 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             protected override UIAction Action => ViewModel.LinkCalendars;
         }
 
+        public sealed class TheHasCalendarsLinkedObservable : CalendarViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public async Task EmitsFalseOnceWhenThereAreNoCalendarsEnabled()
+            {
+                UserPreferences.EnabledCalendars.Returns(Observable.Return(new List<string>()));
+                PermissionsService.CalendarPermissionGranted.Returns(Observable.Return(true));
+                var observer = TestScheduler.CreateObserver<bool>();
+                var viewModel = CreateViewModel();
+                viewModel.HasCalendarsLinked.Subscribe(observer);
+
+                await viewModel.Initialize();
+                TestScheduler.Start();
+                viewModel.ViewAppeared();
+                TestScheduler.Start();
+
+                observer.Messages.AssertEqual(
+                    ReactiveTest.OnNext(0, false));
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task EmitsTrueWhenThereAreCalendarsEnabled()
+            {
+                UserPreferences.EnabledCalendars.Returns(Observable.Return(new List<string> { "nice event" }));
+                PermissionsService.CalendarPermissionGranted.Returns(Observable.Return(true));
+                var observer = TestScheduler.CreateObserver<bool>();
+
+                var viewModel = CreateViewModel();
+
+                viewModel.HasCalendarsLinked.Subscribe(observer);
+
+                await viewModel.Initialize();
+                TestScheduler.Start();
+                viewModel.ViewAppeared();
+                TestScheduler.Start();
+
+                observer.Messages.AssertEqual(
+                    ReactiveTest.OnNext(0, true));
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task EmitsFalseWhenCalendarPermissionsWereNotGranted()
+            {
+                UserPreferences.EnabledCalendars.Returns(Observable.Return(new List<string> { "nice event" }));
+                PermissionsService.CalendarPermissionGranted.Returns(Observable.Return(false));
+                var observer = TestScheduler.CreateObserver<bool>();
+
+                var viewModel = CreateViewModel();
+
+                viewModel.HasCalendarsLinked.Subscribe(observer);
+
+                await viewModel.Initialize();
+                TestScheduler.Start();
+                viewModel.ViewAppeared();
+                TestScheduler.Start();
+
+                observer.Messages.AssertEqual(
+                    ReactiveTest.OnNext(0, false));
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task EmitsFalseWhenCalendarPermissionsWereNotGrantedBeforeAppearedThenTrueIfPermissionWasGrantedAfterAppeared()
+            {
+                UserPreferences.EnabledCalendars.Returns(Observable.Return(new List<string> { "nice event" }));
+                PermissionsService.CalendarPermissionGranted.Returns(Observable.Return(false));
+                var observer = TestScheduler.CreateObserver<bool>();
+
+                var viewModel = CreateViewModel();
+
+                viewModel.HasCalendarsLinked.Subscribe(observer);
+
+                await viewModel.Initialize();
+                TestScheduler.Start();
+
+                PermissionsService.CalendarPermissionGranted.Returns(Observable.Return(true));
+                TestScheduler.AdvanceTo(100);
+                viewModel.ViewAppeared();
+                TestScheduler.Start();
+
+                observer.Messages.AssertEqual(
+                    ReactiveTest.OnNext(0, false),
+                    ReactiveTest.OnNext(100, true)
+                );
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task EmitsFalseWhenThereAreNoCalendarsEnabledThenTrueWhenThereAreCalendarsEnabled()
+            {
+                var calendars = TestScheduler.CreateHotObservable(
+                    new Recorded<Notification<List<string>>>(100, Notification.CreateOnNext(new List<string>())),
+                    new Recorded<Notification<List<string>>>(200, Notification.CreateOnNext(new List<string> { "nice event" })));
+
+                UserPreferences.EnabledCalendars.Returns(calendars);
+                PermissionsService.CalendarPermissionGranted.Returns(Observable.Return(true));
+                var observer = TestScheduler.CreateObserver<bool>();
+                var viewModel = CreateViewModel();
+                viewModel.HasCalendarsLinked.Subscribe(observer);
+
+                await viewModel.Initialize();
+                TestScheduler.Start();
+                viewModel.ViewAppeared();
+                TestScheduler.Start();
+
+                UserPreferences.EnabledCalendars.Returns(Observable.Return(new List<string> { "nice event" }));
+                TestScheduler.Start();
+
+                observer.Messages.AssertEqual(
+                    ReactiveTest.OnNext(100, false),
+                    ReactiveTest.OnNext(200, true)
+                );
+            }
+        }
+
         public sealed class TheGetStartedAction : LinkCalendarsTest
         {
             protected override UIAction Action => ViewModel.GetStarted;
@@ -824,6 +939,22 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 TestScheduler.Start();
 
                 await NavigationService.Received().Navigate<EditTimeEntryViewModel, long>(Arg.Is(TimeEntryId));
+            }
+        }
+
+        public sealed class TheCreateTimeEntryAtOffsetAction : CalendarViewModelTest
+        {
+            [Fact]
+            public async Task NavigatesToTheStartTimeEntryViewModel()
+            {
+                var offset = DateTimeOffset.UtcNow;
+                var duration = TimeSpan.FromMinutes(30);
+
+                ViewModel.CreateTimeEntryAtOffset.Execute(offset);
+                TestScheduler.Start();
+
+                await NavigationService.Received().Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(
+                    Arg.Is<StartTimeEntryParameters>(param => param.StartTime == offset - duration && param.Duration == duration));
             }
         }
 

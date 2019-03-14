@@ -7,6 +7,7 @@ using Toggl.Foundation.Calendar;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Multivac;
 using static Android.Provider.CalendarContract;
+using Color = Android.Graphics.Color;
 
 namespace Toggl.Giskard.Services
 {
@@ -30,7 +31,7 @@ namespace Toggl.Giskard.Services
             Events.InterfaceConsts.Dtstart,
             Events.InterfaceConsts.Dtend,
             Events.InterfaceConsts.Title,
-            Events.InterfaceConsts.EventColor,
+            Events.InterfaceConsts.DisplayColor,
             Events.InterfaceConsts.CalendarId,
             Events.InterfaceConsts.AllDay
         };
@@ -43,7 +44,7 @@ namespace Toggl.Giskard.Services
         private const int eventStartDateIndex = 1;
         private const int eventEndDateIndex = 2;
         private const int eventDescriptionIndex = 3;
-        private const int eventColorIndex = 4;
+        private const int eventDisplayColorIndex = 4;
         private const int eventCalendarIdIndex = 5;
         private const int eventIsAllDayIndex = 6;
 
@@ -107,10 +108,13 @@ namespace Toggl.Giskard.Services
             var startDateUnixTime = cursor.GetLong(eventStartDateIndex);
             var endDateUnixTime = cursor.GetLong(eventEndDateIndex);
             var description = cursor.GetString(eventDescriptionIndex);
-            var color = cursor.GetString(eventColorIndex);
+            var colorHex = cursor.GetInt(eventDisplayColorIndex);
             var calendarId = cursor.GetString(eventCalendarIdIndex);
 
             var startDate = DateTimeOffset.FromUnixTimeMilliseconds(startDateUnixTime);
+
+            var color = new Color(colorHex);
+            var rgb = $"#{color.R:X2}{color.G:X2}{color.B:X2}";
 
             return new CalendarItem(
                 id: id,
@@ -119,7 +123,7 @@ namespace Toggl.Giskard.Services
                 duration: DateTimeOffset.FromUnixTimeMilliseconds(endDateUnixTime) - startDate,
                 description: description,
                 iconKind: CalendarIconKind.Event,
-                color: color,
+                color: rgb,
                 calendarId: calendarId
             );
         }

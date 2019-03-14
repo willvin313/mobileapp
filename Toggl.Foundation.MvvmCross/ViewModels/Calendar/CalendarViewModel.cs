@@ -19,6 +19,7 @@ using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Extensions;
+using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
 using Toggl.Foundation.Services;
@@ -49,6 +50,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
 
         private readonly ISubject<bool> shouldShowOnboardingSubject;
         private readonly ISubject<bool> hasCalendarsLinkedSubject;
+        private readonly ISubject<bool> calendarPermissionsOnViewAppearedSubject;
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
 
         public IObservable<bool> SettingsAreVisible { get; }
@@ -76,6 +78,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
         public InputAction<CalendarItem> OnCalendarEventLongPressed { get; }
 
         public InputAction<(DateTimeOffset, TimeSpan)> OnDurationSelected { get; }
+
+        public InputAction<DateTimeOffset> CreateTimeEntryAtOffset { get; }
 
         public InputAction<CalendarItem> OnUpdateTimeEntry { get; }
 
@@ -127,6 +131,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
             var isCompleted = onboardingStorage.CompletedCalendarOnboarding();
             shouldShowOnboardingSubject = new BehaviorSubject<bool>(!isCompleted);
             hasCalendarsLinkedSubject = new BehaviorSubject<bool>(false);
+            calendarPermissionsOnViewAppearedSubject = new BehaviorSubject<bool>(false);
 
             var onboardingObservable = shouldShowOnboardingSubject
                 .AsObservable()
@@ -166,14 +171,18 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
                 .DistinctUntilChanged();
 
             HasCalendarsLinked = userPreferences.EnabledCalendars.CombineLatest(
-                permissionsService.CalendarPermissionGranted, hasCalendarsLinkedSubject.AsObservable(),
-                (calendars, hasInitialCalendarPermissions, didLinkCalendars) => (hasInitialCalendarPermissions || didLinkCalendars) && calendars.Count > 0)
+                    permissionsService.CalendarPermissionGranted,
+                    hasCalendarsLinkedSubject.AsObservable(),
+                    calendarPermissionsOnViewAppearedSubject,
+                    hasCalendarsLinked)
                 .DistinctUntilChanged();
 
             SelectCalendars = rxActionFactory.FromAsync(() => selectUserCalendars(false), SettingsAreVisible);
 
             OnDurationSelected = rxActionFactory.FromAsync<(DateTimeOffset StartTime, TimeSpan Duration)>(
                 tuple => durationSelected(tuple.StartTime, tuple.Duration));
+
+            CreateTimeEntryAtOffset = rxActionFactory.FromAsync<DateTimeOffset>(createTimeEntryAtOffset);
 
             OnUpdateTimeEntry = rxActionFactory.FromAsync<CalendarItem>(updateTimeEntry);
 
@@ -217,6 +226,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
                 .Merge(selectedCalendarsChangedObservable)
                 .Merge(appResumedFromBackgroundObservable)
                 .SubscribeOn(schedulerProvider.BackgroundScheduler)
+                .ObserveOn(schedulerProvider.BackgroundScheduler)
                 .SelectMany(_ => reloadData())
                 .Subscribe(CalendarItems.ReplaceWith)
                 .DisposedBy(disposeBag);
@@ -230,6 +240,23 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
                 .Subscribe()
                 .DisposedBy(disposeBag);
         }
+
+        public override void ViewAppeared()
+        {
+            base.ViewAppeared();
+            checkCalendarPermissions();
+        }
+
+        private async Task checkCalendarPermissions()
+        {
+            var authorized = await permissionsService.CalendarPermissionGranted;
+            calendarPermissionsOnViewAppearedSubject.OnNext(authorized);
+        }
+
+        private bool hasCalendarsLinked(List<string> calendars, bool hasInitialCalendarPermissions, bool didLinkCalendars, bool hadPermissionsWhenAppeared)
+            => calendars != null
+               && calendars.Count > 0
+               && (hasInitialCalendarPermissions || didLinkCalendars || hadPermissionsWhenAppeared);
 
         private IObservable<Unit> refreshNotifications(bool notificationsAreEnabled)
             => Observable.FromAsync(async () =>
@@ -356,6 +383,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
             var timeEntry = await interactorFactory.CreateTimeEntry(prototype, TimeEntryStartOrigin.CalendarTapAndDrag).Execute();
 
             await navigationService.Navigate<EditTimeEntryViewModel, long>(timeEntry.Id);
+        }
+
+        private async Task createTimeEntryAtOffset(DateTimeOffset startTime)
+        {
+            var startParams = StartTimeEntryParameters.ForManualMode(startTime);
+            await navigationService.Navigate<StartTimeEntryViewModel, StartTimeEntryParameters>(startParams);
         }
 
         private async Task updateTimeEntry(CalendarItem calendarItem)
