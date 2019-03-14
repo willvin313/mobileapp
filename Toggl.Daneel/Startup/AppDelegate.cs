@@ -71,10 +71,12 @@ namespace Toggl.Daneel
         {
             base.RunAppStart(hint);
 
-            analyticsService = Mvx.Resolve<IAnalyticsService>();
-            backgroundService = Mvx.Resolve<IBackgroundService>();
-            navigationService = Mvx.Resolve<IMvxNavigationService>();
-            timeService = Mvx.Resolve<ITimeService>();
+            var container = IosDependencyContainer.Instance;
+
+            analyticsService = container.AnalyticsService.Value;
+            backgroundService = container.BackgroundService.Value;
+            navigationService = container.NavigationService.Value;
+            timeService = container.TimeService.Value;
             setupNavigationBar();
             setupTabBar();
         }
