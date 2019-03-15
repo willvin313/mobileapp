@@ -16,6 +16,7 @@ using Toggl.Foundation.Models;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Services;
+using Toggl.Foundation.Sync;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Foundation.Tests.Mocks;
 using Toggl.Multivac;
@@ -30,6 +31,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public abstract class TimeEntriesViewModelTest
         {
             protected ITogglDataSource DataSource { get; } = Substitute.For<ITogglDataSource>();
+            protected ISyncManager SyncManager { get; } = Substitute.For<ISyncManager>();
             protected IInteractorFactory InteractorFactory { get; } = Substitute.For<IInteractorFactory>();
             protected IAnalyticsService AnalyticsService { get; } = Substitute.For<IAnalyticsService>();
             protected TestSchedulerProvider SchedulerProvider { get; } = new TestSchedulerProvider();
@@ -38,7 +40,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             protected TimeEntriesViewModel ViewModel { get; private set; }
 
             protected TimeEntriesViewModel CreateViewModel()
-                => new TimeEntriesViewModel(DataSource, InteractorFactory, AnalyticsService, SchedulerProvider, RxActionFactory);
+                => new TimeEntriesViewModel(DataSource, SyncManager, InteractorFactory, AnalyticsService, SchedulerProvider, RxActionFactory);
 
             protected TimeEntriesViewModelTest()
             {
@@ -53,19 +55,21 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(
                 bool useDataSource,
+                bool useSyncManager,
                 bool useInteractorFactory,
                 bool useAnalyticsService,
                 bool useSchedulerProvider,
                 bool useRxActionFactory)
             {
                 var dataSource = useDataSource ? DataSource : null;
+                var syncManager = useSyncManager ? SyncManager : null;
                 var interactorFactory = useInteractorFactory ? InteractorFactory : null;
                 var analyticsService = useAnalyticsService ? AnalyticsService : null;
                 var schedulerProvider = useSchedulerProvider ? SchedulerProvider : null;
                 var rxActionFactory = useRxActionFactory ? RxActionFactory : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new TimeEntriesViewModel(dataSource, interactorFactory, analyticsService, schedulerProvider, rxActionFactory);
+                    () => new TimeEntriesViewModel(dataSource, syncManager, interactorFactory, analyticsService, schedulerProvider, rxActionFactory);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
@@ -314,7 +318,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
             public TheDelayDeleteTimeEntryAction()
             {
-                viewModel = new TimeEntriesViewModel(DataSource, InteractorFactory, AnalyticsService, SchedulerProvider, RxActionFactory);
+                viewModel = new TimeEntriesViewModel(DataSource, SyncManager, InteractorFactory, AnalyticsService, SchedulerProvider, RxActionFactory);
                 viewModel.ShouldShowUndo.Subscribe(observer);
             }
 
@@ -407,7 +411,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
             public TheCancelDeleteTimeEntryAction()
             {
-                viewModel = new TimeEntriesViewModel(DataSource, InteractorFactory, AnalyticsService, SchedulerProvider, RxActionFactory);
+                viewModel = new TimeEntriesViewModel(DataSource, SyncManager, InteractorFactory, AnalyticsService, SchedulerProvider, RxActionFactory);
                 viewModel.ShouldShowUndo.Subscribe(observer);
             }
 

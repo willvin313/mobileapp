@@ -8,9 +8,11 @@ using Microsoft.Reactive.Testing;
 using NSubstitute;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
+using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Login;
 using Toggl.Foundation.Shortcuts;
+using Toggl.Foundation.Sync;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
@@ -46,14 +48,16 @@ namespace Toggl.Foundation.Tests.Login
             protected ITogglDataSource DataSource { get; } = Substitute.For<ITogglDataSource>();
             protected readonly IUserAccessManager UserAccessManager;
             protected IScheduler Scheduler { get; } = System.Reactive.Concurrency.Scheduler.Default;
-            protected ITogglDataSource CreateDataSource(ITogglApi api) => DataSource;
+            protected ISyncManager SyncManager { get; } = Substitute.For<ISyncManager>();
+            protected IInteractorFactory InteractorFactory { get; } = Substitute.For<IInteractorFactory>();
+            protected (ISyncManager, IInteractorFactory) Initialize(ITogglApi api) => (SyncManager, InteractorFactory);
             protected virtual IScheduler CreateScheduler => Scheduler;
             protected IAnalyticsService AnalyticsService { get; } = Substitute.For<IAnalyticsService>();
             protected IPrivateSharedStorageService PrivateSharedStorageService { get; } = Substitute.For<IPrivateSharedStorageService>();
 
             protected UserAccessManagerTest()
             {
-                UserAccessManager = new UserAccessManager(ApiFactory, Database, GoogleService, PrivateSharedStorageService, CreateDataSource);
+                UserAccessManager = new UserAccessManager(ApiFactory, Database, GoogleService, PrivateSharedStorageService, Initialize);
 
                 Api.User.Get().Returns(Observable.Return(User));
                 Api.User.SignUp(Email, Password, TermsAccepted, CountryId, Timezone).Returns(Observable.Return(User));
@@ -77,17 +81,17 @@ namespace Toggl.Foundation.Tests.Login
                 bool useApiFactory,
                 bool useDatabase,
                 bool useGoogleService,
-                bool useCreateDataSource,
+                bool useCreateInteractorFactory,
                 bool usePrivateSharedStorageService)
             {
                 var database = useDatabase ? Database : null;
                 var apiFactory = useApiFactory ? ApiFactory : null;
                 var googleService = useGoogleService ? GoogleService : null;
                 var privateSharedStorageService = usePrivateSharedStorageService ? PrivateSharedStorageService : null;
-                var createDataSource = useCreateDataSource ? CreateDataSource : (Func<ITogglApi, ITogglDataSource>)null;
+                var initialize = useCreateInteractorFactory ? Initialize : (Func<ITogglApi, (ISyncManager, IInteractorFactory)>)null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new UserAccessManager(apiFactory, database, googleService, privateSharedStorageService, createDataSource);
+                    () => new UserAccessManager(apiFactory, database, googleService, privateSharedStorageService, initialize);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
@@ -228,9 +232,11 @@ namespace Toggl.Foundation.Tests.Login
                 var observable = Observable.Throw<IDatabaseUser>(new InvalidOperationException());
                 Database.User.Single().Returns(observable);
 
-                var result = UserAccessManager.GetDataSourceIfLoggedIn();
+                var result = UserAccessManager.TryInitializingAccessToUserData(out var syncManager, out var interactorFactory);
 
-                result.Should().BeNull();
+                result.Should().BeFalse();
+                syncManager.Should().BeNull();
+                interactorFactory.Should().BeNull();
             }
 
             [Fact, LogIfTooSlow]
@@ -239,35 +245,37 @@ namespace Toggl.Foundation.Tests.Login
                 var observable = Observable.Return<IDatabaseUser>(FoundationUser.Clean(User));
                 Database.User.Single().Returns(observable);
 
-                var result = UserAccessManager.GetDataSourceIfLoggedIn();
+                var result = UserAccessManager.TryInitializingAccessToUserData(out var syncManager, out var interactorFactory);
 
-                result.Should().NotBeNull();
+                result.Should().BeTrue();
+                syncManager.Should().NotBeNull();
+                interactorFactory.Should().NotBeNull();
             }
 
             [Fact, LogIfTooSlow]
-            public void DoesNotEmitTheDataSourceWhenUserIsNotLoggedIn()
+            public void DoesNotEmitWhenUserIsNotLoggedIn()
             {
-                var observer = Substitute.For<IObserver<ITogglDataSource>>();
+                var observer = Substitute.For<IObserver<Unit>>();
                 var observable = Observable.Throw<IDatabaseUser>(new InvalidOperationException());
                 Database.User.Single().Returns(observable);
                 UserAccessManager.UserLoggedIn.Subscribe(observer);
 
-                UserAccessManager.GetDataSourceIfLoggedIn();
+                UserAccessManager.TryInitializingAccessToUserData(out _, out _);
 
-                observer.DidNotReceive().OnNext(Arg.Any<ITogglDataSource>());
+                observer.DidNotReceive().OnNext(Arg.Any<Unit>());
             }
 
             [Fact, LogIfTooSlow]
-            public void EmitsTheDataSourceWhenUserIsLoggedIn()
+            public void EmitsWhenUserIsLoggedIn()
             {
-                var observer = Substitute.For<IObserver<ITogglDataSource>>();
+                var observer = Substitute.For<IObserver<Unit>>();
                 var observable = Observable.Return<IDatabaseUser>(FoundationUser.Clean(User));
                 Database.User.Single().Returns(observable);
                 UserAccessManager.UserLoggedIn.Subscribe(observer);
 
-                UserAccessManager.GetDataSourceIfLoggedIn();
+                UserAccessManager.TryInitializingAccessToUserData(out _, out _);
 
-                observer.Received().OnNext(Arg.Any<ITogglDataSource>());
+                observer.Received().OnNext(Arg.Any<Unit>());
             }
         }
 
@@ -344,7 +352,7 @@ namespace Toggl.Foundation.Tests.Login
                         .SignUp(Email, Password, TermsAccepted, CountryId, Timezone)
                         .SingleAsync();
             }
-            
+
             [Fact, LogIfTooSlow]
             public void DoesNotRetryWhenTheApiThrowsSomethingOtherThanUserIsMissingApiTokenException()
             {

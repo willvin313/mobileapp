@@ -24,4 +24,10 @@ namespace Toggl.Foundation.Autocomplete.Suggestions
         public override int GetHashCode() 
             => HashCode.From(Symbol, Description);
     }
+
+    public static class QuerySymbolSuggestionExtensions
+    {
+        public static string FormattedDescription(this QuerySymbolSuggestion querySymbolSuggestion)
+            => $"{querySymbolSuggestion.Symbol} {querySymbolSuggestion.Description}"; 
+    }
 }

@@ -19,8 +19,6 @@ namespace Toggl.Foundation.DataSources
         IObservableDataSource<IThreadSafeWorkspace, IDatabaseWorkspace> Workspaces { get; }
         IDataSource<IThreadSafeWorkspaceFeatureCollection, IDatabaseWorkspaceFeatureCollection> WorkspaceFeatures { get; }
 
-        ISyncManager SyncManager { get; }
-
         IObservable<bool> HasUnsyncedData();
     }
 }

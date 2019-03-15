@@ -4,12 +4,9 @@ using System.Reactive.Linq;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources.Interfaces;
 using Toggl.Foundation.Models.Interfaces;
-using Toggl.Foundation.Sync;
 using Toggl.Multivac;
 using Toggl.PrimeRadiant;
 using Toggl.PrimeRadiant.Models;
-using Toggl.Ultrawave;
-using Toggl.Ultrawave.ApiClients;
 
 namespace Toggl.Foundation.DataSources
 {
@@ -18,16 +15,12 @@ namespace Toggl.Foundation.DataSources
         private readonly ITogglDatabase database;
 
         public TogglDataSource(
-            ITogglApi api,
             ITogglDatabase database,
             ITimeService timeService,
-            Func<ITogglDataSource, ISyncManager> createSyncManager,
             IAnalyticsService analyticsService)
         {
-            Ensure.Argument.IsNotNull(api, nameof(api));
             Ensure.Argument.IsNotNull(database, nameof(database));
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
-            Ensure.Argument.IsNotNull(createSyncManager, nameof(createSyncManager));
             Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
 
             this.database = database;
@@ -41,8 +34,6 @@ namespace Toggl.Foundation.DataSources
             Preferences = new PreferencesDataSource(database.Preferences);
             WorkspaceFeatures = new WorkspaceFeaturesDataSource(database.WorkspaceFeatures);
             TimeEntries = new TimeEntriesDataSource(database.TimeEntries, timeService, analyticsService);
-
-            SyncManager = createSyncManager(this);
         }
 
         public ITimeEntriesSource TimeEntries { get; }
@@ -62,8 +53,6 @@ namespace Toggl.Foundation.DataSources
         public IObservableDataSource<IThreadSafeWorkspace, IDatabaseWorkspace> Workspaces { get; }
 
         public IDataSource<IThreadSafeWorkspaceFeatureCollection, IDatabaseWorkspaceFeatureCollection> WorkspaceFeatures { get; }
-
-        public ISyncManager SyncManager { get; private set; }
 
         public IObservable<bool> HasUnsyncedData()
             => Observable.Merge(

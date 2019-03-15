@@ -88,7 +88,7 @@ namespace Toggl.Giskard
             var schedulerProvider = new AndroidSchedulerProvider();
             var permissionsService = new PermissionsServiceAndroid();
             var calendarService = new CalendarServiceAndroid(permissionsService);
-            var automaticSyncingService = new AutomaticSyncingService(backgroundService, timeService, analyticsService);
+            var automaticSyncingService = new AutomaticSyncingService(backgroundService, timeService);
             var errorHandlingService = new ErrorHandlingService(navigationService, settingsStorage);
 
             ApplicationContext.RegisterReceiver(new TimezoneChangedBroadcastReceiver(timeService),
@@ -180,7 +180,7 @@ namespace Toggl.Giskard
              * and ready to be injected during those times.
              */
             var userAccessManager = Mvx.Resolve<IUserAccessManager>();
-            var dataSource = userAccessManager.GetDataSourceIfLoggedIn();
+            userAccessManager.TryInitializingAccessToUserData(out _, out _);
         }
 
         private void createApplicationLifecycleObserver(IBackgroundService backgroundService)

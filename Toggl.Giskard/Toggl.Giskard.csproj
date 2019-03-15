@@ -305,6 +305,9 @@
     <Compile Include="Adapters\SelectTagsRecyclerAdapter.cs" />
     <Compile Include="Activities\SelectProjectActivity.cs" />
     <Compile Include="Adapters\SelectProjectRecyclerAdapter.cs" />
+    <Compile Include="ViewHolders\StartTimeEntry\SuggestionRecyclerViewHolder.cs" />
+    <Compile Include="ViewHolders\StartTimeEntry\ProjectSuggestionViewHolder.cs" />
+    <Compile Include="ViewHolders\StartTimeEntry\TimeEntrySuggestionViewHolder.cs" />
     <Compile Include="Bindings\TextInputLayoutErrorTextTargetBinding.cs" />
     <Compile Include="BroadcastReceivers\TimezoneChangedBroadcastReceiver.cs" />
     <Compile Include="Extensions\ContextExtensions.cs" />
@@ -369,6 +372,7 @@
     <Compile Include="ViewHolders\MainLogSuggestionItemViewHolder.cs" />
     <Compile Include="ViewHolders\MainLogSuggestionsListViewHolder.cs" />
     <Compile Include="ViewHolders\GuardedMvxRecyclerViewHolder.cs" />
+    <Compile Include="ViewHolders\SimpleTextViewHolder.cs" />
     <Compile Include="ViewHolders\SelectDurationFormatViewHolder.cs" />
     <Compile Include="ViewHolders\SelectWorkspaceViewHolder.cs" />
     <Compile Include="ViewHolders\ReportsCalendarShortcutCellViewHolder.cs" />
@@ -405,8 +409,6 @@
     <Compile Include="Extensions\CircularRevealAnimation.cs" />
     <Compile Include="Activities\EditTimeEntryActivity.cs" />
     <Compile Include="ApplicationShortcutCreator.cs" />
-    <Compile Include="TemplateSelectors\StartTimeEntrySuggestionsTemplateSelector.cs" />
-    <Compile Include="Views\StartTimeEntryRecyclerView.cs" />
     <Compile Include="Adapters\StartTimeEntryRecyclerAdapter.cs" />
     <Compile Include="Adapters\SegmentedRecyclerAdapter.cs" />
     <Compile Include="Autocomplete\AutocompleteExtensions.cs" />
@@ -826,7 +828,7 @@
     <AndroidResource Include="Resources\layout\StartTimeEntryActivityTaskCell.axml" />
     <AndroidResource Include="Resources\layout\StartTimeEntryActivityWorkspaceHeader.axml" />
     <AndroidResource Include="Resources\layout\StartTimeEntryActivityNoEntityCell.axml" />
-    <AndroidResource Include="Resources\layout\StartTimeEntryActivityEmptyCell.axml" />
+    <AndroidResource Include="Resources\layout\StartTimeEntryActivityQuerySymbolCell.axml" />
     <AndroidResource Include="Resources\layout\EditTimeEntryActivity.axml" />
     <AndroidResource Include="Resources\values\Dimen.xml" />
     <AndroidResource Include="Resources\layout\EditProjectActivity.axml" />
@@ -992,12 +994,6 @@
       <Project>{5ACEB155-9DD4-4309-BCC9-997A09950393}</Project>
       <Name>Toggl.Ultrawave</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Presenters\" />
-    <Folder Include="Extensions\Reactive\" />
-    <Folder Include="Resources\xml\" />
-    <Folder Include="Views\EditDuration" />
   </ItemGroup>
   <ItemGroup>
     <ProguardConfiguration Include="ProGuard.cfg" />

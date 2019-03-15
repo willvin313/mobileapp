@@ -100,6 +100,7 @@
                 <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" bounces="NO" text="￼" translatesAutoresizingMaskIntoConstraints="NO" id="R8W-w1-sEf">
                     <rect key="frame" x="16" y="44" width="343" height="68"/>
                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <accessibility key="accessibilityConfiguration" label="DescriptionTextField"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="68" id="u0i-Qv-oYj"/>
                     </constraints>

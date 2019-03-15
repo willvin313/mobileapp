@@ -25,15 +25,17 @@ namespace Toggl.Foundation.Tests.Interactors
                 bool useIdProvider,
                 bool useDataSource,
                 bool useTimeService,
-                bool useAnalyticsService)
+                bool useAnalyticsService,
+                bool useSyncManager)
             {
                 var idProvider = useIdProvider ? IdProvider : null;
                 var dataSource = useDataSource ? DataSource : null;
                 var timeService = useTimeService ? TimeService : null;
                 var analyticsService = useAnalyticsService ? AnalyticsService : null;
+                var syncManager = useSyncManager ? SyncManager : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new ContinueMostRecentTimeEntryInteractor(idProvider, timeService, dataSource, analyticsService);
+                    () => new ContinueMostRecentTimeEntryInteractor(idProvider, timeService, dataSource, analyticsService, syncManager);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
@@ -72,7 +74,7 @@ namespace Toggl.Foundation.Tests.Interactors
                     .Returns(Observable.Return(timeEntries));
 
                 interactor = new ContinueMostRecentTimeEntryInteractor(
-                    IdProvider, TimeService, DataSource, AnalyticsService);
+                    IdProvider, TimeService, DataSource, AnalyticsService, SyncManager);
             }
 
             [Fact, LogIfTooSlow]
@@ -200,7 +202,7 @@ namespace Toggl.Foundation.Tests.Interactors
             {
                 await interactor.Execute();
 
-                await DataSource.SyncManager.Received().PushSync();
+                await SyncManager.Received().PushSync();
             }
 
             [Fact, LogIfTooSlow]

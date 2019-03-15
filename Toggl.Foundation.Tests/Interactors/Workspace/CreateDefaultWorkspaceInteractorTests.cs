@@ -50,8 +50,8 @@ namespace Toggl.Foundation.Tests.Interactors.Workspace
                 {
                     DataSource.Workspaces.Create(Arg.Any<IThreadSafeWorkspace>());
                     DataSource.User.Update(Arg.Any<IThreadSafeUser>());
-                    DataSource.SyncManager.PushSync();
-                    DataSource.SyncManager.ForceFullSync();
+                    SyncManager.PushSync();
+                    SyncManager.ForceFullSync();
                 });
             }
         }

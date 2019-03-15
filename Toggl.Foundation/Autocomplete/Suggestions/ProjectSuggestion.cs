@@ -61,4 +61,20 @@ namespace Toggl.Foundation.Autocomplete.Suggestions
         public override int GetHashCode() 
             => HashCode.From(ProjectName, ProjectColor, ClientName);
     }
+
+    public static class ProjectSuggestionExtensions
+    {
+        public static string FormattedNumberOfTasks(this ProjectSuggestion projectSuggestion)
+        {
+            switch (projectSuggestion.NumberOfTasks)
+            {
+                case 0:
+                    return "";
+                case 1:
+                    return string.Format(Resources.NumberOfTasksSingular, projectSuggestion.NumberOfTasks);
+                default:
+                    return string.Format(Resources.NumberOfTasksPlural, projectSuggestion.NumberOfTasks);
+            }
+        }
+    }
 }

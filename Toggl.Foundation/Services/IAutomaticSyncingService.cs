@@ -6,6 +6,7 @@ namespace Toggl.Foundation.Services
 {
     public interface IAutomaticSyncingService
     {
-        void SetupAutomaticSync(IUserAccessManager userAccessManager);
+        void Start(ISyncManager syncManager);
+        void Stop();
     }
 }

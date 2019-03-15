@@ -5,6 +5,7 @@ using Toggl.Foundation.DTOs;
 using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Models;
 using Toggl.Foundation.Models.Interfaces;
+using Toggl.Foundation.Sync;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant;
@@ -17,22 +18,26 @@ namespace Toggl.Foundation.Interactors
         private readonly ITimeService timeService;
         private readonly ITogglDataSource dataSource;
         private readonly IInteractorFactory interactorFactory;
+        private readonly ISyncManager syncManager;
 
         public UpdateTimeEntryInteractor(
             ITimeService timeService,
             ITogglDataSource dataSource,
             IInteractorFactory interactorFactory,
+            ISyncManager syncManager,
             EditTimeEntryDto dto)
         {
             Ensure.Argument.IsNotNull(dto, nameof(dto));
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
             Ensure.Argument.IsNotNull(interactorFactory, nameof(interactorFactory));
+            Ensure.Argument.IsNotNull(syncManager, nameof(syncManager));
 
             this.dto = dto;
             this.dataSource = dataSource;
             this.timeService = timeService;
             this.interactorFactory = interactorFactory;
+            this.syncManager = syncManager;
         }
 
         public IObservable<IThreadSafeTimeEntry> Execute()
@@ -40,7 +45,7 @@ namespace Toggl.Foundation.Interactors
                 .Execute()
                 .Select(createUpdatedTimeEntry)
                 .SelectMany(dataSource.TimeEntries.Update)
-                .Do(dataSource.SyncManager.InitiatePushSync);
+                .Do(syncManager.InitiatePushSync);
 
         private TimeEntry createUpdatedTimeEntry(IThreadSafeTimeEntry timeEntry)
             => TimeEntry.Builder.Create(dto.Id)

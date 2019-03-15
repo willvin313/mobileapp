@@ -48,31 +48,23 @@ namespace Toggl.Foundation.Tests.Sync.Helpers
             var errorHandlingService = new ErrorHandlingService(NavigationServiceSubstitute, AccessRestrictionStorageSubsitute);
             syncErrorHandlingService = new SyncErrorHandlingService(errorHandlingService);
 
-            ISyncManager createSyncManager(ITogglDataSource dataSource)
-            {
-                var syncManager = TogglSyncManager.CreateSyncManager(
-                    database,
-                    api,
-                    dataSource,
-                    TimeService,
-                    AnalyticsServiceSubstitute,
-                    LastTimeUsageStorageSubstitute,
-                    Scheduler,
-                    StopwatchProvider);
-
-                syncErrorHandlingService.HandleErrorsOf(syncManager);
-
-                return syncManager;
-            }
-
-            var togglDataSource = new TogglDataSource(
+            var dataSource = new TogglDataSource(
                 api,
                 database,
                 TimeService,
-                createSyncManager,
                 AnalyticsServiceSubstitute);
 
-            SyncManager = togglDataSource.SyncManager;
+            SyncManager = TogglSyncManager.CreateSyncManager(
+                database,
+                api,
+                dataSource,
+                TimeService,
+                AnalyticsServiceSubstitute,
+                LastTimeUsageStorageSubstitute,
+                Scheduler,
+                StopwatchProvider);
+
+            syncErrorHandlingService.HandleErrorsOf(SyncManager);
         }
     }
 }

@@ -10,19 +10,16 @@ using Android.Support.V7.Util;
 using Android.Support.V7.Widget;
 using Android.Views;
 using Toggl.Foundation.MvvmCross.Collections;
-using Toggl.Foundation.MvvmCross.Interfaces;
 using Toggl.Giskard.ViewHolders;
 using Toggl.Multivac;
 
 namespace Toggl.Giskard.Adapters
 {
-    public abstract class BaseSectionedRecyclerAdapter<TSection, TItem, TSectionViewHolder, TItemViewHolder> : RecyclerView.Adapter
-        where TItemViewHolder : BaseRecyclerViewHolder<TItem>
-        where TSectionViewHolder : BaseRecyclerViewHolder<TSection>
-        where TItem : IDiffableByIdentifier<TItem>
-        where TSection : IDiffableByIdentifier<TSection>
+    public abstract class BaseSectionedRecyclerAdapter<TSection, TItem> : RecyclerView.Adapter
+        where TItem : IEquatable<TItem>
+        where TSection : IEquatable<TSection>
     {
-        public const int SectionViewType = 0;
+        public const int HeaderViewType = 0;
         public const int ItemViewType = 1;
 
         private readonly object updateLock = new object();
@@ -31,7 +28,8 @@ namespace Toggl.Giskard.Adapters
         private IList<Either<TSection, TItem>> currentItems = new List<Either<TSection, TItem>>();
         private IList<Either<TSection, TItem>> nextUpdate;
 
-        private Subject<TItem> itemTapSubject = new Subject<TItem>();
+        private readonly Subject<TItem> itemTapSubject = new Subject<TItem>();
+        private readonly Subject<TSection> headerTapSubject = new Subject<TSection>();
 
         private IList<CollectionSection<TSection, TItem>> items;
         public IList<CollectionSection<TSection, TItem>> Items
@@ -41,6 +39,9 @@ namespace Toggl.Giskard.Adapters
         }
 
         public IObservable<TItem> ItemTapObservable => itemTapSubject.AsObservable();
+
+        protected virtual HashSet<int> ItemViewTypes { get; } = new HashSet<int> { ItemViewType };
+        protected virtual HashSet<int> HeaderViewTypes { get; } = new HashSet<int> { HeaderViewType };
 
         public override int ItemCount => currentItems.Count;
 
@@ -54,34 +55,59 @@ namespace Toggl.Giskard.Adapters
         {
         }
 
-        public override int GetItemViewType(int position)
-            => currentItems[position].IsLeft ? SectionViewType : ItemViewType;
+        public override sealed int GetItemViewType(int position)
+        {
+            var item = currentItems[position];
+            var isHeader = item.IsLeft;
+            if (isHeader)
+            {
+                var headerViewType = SelectHeaderViewType(item.Left);
+                if (!HeaderViewTypes.Contains(headerViewType))
+                    throw new InvalidOperationException("A header view type not included in the HeaderViewTypes property was returned");
+
+                return headerViewType;
+            }
+            
+            var itemViewType = SelectItemViewType(item.Right);
+            if (!ItemViewTypes.Contains(itemViewType))
+                throw new InvalidOperationException("An item view type not included in the ItemViewTypes property was returned");
+
+            return itemViewType;
+        }
 
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
         {
             var inflater = LayoutInflater.From(parent.Context);
-            if (viewType == ItemViewType)
+            if (ItemViewTypes.Contains(viewType))
             {
-                var viewHolder = CreateItemViewHolder(inflater, parent);
-                viewHolder.TappedSubject = itemTapSubject;
-                return viewHolder;
+                var itemViewHolder = CreateItemViewHolder(inflater, parent, viewType);
+                itemViewHolder.TappedSubject = itemTapSubject;
+                return itemViewHolder;
             }
 
-            return CreateHeaderViewHolder(inflater, parent);
+            var headerViewHolder = CreateHeaderViewHolder(inflater, parent, viewType); ;
+            headerViewHolder.TappedSubject = headerTapSubject;
+            return headerViewHolder;
         }
 
-        protected abstract TSectionViewHolder CreateHeaderViewHolder(LayoutInflater inflater, ViewGroup parent);
+        protected virtual int SelectItemViewType(TItem headerItem)
+            => HeaderViewType;
 
-        protected abstract TItemViewHolder CreateItemViewHolder(LayoutInflater inflater, ViewGroup parent);
+        protected virtual int SelectHeaderViewType(TSection headerItem)
+            => ItemViewType;
+
+        protected abstract BaseRecyclerViewHolder<TSection> CreateHeaderViewHolder(LayoutInflater inflater, ViewGroup parent, int viewType);
+
+        protected abstract BaseRecyclerViewHolder<TItem> CreateItemViewHolder(LayoutInflater inflater, ViewGroup parent, int viewType);
 
         public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
         {
             switch (holder)
             {
-                case TItemViewHolder itemViewHolder:
+                case BaseRecyclerViewHolder<TItem> itemViewHolder:
                     itemViewHolder.Item = currentItems[position].Right;
                     break;
-                case TSectionViewHolder sectionViewHolder:
+                case BaseRecyclerViewHolder<TSection> sectionViewHolder:
                     sectionViewHolder.Item = currentItems[position].Left;
                     break;
                 default:
@@ -93,7 +119,7 @@ namespace Toggl.Giskard.Adapters
         {
             lock (updateLock)
             {
-                var flatNewItems = flattenItems(newItems);
+                var flatNewItems = flattenItems(newItems).ToList();
                 if (!isUpdateRunning)
                 {
                     isUpdateRunning = true;
@@ -106,18 +132,20 @@ namespace Toggl.Giskard.Adapters
             }
         }
 
-        private IList<Either<TSection, TItem>> flattenItems(IList<CollectionSection<TSection, TItem>> newItems)
+        private IEnumerable<Either<TSection, TItem>> flattenItems(IList<CollectionSection<TSection, TItem>> newItems)
         {
-            return newItems.Aggregate(new List<Either<TSection, TItem>>(), (flatten, section) =>
+            var shouldIncludeHeader = newItems.Count > 1;
+
+            foreach (var section in newItems)
+            {
+                if (shouldIncludeHeader)
+                    yield return Either<TSection, TItem>.WithLeft(section.Header);
+
+                foreach (var item in section.Items)
                 {
-                    flatten.Add(Either<TSection, TItem>.WithLeft(section.Header));
-                    section
-                        .Items
-                        .ToList()
-                        .ForEach(item => flatten.Add(Either<TSection, TItem>.WithRight(item)));
-                    return flatten;
-                })
-                .ToList();
+                    yield return Either<TSection, TItem>.WithRight(item);
+                }
+            }
         }
 
         private void processUpdate(IList<Either<TSection, TItem>> newItems)
@@ -169,9 +197,21 @@ namespace Toggl.Giskard.Adapters
                 var newItem = newItems[newItemPosition];
 
                 if (oldItem.IsLeft && newItem.IsLeft)
+                {
+                    if (oldItem.Left == null || newItem.Left == null)
+                        return false;
+
                     return oldItem.Left.Equals(newItem.Left);
+                }
+
                 if (oldItem.IsRight && newItem.IsRight)
+                {
+                    if (oldItem.Right == null || newItem.Right == null)
+                        return false;
+
                     return oldItem.Right.Equals(newItem.Right);
+                }
+
                 return false;
             }
 
@@ -181,9 +221,21 @@ namespace Toggl.Giskard.Adapters
                 var newItem = newItems[newItemPosition];
 
                 if (oldItem.IsLeft && newItem.IsLeft)
-                    return oldItem.Left.Identifier == newItem.Left.Identifier;
+                {
+                    if (oldItem.Left == null || newItem.Left == null)
+                        return false;
+
+                    return oldItem.Left.Equals(newItem.Left);
+                }
+
                 if (oldItem.IsRight && newItem.IsRight)
-                    return oldItem.Right.Identifier == newItem.Right.Identifier;
+                {
+                    if (oldItem.Right == null || newItem.Right == null)
+                        return false;
+
+                    return oldItem.Right.Equals(newItem.Right);
+                }
+
                 return false;
             }
 

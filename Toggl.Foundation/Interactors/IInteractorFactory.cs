@@ -9,6 +9,7 @@ using Toggl.Foundation.Models;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.Reports;
 using Toggl.Foundation.Suggestions;
+using Toggl.Foundation.Sync;
 using Toggl.Multivac;
 using Toggl.Multivac.Models.Reports;
 
@@ -33,6 +34,8 @@ namespace Toggl.Foundation.Interactors
         IInteractor<IObservable<Unit>> DeleteTimeEntry(long id);
 
         IInteractor<IObservable<IEnumerable<IThreadSafeTimeEntry>>> GetAllTimeEntriesVisibleToTheUser();
+
+        IInteractor<IObservable<IEnumerable<IThreadSafeTimeEntry>>> ObserveTimeEntriesVisibleToTheUser();
 
         IInteractor<IObservable<IThreadSafeTimeEntry>> StopTimeEntry(DateTimeOffset currentDateTime, TimeEntryStopOrigin origin);
 
@@ -124,6 +127,8 @@ namespace Toggl.Foundation.Interactors
         IInteractor<IObservable<IThreadSafeUser>> UpdateUser(EditUserDTO dto);
 
         IInteractor<IObservable<IThreadSafeUser>> UpdateDefaultWorkspace(long selectedWorkspaceId);
+
+        IInteractor<IObservable<IThreadSafeUser>> GetCurrentUser();
 
         #endregion
 

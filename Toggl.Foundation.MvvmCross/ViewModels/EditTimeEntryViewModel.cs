@@ -18,6 +18,7 @@ using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.Services;
+using Toggl.Foundation.Sync;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
@@ -37,6 +38,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly IOnboardingStorage onboardingStorage;
         private readonly IAnalyticsService analyticsService;
         private readonly IStopwatchProvider stopwatchProvider;
+        private readonly ISyncManager syncManager;
 
         private readonly HashSet<long> tagIds = new HashSet<long>();
         private IDisposable tickingDisposable;
@@ -183,6 +185,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public EditTimeEntryViewModel(
             ITimeService timeService,
             ITogglDataSource dataSource,
+            ISyncManager syncManager,
             IInteractorFactory interactorFactory,
             IMvxNavigationService navigationService,
             IOnboardingStorage onboardingStorage,
@@ -191,6 +194,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IStopwatchProvider stopwatchProvider)
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
+            Ensure.Argument.IsNotNull(syncManager, nameof(syncManager));
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
             Ensure.Argument.IsNotNull(dialogService, nameof(dialogService));
             Ensure.Argument.IsNotNull(interactorFactory, nameof(interactorFactory));
@@ -200,6 +204,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(stopwatchProvider, nameof(stopwatchProvider));
 
             this.dataSource = dataSource;
+            this.syncManager = syncManager;
             this.timeService = timeService;
             this.dialogService = dialogService;
             this.interactorFactory = interactorFactory;
@@ -309,7 +314,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 await interactorFactory.DeleteTimeEntry(Id).Execute();
 
                 analyticsService.DeleteTimeEntry.Track();
-                dataSource.SyncManager.InitiatePushSync();
+                syncManager.InitiatePushSync();
                 await close();
             }
             catch
@@ -349,7 +354,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             confirmDisposable = interactorFactory
                 .UpdateTimeEntry(dto)
                 .Execute()
-                .Do(dataSource.SyncManager.InitiatePushSync)
+                .Do(syncManager.InitiatePushSync)
                 .SubscribeToErrorsAndCompletion((Exception ex) => close(), () => close());
         }
 

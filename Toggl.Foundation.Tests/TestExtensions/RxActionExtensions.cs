@@ -40,6 +40,9 @@ namespace Toggl.Foundation.Tests.TestExtensions
         public static IObservable<Unit> PrependAction(this IObservable<Unit> observable, RxAction<Unit, Unit> action)
             => observable.prependAction(action, default(Unit));
 
+        public static IObservable<Unit> PrependAction<TInput>(this IObservable<Unit> observable, RxAction<TInput, Unit> action, TInput input)
+            => observable.prependAction(action, input);
+
         private static IObservable<TOutput> prependAction<TElement, TInput, TOutput>(this IObservable<TElement> observable, RxAction<TInput, TOutput> action, TInput input)
         {
             return observable

@@ -49,17 +49,19 @@
 
     public static class Main
     {
-        public const string StartTimeEntryButton = "MainStartTimeEntry";
-        public const string StopTimeEntryButton = "MainStopTimeEntry";
-        public const string TimeEntriesCollection = "TimeEntriesCollection";
         public const string TimeEntryRow = "TimeEntryRow";
+        public const string StopTimeEntryButton = "MainStopTimeEntry";
+        public const string StartTimeEntryButton = "MainStartTimeEntry";
+        public const string CurrentTimeEntryCard = "CurrentTimeEntryCard";
+        public const string TimeEntriesCollection = "TimeEntriesCollection";
+        public const string TimeEntryRowContinueButton = "TimeEntryRowContinueButton";
     }
 
     public static class StartTimeEntry
     {
         public const string DoneButton = "StartTimeEntryDone";
         public const string CloseButton = "StartTimeEntryClose";
-        public const string DescriptionText = "StartTimeEntryDescription";
+        public const string DescriptionTextField = "DescriptionTextField";
         public const string DialogDiscard = "Discard";
         public const string DialogCancel = "Cancel";
         public const string DurationLabel = "DurationLabel";
@@ -74,12 +76,20 @@
         public const string EditDescription = "EditTimeEntryDescription";
     }
 
+    public static class Client
+    {
+        public const string AddFilterTextField = "AddFilterTextField";
+        public const string ClientViewCell = "ClientViewCell";
+    }
+
     public static class EditProject
     {
         public const string ChangeClient = "ChangeClientButton";
         public const string CreateButton = "CreateProjectButton";
+        public const string CloseButton = "CreateProjectCloseButton";
         public const string ChangeWorkspace = "ChangeWorkspaceButton";
         public const string TogglePrivateProject = "PrivateProjectSwitchContainer";
+        public const string CreateProjectCell = "CreateEntityViewCell";
     }
 
     public static class SelectProject

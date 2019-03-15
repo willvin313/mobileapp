@@ -8,7 +8,7 @@
     android:layout_height="48dp"
     android:layout_width="match_parent">
     <TextView
-        local:MvxBind="Text Name"
+        android:id="@+id/TagLabel"
         android:maxLines="1"
         android:gravity="left"
         android:textSize="15sp"

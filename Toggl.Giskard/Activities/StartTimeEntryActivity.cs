@@ -1,17 +1,17 @@
 using System;
 using System.Reactive.Concurrency;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Android.App;
 using Android.Content.PM;
 using Android.OS;
+using Android.Support.V7.Widget;
 using Android.Views;
 using Android.Widget;
-using MvvmCross.Droid.Support.V7.AppCompat;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
 using Toggl.Foundation.Autocomplete;
 using Toggl.Foundation.MvvmCross.Onboarding.StartTimeEntryView;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Giskard.Adapters;
 using Toggl.Giskard.Extensions;
 using Toggl.Giskard.Extensions.Reactive;
 using Toggl.Giskard.Helper;
@@ -24,7 +24,7 @@ namespace Toggl.Giskard.Activities
               ScreenOrientation = ScreenOrientation.Portrait,
               WindowSoftInputMode = SoftInput.StateVisible,
               ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize)]
-    public sealed partial class StartTimeEntryActivity : MvxAppCompatActivity<StartTimeEntryViewModel>
+    public sealed partial class StartTimeEntryActivity : ReactiveActivity<StartTimeEntryViewModel>
     {
         private static readonly TimeSpan typingThrottleDuration = TimeSpan.FromMilliseconds(300);
 
@@ -32,29 +32,95 @@ namespace Toggl.Giskard.Activities
         private IDisposable onboardingDisposable;
         private EventHandler onLayoutFinished;
 
-        public CompositeDisposable DisposeBag { get; } = new CompositeDisposable();
-
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
             SetContentView(Resource.Layout.StartTimeEntryActivity);
             OverridePendingTransition(Resource.Animation.abc_slide_in_bottom, Resource.Animation.abc_fade_out);
 
-            initializeViews();
+            InitializeViews();
 
-            ViewModel.TextFieldInfoObservable
+            // Suggestions RecyclerView
+            var adapter = new StartTimeEntryRecyclerAdapter();
+            recyclerView.SetLayoutManager(new LinearLayoutManager(this));
+            recyclerView.SetAdapter(adapter);
+            
+            ViewModel.Suggestions
+                .Subscribe(adapter.Rx().Items())
+                .DisposedBy(DisposeBag);
+
+            adapter.ItemTapObservable
+                .Subscribe(ViewModel.SelectSuggestion.Inputs)
+                .DisposedBy(DisposeBag);
+
+            adapter.ToggleTasks
+                .Subscribe(ViewModel.ToggleTasks.Inputs)
+                .DisposedBy(DisposeBag);
+
+            // Displayed time
+            ViewModel.DisplayedTime
+                .Subscribe(durationLabel.Rx().TextObserver())
+                .DisposedBy(DisposeBag);
+
+            // Toggle project suggestions toolbar button
+            selectProjectToolbarButton.Rx()
+                .BindAction(ViewModel.ToggleProjectSuggestions)
+                .DisposedBy(DisposeBag);
+
+            ViewModel.IsSuggestingProjects
+                .Select(isSuggesting => isSuggesting ? Resource.Drawable.te_project_active : Resource.Drawable.project)
+                .Subscribe(selectProjectToolbarButton.SetImageResource)
+                .DisposedBy(DisposeBag);
+
+            // Toggle tag suggestions toolbar button
+            selectTagToolbarButton.Rx()
+                .BindAction(ViewModel.ToggleTagSuggestions)
+                .DisposedBy(DisposeBag);
+
+            ViewModel.IsSuggestingTags
+                .Select(isSuggesting => isSuggesting ? Resource.Drawable.te_tag_active : Resource.Drawable.tag)
+                .Subscribe(selectTagToolbarButton.SetImageResource)
+                .DisposedBy(DisposeBag);
+
+            // Billable toolbar button
+            selectBillableToolbarButton.Rx()
+                .BindAction(ViewModel.ToggleBillable)
+                .DisposedBy(DisposeBag);
+
+            ViewModel.IsBillable
+                .Select(isSuggesting => isSuggesting ? Resource.Drawable.te_billable_active : Resource.Drawable.billable)
+                .Subscribe(selectBillableToolbarButton.SetImageResource)
+                .DisposedBy(DisposeBag);
+
+            ViewModel.IsBillableAvailable
+                .Subscribe(selectBillableToolbarButton.Rx().IsVisible())
+                .DisposedBy(DisposeBag);
+
+            // Finish buttons
+            doneButton.Rx()
+                .BindAction(ViewModel.Done)
+                .DisposedBy(DisposeBag);
+
+            closeButton.Rx()
+                .BindAction(ViewModel.Close)
+                .DisposedBy(DisposeBag);
+            
+            // Description text field
+            descriptionField.Hint = ViewModel.PlaceholderText;
+
+            ViewModel.TextFieldInfo
                 .Subscribe(onTextFieldInfo)
                 .DisposedBy(DisposeBag);
 
-            durationLabel.Rx().Tap()
-                .Subscribe(_ => ViewModel.ChangeTimeCommand.Execute())
+            durationLabel.Rx()
+                .BindAction(ViewModel.ChangeTime)
                 .DisposedBy(DisposeBag);
 
-            editText.TextObservable
+            descriptionField.TextObservable
                 .SubscribeOn(ThreadPoolScheduler.Instance)
                 .Throttle(typingThrottleDuration)
-                .Select(text => text.AsImmutableSpans(editText.SelectionStart))
-                .Subscribe(async spans => await ViewModel.OnTextFieldInfoFromView(spans))
+                .Select(text => text.AsImmutableSpans(descriptionField.SelectionStart))
+                .Subscribe(ViewModel.SetTextSpans.Inputs)
                 .DisposedBy(DisposeBag);
 
             onLayoutFinished = (s, e) => ViewModel.StopSuggestionsRenderingStopwatch();
@@ -64,7 +130,7 @@ namespace Toggl.Giskard.Activities
         protected override void OnResume()
         {
             base.OnResume();
-            editText.RequestFocus();
+            descriptionField.RequestFocus();
             selectProjectToolbarButton.LayoutChange += onSelectProjectToolbarButtonLayoutChanged;
             recyclerView.ViewTreeObserver.GlobalLayout += onLayoutFinished;
         }
@@ -97,7 +163,7 @@ namespace Toggl.Giskard.Activities
         {
             if (keyCode == Keycode.Back)
             {
-                ViewModel.BackCommand.ExecuteAsync();
+                ViewModel.Close.Execute();
                 return true;
             }
 
@@ -145,9 +211,11 @@ namespace Toggl.Giskard.Activities
         private void onTextFieldInfo(TextFieldInfo textFieldInfo)
         {
             var (formattedText, cursorPosition) = textFieldInfo.AsSpannableTextAndCursorPosition();
+            if (descriptionField.TextFormatted.ToString() == formattedText.ToString())
+                return;
 
-            editText.TextFormatted = formattedText;
-            editText.SetSelection(cursorPosition);
+            descriptionField.TextFormatted = formattedText;
+            descriptionField.SetSelection(cursorPosition);
         }
     }
 }

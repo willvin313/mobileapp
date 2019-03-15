@@ -7,11 +7,13 @@ using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Exceptions;
 using Toggl.Foundation.Extensions;
+using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Login;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.Services;
+using Toggl.Foundation.Sync;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
@@ -187,7 +189,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 userAccessManager
                     .Login(emailSubject.Value, passwordSubject.Value)
                     .Track(analyticsService.Login, AuthenticationMethod.EmailAndPassword)
-                    .Subscribe(onDataSource, onError, onCompleted);
+                    .Subscribe(onInteractorFactory, onError, onCompleted);
         }
 
         public void TogglePasswordVisibility()
@@ -202,7 +204,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             loginDisposable = userAccessManager
                 .LoginWithGoogle()
                 .Track(analyticsService.Login, AuthenticationMethod.Google)
-                .Subscribe(onDataSource, onError, onCompleted);
+                .Subscribe(onInteractorFactory, onError, onCompleted);
         }
 
         private Task signup()
@@ -246,11 +248,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Login();
         }
 
-        private async void onDataSource(ITogglDataSource dataSource)
+        private async void onInteractorFactory(ISyncManager syncManager)
         {
             lastTimeUsageStorage.SetLogin(timeService.CurrentDateTime);
 
-            await dataSource.SyncManager.ForceFullSync();
+            await syncManager.ForceFullSync();
 
             onboardingStorage.SetIsNewUser(false);
 

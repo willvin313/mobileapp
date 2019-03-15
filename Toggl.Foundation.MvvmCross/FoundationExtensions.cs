@@ -1,12 +1,10 @@
 ﻿using System;
 using MvvmCross;
 using Toggl.Foundation.Autocomplete;
-using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Login;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.Sync;
-using Toggl.Multivac.Extensions;
 using Toggl.Ultrawave;
 
 namespace Toggl.Foundation.MvvmCross
@@ -41,51 +39,48 @@ namespace Toggl.Foundation.MvvmCross
         {
             initializeInversionOfControl(foundation);
 
-            Func<ITogglDataSource, ISyncManager> createSyncManager(ITogglApi api) => dataSource =>
-                TogglSyncManager.CreateSyncManager(
+            (ISyncManager, IInteractorFactory) initializeAfterLogin(ITogglApi api)
+            {
+                var syncManager = TogglSyncManager.CreateSyncManager(
                     foundation.Database,
                     api,
-                    dataSource,
+                    foundation.DataSource,
                     foundation.TimeService,
                     foundation.AnalyticsService,
                     foundation.LastTimeUsageStorage,
                     foundation.Scheduler,
-                    foundation.StopwatchProvider);
-
-            ITogglDataSource createDataSource(ITogglApi api)
-            {
-                var dataSource = new TogglDataSource(
-                        api,
-                        foundation.Database,
-                        foundation.TimeService,
-                        createSyncManager(api),
-                        foundation.AnalyticsService)
-                    .RegisterServices();
+                    foundation.StopwatchProvider,
+                    foundation.AutomaticSyncingService);
 
                 Mvx.RegisterSingleton(api);
+                Mvx.RegisterSingleton(syncManager);
                 Mvx.ConstructAndRegisterSingleton<IInteractorFactory, InteractorFactory>();
                 Mvx.ConstructAndRegisterSingleton<IAutocompleteProvider, AutocompleteProvider>();
 
-                foundation.SyncErrorHandlingService.HandleErrorsOf(dataSource.SyncManager);
+                foundation.SyncErrorHandlingService.HandleErrorsOf(syncManager);
 
-                return dataSource;
+                var interactorFactory = Mvx.Resolve<IInteractorFactory>();
+
+                return (syncManager, interactorFactory);
             }
 
             var userAccessManager =
-                new UserAccessManager(foundation.ApiFactory, foundation.Database, foundation.GoogleService, foundation.PrivateSharedStorageService, createDataSource);
-
-            loginDisposable = userAccessManager
-                    .UserLoggedIn
-                    .Subscribe(foundation.ShortcutCreator.OnLogin);
+                new UserAccessManager(foundation.ApiFactory, foundation.Database, foundation.GoogleService, foundation.PrivateSharedStorageService, initializeAfterLogin);
 
             Mvx.RegisterSingleton<IUserAccessManager>(userAccessManager);
 
             foundation.BackgroundSyncService.SetupBackgroundSync(userAccessManager);
-            foundation.AutomaticSyncingService.SetupAutomaticSync(userAccessManager);
         }
 
         private static void initializeInversionOfControl(MvvmCrossFoundation foundation)
         {
+            Mvx.RegisterSingleton(foundation.DataSource);
+            Mvx.RegisterSingleton(foundation.DataSource.Tags);
+            Mvx.RegisterSingleton(foundation.DataSource.User);
+            Mvx.RegisterSingleton(foundation.DataSource.Tasks);
+            Mvx.RegisterSingleton(foundation.DataSource.Clients);
+            Mvx.RegisterSingleton(foundation.DataSource.Projects);
+            Mvx.RegisterSingleton(foundation.DataSource.TimeEntries);
             Mvx.RegisterSingleton(foundation.StopwatchProvider);
             Mvx.RegisterSingleton(foundation.BackgroundService);
             Mvx.RegisterSingleton(foundation.AutomaticSyncingService);

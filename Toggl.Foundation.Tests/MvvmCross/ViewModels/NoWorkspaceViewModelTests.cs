@@ -19,7 +19,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public abstract class NoWorkspaceViewModelTest : BaseViewModelTests<NoWorkspaceViewModel>
         {
             protected override NoWorkspaceViewModel CreateViewModel()
-                => new NoWorkspaceViewModel(DataSource, InteractorFactory, NavigationService, AccessRestrictionStorage, SchedulerProvider, RxActionFactory);
+                => new NoWorkspaceViewModel(SyncManager, InteractorFactory, NavigationService, AccessRestrictionStorage, SchedulerProvider, RxActionFactory);
         }
 
         public sealed class TheConstructor : NoWorkspaceViewModelTest
@@ -27,14 +27,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Theory, LogIfTooSlow]
             [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(
-                bool useDataSource,
+                bool useSyncManager,
                 bool useAccessRestrictionStorage,
                 bool useInteractorFactory,
                 bool useNavigationService,
                 bool useSchedulerProvider,
                 bool useRxActionFactory)
             {
-                var dataSource = useDataSource ? DataSource : null;
+                var syncManager = useSyncManager ? SyncManager : null;
                 var accessRestrictionStorage = useAccessRestrictionStorage ? AccessRestrictionStorage : null;
                 var interactorFactory = useInteractorFactory ? InteractorFactory : null;
                 var navigationService = useNavigationService ? NavigationService : null;
@@ -42,7 +42,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var rxActionFactory = useRxActionFactory ? RxActionFactory : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new NoWorkspaceViewModel(dataSource, interactorFactory, navigationService, accessRestrictionStorage, schedulerProvider, rxActionFactory);
+                    () => new NoWorkspaceViewModel(syncManager, interactorFactory, navigationService, accessRestrictionStorage, schedulerProvider, rxActionFactory);
 
                 tryingToConstructWithEmptyParameters.Should().Throw<ArgumentNullException>();
             }

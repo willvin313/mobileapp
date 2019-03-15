@@ -1,4 +1,4 @@
-﻿using Xamarin.UITest;
+using Xamarin.UITest;
 
 namespace Toggl.Tests.UI.Extensions
 {
@@ -30,6 +30,11 @@ namespace Toggl.Tests.UI.Extensions
         {
             var query = $"Create client \"{clientName}\"";
             tapAndWaitForElement(app, query);
+        }
+
+        public static void TapSelectClient(this IApp app, string clientName)
+        {
+            app.Tap(query => query.Marked(clientName).Id(Client.ClientCreationCellId));
         }
 
         private static void tapAndWaitForElement(IApp app, string query)

@@ -7,12 +7,14 @@ using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
+using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Helper;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.Services;
+using Toggl.Foundation.Sync;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 
@@ -22,6 +24,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
     public sealed class TimeEntriesViewModel
     {
         private readonly ITogglDataSource dataSource;
+        private readonly ISyncManager syncManager;
         private readonly IInteractorFactory interactorFactory;
         private readonly IAnalyticsService analyticsService;
         private readonly ISchedulerProvider schedulerProvider;
@@ -44,18 +47,21 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public UIAction CancelDeleteTimeEntry { get; }
 
         public TimeEntriesViewModel (ITogglDataSource dataSource,
+                                     ISyncManager syncManager,
                                      IInteractorFactory interactorFactory,
                                      IAnalyticsService analyticsService,
                                      ISchedulerProvider schedulerProvider,
                                      IRxActionFactory rxActionFactory)
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
+            Ensure.Argument.IsNotNull(syncManager, nameof(syncManager));
             Ensure.Argument.IsNotNull(interactorFactory, nameof(interactorFactory));
             Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
             Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
 
             this.dataSource = dataSource;
+            this.syncManager = syncManager;
             this.interactorFactory = interactorFactory;
             this.analyticsService = analyticsService;
             this.schedulerProvider = schedulerProvider;
@@ -154,11 +160,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             return interactorFactory
                 .DeleteTimeEntry(timeEntry.Id)
                 .Execute()
-                .Do(_ =>
-                {
-                    analyticsService.DeleteTimeEntry.Track();
-                    dataSource.SyncManager.PushSync();
-                })
+                .Track(analyticsService.DeleteTimeEntry)
+                .Do(syncManager.InitiatePushSync)
                 .SelectValue(timeEntry);
         }
 

@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reactive.Subjects;
-using System.Threading.Tasks;
 using Android.Runtime;
 using Android.Support.V7.Widget;
 using Android.Views;
@@ -9,6 +9,8 @@ namespace Toggl.Giskard.ViewHolders
 {
     public abstract class BaseRecyclerViewHolder<T> : RecyclerView.ViewHolder
     {
+        private bool viewsAreInitialized = false;
+
         public Subject<T> TappedSubject { get; set; }
 
         private T item;
@@ -18,6 +20,13 @@ namespace Toggl.Giskard.ViewHolders
             set
             {
                 item = value;
+
+                if (!viewsAreInitialized)
+                {
+                    InitializeViews();
+                    viewsAreInitialized = true;
+                }
+
                 UpdateView();
             }
         }
@@ -26,7 +35,6 @@ namespace Toggl.Giskard.ViewHolders
             : base(itemView)
         {
             ItemView.Click += onItemViewClick;
-            InitializeViews();
         }
 
         protected BaseRecyclerViewHolder(IntPtr handle, JniHandleOwnership ownership)
@@ -45,7 +53,6 @@ namespace Toggl.Giskard.ViewHolders
             if (!disposing || ItemView == null) return;
             ItemView.Click -= onItemViewClick;
         }
-
 
         private void onItemViewClick(object sender, EventArgs args)
         {

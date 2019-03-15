@@ -6,6 +6,7 @@ using MvvmCross.ViewModels;
 using NSubstitute;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.DataSources.Interfaces;
+using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Login;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross;
@@ -33,8 +34,12 @@ namespace Toggl.Foundation.Tests.MvvmCross
             protected AppStartTest()
             {
                 AppStart = new AppStart<OnboardingViewModel>(App, TimeService, UserAccessManager, OnboardingStorage, NavigationService, AccessRestrictionStorage);
-                DataSource.SyncManager.Returns(SyncManager);
-                UserAccessManager.GetDataSourceIfLoggedIn().Returns(DataSource);
+                UserAccessManager.TryInitializingAccessToUserData(out _, out _).Returns(x =>
+                {
+                    x[0] = SyncManager;
+                    x[1] = InteractorFactory;
+                    return true;
+                });
             }
         }
 
@@ -76,10 +81,10 @@ namespace Toggl.Foundation.Tests.MvvmCross
             {
                 AccessRestrictionStorage.IsClientOutdated().Returns(true);
 
-                await Task.Run(() => AppStart.Start());
+                AppStart.Start();
 
                 await NavigationService.Received().Navigate<OutdatedAppViewModel>();
-                UserAccessManager.DidNotReceive().GetDataSourceIfLoggedIn();
+                UserAccessManager.DidNotReceive().TryInitializingAccessToUserData(out _, out _);
             }
 
             [Fact, LogIfTooSlow]
@@ -87,10 +92,10 @@ namespace Toggl.Foundation.Tests.MvvmCross
             {
                 AccessRestrictionStorage.IsApiOutdated().Returns(true);
 
-                await Task.Run(() => AppStart.Start());
+                AppStart.Start();
 
                 await NavigationService.Received().Navigate<OutdatedAppViewModel>();
-                UserAccessManager.DidNotReceive().GetDataSourceIfLoggedIn();
+                UserAccessManager.DidNotReceive().TryInitializingAccessToUserData(out _, out _);
             }
 
             [Fact, LogIfTooSlow]
@@ -98,7 +103,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
             {
                 AccessRestrictionStorage.IsUnauthorized(Arg.Any<string>()).Returns(true);
 
-                await Task.Run(() => AppStart.Start());
+                AppStart.Start();
 
                 await SyncManager.DidNotReceive().ForceFullSync();
                 await NavigationService.Received().Navigate<TokenResetViewModel>();
@@ -110,10 +115,10 @@ namespace Toggl.Foundation.Tests.MvvmCross
                 AccessRestrictionStorage.IsUnauthorized(Arg.Any<string>()).Returns(true);
                 AccessRestrictionStorage.IsClientOutdated().Returns(true);
 
-                await Task.Run(() => AppStart.Start());
+                AppStart.Start();
 
                 await NavigationService.Received().Navigate<OutdatedAppViewModel>();
-                UserAccessManager.DidNotReceive().GetDataSourceIfLoggedIn();
+                UserAccessManager.DidNotReceive().TryInitializingAccessToUserData(out _, out _);
             }
 
             [Fact, LogIfTooSlow]
@@ -122,11 +127,11 @@ namespace Toggl.Foundation.Tests.MvvmCross
                 AccessRestrictionStorage.IsUnauthorized(Arg.Any<string>()).Returns(true);
                 AccessRestrictionStorage.IsApiOutdated().Returns(true);
 
-                await Task.Run(() => AppStart.Start());
+                AppStart.Start();
 
                 await NavigationService.Received().Navigate<OutdatedAppViewModel>();
                 await NavigationService.DidNotReceive().Navigate<TokenResetViewModel>();
-                UserAccessManager.DidNotReceive().GetDataSourceIfLoggedIn();
+                UserAccessManager.DidNotReceive().TryInitializingAccessToUserData(out _, out _);
             }
 
             [Fact, LogIfTooSlow]
@@ -135,17 +140,14 @@ namespace Toggl.Foundation.Tests.MvvmCross
                 var oldApiToken = Guid.NewGuid().ToString();
                 var newApiToken = Guid.NewGuid().ToString();
                 var user = Substitute.For<IThreadSafeUser>();
-                var dataSource = Substitute.For<ITogglDataSource>();
-                var userSource = Substitute.For<ISingletonDataSource<IThreadSafeUser>>();
+                var interactorFactory = Substitute.For<IInteractorFactory>();
                 user.ApiToken.Returns(newApiToken);
-                userSource.Current.Returns(Observable.Return(user));
-                dataSource.User.Returns(userSource);
-                UserAccessManager.GetDataSourceIfLoggedIn().Returns(dataSource);
+                interactorFactory.GetCurrentUser().Execute().Returns(Observable.Return(user));
                 AccessRestrictionStorage.IsUnauthorized(Arg.Is(oldApiToken)).Returns(true);
                 AccessRestrictionStorage.IsApiOutdated().Returns(false);
                 AccessRestrictionStorage.IsClientOutdated().Returns(false);
 
-                await Task.Run(() => AppStart.Start());
+                AppStart.Start();
 
                 await NavigationService.Received().ForkNavigate<MainTabBarViewModel, MainViewModel>();
             }
@@ -153,10 +155,9 @@ namespace Toggl.Foundation.Tests.MvvmCross
             [Fact, LogIfTooSlow]
             public async Task ShowsTheOnboardingViewModelIfTheUserHasNotLoggedInPreviously()
             {
-                ITogglDataSource dataSource = null;
-                UserAccessManager.GetDataSourceIfLoggedIn().Returns(dataSource);
+                UserAccessManager.TryInitializingAccessToUserData(out _, out _).Returns(false);
 
-                await Task.Run(() => AppStart.Start());
+                AppStart.Start();
 
                 await NavigationService.Received().Navigate<OnboardingViewModel>();
             }
@@ -164,10 +165,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
             [Fact, LogIfTooSlow]
             public async Task CallsForkNavigateToMainTabBarViewModelAndMainViewModelIfTheUserHasLoggedInPreviously()
             {
-                var dataSource = Substitute.For<ITogglDataSource>();
-                UserAccessManager.GetDataSourceIfLoggedIn().Returns(dataSource);
-
-                await Task.Run(() => AppStart.Start());
+                AppStart.Start();
 
                 await NavigationService.Received().ForkNavigate<MainTabBarViewModel, MainViewModel>();
             }

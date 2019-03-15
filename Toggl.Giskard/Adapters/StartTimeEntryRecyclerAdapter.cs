@@ -1,28 +1,44 @@
 ﻿using System;
-using System.Collections.Specialized;
-using System.Linq;
+using System.Collections.Generic;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Android.Runtime;
-using Android.Support.V7.Widget;
 using Android.Views;
-using MvvmCross.Commands;
-using MvvmCross.Platforms.Android.Binding.BindingContext;
-using MvvmCross.ViewModels;
-using Toggl.Foundation;
 using Toggl.Foundation.Autocomplete.Suggestions;
-using Toggl.Foundation.MvvmCross.Collections;
-using Toggl.Giskard.TemplateSelectors;
-using Toggl.Giskard.Views;
+using Toggl.Giskard.ViewHolders;
+using Toggl.Multivac.Extensions;
 
 namespace Toggl.Giskard.Adapters
 {
-    public sealed class StartTimeEntryRecyclerAdapter
-        : CreateSuggestionGroupedTableViewSource<WorkspaceGroupedCollection<AutocompleteSuggestion>, AutocompleteSuggestion>
+    public sealed class StartTimeEntryRecyclerAdapter : BaseSectionedRecyclerAdapter<string, AutocompleteSuggestion>
     {
-        public bool UseGrouping { get; set; }
+        public const int WorkspaceHeader = 0;
+        public const int NoEntityFound = 1;
+        public const int TimeEntrySuggestion = 2;
+        public const int ProjectSuggestion = 3;
+        public const int TagSuggestion = 4;
+        public const int TaskSuggestion = 5;
+        public const int CreateEntity = 6;
+        public const int TimeEntrySuggestionWithPartialContent = 7;
+        public const int QuerySymbolSuggestion = 8;
 
-        public bool IsSuggestingProjects { get; set; }
+        private readonly ISubject<ProjectSuggestion> toggleTasksSubject = new Subject<ProjectSuggestion>();
 
-        public IMvxCommand<ProjectSuggestion> ToggleTasksCommand { get; set; }
+        protected override HashSet<int> HeaderViewTypes { get; } = new HashSet<int> { WorkspaceHeader };
+
+        protected override HashSet<int> ItemViewTypes { get; } = new HashSet<int>
+        {
+            NoEntityFound,
+            TimeEntrySuggestion,
+            ProjectSuggestion,
+            TagSuggestion,
+            TaskSuggestion,
+            CreateEntity,
+            TimeEntrySuggestionWithPartialContent,
+            QuerySymbolSuggestion
+        };
+
+        public IObservable<ProjectSuggestion> ToggleTasks => toggleTasksSubject.AsObservable();
 
         public StartTimeEntryRecyclerAdapter()
         {
@@ -33,65 +49,99 @@ namespace Toggl.Giskard.Adapters
         {
         }
 
-        public override int ItemCount
-        {
-            get
-            {
-                if (UseGrouping)
-                    return base.ItemCount;
+        protected override int SelectHeaderViewType(string headerItem) => WorkspaceHeader;
 
-                return (Collection.FirstOrDefault()?.Count ?? 0)
-                    + (IsSuggestingCreation ? 1 : 0);
+        protected override int SelectItemViewType(AutocompleteSuggestion headerItem)
+        {
+            switch (headerItem)
+            {
+                case TagSuggestion _:
+                    return TagSuggestion;
+                case QuerySymbolSuggestion _:
+                    return QuerySymbolSuggestion;
+                case TaskSuggestion _:
+                    return TaskSuggestion;
+                case NoEntityInfoMessage _:
+                    return NoEntityFound;
+                case ProjectSuggestion _:
+                    return ProjectSuggestion;
+                case TimeEntrySuggestion timeEntrySuggestion when timeEntrySuggestionHasPartialContent(timeEntrySuggestion):
+                    return TimeEntrySuggestionWithPartialContent;
+                case TimeEntrySuggestion _:
+                    return TimeEntrySuggestion;
+                default:
+                    return CreateEntity;
+            }
+
+            bool timeEntrySuggestionHasPartialContent(TimeEntrySuggestion timeEntrySuggestion)
+                => string.IsNullOrEmpty(timeEntrySuggestion.Description) || !timeEntrySuggestion.HasProject;
+        }
+
+        protected override BaseRecyclerViewHolder<string> CreateHeaderViewHolder(LayoutInflater inflater, ViewGroup parent, int viewType)
+        {
+            var inflatedView = inflater.Inflate(Resource.Layout.StartTimeEntryActivityWorkspaceHeader, parent, false);
+            return new SimpleTextViewHolder<string>(inflatedView, Resource.Id.WorkspaceHeaderTextView, CommonFunctions.Identity);
+        }
+
+        protected override BaseRecyclerViewHolder<AutocompleteSuggestion> CreateItemViewHolder(LayoutInflater inflater, ViewGroup parent, int viewType)
+        {
+            switch (viewType)
+            {
+                case QuerySymbolSuggestion:
+                    return new SimpleTextViewHolder<AutocompleteSuggestion>(
+                        inflater.Inflate(Resource.Layout.StartTimeEntryActivityQuerySymbolCell, parent, false),
+                        Resource.Id.HintLabel,
+                        suggestion => (suggestion as QuerySymbolSuggestion).FormattedDescription()
+                    );
+
+                case NoEntityFound:
+                    // This view type of suggestion is ignored on Droid
+                    return new SimpleTextViewHolder<AutocompleteSuggestion>(
+                        inflater.Inflate(Resource.Layout.StartTimeEntryActivityNoEntityCell, parent, false),
+                        Resource.Id.TextView,
+                        suggestion => ""
+                    );
+                    
+                case TimeEntrySuggestion:
+                    return new TimeEntrySuggestionViewHolder(
+                        inflater.Inflate(Resource.Layout.StartTimeEntryActivityTimeEntryCell, parent, false)
+                    );
+
+                case ProjectSuggestion:
+                    return new ProjectSuggestionViewHolder(
+                        inflater.Inflate(Resource.Layout.StartTimeEntryActivityProjectCell, parent, false),
+                        toggleTasksSubject
+                    );
+
+                case TagSuggestion:
+                    return new SimpleTextViewHolder<AutocompleteSuggestion>(
+                        inflater.Inflate(Resource.Layout.StartTimeEntryActivityTagCell, parent, false),
+                        Resource.Id.TagLabel,
+                        suggestion => (suggestion as TagSuggestion).Name
+                    );
+
+                case TaskSuggestion:
+                    return new SimpleTextViewHolder<AutocompleteSuggestion>(
+                        inflater.Inflate(Resource.Layout.StartTimeEntryActivityTaskCell, parent, false),
+                        Resource.Id.TaskLabel,
+                        suggestion => (suggestion as TaskSuggestion).Name
+                    );
+
+                case CreateEntity:
+                    return new SimpleTextViewHolder<AutocompleteSuggestion>(
+                        inflater.Inflate(Resource.Layout.AbcCreateEntityCell, parent, false),
+                        Resource.Id.CreationLabel,
+                        suggestion => (suggestion as CreateEntitySuggestion).CreateEntityMessage
+                    );
+
+                case TimeEntrySuggestionWithPartialContent:
+                    return new TimeEntrySuggestionViewHolder(
+                        inflater.Inflate(Resource.Layout.StartTimeEntryActivityTimeEntryWithPartialContentCell, parent, false)
+                    );
+
+                default:
+                    throw new InvalidOperationException($"Invalid view type {viewType}");
             }
         }
-
-        public override object GetItem(int viewPosition)
-        {
-            if (UseGrouping)
-                return base.GetItem(viewPosition);
-
-            if (IsSuggestingCreation && viewPosition == 0)
-                return GetCreateSuggestionItem();
-
-            var actualViewPosition = viewPosition - (IsSuggestingCreation ? 1 : 0);
-
-            if (Collection.FirstOrDefault()?.Count < actualViewPosition)
-                return null;
-
-            return Collection.First()[actualViewPosition];
-        }
-
-        protected override void OnItemsSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            base.OnItemsSourceCollectionChanged(sender, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-        }
-
-        protected override MvxObservableCollection<WorkspaceGroupedCollection<AutocompleteSuggestion>> Collection
-            => ItemsSource as MvxObservableCollection<WorkspaceGroupedCollection<AutocompleteSuggestion>>;
-
-        public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
-        {
-            if (viewType != StartTimeEntrySuggestionsTemplateSelector.ProjectSuggestion)
-                return base.OnCreateViewHolder(parent, viewType);
-
-            var itemBindingContext = new MvxAndroidBindingContext(parent.Context, BindingContext.LayoutInflaterHolder);
-            var inflatedView = InflateViewForHolder(parent, viewType, itemBindingContext);
-            var viewHolder = new SelectProjectWithExpandableTasksRecyclerViewHolder(
-                inflatedView, itemBindingContext, Resource.Id.StartTimeEntryToggleTasksButton)
-            {
-                Click = ItemClick,
-                LongClick = ItemLongClick,
-                ToggleTasksCommand = ToggleTasksCommand
-            };
-
-            return viewHolder;
-        }
-
-        protected override int SuggestCreationViewType => StartTimeEntrySuggestionsTemplateSelector.CreateEntity;
-
-        protected override object GetCreateSuggestionItem()
-            => IsSuggestingProjects
-                ? $"{Resources.CreateProject} \"{Text}\""
-                : $"{Resources.CreateTag} \"{Text}\"";
     }
 }
