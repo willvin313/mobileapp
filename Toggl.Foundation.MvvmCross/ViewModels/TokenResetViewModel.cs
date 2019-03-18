@@ -13,6 +13,7 @@ using Toggl.Foundation.Login;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.Services;
+using Toggl.Foundation.Sync;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
@@ -145,12 +146,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .Select(Multivac.Password.From)
                 .ThrowIf(password => !password.IsValid, new InvalidOperationException())
                 .SelectMany(userAccessManager.RefreshToken)
-                .Do(onDataSource)
+                .Do(onSyncManager)
                 .SelectUnit();
 
-        private void onDataSource(ITogglDataSource newDataSource)
+        private void onSyncManager(ISyncManager syncManager)
         {
-            newDataSource.SyncManager.ForceFullSync().Subscribe();
+            syncManager.ForceFullSync();
 
             navigationService.Navigate<MainTabBarViewModel>();
         }

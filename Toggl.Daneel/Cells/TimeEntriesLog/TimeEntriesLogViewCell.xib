@@ -156,6 +156,9 @@
                                     </button>
                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="icContinue" translatesAutoresizingMaskIntoConstraints="NO" id="2Q5-T6-UvK">
                                         <rect key="frame" x="223" y="38" width="10" height="11"/>
+                                        <accessibility key="accessibilityConfiguration" label="TimeEntryRowContinueButton">
+                                            <bool key="isElement" value="YES"/>
+                                        </accessibility>
                                         <constraints>
                                             <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="11" id="1wx-Ua-IPz"/>
                                             <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="10" id="e1m-FH-gEi"/>

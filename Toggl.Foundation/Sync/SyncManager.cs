@@ -4,6 +4,7 @@ using System.Reactive.Subjects;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.Exceptions;
+using Toggl.Foundation.Services;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
@@ -21,6 +22,7 @@ namespace Toggl.Foundation.Sync
         private readonly ILastTimeUsageStorage lastTimeUsageStorage;
         private readonly ITimeService timeService;
         private readonly IStopwatchProvider stopwatchProvider;
+        private readonly IAutomaticSyncingService automaticSyncingService;
 
         private bool isFrozen;
 
@@ -43,7 +45,8 @@ namespace Toggl.Foundation.Sync
             IAnalyticsService analyticsService,
             ILastTimeUsageStorage lastTimeUsageStorage,
             ITimeService timeService,
-            IStopwatchProvider stopwatchProvider)
+            IStopwatchProvider stopwatchProvider,
+            IAutomaticSyncingService automaticSyncingService)
         {
             Ensure.Argument.IsNotNull(queue, nameof(queue));
             Ensure.Argument.IsNotNull(orchestrator, nameof(orchestrator));
@@ -51,6 +54,7 @@ namespace Toggl.Foundation.Sync
             Ensure.Argument.IsNotNull(lastTimeUsageStorage, nameof(lastTimeUsageStorage));
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
             Ensure.Argument.IsNotNull(stopwatchProvider, nameof(stopwatchProvider));
+            Ensure.Argument.IsNotNull(automaticSyncingService, nameof(automaticSyncingService));
 
             this.queue = queue;
             this.orchestrator = orchestrator;
@@ -58,6 +62,7 @@ namespace Toggl.Foundation.Sync
             this.lastTimeUsageStorage = lastTimeUsageStorage;
             this.timeService = timeService;
             this.stopwatchProvider = stopwatchProvider;
+            this.automaticSyncingService = automaticSyncingService;
 
             progress = new BehaviorSubject<SyncProgress>(SyncProgress.Unknown);
             ProgressObservable = progress.AsObservable();
@@ -67,6 +72,7 @@ namespace Toggl.Foundation.Sync
 
             orchestrator.SyncCompleteObservable.Subscribe(syncOperationCompleted);
             isFrozen = false;
+            automaticSyncingService.Start(this);
         }
 
         public IObservable<SyncState> PushSync()
@@ -106,6 +112,7 @@ namespace Toggl.Foundation.Sync
                 {
                     isFrozen = true;
                     orchestrator.Freeze();
+                    automaticSyncingService.Stop();
                 }
 
                 return IsRunningSync

@@ -57,7 +57,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
             Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
 
             this.UserPreferences = userPreferences;
-            this.NavigationService = navigationService; 
+            this.NavigationService = navigationService;
             this.interactorFactory = interactorFactory;
             this.rxActionFactory = rxActionFactory;
 
@@ -65,8 +65,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
 
             Calendars = calendarsSubject.AsObservable().DistinctUntilChanged();
 
-            Close = rxActionFactory.FromAsync(close);
-            Done = rxActionFactory.FromAsync(done, doneEnabledSubject.AsObservable());
+            Close = rxActionFactory.FromAsync(OnClose);
+            Done = rxActionFactory.FromAsync(OnDone, doneEnabledSubject.AsObservable());
         }
 
         public sealed override void Prepare(bool parameter)
@@ -127,10 +127,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
             calendar.Selected = !calendar.Selected;
         }
 
-        private Task close()
+        protected virtual Task OnClose()
             => NavigationService.Close(this, InitialSelectedCalendarIds.ToArray());
 
-        private Task done()
+        protected virtual Task OnDone()
             => NavigationService.Close(this, SelectedCalendarIds.ToArray());
     }
 }

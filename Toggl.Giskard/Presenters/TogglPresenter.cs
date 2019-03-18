@@ -20,7 +20,7 @@ namespace Toggl.Giskard.Presenters
     {
         private readonly HashSet<Type> clearBackStackTypes = new HashSet<Type>
         {
-            typeof(MainViewModel),
+            typeof(MainTabBarViewModel),
             typeof(LoginViewModel),
             typeof(SignupViewModel),
             typeof(OnboardingViewModel),

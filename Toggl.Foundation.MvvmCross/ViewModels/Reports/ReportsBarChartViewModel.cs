@@ -18,6 +18,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Reports
 
         private const int roundToMultiplesOf = 2;
 
+        private IDisposable reportsDisposable;
+
         public IObservable<BarViewModel[]> Bars { get; }
 
         public IObservable<int> MaximumHoursPerBar { get; }
@@ -41,7 +43,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Reports
                 .Select(preferences => preferences.DateFormat)
                 .AsDriver(onErrorJustReturn: defaultDateFormat, schedulerProvider: schedulerProvider);
 
-            var finalReports = reports.Share();
+            var finalReports = reports.Replay(1);
+            reportsDisposable = finalReports.Connect();
 
             Bars = finalReports.Select(bars)
                 .AsDriver(onErrorJustReturn: Array.Empty<BarViewModel>(), schedulerProvider: schedulerProvider);
@@ -51,6 +54,15 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Reports
 
             HorizontalLegend = finalReports.Select(weeklyLegend)
                 .AsDriver(onErrorJustReturn: null, schedulerProvider: schedulerProvider);
+        }
+
+        public override void ViewDestroy(bool viewFinishing = true)
+        {
+            base.ViewDestroy(viewFinishing);
+
+            if (!viewFinishing) return;
+
+            reportsDisposable.Dispose();
         }
 
         private BarViewModel[] bars(ITimeEntriesTotals report)

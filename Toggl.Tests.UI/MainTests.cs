@@ -1,5 +1,7 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using Xamarin.UITest;
+using Xamarin.UITest.Queries;
 using static Toggl.Tests.UI.Extensions.MainExtensions;
 
 namespace Toggl.Tests.UI
@@ -72,6 +74,56 @@ namespace Toggl.Tests.UI
             app.TapSnackBarButton("UNDO");
 
             app.AssertTimeEntryInTheLog(description);
+        }
+
+        [Test]
+        public void TappingTheContinueButtonOnATimeEntryContinuesTheTimeEntry()
+        {
+            var timeEntryDescription = "This is a time entry";
+            app.CreateTimeEntry(timeEntryDescription);
+            Func<AppQuery, AppQuery> queryForContinueButton
+                = x => x.Marked(Main.TimeEntryRow)
+                    .Descendant()
+                    .Text(timeEntryDescription)
+                    .Parent()
+                    .Marked(Main.TimeEntryRow)
+                    .Descendant()
+                    .Marked(Main.TimeEntryRowContinueButton);
+
+            app.Tap(queryForContinueButton);
+
+            app.AssertRunningTimeEntry(timeEntryDescription);
+        }
+
+        [Test]
+        public void SwipingATimeEntryRightContinuesIt()
+        {
+            var timeEntryDescription = "No, this is Patrick!";
+            var projectName = "Some project";
+            app.CreateTimeEntry(timeEntryDescription, projectName);
+
+            app.SwipeEntryToContinue(timeEntryDescription);
+
+            app.AssertRunningTimeEntry(timeEntryDescription, projectName);
+        }
+
+        [Test, IgnoreOnAndroid]
+        public void SwipingATimeEntryRightAndTappingTheRevealedContinueButtonContinuesTheTimeEntry()
+        {
+            var description = "This was a triupmh";
+            app.CreateTimeEntry(description);
+            var timeEntryCellRect = app.RectForTimeEntryCell(description);
+
+            app.DragCoordinates(
+                fromX: timeEntryCellRect.X,
+                fromY: timeEntryCellRect.CenterY,
+                toX: timeEntryCellRect.X + 100,
+                toY: timeEntryCellRect.CenterY
+            );
+            app.WaitForElement(x => x.Text("Continue"));
+            app.Tap(x => x.Text("Continue"));
+
+            app.AssertRunningTimeEntry(description);
         }
     }
 }

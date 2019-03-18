@@ -1,27 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using FluentAssertions;
-using Microsoft.Reactive.Testing;
 using NSubstitute;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Models;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Sync;
-using Toggl.Foundation.Tests.Helpers;
-using Toggl.Foundation.Tests.Sync;
 using Toggl.Multivac.Models;
 using Toggl.PrimeRadiant;
 using Toggl.PrimeRadiant.Models;
 using Xunit;
-using Toggl.Ultrawave.Exceptions;
-using Toggl.Ultrawave.Network;
 using ThreadingTask = System.Threading.Tasks.Task;
-using Toggl.Ultrawave;
 using Toggl.Foundation.Shortcuts;
 
 namespace Toggl.Foundation.Tests.DataSources
@@ -31,7 +22,6 @@ namespace Toggl.Foundation.Tests.DataSources
         public abstract class TogglDataSourceTest
         {
             protected ITogglDataSource DataSource { get; }
-            protected ITogglApi Api { get; } = Substitute.For<ITogglApi>();
             protected ITogglDatabase Database { get; } = Substitute.For<ITogglDatabase>();
             protected ITimeService TimeService { get; } = Substitute.For<ITimeService>();
             protected ISyncManager SyncManager { get; } = Substitute.For<ISyncManager>();
@@ -44,10 +34,8 @@ namespace Toggl.Foundation.Tests.DataSources
             {
                 SyncManager.ProgressObservable.Returns(ProgressSubject.AsObservable());
                 DataSource = new TogglDataSource(
-                    Api,
                     Database,
                     TimeService,
-                    _ => SyncManager,
                     AnalyticsService);
             }
         }

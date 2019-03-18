@@ -29,6 +29,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using Toggl.Foundation.Interactors.Timezones;
 using Toggl.Foundation.Serialization;
+using Toggl.Foundation.Sync;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels
 {
@@ -291,16 +292,16 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                             timezone)
                 )
                 .Track(analyticsService.SignUp, AuthenticationMethod.EmailAndPassword)
-                .Subscribe(onDataSource, onError, onCompleted);
+                .Subscribe(onInteractorFactory, onError, onCompleted);
         }
 
-        private async void onDataSource(ITogglDataSource dataSource)
+        private async void onInteractorFactory(ISyncManager syncManager)
         {
             successfulSignupSubject.OnNext(Unit.Default);
 
             lastTimeUsageStorage.SetLogin(timeService.CurrentDateTime);
 
-            await dataSource.SyncManager.ForceFullSync();
+            await syncManager.ForceFullSync();
 
             onboardingStorage.SetIsNewUser(true);
             onboardingStorage.SetUserSignedUp();
@@ -359,7 +360,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             signupDisposable = userAccessManager
                 .SignUpWithGoogle(termsOfServiceAccepted, (int)countryId.Value, timezone)
                 .Track(analyticsService.SignUp, AuthenticationMethod.Google)
-                .Subscribe(onDataSource, onError, onCompleted);
+                .Subscribe(onInteractorFactory, onError, onCompleted);
         }
 
         public void TogglePasswordVisibility()

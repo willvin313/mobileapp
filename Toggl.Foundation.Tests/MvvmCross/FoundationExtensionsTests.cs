@@ -17,6 +17,7 @@ using Toggl.PrimeRadiant.Settings;
 using Toggl.Ultrawave.Network;
 using Xunit;
 using IStopwatchProvider = Toggl.Foundation.Diagnostics.IStopwatchProvider;
+using Toggl.Foundation.DataSources;
 
 namespace Toggl.Foundation.Tests.MvvmCross
 {
@@ -30,6 +31,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
         private readonly UserAgent userAgent = new UserAgent("Some Client", "1.0");
         private readonly ITimeService timeService = Substitute.For<ITimeService>();
         private readonly ITogglDatabase database = Substitute.For<ITogglDatabase>();
+        private readonly ITogglDataSource dataSource = Substitute.For<ITogglDataSource>();
         private readonly IPlatformInfo platformInfo = Substitute.For<IPlatformInfo>();
         private readonly IRatingService ratingService = Substitute.For<IRatingService>();
         private readonly IGoogleService googleService = Substitute.For<IGoogleService>();
@@ -180,6 +182,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
 
         private TogglFoundation constructFoundation()
             => TogglFoundation.ForClient(userAgent, version)
+                    .WithDataSource(dataSource)
                     .WithDatabase(database)
                     .WithScheduler(scheduler)
                     .WithApiFactory(apiFactory)

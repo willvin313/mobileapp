@@ -22,6 +22,7 @@ namespace Toggl.Foundation.Interactors
                 analyticsService,
                 intentDonationService,
                 prototype,
+                syncManager,
                 prototype.StartTime,
                 prototype.Duration,
                 origin);
@@ -34,6 +35,7 @@ namespace Toggl.Foundation.Interactors
                 analyticsService,
                 intentDonationService,
                 prototype,
+                syncManager,
                 timeService.CurrentDateTime,
                 null,
                 TimeEntryStartOrigin.Continue);
@@ -46,6 +48,7 @@ namespace Toggl.Foundation.Interactors
                 analyticsService,
                 intentDonationService,
                 suggestion,
+                syncManager,
                 timeService.CurrentDateTime,
                 null,
             TimeEntryStartOrigin.Suggestion);
@@ -55,7 +58,8 @@ namespace Toggl.Foundation.Interactors
                 idProvider,
                 timeService,
                 dataSource,
-                analyticsService);
+                analyticsService,
+                syncManager);
 
         public IInteractor<IObservable<Unit>> DeleteTimeEntry(long id)
             => new DeleteTimeEntryInteractor(timeService, dataSource.TimeEntries, this, id);
@@ -66,8 +70,11 @@ namespace Toggl.Foundation.Interactors
         public IInteractor<IObservable<IEnumerable<IThreadSafeTimeEntry>>> GetAllTimeEntriesVisibleToTheUser()
             => new GetAllTimeEntriesVisibleToTheUserInteractor(dataSource.TimeEntries);
 
+        public IInteractor<IObservable<IEnumerable<IThreadSafeTimeEntry>>> ObserveTimeEntriesVisibleToTheUser()
+            => new ObserveTimeEntriesVisibleToTheUserInteractor(dataSource.TimeEntries);
+
         public IInteractor<IObservable<IThreadSafeTimeEntry>> UpdateTimeEntry(EditTimeEntryDto dto)
-            => new UpdateTimeEntryInteractor(timeService, dataSource, this, dto);
+            => new UpdateTimeEntryInteractor(timeService, dataSource, this, syncManager, dto);
 
         public IInteractor<IObservable<IThreadSafeTimeEntry>> StopTimeEntry(DateTimeOffset currentDateTime, TimeEntryStopOrigin origin)
             => new StopTimeEntryInteractor(timeService, dataSource.TimeEntries, currentDateTime, analyticsService, origin);

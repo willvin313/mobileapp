@@ -46,6 +46,8 @@ namespace Toggl.Tests.UI
     {
         public const string TimeEntryRow = "MainTimeEntryRow";
         public const string TimeEntriesCollection = "MainRecyclerView";
+        public const string CurrentTimeEntryCard = "MainRunningTimeEntryFrame";
+        public const string TimeEntryRowContinueButton = "TimeEntriesLogCellContinueButton";
         public static readonly Func<AppQuery, AppQuery> StartTimeEntryButton = x => x.Id("MainPlayButton");
         public static readonly Func<AppQuery, AppQuery> StopTimeEntryButton = x => x.Id("MainStopButton");
     }

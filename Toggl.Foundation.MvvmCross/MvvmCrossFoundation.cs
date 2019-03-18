@@ -13,6 +13,7 @@ using Toggl.PrimeRadiant.Settings;
 using Toggl.Ultrawave;
 using Toggl.Ultrawave.Network;
 using IStopwatchProvider = Toggl.Foundation.Diagnostics.IStopwatchProvider;
+using Toggl.Foundation.DataSources;
 
 namespace Toggl.Foundation.MvvmCross
 {
@@ -20,6 +21,7 @@ namespace Toggl.Foundation.MvvmCross
     {
         public Version Version { get; }
         public UserAgent UserAgent { get; }
+        public ITogglDataSource DataSource { get; }
         public IScheduler Scheduler { get; }
         public IApiFactory ApiFactory { get; }
         public ITogglDatabase Database { get; }
@@ -77,6 +79,7 @@ namespace Toggl.Foundation.MvvmCross
             RxActionFactory = builder.RxActionFactory;
 
             Version = builder.Foundation.Version;
+            DataSource = builder.Foundation.DataSource;
             Database = builder.Foundation.Database;
             UserAgent = builder.Foundation.UserAgent;
             Scheduler = builder.Foundation.Scheduler;

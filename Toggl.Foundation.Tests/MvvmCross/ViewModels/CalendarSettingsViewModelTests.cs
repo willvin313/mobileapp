@@ -164,5 +164,131 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 });
             }
         }
+
+        public sealed class TheCloseAction : CalendarSettingsViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public async Task SavesThePreviouslySelectedCalendarIds()
+            {
+                var initialSelectedIds = new List<string> { "0", "1", "2", "3" };
+                UserPreferences.EnabledCalendarIds().Returns(initialSelectedIds);
+                PermissionsService.CalendarPermissionGranted.Returns(Observable.Return(true));
+
+                var userCalendars = Enumerable
+                    .Range(0, 9)
+                    .Select(id => new UserCalendar(
+                        id.ToString(),
+                        $"Calendar #{id}",
+                        $"Source #{id % 3}",
+                        false));
+
+                InteractorFactory
+                    .GetUserCalendars()
+                    .Execute()
+                    .Returns(Observable.Return(userCalendars));
+                await ViewModel.Initialize();
+                var selectedIds = new[] { "0", "2", "4", "7" };
+
+                var calendars = userCalendars
+                    .Where(calendar => selectedIds.Contains(calendar.Id))
+                    .Select(calendar => new SelectableUserCalendarViewModel(calendar, false));
+
+                ViewModel.SelectCalendar.ExecuteSequentally(calendars)
+                    .PrependAction(ViewModel.Close)
+                    .Subscribe();
+
+                TestScheduler.Start();
+
+                UserPreferences.Received().SetEnabledCalendars(initialSelectedIds.ToArray());
+            }
+        }
+
+        public sealed class TheDoneAction : CalendarSettingsViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public async Task SavesTheSelectedCalendarIds()
+            {
+                var initialSelectedIds = new List<string> { "0" };
+                UserPreferences.EnabledCalendarIds().Returns(initialSelectedIds);
+                PermissionsService.CalendarPermissionGranted.Returns(Observable.Return(true));
+
+                var userCalendars = Enumerable
+                    .Range(0, 9)
+                    .Select(id => new UserCalendar(
+                        id.ToString(),
+                        $"Calendar #{id}",
+                        $"Source #{id % 3}",
+                        false));
+
+                InteractorFactory
+                    .GetUserCalendars()
+                    .Execute()
+                    .Returns(Observable.Return(userCalendars));
+
+                await ViewModel.Initialize();
+                var selectedIds = new[] { "2", "4", "7" };
+
+                var calendars = userCalendars
+                    .Where(calendar => selectedIds.Contains(calendar.Id))
+                    .Select(calendar => new SelectableUserCalendarViewModel(calendar, false));
+
+                ViewModel.SelectCalendar.ExecuteSequentally(calendars)
+                    .PrependAction(ViewModel.Done)
+                    .Subscribe();
+
+                TestScheduler.Start();
+
+                Received.InOrder(() =>
+                {
+                    UserPreferences.SetEnabledCalendars(new[] { "0", "2" });
+                    UserPreferences.SetEnabledCalendars(new[] { "0", "2", "4" });
+                    UserPreferences.SetEnabledCalendars(new[] { "0", "2", "4", "7" });
+                    UserPreferences.SetEnabledCalendars(new[] { "0", "2", "4", "7" });
+                });
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task DeselectsAllCalendarAfterDisablingIntegration()
+            {
+                var initialSelectedIds = new List<string> { "0" };
+                UserPreferences.EnabledCalendarIds().Returns(initialSelectedIds);
+                PermissionsService.CalendarPermissionGranted.Returns(Observable.Return(true));
+
+                var userCalendars = Enumerable
+                    .Range(0, 9)
+                    .Select(id => new UserCalendar(
+                        id.ToString(),
+                        $"Calendar #{id}",
+                        $"Source #{id % 3}",
+                        false));
+
+                InteractorFactory
+                    .GetUserCalendars()
+                    .Execute()
+                    .Returns(Observable.Return(userCalendars));
+
+                await ViewModel.Initialize();
+                var selectedIds = new[] { "2", "4", "7" };
+
+                var calendars = userCalendars
+                    .Where(calendar => selectedIds.Contains(calendar.Id))
+                    .Select(calendar => new SelectableUserCalendarViewModel(calendar, false));
+
+                ViewModel.SelectCalendar.ExecuteSequentally(calendars)
+                    .PrependAction(ViewModel.TogglCalendarIntegration)
+                    .PrependAction(ViewModel.Done)
+                    .Subscribe();
+
+                TestScheduler.Start();
+
+                Received.InOrder(() =>
+                {
+                    UserPreferences.SetEnabledCalendars(new[] { "0", "2" });
+                    UserPreferences.SetEnabledCalendars(new[] { "0", "2", "4" });
+                    UserPreferences.SetEnabledCalendars(new[] { "0", "2", "4", "7" });
+                    UserPreferences.SetEnabledCalendars();
+                });
+            }
+        }
     }
 }

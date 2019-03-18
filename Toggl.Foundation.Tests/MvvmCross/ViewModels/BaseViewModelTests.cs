@@ -10,6 +10,7 @@ using Toggl.Foundation.Login;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Suggestions;
+using Toggl.Foundation.Sync;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant;
 using Toggl.PrimeRadiant.Settings;
@@ -23,6 +24,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         protected ITogglApi Api { get; } = Substitute.For<ITogglApi>();
         protected IApiFactory ApiFactory { get; } = Substitute.For<IApiFactory>();
         protected ITogglDatabase Database { get; } = Substitute.For<ITogglDatabase>();
+        protected ISyncManager SyncManager { get; } = Substitute.For<ISyncManager>();
         protected IUserAccessManager UserAccessManager { get; } = Substitute.For<IUserAccessManager>();
         protected IRatingService RatingService { get; } = Substitute.For<IRatingService>();
         protected IDialogService DialogService { get; } = Substitute.For<IDialogService>();

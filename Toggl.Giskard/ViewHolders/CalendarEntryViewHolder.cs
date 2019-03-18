@@ -1,5 +1,6 @@
 using System;
 using Android.Graphics;
+using Android.Graphics.Drawables;
 using Android.Runtime;
 using Android.Util;
 using Android.Views;
@@ -13,6 +14,7 @@ namespace Toggl.Giskard.ViewHolders
     public class CalendarEntryViewHolder : BaseRecyclerViewHolder<CalendarItem>
     {
         private TextView label;
+        private GradientDrawable secondBackgroundLayer;
 
         private readonly int regularEntryTextSize = 12;
         private readonly int shortEntryTextSize = 10;
@@ -36,6 +38,9 @@ namespace Toggl.Giskard.ViewHolders
 
         protected override void InitializeViews()
         {
+            //This view holder layout background is a layer-list that contains one shape with the id: CalendarEntryBackgroundToOverride
+            var layerDrawable = ItemView.Background as LayerDrawable;
+            secondBackgroundLayer = layerDrawable?.FindDrawableByLayerId(Resource.Id.CalendarEntryBackgroundToOverride) as GradientDrawable;
             label = ItemView.FindViewById<TextView>(Resource.Id.EntryLabel);
             defaultElevation = ItemView.Elevation;
             shortTimeEntryHeight = 18.DpToPixels(ItemView.Context);
@@ -86,7 +91,7 @@ namespace Toggl.Giskard.ViewHolders
             if (Item.Source == CalendarItemSource.Calendar)
                 color.A = (byte) (color.A * 0.25);
 
-            ItemView.Background.SetTint(color);
+            secondBackgroundLayer?.SetColor(color);
         }
 
         private void updateTextColor()

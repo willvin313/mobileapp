@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using Toggl.Foundation.DataSources;
+using Toggl.Foundation.Interactors;
+using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Models;
 
 namespace Toggl.Foundation.Shortcuts
@@ -42,20 +44,20 @@ namespace Toggl.Foundation.Shortcuts
             this.supportedShortcutTypes = supportedShortcutTypes;
         }
 
-        public void OnLogin(ITogglDataSource dataSource)
+        public void OnLogin(IInteractorFactory interactorFactory)
         {
-            if (dataSource == null) return;
+            if (interactorFactory == null) return;
 
             useShortcutsWhichAreSupported(new[] { reportsShortcut, startTimeEntryShortcut, showCalendarShortcut });
 
-            dataSource
-                .TimeEntries
-                .IsEmpty
-                .Subscribe(isEmpty => noTimeEntries = isEmpty);
+            var visibleTimeEntries = interactorFactory.ObserveTimeEntriesVisibleToTheUser().Execute();
 
-            dataSource
-                .TimeEntries
-                .CurrentlyRunningTimeEntry
+            visibleTimeEntries
+                .Subscribe(timeEntries => noTimeEntries = timeEntries.None());
+
+            visibleTimeEntries
+                .Select(timeEntries => timeEntries.SingleOrDefault(timeEntry => timeEntry.IsRunning()))
+                .DistinctUntilChanged()
                 .Subscribe(onCurrentTimeEntryChanged);
         }
 

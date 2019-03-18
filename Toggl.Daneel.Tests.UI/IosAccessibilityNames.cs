@@ -49,10 +49,12 @@
 
     public static class Main
     {
-        public const string StartTimeEntryButton = "MainStartTimeEntry";
-        public const string StopTimeEntryButton = "MainStopTimeEntry";
-        public const string TimeEntriesCollection = "TimeEntriesCollection";
         public const string TimeEntryRow = "TimeEntryRow";
+        public const string StopTimeEntryButton = "MainStopTimeEntry";
+        public const string StartTimeEntryButton = "MainStartTimeEntry";
+        public const string CurrentTimeEntryCard = "CurrentTimeEntryCard";
+        public const string TimeEntriesCollection = "TimeEntriesCollection";
+        public const string TimeEntryRowContinueButton = "TimeEntryRowContinueButton";
     }
 
     public static class StartTimeEntry

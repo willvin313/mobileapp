@@ -4,6 +4,7 @@ using Android.Database;
 using MvvmCross;
 using MvvmCross.Platforms.Android;
 using Toggl.Foundation.Calendar;
+using Toggl.Foundation.Helper;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Multivac;
 using static Android.Provider.CalendarContract;
@@ -27,13 +28,13 @@ namespace Toggl.Giskard.Services
 
         private static readonly string[] eventsProjection =
         {
-            Events.InterfaceConsts.Id,
-            Events.InterfaceConsts.Dtstart,
-            Events.InterfaceConsts.Dtend,
-            Events.InterfaceConsts.Title,
-            Events.InterfaceConsts.DisplayColor,
-            Events.InterfaceConsts.CalendarId,
-            Events.InterfaceConsts.AllDay
+            Instances.InterfaceConsts.Id,
+            Instances.Begin,
+            Instances.End,
+            Instances.InterfaceConsts.Title,
+            Instances.InterfaceConsts.DisplayColor,
+            Instances.InterfaceConsts.CalendarId,
+            Instances.InterfaceConsts.AllDay
         };
 
         private const int calendarIdIndex = 0;
@@ -75,8 +76,7 @@ namespace Toggl.Giskard.Services
         {
             var appContext = Mvx.Resolve<IMvxAndroidGlobals>().ApplicationContext;
 
-            var selection =  getEventSelectionByDate(start, end);
-            var cursor = appContext.ContentResolver.Query(Events.ContentUri, eventsProjection, selection, null, null);
+            var cursor = Instances.Query(appContext.ContentResolver, eventsProjection, start.ToUnixTimeMilliseconds(), end.ToUnixTimeMilliseconds());
             if (cursor.Count <= 0)
                 yield break;
 
@@ -94,7 +94,7 @@ namespace Toggl.Giskard.Services
         {
             var appContext = Mvx.Resolve<IMvxAndroidGlobals>().ApplicationContext;
 
-            var cursor = appContext.ContentResolver.Query(Events.ContentUri, eventsProjection, $"({Events.InterfaceConsts.Id} = ?)", new [] { id }, null);
+            var cursor = appContext.ContentResolver.Query(Instances.ContentUri, eventsProjection, $"({Instances.InterfaceConsts.Id} = ?)", new [] { id }, null);
             if (cursor.Count <= 0)
                 throw new InvalidOperationException("An invalid calendar Id was provided");
 
@@ -127,8 +127,5 @@ namespace Toggl.Giskard.Services
                 calendarId: calendarId
             );
         }
-
-        private static string getEventSelectionByDate(DateTimeOffset startDate, DateTimeOffset endDate)
-            => $"(({Events.InterfaceConsts.Dtstart} >= {startDate.ToUnixTimeMilliseconds()}) AND ({Events.InterfaceConsts.Dtend} <= {endDate.ToUnixTimeMilliseconds()}))";
     }
 }

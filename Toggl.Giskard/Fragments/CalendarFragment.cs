@@ -105,11 +105,13 @@ namespace Toggl.Giskard.Fragments
                     initializeOnboardingView();
                 }
 
+                calendarRecyclerView.Visibility = ViewStates.Gone;
                 onboardingView.Visibility = ViewStates.Visible;
             }
             else if (onboardingView != null)
             {
                 onboardingView.Visibility = ViewStates.Gone;
+                calendarRecyclerView.Visibility = ViewStates.Visible;
             }
         }
 

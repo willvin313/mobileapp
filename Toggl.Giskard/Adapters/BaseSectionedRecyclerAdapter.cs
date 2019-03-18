@@ -47,7 +47,7 @@ namespace Toggl.Giskard.Adapters
 
         protected BaseSectionedRecyclerAdapter()
         {
-            HasStableIds = true;
+            HasStableIds = false;
         }
 
         protected BaseSectionedRecyclerAdapter(IntPtr javaReference, JniHandleOwnership transfer)

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -15,6 +14,7 @@ using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
 using Toggl.Foundation.MvvmCross.ViewModels.Reports;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Suggestions;
+using Toggl.Foundation.Sync;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
@@ -40,6 +40,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public MainTabBarViewModel(
             ITimeService timeService,
             ITogglDataSource dataSource,
+            ISyncManager syncManager,
             IDialogService dialogService,
             IRatingService ratingService,
             IUserPreferences userPreferences,
@@ -61,6 +62,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IPlatformInfo platformInfo)
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
+            Ensure.Argument.IsNotNull(syncManager, nameof(syncManager));
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
             Ensure.Argument.IsNotNull(dialogService, nameof(dialogService));
             Ensure.Argument.IsNotNull(ratingService, nameof(ratingService));
@@ -90,6 +92,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             mainViewModel = new MainViewModel(
                 dataSource,
+                syncManager,
                 timeService,
                 ratingService,
                 userPreferences,
@@ -134,6 +137,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             settingsViewModel = new SettingsViewModel(
                 dataSource,
+                syncManager,
                 platformInfo,
                 dialogService,
                 userPreferences,

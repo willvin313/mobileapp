@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive.Concurrency;
 using Toggl.Foundation.Analytics;
+using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Login;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Shortcuts;
@@ -17,6 +18,7 @@ namespace Toggl.Foundation
     {
         public Version Version { get; }
         public UserAgent UserAgent { get; }
+        public ITogglDataSource DataSource { get; }
         public IScheduler Scheduler { get; }
         public IApiFactory ApiFactory { get; }
         public ITogglDatabase Database { get; }
@@ -47,6 +49,7 @@ namespace Toggl.Foundation
             builder.EnsureValidity();
 
             Version = builder.Version;
+            DataSource = builder.DataSource;
             Database = builder.Database;
             UserAgent = builder.UserAgent;
             Scheduler = builder.Scheduler;
@@ -75,6 +78,7 @@ namespace Toggl.Foundation
         {
             public Version Version { get; internal set; }
             public UserAgent UserAgent { get; internal set; }
+            public ITogglDataSource DataSource { get; internal set; }
             public IApiFactory ApiFactory { get; internal set; }
             public ITogglDatabase Database { get; internal set; }
             public ITimeService TimeService { get; internal set; }
@@ -102,6 +106,12 @@ namespace Toggl.Foundation
             {
                 UserAgent = agent;
                 Version = version;
+            }
+
+            public Builder WithDataSource(ITogglDataSource dataSource)
+            {
+                DataSource = dataSource;
+                return this;
             }
 
             public Builder WithScheduler(IScheduler scheduler)
@@ -296,6 +306,7 @@ namespace Toggl.Foundation
             public void EnsureValidity()
             {
                 Ensure.Argument.IsNotNull(Version, nameof(Version));
+                Ensure.Argument.IsNotNull(DataSource, nameof(DataSource));
                 Ensure.Argument.IsNotNull(Database, nameof(Database));
                 Ensure.Argument.IsNotNull(UserAgent, nameof(UserAgent));
                 Ensure.Argument.IsNotNull(Scheduler, nameof(Scheduler));

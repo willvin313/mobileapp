@@ -68,6 +68,21 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Settings
             calendarListVisibleSubject.OnNext(calendarListVisible);
         }
 
+        protected override async Task OnClose()
+        {
+            UserPreferences.SetEnabledCalendars(InitialSelectedCalendarIds.ToArray());
+            await base.OnClose();
+        }
+
+        protected override async Task OnDone()
+        {
+            if (!calendarListVisible)
+                SelectedCalendarIds.Clear();
+
+            UserPreferences.SetEnabledCalendars(SelectedCalendarIds.ToArray());
+            await base.OnDone();
+        }
+
         private void requestAccess()
         {
             permissionsService.OpenAppSettings();
@@ -82,11 +97,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Settings
         {
             if (calendarListVisible)
             {
-                if (SelectedCalendarIds != null)
-                {
-                    SelectedCalendarIds.Clear();
-                    onCalendarSelected();
-                }
                 calendarListVisible = false;
             }
             else
