@@ -214,18 +214,6 @@ namespace Toggl.Giskard.Views.Calendar
             );
         }
 
-        public override int ComputeVerticalScrollRange(RecyclerView.State state)
-        {
-            //todo: calculate the of the whole calendar (anchor height * anchor count)
-            return base.ComputeVerticalScrollRange(state);
-        }
-
-        public override int ComputeVerticalScrollExtent(RecyclerView.State state)
-        {
-            //todo: calculate the space taken to fill the available space in the screen with anchors
-            return base.ComputeVerticalScrollExtent(state);
-        }
-
         public override void ScrollToPosition(int position)
         {
             pendingScrollPosition = position;
@@ -415,10 +403,6 @@ namespace Toggl.Giskard.Views.Calendar
 
                 //todo: handle focusable view logic (stop fill when you find a focusable view)
             }
-
-#if DEBUG
-            showLayout();
-#endif
 
             return start - layoutState.Available;
         }

@@ -59,7 +59,7 @@ namespace Toggl.Giskard.Views.Calendar
             {
                 if (ScrapList != null)
                 {
-                    //todo: check in the scrapList when laying out for predictive animations (if we do it)
+                    //todo: check in the scrapList when laying out for predictive animations
                 }
 
                 var view = recycler.GetViewForPosition(CurrentAnchorPosition);
