@@ -7,7 +7,7 @@ using Toggl.Foundation.MvvmCross.ViewModels;
 
 namespace Toggl.Giskard
 {
-    [Application(AllowBackup = false)]
+    [Application(AllowBackup = false, Debuggable = true)]
     public class TogglApplication : MvxAppCompatApplication<Setup, App<LoginViewModel>>
     {
         public TogglApplication(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
