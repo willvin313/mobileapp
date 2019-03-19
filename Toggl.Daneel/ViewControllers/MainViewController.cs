@@ -29,6 +29,7 @@ using Toggl.PrimeRadiant.Onboarding;
 using Toggl.PrimeRadiant.Settings;
 using UIKit;
 using static Toggl.Foundation.MvvmCross.Helper.Animation;
+using Toggl.Daneel.Binding;
 
 namespace Toggl.Daneel.ViewControllers
 {
@@ -114,9 +115,10 @@ namespace Toggl.Daneel.ViewControllers
             tableViewSource.ObservedHeaders = ViewModel.TimeEntries.Select(e => e.Select(section => section.Header));
 
             TimeEntriesLogTableView.Source = tableViewSource;
+            var binder = new AnimatedTableViewReloadingBinder<MainLogSection, DaySummaryViewModel, LogItemViewModel, IMainLogKey>();
 
             ViewModel.TimeEntries
-                .Subscribe(TimeEntriesLogTableView.Rx().AnimateSections<MainLogSection, DaySummaryViewModel, LogItemViewModel, IMainLogKey>(tableViewSource))
+                .Subscribe(binder.CreateAnimatedReloadObserver(TimeEntriesLogTableView.Rx(), tableViewSource))
                 .DisposedBy(disposeBag);
 
             ViewModel.ShouldReloadTimeEntryLog
