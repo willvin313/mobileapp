@@ -595,7 +595,6 @@
     <InterfaceDefinition Include="Views\StartTimeEntry\TaskSuggestionViewCell.xib" />
     <InterfaceDefinition Include="Views\StartTimeEntry\WorkspaceHeaderViewCell.xib" />
     <InterfaceDefinition Include="Views\Suggestions\SuggestionsEmptyViewCell.xib" />
-    <InterfaceDefinition Include="Views\EntityCreation\MvxCreateEntityViewCell.xib" />
     <InterfaceDefinition Include="Views\EntityCreation\WorkspaceViewCell.xib" />
     <InterfaceDefinition Include="ViewControllers\ReportsCalendarViewController.xib" />
     <InterfaceDefinition Include="Views\Reports\ReportsCalendarViewCell.xib" />
@@ -647,6 +646,7 @@
     <InterfaceDefinition Include="Views\Tag\NewTagViewCell.xib" />
     <InterfaceDefinition Include="Cells\TimeEntriesLog\TimeEntriesLogHeaderView.xib" />
     <InterfaceDefinition Include="Cells\TimeEntriesLog\TimeEntriesLogViewCell.xib" />
+    <InterfaceDefinition Include="Views\EntityCreation\CreateEntityViewCell.xib" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -663,7 +663,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Analytics\SiriTrackableEvent.cs" />
+    <Compile Include="Analytics\SiriIntentErrorTrackingEvent.cs" />
+    <Compile Include="Analytics\SiriTrackingEventExtensions.cs" />
     <Compile Include="Binding\DatePickerDateTimeOffsetTargetBinding.cs" />
     <Compile Include="Cells\BaseCollectionViewCell.cs" />
     <Compile Include="Extensions\Binders\ReactiveTableViewBinder.cs" />
@@ -883,10 +884,6 @@
       <DependentUpon>SuggestionsEmptyViewCell.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\Color\ValueSliderView.cs" />
-    <Compile Include="Views\EntityCreation\MvxCreateEntityViewCell.cs" />
-    <Compile Include="Views\EntityCreation\MvxCreateEntityViewCell.designer.cs">
-      <DependentUpon>MvxCreateEntityViewCell.cs</DependentUpon>
-    </Compile>
     <Compile Include="Views\EntityCreation\WorkspaceViewCell.cs" />
     <Compile Include="Views\EntityCreation\WorkspaceViewCell.designer.cs">
       <DependentUpon>WorkspaceViewCell.cs</DependentUpon>
@@ -934,7 +931,6 @@
     <Compile Include="Views\EditDuration\WheelBackgroundView.cs" />
     <Compile Include="Views\EditDuration\BaseWheelView.cs" />
     <Compile Include="Views\EditDuration\WheelForegroundView.cs" />
-    <Compile Include="Extensions\NoEntityInfoMessageExtensions.cs" />
     <Compile Include="Views\Reports\LoadingPieChartView.cs" />
     <Compile Include="Views\SpiderOnARopeView.cs" />
     <Compile Include="Binding\SpiderOnARopeViewIsVisibleTargetBinding.cs" />
@@ -1170,6 +1166,7 @@
       <DependentUpon>NewTagViewCell.cs</DependentUpon>
     </Compile>
     <Compile Include="Extensions\TimeSpanExtensions.cs" />
+    <Compile Include="Views\Calendar\CalendarCollectionViewZoomHelper.cs" />
     <Compile Include="ViewSources\Generic\TableView\CustomTableViewSource.cs" />
     <Compile Include="Cells\TimeEntriesLog\TimeEntriesLogHeaderView.cs" />
     <Compile Include="Cells\TimeEntriesLog\TimeEntriesLogHeaderView.designer.cs">
@@ -1178,6 +1175,10 @@
     <Compile Include="Cells\TimeEntriesLog\TimeEntriesLogViewCell.cs" />
     <Compile Include="Cells\TimeEntriesLog\TimeEntriesLogViewCell.designer.cs">
       <DependentUpon>TimeEntriesLogViewCell.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\EntityCreation\CreateEntityViewCell.cs" />
+    <Compile Include="Views\EntityCreation\CreateEntityViewCell.designer.cs">
+      <DependentUpon>CreateEntityViewCell.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

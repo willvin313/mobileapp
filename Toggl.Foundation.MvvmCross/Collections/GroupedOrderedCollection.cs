@@ -7,6 +7,7 @@ using Toggl.Multivac.Extensions;
 
 namespace Toggl.Foundation.MvvmCross.Collections
 {
+    [Obsolete("We are moving into using CollectionSection and per platform diffing")]
     public class GroupedOrderedCollection<TItem> : IGroupOrderedCollection<TItem>
     {
         private ImmutableList<ImmutableList<TItem>> sections;

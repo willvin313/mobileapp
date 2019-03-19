@@ -8,7 +8,7 @@ namespace Toggl.Foundation.Interactors
     {
         public IInteractor<IObservable<Unit>> SendFeedback(string message)
             => new SendFeedbackInteractor(
-                dataSource.FeedbackApi,
+                api.Feedback,
                 dataSource.User,
                 dataSource.Workspaces,
                 dataSource.TimeEntries,

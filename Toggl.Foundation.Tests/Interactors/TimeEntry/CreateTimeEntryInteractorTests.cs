@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -160,7 +160,7 @@ namespace Toggl.Foundation.Tests.Interactors
             {
                 await CallInteractor(CreatePrototype(ValidTime, ValidDescription, true, ProjectId));
 
-                await DataSource.SyncManager.Received().PushSync();
+                await SyncManager.Received().PushSync();
             }
 
             [Fact, LogIfTooSlow]
@@ -174,7 +174,7 @@ namespace Toggl.Foundation.Tests.Interactors
                     () => CallInteractor(CreatePrototype(ValidTime, ValidDescription, true, ProjectId)).Wait();
 
                 executeCommand.Should().Throw<Exception>();
-                await DataSource.SyncManager.DidNotReceive().PushSync();
+                await SyncManager.DidNotReceive().PushSync();
             }
         }
 
@@ -255,7 +255,7 @@ namespace Toggl.Foundation.Tests.Interactors
         public sealed class TheCreateTimeEntryInteractor : BaseCreateTimeEntryInteractorTest
         {
             protected override IObservable<IDatabaseTimeEntry> CallInteractor(ITimeEntryPrototype prototype)
-                => InteractorFactory.CreateTimeEntry(prototype).Execute();
+                => InteractorFactory.CreateTimeEntry(prototype, prototype.Duration.HasValue ? TimeEntryStartOrigin.Manual : TimeEntryStartOrigin.Timer).Execute();
 
             [Fact, LogIfTooSlow]
             public async Task RegistersTheEventAsATimerEventIfManualModeIsDisabled()

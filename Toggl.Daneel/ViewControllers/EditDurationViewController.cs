@@ -18,7 +18,10 @@ using Toggl.Foundation;
 namespace Toggl.Daneel.ViewControllers
 {
     [ModalCardPresentation]
-    public sealed partial class EditDurationViewController : KeyboardAwareViewController<EditDurationViewModel>, IDismissableViewController
+    public sealed partial class EditDurationViewController
+        : KeyboardAwareViewController<EditDurationViewModel>,
+          IDismissableViewController,
+          IUIGestureRecognizerDelegate
     {
         private const int additionalVerticalContentSize = 100;
         private const int stackViewSpacing = 26;
@@ -311,6 +314,7 @@ namespace Toggl.Daneel.ViewControllers
             StackView.Spacing = stackViewSpacing;
 
             var backgroundTap = new UITapGestureRecognizer(onBackgroundTap);
+            backgroundTap.Delegate = this;
             View.AddGestureRecognizer(backgroundTap);
 
             var editTimeTap = new UITapGestureRecognizer(onEditTimeTap);
@@ -328,9 +332,16 @@ namespace Toggl.Daneel.ViewControllers
         {
             if (DurationInput.IsEditing)
                 DurationInput.ResignFirstResponder();
-
-
+                
             ViewModel.StopEditingTime.Execute();
+        }
+
+        [Export("gestureRecognizer:shouldReceiveTouch:")]
+        public bool ShouldReceiveTouch(UIGestureRecognizer recognizer, UITouch touch)
+        {
+            if (touch.View.IsDescendantOfView(StartView) || touch.View.IsDescendantOfView(EndView))
+                return false;
+            return true;
         }
     }
 }

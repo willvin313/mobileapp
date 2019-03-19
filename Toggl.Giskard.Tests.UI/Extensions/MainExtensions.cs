@@ -8,5 +8,10 @@ namespace Toggl.Tests.UI.Extensions
         {
             app.Tap("MainLogContentView");
         }
+
+        public static void TapSnackBarButton(this IApp app, string buttonText)
+        {
+            app.Tap(x => x.Marked(Misc.SnackbarAction).Text(buttonText));
+        }
     }
 }

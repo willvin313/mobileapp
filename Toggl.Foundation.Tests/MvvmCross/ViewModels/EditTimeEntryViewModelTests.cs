@@ -70,7 +70,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             protected override EditTimeEntryViewModel CreateViewModel()
-            => new EditTimeEntryViewModel(TimeService, DataSource, InteractorFactory, NavigationService, OnboardingStorage, DialogService, AnalyticsService, StopwatchProvider);
+                => new EditTimeEntryViewModel(TimeService, DataSource, SyncManager, InteractorFactory, NavigationService, OnboardingStorage, DialogService, AnalyticsService, StopwatchProvider);
         }
 
         public sealed class TheConstructor : EditTimeEntryViewModelTest
@@ -79,6 +79,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(
                 bool useDataSource,
+                bool useSyncManager,
                 bool useNavigationService,
                 bool useTimeService,
                 bool useInteractorFactory,
@@ -88,6 +89,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 bool useStopwatchProvider)
             {
                 var dataSource = useDataSource ? DataSource : null;
+                var syncManager = useSyncManager ? SyncManager : null;
                 var timeService = useTimeService ? TimeService : null;
                 var dialogService = useDialogService ? DialogService : null;
                 var navigationService = useNavigationService ? NavigationService : null;
@@ -97,7 +99,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var stopwatchProvider = useStopwatchProvider ? StopwatchProvider : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new EditTimeEntryViewModel(timeService, dataSource, interactorFactory, navigationService, onboardingStorage, dialogService, analyticsService, stopwatchProvider);
+                    () => new EditTimeEntryViewModel(timeService, dataSource, syncManager, interactorFactory, navigationService, onboardingStorage, dialogService, analyticsService, stopwatchProvider);
 
                 tryingToConstructWithEmptyParameters.Should().Throw<ArgumentNullException>();
             }
@@ -291,7 +293,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     await ViewModel.DeleteCommand.ExecuteAsync();
 
-                    await DataSource.SyncManager.Received().PushSync();
+                    SyncManager.Received().PushSync();
                 }
 
                 [Fact, LogIfTooSlow]
@@ -305,7 +307,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                     await ViewModel.DeleteCommand.ExecuteAsync();
 
-                    await DataSource.SyncManager.DidNotReceive().PushSync();
+                    SyncManager.DidNotReceive().PushSync();
                 }
 
                 [Fact]
@@ -337,7 +339,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     await ViewModel.DeleteCommand.ExecuteAsync();
 
-                    await DataSource.SyncManager.DidNotReceive().PushSync();
+                    SyncManager.DidNotReceive().PushSync();
                 }
             }
         }
@@ -495,15 +497,15 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task InitiatesPushSync()
+            public void InitiatesPushSync()
             {
                 ViewModel.SaveCommand.Execute();
 
-                await DataSource.SyncManager.Received().PushSync();
+                SyncManager.Received().PushSync();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task DoesNotInitiatePushSyncWhenSavingFails()
+            public void DoesNotInitiatePushSyncWhenSavingFails()
             {
                 InteractorFactory.UpdateTimeEntry(Arg.Any<EditTimeEntryDto>())
                     .Execute()
@@ -511,7 +513,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 ViewModel.SaveCommand.Execute();
 
-                await DataSource.SyncManager.DidNotReceive().PushSync();
+                SyncManager.DidNotReceive().PushSync();
             }
 
             [Fact, LogIfTooSlow]

@@ -11,6 +11,7 @@ using UIKit;
 
 namespace Toggl.Daneel.ViewSources
 {
+    [Obsolete("We are moving into using CollectionSection and per platform diffing")]
     public class MutableSectionedListTableViewSource<TModel, TCell> : UITableViewSource
         where TCell : BaseTableViewCell<TModel>
     {

@@ -7,7 +7,9 @@ using Toggl.Foundation.Calendar;
 using Toggl.Foundation.DTOs;
 using Toggl.Foundation.Models;
 using Toggl.Foundation.Models.Interfaces;
+using Toggl.Foundation.Reports;
 using Toggl.Foundation.Suggestions;
+using Toggl.Foundation.Sync;
 using Toggl.Multivac;
 using Toggl.Multivac.Models.Reports;
 
@@ -17,7 +19,7 @@ namespace Toggl.Foundation.Interactors
     {
         #region Time Entries
 
-        IInteractor<IObservable<IThreadSafeTimeEntry>> CreateTimeEntry(ITimeEntryPrototype prototype);
+        IInteractor<IObservable<IThreadSafeTimeEntry>> CreateTimeEntry(ITimeEntryPrototype prototype, TimeEntryStartOrigin origin);
 
         IInteractor<IObservable<IThreadSafeTimeEntry>> StartSuggestion(Suggestion suggestion);
 
@@ -32,6 +34,8 @@ namespace Toggl.Foundation.Interactors
         IInteractor<IObservable<Unit>> DeleteTimeEntry(long id);
 
         IInteractor<IObservable<IEnumerable<IThreadSafeTimeEntry>>> GetAllTimeEntriesVisibleToTheUser();
+
+        IInteractor<IObservable<IEnumerable<IThreadSafeTimeEntry>>> ObserveTimeEntriesVisibleToTheUser();
 
         IInteractor<IObservable<IThreadSafeTimeEntry>> StopTimeEntry(DateTimeOffset currentDateTime, TimeEntryStopOrigin origin);
 
@@ -124,6 +128,8 @@ namespace Toggl.Foundation.Interactors
 
         IInteractor<IObservable<IThreadSafeUser>> UpdateDefaultWorkspace(long selectedWorkspaceId);
 
+        IInteractor<IObservable<IThreadSafeUser>> GetCurrentUser();
+
         #endregion
 
         #region UserAccess
@@ -198,6 +204,9 @@ namespace Toggl.Foundation.Interactors
 
         IInteractor<IObservable<ITimeEntriesTotals>> GetReportsTotals(
             long userId, long workspaceId, DateTimeOffset startDate, DateTimeOffset endDate);
+
+        IInteractor<IObservable<ProjectSummaryReport>> GetProjectSummary(
+            long workspaceId, DateTimeOffset startDate, DateTimeOffset? endDate);
 
         #endregion
     }

@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MvvmCross.ViewModels;
 using Toggl.Multivac;
 
 namespace Toggl.Foundation.MvvmCross.Collections
 {
     [Preserve(AllMembers = true)]
+    [Obsolete("We are moving into using CollectionSection and per platform diffing")]
     public class WorkspaceGroupedCollection<T> : MvxObservableCollection<T>
     {
         public long WorkspaceId { get; }

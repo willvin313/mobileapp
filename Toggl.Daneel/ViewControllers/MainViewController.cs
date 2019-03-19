@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -238,6 +239,10 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(ViewModel.RatingViewModel.CloseFeedbackSuccessView)
                 .DisposedBy(DisposeBag);
 
+            ViewModel.ShouldShowRatingView
+                .Subscribe(showHideRatingView)
+                .DisposedBy(disposeBag);
+
             // Suggestion View
             suggestionsView.SuggestionTapped
                 .Subscribe(ViewModel.SuggestionsViewModel.StartTimeEntry.Inputs)
@@ -304,10 +309,10 @@ namespace Toggl.Daneel.ViewControllers
         {
             var events = SharedStorage.instance.PopTrackableEvents();
 
-            foreach (var e in events)
-            {
-                ViewModel.Track(new SiriTrackableEvent(e));
-            }
+            events
+                .Select(e => e.ToTrackableEvent())
+                .Where(e => e != null)
+                .Do(ViewModel.Track);
         }
 
         private void onApplicationDidBecomeActive(NSNotification notification)
@@ -391,7 +396,18 @@ namespace Toggl.Daneel.ViewControllers
                 .DisposedBy(disposeBag);
         }
 
-        public void ShowRatingView()
+        private void showHideRatingView(bool shouldShow)
+        {
+            if (shouldShow)
+            {
+                showRatingView();
+                return;
+            }
+
+            hideRatingView();
+        }
+
+        private void showRatingView()
         {
             ratingView = RatingView.Create();
             ratingView.TranslatesAutoresizingMaskIntoConstraints = false;
@@ -401,11 +417,9 @@ namespace Toggl.Daneel.ViewControllers
             View.SetNeedsLayout();
         }
 
-        public void HideRatingView()
+        private void hideRatingView()
         {
             if (ratingView == null) return;
-
-            var ratingViewContainerHeight = ratingViewContainer.Frame.Height;
 
             ratingView.RemoveFromSuperview();
             ratingView.Dispose();
@@ -453,7 +467,7 @@ namespace Toggl.Daneel.ViewControllers
             {
                 var currentlyRunningTimeEntry = await ViewModel.CurrentRunningTimeEntry.FirstAsync();
                 if (currentlyRunningTimeEntry == null) return;
-                await ViewModel.SelectTimeEntry.Execute(currentlyRunningTimeEntry.Id);
+                await ViewModel.SelectTimeEntry.ExecuteWithCompletion(currentlyRunningTimeEntry.Id);
             });
             swipeUpRunningCardGesture.Direction = UISwipeGestureRecognizerDirection.Up;
             CurrentTimeEntryCard.AddGestureRecognizer(swipeUpRunningCardGesture);

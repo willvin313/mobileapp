@@ -11,6 +11,7 @@ using Toggl.Daneel.Presentation;
 using Toggl.Daneel.Services;
 using Toggl.Foundation;
 using Toggl.Foundation.Analytics;
+using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Login;
 using Toggl.Foundation.MvvmCross;
 using Toggl.Foundation.MvvmCross.Services;
@@ -75,7 +76,7 @@ namespace Toggl.Daneel
             var suggestionProviderContainer = new SuggestionProviderContainer(
                 new MostUsedTimeEntrySuggestionProvider(database, timeService, maxNumberOfSuggestions)
             );
-            var intentDonationService = new IntentDonationServiceIos();
+            var intentDonationService = new IntentDonationServiceIos(analyticsService);
             var privateSharedStorageService = new PrivateSharedStorageServiceIos();
 
             var appVersion = Version.Parse(version);
@@ -90,12 +91,19 @@ namespace Toggl.Daneel
             var notificationService = new NotificationServiceIos(permissionsService, timeService);
             var backgroundSyncService = new BackgroundSyncServiceIos();
             var backgroundService = new BackgroundService(timeService, analyticsService);
-            var automaticSyncingService = new AutomaticSyncingService(backgroundService, timeService, analyticsService);
+            var automaticSyncingService = new AutomaticSyncingService(backgroundService, timeService);
             var errorHandlingService = new ErrorHandlingService(navigationService, settingsStorage);
+
+            var dataSource =
+                new TogglDataSource(
+                    database,
+                    timeService,
+                    analyticsService);
 
             var foundation =
                 TogglFoundation
                     .ForClient(userAgent, appVersion)
+                    .WithDataSource(dataSource)
                     .WithDatabase(database)
                     .WithScheduler(scheduler)
                     .WithTimeService(timeService)

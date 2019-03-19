@@ -9,7 +9,9 @@ using NSubstitute;
 using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
 using Toggl.Foundation.MvvmCross.ViewModels.Selectable;
 using Toggl.Foundation.Tests.Generators;
+using Toggl.Foundation.Tests.TestExtensions;
 using Toggl.Multivac;
+using Toggl.Multivac.Extensions;
 using Xunit;
 using static Toggl.Multivac.Extensions.FunctionalExtensions;
 
@@ -63,26 +65,23 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         $"Calendar #{id}",
                         $"Source #{id % 3}",
                         false));
+
                 InteractorFactory
                     .GetUserCalendars()
                     .Execute()
                     .Returns(Observable.Return(userCalendars));
+
                 await ViewModel.Initialize();
                 var selectedIds = new[] { "0", "2", "4", "7" };
 
-                var selectCalendars = Observable.Concat(
-                    userCalendars
-                        .Where(calendar => selectedIds.Contains(calendar.Id))
-                        .Select(calendar => new SelectableUserCalendarViewModel(calendar, false))
-                        .Select(calendar => Observable.Defer(() => ViewModel.SelectCalendar.Execute(calendar)))
-                );
+                var calendars = userCalendars
+                    .Where(calendar => selectedIds.Contains(calendar.Id))
+                    .Select(calendar => new SelectableUserCalendarViewModel(calendar, false));
 
-                var auxObserver = TestScheduler.CreateObserver<Unit>();
-                Observable.Concat(
-                        selectCalendars,
-                        Observable.Defer(() => ViewModel.Done.Execute())
-                        )
-                    .Subscribe(auxObserver);
+                ViewModel.SelectCalendar.ExecuteSequentally(calendars)
+                    .PrependAction(ViewModel.Done)
+                    .Subscribe();
+
                 TestScheduler.Start();
 
                 await NavigationService.Received().Close(ViewModel, Arg.Is<string[]>(ids => ids.SequenceEqual(selectedIds)));
@@ -164,11 +163,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         });
 
                     var auxObserver = TestScheduler.CreateObserver<Unit>();
-                    Observable.Concat(
-                            selectedableUserCalendars
-                                .Select(calendar => Observable.Defer(() => ViewModel.SelectCalendar.Execute(calendar)))
-                        )
+                    ViewModel.SelectCalendar.ExecuteSequentally(selectedableUserCalendars)
                         .Subscribe(auxObserver);
+
                     TestScheduler.Start();
 
                     Received.InOrder(() =>
@@ -183,28 +180,27 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 {
                     var observer = Substitute.For<IObserver<bool>>();
                     ViewModel.Done.Enabled.Subscribe(observer);
-                    var selectedableUserCalendars = Enumerable
-                        .Range(0, 10)
-                        .Select(id =>
-                        {
-                            var userCalendar = new UserCalendar(id.ToString(), id.ToString(), "Doenst matter");
-                            return new SelectableUserCalendarViewModel(userCalendar, false);
-                        });
 
-                    var selectAll = Observable
-                        .Concat(
-                            selectedableUserCalendars
-                                .Select(calendar => Observable.Defer(() => ViewModel.SelectCalendar.Execute(calendar)))
-                        );
+                    var userCalendars = Enumerable
+                        .Range(0, 3)
+                        .Select(id => new UserCalendar(id.ToString(), id.ToString(), "Doesn't matter"));
+
+                    var selectedableUserCalendars = userCalendars
+                        .Select(userCalendar => new SelectableUserCalendarViewModel(userCalendar, false));
+
+                    InteractorFactory
+                        .GetUserCalendars()
+                        .Execute()
+                        .Returns(Observable.Return(userCalendars));
+
 
                     var auxObserver = TestScheduler.CreateObserver<Unit>();
-
-                    Observable
-                        .Concat(
-                            selectAll,
-                            selectAll
+                    ViewModel.SelectCalendar.ExecuteSequentally(
+                            selectedableUserCalendars
+                                .Concat(selectedableUserCalendars)
                         )
                         .Subscribe(auxObserver);
+
                     TestScheduler.Start();
 
                     Received.InOrder(() =>

@@ -1,3 +1,4 @@
+using Android.Support.V7.Widget;
 using Android.Views;
 using Android.Widget;
 using Toggl.Giskard.Views;
@@ -7,23 +8,31 @@ namespace Toggl.Giskard.Activities
 {
     public partial class StartTimeEntryActivity
     {
+        private View doneButton;
+        private View closeButton;
+        private ImageView selectTagToolbarButton;
+        private ImageView selectProjectToolbarButton;
+        private ImageView selectBillableToolbarButton;
+
         private TextView durationLabel;
 
-        private AutocompleteEditText editText;
+        private RecyclerView recyclerView;
 
-        private View selectProjectToolbarButton;
+        private AutocompleteEditText descriptionField;
 
-        private StartTimeEntryRecyclerView recyclerView;
-
-        private void initializeViews()
+        protected override void InitializeViews()
         {
-            durationLabel = FindViewById<TextView>(StartTimeEntryDurationText);
+            doneButton = FindViewById(DoneButton);
+            closeButton = FindViewById(CloseButton);
+            selectTagToolbarButton = FindViewById<ImageView>(ToolbarTagButton);
+            selectProjectToolbarButton = FindViewById<ImageView>(ToolbarProjectButton);
+            selectBillableToolbarButton = FindViewById<ImageView>(ToolbarBillableButton);
 
-            editText = FindViewById<AutocompleteEditText>(StartTimeEntryDescriptionTextField);
+            durationLabel = FindViewById<TextView>(DurationText);
 
-            selectProjectToolbarButton = FindViewById<View>(StartTimeEntryToolbarProject);
+            recyclerView = FindViewById<RecyclerView>(SuggestionsRecyclerView);
 
-            recyclerView = FindViewById<StartTimeEntryRecyclerView>(Resource.Id.StartTimeEntryRecyclerView);
+            descriptionField = FindViewById<AutocompleteEditText>(DescriptionTextField);
         }
     }
 }

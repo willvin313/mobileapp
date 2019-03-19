@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Reactive.Linq;
+using MvvmCross;
 using MvvmCross.Plugin;
 using MvvmCross.ViewModels;
+using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Login;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.MvvmCross.ViewModels;
@@ -23,7 +25,7 @@ namespace Toggl.Foundation.MvvmCross
         }
     }
 
-    [Preserve(AllMembers = true)]
+    [Multivac.Preserve(AllMembers = true)]
     public sealed class AppStart<TFirstViewModelWhenNotLoggedIn> : MvxAppStart
         where TFirstViewModelWhenNotLoggedIn : MvxViewModel
     {
@@ -65,21 +67,20 @@ namespace Toggl.Foundation.MvvmCross
                 return;
             }
 
-            var dataSource = userAccessManager.GetDataSourceIfLoggedIn();
-            if (dataSource == null)
+            if (!userAccessManager.TryInitializingAccessToUserData(out var syncManager, out var interactorFactory))
             {
                 await navigationService.Navigate<TFirstViewModelWhenNotLoggedIn>();
                 return;
             }
 
-            var user = await dataSource.User.Current.FirstAsync();
+            var user = await interactorFactory.GetCurrentUser().Execute();
             if (accessRestrictionStorage.IsUnauthorized(user.ApiToken))
             {
                 await navigationService.Navigate<TokenResetViewModel>();
                 return;
             }
 
-            dataSource.SyncManager.ForceFullSync().Subscribe();
+            syncManager.ForceFullSync().Subscribe();
 
             await navigationService.ForkNavigate<MainTabBarViewModel, MainViewModel>();
         }

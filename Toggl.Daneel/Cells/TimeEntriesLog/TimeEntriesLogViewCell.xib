@@ -156,6 +156,9 @@
                                     </button>
                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="icContinue" translatesAutoresizingMaskIntoConstraints="NO" id="2Q5-T6-UvK">
                                         <rect key="frame" x="223" y="38" width="10" height="11"/>
+                                        <accessibility key="accessibilityConfiguration" label="TimeEntryRowContinueButton">
+                                            <bool key="isElement" value="YES"/>
+                                        </accessibility>
                                         <constraints>
                                             <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="11" id="1wx-Ua-IPz"/>
                                             <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="10" id="e1m-FH-gEi"/>
@@ -266,6 +269,9 @@
                     <constraint firstAttribute="trailing" secondItem="2Q5-T6-UvK" secondAttribute="trailing" constant="27" id="xx9-4r-fxJ"/>
                 </constraints>
             </tableViewCellContentView>
+            <accessibility key="accessibilityConfiguration" label="TimeEntryRow">
+                <bool key="isElement" value="YES"/>
+            </accessibility>
             <connections>
                 <outlet property="BillableIcon" destination="Arb-iG-IM3" id="MHp-Pv-hnS"/>
                 <outlet property="ContinueButton" destination="Re8-uD-vpm" id="name-outlet-Re8-uD-vpm"/>

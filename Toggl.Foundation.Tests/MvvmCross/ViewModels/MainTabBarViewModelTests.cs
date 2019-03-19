@@ -19,6 +19,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 => new MainTabBarViewModel(
                     TimeService,
                     DataSource,
+                    SyncManager,
                     DialogService,
                     RatingService,
                     UserPreferences,
@@ -53,6 +54,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public void ThrowsIfAnyOfTheArgumentsIsNull(
                     bool useTimeService,
                     bool useDataSource,
+                    bool useSyncManager,
                     bool useDialogService,
                     bool useRatingService,
                     bool useUserPreferences,
@@ -73,6 +75,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 var timeService = useTimeService ? TimeService : null;
                 var dataSource = useDataSource ? DataSource : null;
+                var syncManager = useSyncManager ? SyncManager : null;
                 var dialogService = useDialogService ? DialogService : null;
                 var ratingService = useRatingService ? RatingService : null;
                 var userPreferences = useUserPreferences ? UserPreferences : null;
@@ -94,6 +97,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     () => new MainTabBarViewModel(
                         timeService,
                         dataSource,
+                        syncManager,
                         dialogService,
                         ratingService,
                         userPreferences,

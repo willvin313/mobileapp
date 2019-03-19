@@ -19,7 +19,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
     [Preserve(AllMembers = true)]
     public sealed class NoWorkspaceViewModel : MvxViewModelResult<Unit>
     {
-        private readonly ITogglDataSource dataSource;
+        private readonly ISyncManager syncManager;
         private readonly IAccessRestrictionStorage accessRestrictionStorage;
         private readonly IInteractorFactory interactorFactory;
         private readonly IMvxNavigationService navigationService;
@@ -31,21 +31,21 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public UIAction TryAgain { get; }
 
         public NoWorkspaceViewModel(
-            ITogglDataSource dataSource,
+            ISyncManager syncManager,
             IInteractorFactory interactorFactory,
             IMvxNavigationService navigationService,
             IAccessRestrictionStorage accessRestrictionStorage,
             ISchedulerProvider schedulerProvider,
             IRxActionFactory rxActionFactory)
         {
-            Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
+            Ensure.Argument.IsNotNull(syncManager, nameof(syncManager));
             Ensure.Argument.IsNotNull(accessRestrictionStorage, nameof(accessRestrictionStorage));
             Ensure.Argument.IsNotNull(interactorFactory, nameof(interactorFactory));
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
             Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
 
-            this.dataSource = dataSource;
+            this.syncManager = syncManager;
             this.accessRestrictionStorage = accessRestrictionStorage;
             this.navigationService = navigationService;
             this.interactorFactory = interactorFactory;
@@ -61,7 +61,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private async Task tryAgain()
         {
-            var anyWorkspaceIsAvailable = await dataSource.SyncManager.ForceFullSync()
+            var anyWorkspaceIsAvailable = await syncManager.ForceFullSync()
                 .Where(state => state == SyncState.Sleep)
                 .SelectMany(_ => interactorFactory.GetAllWorkspaces().Execute())
                 .Any(workspaces => workspaces.Any());

@@ -1,10 +1,10 @@
-﻿using Toggl.Foundation.DataSources;
+﻿using Toggl.Foundation.Interactors;
 
 namespace Toggl.Foundation.Shortcuts
 {
     public interface IApplicationShortcutCreator
     {
-        void OnLogin(ITogglDataSource dataSource);
+        void OnLogin(IInteractorFactory interactorFactory);
         void OnLogout();
     }
 }

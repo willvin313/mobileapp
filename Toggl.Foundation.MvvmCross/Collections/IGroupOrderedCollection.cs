@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace Toggl.Foundation.MvvmCross.Collections
 {
+    [Obsolete("We are moving into using CollectionSection and per platform diffing")]
     public interface IGroupOrderedCollection<TItem> : IReadOnlyList<IReadOnlyList<TItem>>
     {
         bool IsEmpty { get; }

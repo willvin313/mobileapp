@@ -7,6 +7,7 @@ using Toggl.Foundation.MvvmCross.Collections.Changes;
 
 namespace Toggl.Foundation.MvvmCross.Collections
 {
+    [Obsolete("We are moving into using CollectionSection and per platform diffing")]
     public class ObservableGroupedOrderedCollection<TItem> : IGroupOrderedCollection<TItem>
     {
         private Func<TItem, IComparable> indexKey;

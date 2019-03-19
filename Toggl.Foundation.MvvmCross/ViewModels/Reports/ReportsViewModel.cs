@@ -217,7 +217,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Reports
             reportSubject
                 .AsObservable()
                 .Do(setLoadingState)
-                .SelectMany(_ => dataSource.ReportsProvider.GetProjectSummary(workspaceId, startDate, endDate))
+                .SelectMany(_ => interactorFactory.GetProjectSummary(workspaceId, startDate, endDate).Execute())
                 .Subscribe(onReport, onError)
                 .DisposedBy(disposeBag);
 

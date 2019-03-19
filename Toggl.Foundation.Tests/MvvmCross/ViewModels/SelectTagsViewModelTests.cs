@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FsCheck;
@@ -152,16 +153,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         => new SelectableTagViewModel(tagSuggestion.TagId, tagSuggestion.Name, false,
                             tagSuggestion.WorkspaceId));
 
-                var auxObservable = TestScheduler.CreateObserver<Unit>();
-
-                var selectExecutions = Observable.Concat(selectedTags
-                    .Select(tag => Observable.Defer(() => ViewModel.SelectTag.Execute(tag))));
-
-                var saveExecution = Observable.Defer(() => ViewModel.Save.Execute());
-
-                Observable
-                    .Concat(selectExecutions, saveExecution)
-                    .Subscribe(auxObservable);
+                ViewModel.SelectTag.ExecuteSequentally(selectedTags)
+                    .PrependAction(ViewModel.Save)
+                    .Subscribe();
 
                 TestScheduler.Start();
 

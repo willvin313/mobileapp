@@ -13,6 +13,7 @@ using UIKit;
 
 namespace Toggl.Daneel.ViewSources
 {
+    [Obsolete("We are moving into using CollectionSection and per platform diffing")]
     public class ReactiveTableViewBinder<TModel, TCell> : IDisposable
         where TCell : BaseTableViewCell<TModel>
     {

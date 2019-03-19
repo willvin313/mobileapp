@@ -56,7 +56,7 @@ namespace Toggl.Daneel.ViewControllers
 
         public async Task<bool> Dismiss()
         {
-            await ViewModel.Close.Execute();
+            await ViewModel.Close.ExecuteWithCompletion();
             return true;
         }
     }

@@ -5,7 +5,6 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
-using MvvmCross.Commands;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 using Toggl.Foundation;
@@ -20,7 +19,6 @@ using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
-using Toggl.Foundation.MvvmCross.ViewModels.Hints;
 using Toggl.Foundation.MvvmCross.ViewModels.Reports;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Suggestions;
@@ -47,6 +45,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private object isEditViewOpenLock = new object();
 
         private readonly ITogglDataSource dataSource;
+        private readonly ISyncManager syncManager;
         private readonly IUserPreferences userPreferences;
         private readonly IAnalyticsService analyticsService;
         private readonly IOnboardingStorage onboardingStorage;
@@ -59,6 +58,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private readonly RatingViewExperiment ratingViewExperiment;
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
+
+        private readonly ISubject<Unit> hideRatingView = new Subject<Unit>();
 
         public IObservable<bool> LogEmpty { get; }
         public IObservable<int> TimeEntriesCount { get; }
@@ -73,6 +74,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public IObservable<bool> ShouldShowRunningTimeEntryNotification { get; private set; }
         public IObservable<bool> ShouldShowStoppedTimeEntryNotification { get; private set; }
         public IObservable<IThreadSafeTimeEntry> CurrentRunningTimeEntry { get; private set; }
+        public IObservable<bool> ShouldShowRatingView { get; private set; }
 
         public ObservableGroupedOrderedCollection<TimeEntryViewModel> TimeEntries => TimeEntriesViewModel.TimeEntries;
 
@@ -99,6 +101,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public MainViewModel(
             ITogglDataSource dataSource,
+            ISyncManager syncManager,
             ITimeService timeService,
             IRatingService ratingService,
             IUserPreferences userPreferences,
@@ -115,6 +118,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IRxActionFactory rxActionFactory)
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
+            Ensure.Argument.IsNotNull(syncManager, nameof(syncManager));
             Ensure.Argument.IsNotNull(timeService, nameof(timeService));
             Ensure.Argument.IsNotNull(ratingService, nameof(ratingService));
             Ensure.Argument.IsNotNull(userPreferences, nameof(userPreferences));
@@ -131,6 +135,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
 
             this.dataSource = dataSource;
+            this.syncManager = syncManager;
             this.userPreferences = userPreferences;
             this.analyticsService = analyticsService;
             this.interactorFactory = interactorFactory;
@@ -146,7 +151,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             SuggestionsViewModel = new SuggestionsViewModel(dataSource, interactorFactory, onboardingStorage, suggestionProviders, schedulerProvider, rxActionFactory);
             RatingViewModel = new RatingViewModel(timeService, dataSource, ratingService, analyticsService, onboardingStorage, navigationService, SchedulerProvider, rxActionFactory);
-            TimeEntriesViewModel = new TimeEntriesViewModel(dataSource, interactorFactory, analyticsService, SchedulerProvider, rxActionFactory);
+            TimeEntriesViewModel = new TimeEntriesViewModel(dataSource, syncManager, interactorFactory, analyticsService, SchedulerProvider, rxActionFactory);
 
             LogEmpty = TimeEntriesViewModel.Empty.AsDriver(SchedulerProvider);
             TimeEntriesCount = TimeEntriesViewModel.Count.AsDriver(SchedulerProvider);
@@ -164,7 +169,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     .TrackException<InvalidOperationException, IThreadSafeWorkspace>("MainViewModel.Init")
                     .Execute()
                     .SelectMany(workspace => interactorFactory
-                        .CreateTimeEntry(description.AsTimeEntryPrototype(TimeService.CurrentDateTime, workspace.Id))
+                        .CreateTimeEntry(description.AsTimeEntryPrototype(TimeService.CurrentDateTime, workspace.Id), TimeEntryStartOrigin.Timer)
                         .Execute())
                     .Subscribe()
                     .DisposedBy(disposeBag);
@@ -179,9 +184,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             await SuggestionsViewModel.Initialize();
             await RatingViewModel.Initialize();
 
-            SyncProgressState = dataSource
-                .SyncManager
-                .ProgressObservable
+            SyncProgressState = syncManager.ProgressObservable
                 .AsDriver(SchedulerProvider);
 
             var isWelcome = onboardingStorage.IsNewUser;
@@ -264,12 +267,21 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 case ApplicationUrls.Main.Action.Stop:
                     await stopTimeEntry(TimeEntryStopOrigin.Deeplink);
                     break;
+
+                case ApplicationUrls.Main.Action.StopFromSiri:
+                    await stopTimeEntry(TimeEntryStopOrigin.Siri);
+                    break;
             }
 
-            ratingViewExperiment
-                .RatingViewShouldBeVisible
-                .Subscribe(presentRatingViewIfNeeded)
-                .DisposedBy(disposeBag);
+            ShouldShowRatingView = Observable.Merge(
+                    ratingViewExperiment.RatingViewShouldBeVisible,
+                    RatingViewModel.HideRatingView.SelectValue(false),
+                    hideRatingView.AsObservable().SelectValue(false)
+                )
+                .Select(canPresentRating)
+                .DistinctUntilChanged()
+                .Do(trackRatingViewPresentation)
+                .AsDriver(SchedulerProvider);
 
             onboardingStorage.StopButtonWasTappedBefore
                              .Subscribe(hasBeen => hasStopButtonEverBeenUsed = hasBeen)
@@ -315,35 +327,43 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             analyticsService.Track(e);
         }
 
-        private void presentRatingViewIfNeeded(bool shouldBevisible)
+        private bool canPresentRating(bool shouldBeVisible)
         {
-            if (!shouldBevisible) return;
+            if (!shouldBeVisible) return false;
 
             var wasShownMoreThanOnce = onboardingStorage.NumberOfTimesRatingViewWasShown() > 1;
-            if (wasShownMoreThanOnce) return;
+            if (wasShownMoreThanOnce) return false;
 
             var lastOutcome = onboardingStorage.RatingViewOutcome();
             if (lastOutcome != null)
             {
                 var thereIsInteractionFormLastTime = lastOutcome != RatingViewOutcome.NoInteraction;
-                if (thereIsInteractionFormLastTime) return;
+                if (thereIsInteractionFormLastTime) return false;
             }
 
             var lastOutcomeTime = onboardingStorage.RatingViewOutcomeTime();
             if (lastOutcomeTime != null)
             {
                 var oneDayHasNotPassedSinceLastTime = lastOutcomeTime + TimeSpan.FromHours(24) > TimeService.CurrentDateTime;
-                if (oneDayHasNotPassedSinceLastTime && !wasShownMoreThanOnce) return;
+                if (oneDayHasNotPassedSinceLastTime && !wasShownMoreThanOnce) return false;
             }
 
-            navigationService.ChangePresentation(ToggleRatingViewVisibilityHint.Show());
+            return true;
+        }
+
+        private void trackRatingViewPresentation(bool shouldBeVisible)
+        {
+            if (!shouldBeVisible)
+                return;
+
             analyticsService.RatingViewWasShown.Track();
             onboardingStorage.SetDidShowRatingView();
             onboardingStorage.SetRatingViewOutcome(RatingViewOutcome.NoInteraction, TimeService.CurrentDateTime);
+
             TimeService.RunAfterDelay(TimeSpan.FromMinutes(ratingViewTimeout), () =>
             {
                 shouldHideRatingViewIfStillVisible = true;
-                navigationService.ChangePresentation(ToggleRatingViewVisibilityHint.Hide());
+                hideRatingView.OnNext(Unit.Default);
             });
         }
 
@@ -381,7 +401,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             if (shouldHideRatingViewIfStillVisible)
             {
                 shouldHideRatingViewIfStillVisible = false;
-                navigationService.ChangePresentation(ToggleRatingViewVisibilityHint.Hide());
+                hideRatingView.OnNext(Unit.Default);
             }
         }
 
@@ -474,7 +494,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private async Task refresh()
         {
-            await dataSource.SyncManager.ForceFullSync();
+            await syncManager.ForceFullSync();
         }
 
         private IObservable<Unit> deleteTimeEntry(TimeEntryViewModel timeEntry)
@@ -482,11 +502,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             return interactorFactory
                 .DeleteTimeEntry(timeEntry.Id)
                 .Execute()
-                .Do(_ =>
-                {
-                    analyticsService.DeleteTimeEntry.Track();
-                    dataSource.SyncManager.PushSync();
-                });
+                .Track(analyticsService.DeleteTimeEntry)
+                .Do(syncManager.InitiatePushSync);
         }
 
         private async Task stopTimeEntry(TimeEntryStopOrigin origin)
@@ -497,7 +514,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .StopTimeEntry(TimeService.CurrentDateTime, origin)
                 .Execute()
                 .Do(_ => intentDonationService.DonateStopCurrentTimeEntry())
-                .Do(dataSource.SyncManager.InitiatePushSync);
+                .Do(syncManager.InitiatePushSync);
         }
 
         private Task navigate<TModel, TParameters>(TParameters value)

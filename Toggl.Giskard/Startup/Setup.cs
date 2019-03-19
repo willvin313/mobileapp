@@ -14,6 +14,7 @@ using MvvmCross.Plugin;
 using MvvmCross.ViewModels;
 using Toggl.Foundation;
 using Toggl.Foundation.Analytics;
+using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Login;
 using Toggl.Foundation.MvvmCross;
 using Toggl.Foundation.MvvmCross.Services;
@@ -88,16 +89,23 @@ namespace Toggl.Giskard
             var schedulerProvider = new AndroidSchedulerProvider();
             var permissionsService = new PermissionsServiceAndroid();
             var calendarService = new CalendarServiceAndroid(permissionsService);
-            var automaticSyncingService = new AutomaticSyncingService(backgroundService, timeService, analyticsService);
+            var automaticSyncingService = new AutomaticSyncingService(backgroundService, timeService);
             var errorHandlingService = new ErrorHandlingService(navigationService, settingsStorage);
 
             ApplicationContext.RegisterReceiver(new TimezoneChangedBroadcastReceiver(timeService),
                 new IntentFilter(Intent.ActionTimezoneChanged));
 
+            var dataSource =
+                new TogglDataSource(
+                    database,
+                    timeService,
+                    analyticsService);
+
             var foundation =
                 TogglFoundation
                     .ForClient(userAgent, appVersion)
                     .WithDatabase(database)
+                    .WithDataSource(dataSource)
                     .WithScheduler(scheduler)
                     .WithTimeService(timeService)
                     .WithApiEnvironment(environment)
@@ -180,7 +188,7 @@ namespace Toggl.Giskard
              * and ready to be injected during those times.
              */
             var userAccessManager = Mvx.Resolve<IUserAccessManager>();
-            var dataSource = userAccessManager.GetDataSourceIfLoggedIn();
+            userAccessManager.TryInitializingAccessToUserData(out _, out _);
         }
 
         private void createApplicationLifecycleObserver(IBackgroundService backgroundService)

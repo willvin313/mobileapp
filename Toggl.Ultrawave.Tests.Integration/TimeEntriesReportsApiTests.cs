@@ -84,36 +84,9 @@ namespace Toggl.Ultrawave.Tests.Integration
         [InlineData(1)]
         [InlineData(33)]
         [InlineData(34)]
-        public async Task ReturnsDayResolutionForLessThan34Days(int days)
-        {
-            var (api, user) = await SetupTestUser();
-            var start = DateTimeOffset.UtcNow.AddDays(-days);
-            var end = DateTimeOffset.UtcNow;
-
-            var totals = await api.TimeEntriesReports.GetTotals(user.Id, user.DefaultWorkspaceId.Value, start, end);
-
-            totals.Resolution.Should().Be(Resolution.Day);
-        }
-
-        [Theory, LogTestInfo]
-        [InlineData(35)]
-        [InlineData(182)]
-        public async Task ReturnsWeekResolutionForMoreThan34Days(int days)
-        {
-            var (api, user) = await SetupTestUser();
-            var start = DateTimeOffset.UtcNow.AddDays(-days);
-            var end = DateTimeOffset.UtcNow;
-
-            var totals = await api.TimeEntriesReports.GetTotals(user.Id, user.DefaultWorkspaceId.Value, start, end);
-
-            totals.Resolution.Should().Be(Resolution.Week);
-        }
-
-
-        [Theory, LogTestInfo]
         [InlineData(183)]
         [InlineData(365)]
-        public async Task ReturnsWeekResolutionForMoreThan182Days(int days)
+        public async Task ReturnsAtMost34ItemsForTheGraph(int days)
         {
             var (api, user) = await SetupTestUser();
             var start = DateTimeOffset.UtcNow.AddDays(-days);
@@ -121,7 +94,7 @@ namespace Toggl.Ultrawave.Tests.Integration
 
             var totals = await api.TimeEntriesReports.GetTotals(user.Id, user.DefaultWorkspaceId.Value, start, end);
 
-            totals.Resolution.Should().Be(Resolution.Month);
+            totals.Groups.Should().HaveCountLessOrEqualTo(34);
         }
 
         [Fact, LogTestInfo]

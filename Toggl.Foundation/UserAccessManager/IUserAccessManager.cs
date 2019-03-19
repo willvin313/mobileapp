@@ -1,26 +1,28 @@
 ﻿using System;
 using System.Reactive;
 using Toggl.Foundation.DataSources;
+using Toggl.Foundation.Interactors;
+using Toggl.Foundation.Sync;
 using Toggl.Multivac;
 
 namespace Toggl.Foundation.Login
 {
     public interface IUserAccessManager
     {
-        IObservable<ITogglDataSource> UserLoggedIn { get; }
+        IObservable<Unit> UserLoggedIn { get; }
         IObservable<Unit> UserLoggedOut { get; }
 
         void OnUserLoggedOut();
 
-        ITogglDataSource GetDataSourceIfLoggedIn();
+        bool TryInitializingAccessToUserData(out ISyncManager syncManager, out IInteractorFactory interactorFactory);
 
-        IObservable<ITogglDataSource> LoginWithGoogle();
-        IObservable<ITogglDataSource> Login(Email email, Password password);
+        IObservable<ISyncManager> LoginWithGoogle();
+        IObservable<ISyncManager> Login(Email email, Password password);
 
-        IObservable<ITogglDataSource> SignUpWithGoogle(bool termsAccepted, int countryId, string timezone);
-        IObservable<ITogglDataSource> SignUp(Email email, Password password, bool termsAccepted, int countryId, string timezone);
+        IObservable<ISyncManager> SignUpWithGoogle(bool termsAccepted, int countryId, string timezone);
+        IObservable<ISyncManager> SignUp(Email email, Password password, bool termsAccepted, int countryId, string timezone);
 
-        IObservable<ITogglDataSource> RefreshToken(Password password);
+        IObservable<ISyncManager> RefreshToken(Password password);
 
         IObservable<string> ResetPassword(Email email);
     }

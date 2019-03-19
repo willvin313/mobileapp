@@ -13,6 +13,7 @@ using System.Reactive.Concurrency;
 using Toggl.Multivac;
 using Toggl.Ultrawave.Network;
 using IStopwatchProvider = Toggl.Foundation.Diagnostics.IStopwatchProvider;
+using Toggl.Foundation.DataSources;
 
 namespace Toggl.Foundation.Tests
 {
@@ -103,6 +104,7 @@ namespace Toggl.Foundation.Tests
                 var apiFactory = Substitute.For<IApiFactory>();
                 var agent = new UserAgent("Some Client", "1.0");
                 var database = Substitute.For<ITogglDatabase>();
+                var dataSource = Substitute.For<ITogglDataSource>();
                 var timeService = Substitute.For<ITimeService>();
                 var platformInfo = Substitute.For<IPlatformInfo>();
                 var ratingService = Substitute.For<IRatingService>();
@@ -125,6 +127,7 @@ namespace Toggl.Foundation.Tests
                 Action tryingToConstructWithValidParameters = () =>
                     TogglFoundation
                         .ForClient(agent, version)
+                        .WithDataSource(dataSource)
                         .WithDatabase(database)
                         .WithScheduler(scheduler)
                         .WithApiFactory(apiFactory)

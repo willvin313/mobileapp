@@ -52,9 +52,6 @@ namespace Toggl.Giskard.Presenters
                 case ToggleReportsCalendarVisibilityHint calendarHint when CurrentActivity is ReportsActivity reportsActivity:
                     reportsActivity.ToggleCalendarState(calendarHint.ForceHide);
                     return;
-                case ToggleRatingViewVisibilityHint ratingViewVisibilityHint when CurrentActivity is MainActivity mainActivity:
-                    mainActivity.SetupRatingViewVisibility(!ratingViewVisibilityHint.ShouldHide);
-                    break;
             }
 
             base.ChangePresentation(hint);

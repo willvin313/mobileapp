@@ -97,18 +97,16 @@
 	<key>INIntentDefinitionModelVersion</key>
 	<string>1.0</string>
 	<key>INIntentDefinitionSystemVersion</key>
-	<string>18A389</string>
+	<string>18C54</string>
 	<key>INIntentDefinitionToolsBuildVersion</key>
-	<string>10A255</string>
+	<string>10B61</string>
 	<key>INIntentDefinitionToolsVersion</key>
-	<string>10.0</string>
+	<string>10.1</string>
 	<key>INIntents</key>
 	<array>
 		<dict>
 			<key>INIntentCategory</key>
 			<string>generic</string>
-			<key>INIntentDescription</key>
-			<string>Stop current running time entry</string>
 			<key>INIntentDescriptionID</key>
 			<string>EA0ujz</string>
 			<key>INIntentLastParameterTag</key>
@@ -128,7 +126,7 @@
 					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
 					<true/>
 					<key>INIntentParameterCombinationTitle</key>
-					<string>Stop current running time entry</string>
+					<string>Stop a running timer</string>
 					<key>INIntentParameterCombinationTitleID</key>
 					<string>UHcyyr</string>
 				</dict>
@@ -151,7 +149,7 @@
 					</dict>
 					<dict>
 						<key>INIntentResponseCodeFormatString</key>
-						<string>Stopped. You've been doing ${entryDescription} for ${entryDurationString}.</string>
+						<string>Stopped. You've tracked ${entryDescription} for ${entryDurationString}.</string>
 						<key>INIntentResponseCodeFormatStringID</key>
 						<string>akQb1h</string>
 						<key>INIntentResponseCodeName</key>
@@ -161,21 +159,41 @@
 					</dict>
 					<dict>
 						<key>INIntentResponseCodeFormatString</key>
-						<string>There's no entry currently running.</string>
+						<string>There's no timer running. </string>
 						<key>INIntentResponseCodeFormatStringID</key>
 						<string>JuvQpB</string>
 						<key>INIntentResponseCodeName</key>
-						<string>successNoRunningEntry</string>
+						<string>failureNoTimerRunning</string>
+						<key>INIntentResponseCodeSuccess</key>
+						<false/>
+					</dict>
+					<dict>
+						<key>INIntentResponseCodeFormatString</key>
+						<string>Log in to use this shortcut.</string>
+						<key>INIntentResponseCodeFormatStringID</key>
+						<string>C84CvN</string>
+						<key>INIntentResponseCodeName</key>
+						<string>failureNoApiToken</string>
+						<key>INIntentResponseCodeSuccess</key>
+						<false/>
+					</dict>
+					<dict>
+						<key>INIntentResponseCodeFormatString</key>
+						<string>Stopped. You've tracked time for ${entryDurationString}.</string>
+						<key>INIntentResponseCodeFormatStringID</key>
+						<string>WSMrGS</string>
+						<key>INIntentResponseCodeName</key>
+						<string>successWithEmptyDescription</string>
 						<key>INIntentResponseCodeSuccess</key>
 						<true/>
 					</dict>
 					<dict>
 						<key>INIntentResponseCodeFormatString</key>
-						<string>You need to log in to continue.</string>
+						<string>App data is outdated.</string>
 						<key>INIntentResponseCodeFormatStringID</key>
-						<string>C84CvN</string>
+						<string>HVyNMs</string>
 						<key>INIntentResponseCodeName</key>
-						<string>failureNoApiToken</string>
+						<string>failureSyncConflict</string>
 						<key>INIntentResponseCodeSuccess</key>
 						<false/>
 					</dict>
@@ -237,7 +255,7 @@
 			<key>INIntentRestrictions</key>
 			<integer>0</integer>
 			<key>INIntentTitle</key>
-			<string>Stop Timer</string>
+			<string>Stop a running timer</string>
 			<key>INIntentTitleID</key>
 			<string>QmBKnK</string>
 			<key>INIntentType</key>
@@ -354,8 +372,6 @@
 		<dict>
 			<key>INIntentCategory</key>
 			<string>generic</string>
-			<key>INIntentDescription</key>
-			<string>Show report</string>
 			<key>INIntentDescriptionID</key>
 			<string>KPcGYj</string>
 			<key>INIntentLastParameterTag</key>
@@ -415,7 +431,7 @@
 			<key>INIntentRestrictions</key>
 			<integer>0</integer>
 			<key>INIntentTitle</key>
-			<string>Show Report</string>
+			<string>Show report</string>
 			<key>INIntentTitleID</key>
 			<string>vvtqdG</string>
 			<key>INIntentType</key>
@@ -427,7 +443,7 @@
 		</dict>
 		<dict>
 			<key>INIntentCategory</key>
-			<string>generic</string>
+			<string>start</string>
 			<key>INIntentDescription</key>
 			<string>Start a new time tracking</string>
 			<key>INIntentDescriptionID</key>
@@ -608,7 +624,7 @@
 					</dict>
 					<dict>
 						<key>INIntentResponseCodeFormatString</key>
-						<string>Time tracking started.</string>
+						<string>Time-tracking started.</string>
 						<key>INIntentResponseCodeFormatStringID</key>
 						<string>0vfpVe</string>
 						<key>INIntentResponseCodeName</key>
@@ -618,11 +634,21 @@
 					</dict>
 					<dict>
 						<key>INIntentResponseCodeFormatString</key>
-						<string>You need to log in to continue.</string>
+						<string>Log in to use this shortcut.</string>
 						<key>INIntentResponseCodeFormatStringID</key>
 						<string>sC56D6</string>
 						<key>INIntentResponseCodeName</key>
 						<string>failureNoApiToken</string>
+						<key>INIntentResponseCodeSuccess</key>
+						<false/>
+					</dict>
+					<dict>
+						<key>INIntentResponseCodeFormatString</key>
+						<string>App data is outdated.</string>
+						<key>INIntentResponseCodeFormatStringID</key>
+						<string>DxHT4S</string>
+						<key>INIntentResponseCodeName</key>
+						<string>failureSyncConflict</string>
 						<key>INIntentResponseCodeSuccess</key>
 						<false/>
 					</dict>
@@ -643,7 +669,125 @@
 			<key>INIntentUserConfirmationRequired</key>
 			<false/>
 			<key>INIntentVerb</key>
-			<string>Do</string>
+			<string>Start</string>
+		</dict>
+		<dict>
+			<key>INIntentCategory</key>
+			<string>start</string>
+			<key>INIntentDescriptionID</key>
+			<string>z4KrEF</string>
+			<key>INIntentLastParameterTag</key>
+			<integer>2</integer>
+			<key>INIntentName</key>
+			<string>ContinueTimer</string>
+			<key>INIntentParameterCombinations</key>
+			<dict>
+				<key>workspace</key>
+				<dict>
+					<key>INIntentParameterCombinationIsPrimary</key>
+					<false/>
+					<key>INIntentParameterCombinationSubtitle</key>
+					<string>in ${workspace}</string>
+					<key>INIntentParameterCombinationSubtitleID</key>
+					<string>0DhbDI</string>
+					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
+					<true/>
+					<key>INIntentParameterCombinationTitle</key>
+					<string>Continue tracking</string>
+					<key>INIntentParameterCombinationTitleID</key>
+					<string>rWNsdx</string>
+				</dict>
+			</dict>
+			<key>INIntentParameters</key>
+			<array>
+				<dict>
+					<key>INIntentParameterDisplayPriority</key>
+					<integer>1</integer>
+					<key>INIntentParameterName</key>
+					<string>workspace</string>
+					<key>INIntentParameterSupportsMultipleValues</key>
+					<false/>
+					<key>INIntentParameterTag</key>
+					<integer>2</integer>
+					<key>INIntentParameterType</key>
+					<string>Object</string>
+				</dict>
+			</array>
+			<key>INIntentResponse</key>
+			<dict>
+				<key>INIntentResponseCodes</key>
+				<array>
+					<dict>
+						<key>INIntentResponseCodeFormatString</key>
+						<string></string>
+						<key>INIntentResponseCodeFormatStringID</key>
+						<string>mQIkIV</string>
+						<key>INIntentResponseCodeName</key>
+						<string>failure</string>
+						<key>INIntentResponseCodeSuccess</key>
+						<false/>
+					</dict>
+					<dict>
+						<key>INIntentResponseCodeFormatString</key>
+						<string></string>
+						<key>INIntentResponseCodeFormatStringID</key>
+						<string>Hdju1b</string>
+						<key>INIntentResponseCodeName</key>
+						<string>success</string>
+						<key>INIntentResponseCodeSuccess</key>
+						<true/>
+					</dict>
+					<dict>
+						<key>INIntentResponseCodeFormatString</key>
+						<string>Log in to use this shortcut.</string>
+						<key>INIntentResponseCodeFormatStringID</key>
+						<string>ttEh92</string>
+						<key>INIntentResponseCodeName</key>
+						<string>failureNoApiToken</string>
+						<key>INIntentResponseCodeSuccess</key>
+						<false/>
+					</dict>
+					<dict>
+						<key>INIntentResponseCodeFormatString</key>
+						<string>Tracking ${entryDescription}.</string>
+						<key>INIntentResponseCodeFormatStringID</key>
+						<string>m5JJnW</string>
+						<key>INIntentResponseCodeName</key>
+						<string>successWithEntryDescription</string>
+						<key>INIntentResponseCodeSuccess</key>
+						<true/>
+					</dict>
+				</array>
+				<key>INIntentResponseLastParameterTag</key>
+				<integer>1</integer>
+				<key>INIntentResponseParameters</key>
+				<array>
+					<dict>
+						<key>INIntentResponseParameterDisplayPriority</key>
+						<integer>1</integer>
+						<key>INIntentResponseParameterName</key>
+						<string>entryDescription</string>
+						<key>INIntentResponseParameterSupportsMultipleValues</key>
+						<false/>
+						<key>INIntentResponseParameterTag</key>
+						<integer>1</integer>
+						<key>INIntentResponseParameterType</key>
+						<string>String</string>
+					</dict>
+				</array>
+			</dict>
+			<key>INIntentRestrictions</key>
+			<integer>0</integer>
+			<key>INIntentTitle</key>
+			<string>Continue tracking</string>
+			<key>INIntentTitleID</key>
+			<string>DcWrhF</string>
+			<key>INIntentType</key>
+			<string>Custom</string>
+			<key>INIntentUserConfirmationRequired</key>
+			<false/>
+			<key>INIntentVerb</key>
+			<string>Start</string>
 		</dict>
 	</array>
 </dict>

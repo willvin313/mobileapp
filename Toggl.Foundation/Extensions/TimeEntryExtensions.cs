@@ -1,4 +1,7 @@
 using System;
+using System.Linq;
+using Toggl.Foundation.Autocomplete;
+using Toggl.Foundation.Autocomplete.Span;
 using Toggl.Foundation.Calendar;
 using Toggl.Foundation.Models;
 
@@ -36,11 +39,24 @@ namespace Toggl.Foundation.Extensions
                 description: "",
                 duration: timeSpan,
                 startTime: startTime,
-                projectId: null, 
-                taskId: null, 
-                tagIds: null, 
+                projectId: null,
+                taskId: null,
+                tagIds: null,
                 isBillable: false
             );
+
+        public static ITimeEntryPrototype AsTimeEntryPrototype(this TextFieldInfo textFieldInfo, DateTimeOffset startTime, TimeSpan? duration, bool billable)
+            => new TimeEntryPrototype(
+                textFieldInfo.WorkspaceId,
+                textFieldInfo.Description,
+                duration,
+                startTime,
+                textFieldInfo.ProjectId,
+                textFieldInfo.Spans.OfType<ProjectSpan>().SingleOrDefault()?.TaskId,
+                textFieldInfo.Spans.OfType<TagSpan>().Select(span => span.TagId).Distinct().ToArray(),
+                billable
+                );
+
 
         private sealed class TimeEntryPrototype : ITimeEntryPrototype
         {

@@ -40,6 +40,7 @@
     <Compile Include="Extensions\SignUpExtensions.cs" />
     <Compile Include="Extensions\StartTimeEntryExtensions.cs" />
     <Compile Include="Extensions\MainExtensions.cs" />
+    <Compile Include="Extensions\EditTimeEntryExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

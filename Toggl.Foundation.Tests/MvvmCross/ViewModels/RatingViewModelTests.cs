@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Collections.Generic;
+using System.Reactive;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Reactive.Testing;
@@ -11,6 +12,7 @@ using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.MvvmCross.ViewModels.Hints;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Tests.Generators;
+using Toggl.Foundation.Tests.TestExtensions;
 using Toggl.PrimeRadiant;
 using Xunit;
 
@@ -205,14 +207,15 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 protected abstract IAnalyticsEvent ExpectedEvent { get; }
 
                 [Fact, LogIfTooSlow]
-                public async Task HidesTheViewModel()
+                public async Task HidesTheView()
                 {
-                    ViewModel.PerformMainAction.Execute();
-                    TestScheduler.Start();
+                    var observer = TestScheduler.CreateObserver<Unit>();
+                    ViewModel.HideRatingView.Subscribe(observer);
 
-                    NavigationService.Received().ChangePresentation(
-                        Arg.Is<ToggleRatingViewVisibilityHint>(hint => hint.ShouldHide == true)
-                    );
+                    ViewModel.PerformMainAction.Execute();
+
+                    TestScheduler.Start();
+                    observer.Messages.Count.Should().Be(1);
                 }
 
                 protected override void AdditionalViewModelSetup()
@@ -305,13 +308,15 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public sealed class TheDismissMethod : RatingViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public void HidesTheViewModel()
+            public void HidesTheView()
             {
+                var observer = TestScheduler.CreateObserver<Unit>();
+                ViewModel.HideRatingView.Subscribe(observer);
+
                 ViewModel.Dismiss();
 
-                NavigationService.Received().ChangePresentation(
-                    Arg.Is<ToggleRatingViewVisibilityHint>(hint => hint.ShouldHide == true)
-                );
+                TestScheduler.Start();
+                observer.Messages.Count.Should().Be(1);
             }
 
             [Fact, LogIfTooSlow]

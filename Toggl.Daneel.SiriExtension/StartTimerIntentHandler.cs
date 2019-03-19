@@ -1,10 +1,12 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using Foundation;
 using SiriExtension.Models;
 using Toggl.Daneel.ExtensionKit;
 using Toggl.Daneel.ExtensionKit.Analytics;
+using Toggl.Daneel.ExtensionKit.Extensions;
 using Toggl.Daneel.Intents;
 using Toggl.Ultrawave;
 
@@ -13,6 +15,7 @@ namespace SiriExtension
     public class StartTimerIntentHandler : StartTimerIntentHandling
     {
         private ITogglApi togglAPI;
+        private const string startTimerActivityType = "StartTimer";
 
         public StartTimerIntentHandler(ITogglApi togglAPI)
         {
@@ -23,11 +26,30 @@ namespace SiriExtension
         {
             if (togglAPI == null)
             {
-                completion(new StartTimerIntentResponse(StartTimerIntentResponseCode.FailureNoApiToken, null));
+                var userActivity = new NSUserActivity(startTimerActivityType);
+                userActivity.SetResponseText("Log in to use this shortcut.");
+                completion(new StartTimerIntentResponse(StartTimerIntentResponseCode.FailureNoApiToken, userActivity));
                 return;
             }
 
-            completion(new StartTimerIntentResponse(StartTimerIntentResponseCode.Ready, null));        }
+            var lastUpdated = SharedStorage.instance.GetLastUpdateDate();
+            togglAPI.TimeEntries.GetAllSince(lastUpdated)
+                .Subscribe(tes =>
+                    {
+                        // If there are no changes since last sync, or there are changes in the server but not in the app, we are ok
+                        if (tes.Count == 0 || tes.OrderBy(te => te.At).Last().At >= lastUpdated)
+                        {
+                            completion(new StartTimerIntentResponse(StartTimerIntentResponseCode.Ready, null));
+                        }
+                        else
+                        {
+                            var userActivity = new NSUserActivity(startTimerActivityType);
+                            userActivity.SetResponseText("Open the app to sync your data, then try again.");
+                            completion(new StartTimerIntentResponse(StartTimerIntentResponseCode.FailureSyncConflict, userActivity));
+                        }
+                    }
+                );
+        }
 
         public override void HandleStartTimer(StartTimerIntent intent, Action<StartTimerIntentResponse> completion)
         {
@@ -44,7 +66,9 @@ namespace SiriExtension
             }, exception =>
             {
                 SharedStorage.instance.AddSiriTrackingEvent(SiriTrackingEvent.Error(exception.Message));
-                completion(new StartTimerIntentResponse(StartTimerIntentResponseCode.Failure, null));
+                var userActivity = new NSUserActivity(startTimerActivityType);
+                userActivity.SetResponseText("Something went wrong, please try again.");
+                completion(new StartTimerIntentResponse(StartTimerIntentResponseCode.Failure, userActivity));
             });
         }
 

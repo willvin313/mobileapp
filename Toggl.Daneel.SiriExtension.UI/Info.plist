@@ -15,7 +15,7 @@
 	<key>CFBundlePackageType</key>
 	<string>XPC!</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.17</string>
+	<string>1.19</string>
 	<key>CFBundleVersion</key>
 	<string>IOS_BUNDLE_VERSION</string>
 	<key>MinimumOSVersion</key>
@@ -28,6 +28,7 @@
 			<array>
 				<string>StopTimerIntent</string>
 				<string>StartTimerIntent</string>
+				<string>ContinueTimerIntent</string>
 			</array>
 		</dict>
 		<key>NSExtensionMainStoryboard</key>

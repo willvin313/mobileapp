@@ -18,6 +18,7 @@ using Xunit;
 using Microsoft.Reactive.Testing;
 using Toggl.Foundation.MvvmCross.ViewModels.Reports;
 using Toggl.Foundation.Tests.TestExtensions;
+using Toggl.Foundation.Interactors;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 {
@@ -27,7 +28,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         {
             protected const long WorkspaceId = 10;
 
-            protected IReportsProvider ReportsProvider { get; } = Substitute.For<IReportsProvider>();
+            protected IInteractor<IObservable<ProjectSummaryReport>> Interactor { get; }
+                = Substitute.For<IInteractor<IObservable<ProjectSummaryReport>>>();
 
             public ReportsViewModelTest()
             {
@@ -37,17 +39,22 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
             protected override ReportsViewModel CreateViewModel()
             {
-                DataSource.ReportsProvider.Returns(ReportsProvider);
-                return new ReportsViewModel(DataSource,
-                                            TimeService,
-                                            NavigationService,
-                                            InteractorFactory,
-                                            AnalyticsService,
-                                            DialogService,
-                                            IntentDonationService,
-                                            SchedulerProvider,
-                                            StopwatchProvider,
-                                            RxActionFactory);
+                InteractorFactory
+                    .GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset?>())
+                    .Returns(Interactor);
+
+                return new ReportsViewModel(
+                    DataSource,
+                    TimeService,
+                    NavigationService,
+                    InteractorFactory,
+                    AnalyticsService,
+                    DialogService,
+                    IntentDonationService,
+                    SchedulerProvider,
+                    StopwatchProvider,
+                    RxActionFactory
+                );
             }
 
             protected async Task Initialize()
@@ -134,8 +141,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     return now;
                 });
 
-                ReportsProvider.GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
-                        .Returns(Observable.Return(new ProjectSummaryReport(new ChartSegment[0], projectsNotSyncedCount)));
+                Interactor.Execute()
+                    .Returns(Observable.Return(new ProjectSummaryReport(new ChartSegment[0], projectsNotSyncedCount)));
 
                 await Initialize();
 
@@ -158,8 +165,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     return now;
                 });
 
-                ReportsProvider.GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
-                        .Returns(Observable.Throw<ProjectSummaryReport>(new Exception()));
+                Interactor.Execute().Returns(Observable.Throw<ProjectSummaryReport>(new Exception()));
 
                 await Initialize();
 
@@ -176,8 +182,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var projectsNotSyncedCount = 0;
                 TimeService.CurrentDateTime.Returns(DateTime.Now);
                 TimeService.MidnightObservable.Returns(Observable.Never<DateTimeOffset>());
-                ReportsProvider
-                    .GetProjectSummary(WorkspaceId, Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
+                Interactor.Execute()
                     .Returns(Observable.Return(new ProjectSummaryReport(new ChartSegment[0], projectsNotSyncedCount)));
 
                 ViewModel.BillablePercentageObservable.Subscribe(billableObserver);
@@ -213,8 +218,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var loadingObserver = TestScheduler.CreateObserver<bool>();
                 var now = DateTimeOffset.Now;
                 TimeService.CurrentDateTime.Returns(now);
-                ReportsProvider.GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
-                    .Returns(Observable.Never<ProjectSummaryReport>());
+                Interactor.Execute().Returns(Observable.Never<ProjectSummaryReport>());
                 ViewModel.IsLoadingObservable.Subscribe(loadingObserver);
 
                 await Initialize();
@@ -231,7 +235,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var now = DateTimeOffset.Now;
                 var projectsNotSyncedCount = 0;
                 TimeService.CurrentDateTime.Returns(now);
-                ReportsProvider.GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
+                Interactor.Execute()
                     .Returns(Observable.Return(new ProjectSummaryReport(new ChartSegment[0], projectsNotSyncedCount)));
                 ViewModel.IsLoadingObservable.Subscribe(loadingObserver);
 
@@ -268,8 +272,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 var now = DateTimeOffset.Now;
                 TimeService.CurrentDateTime.Returns(now);
-                ReportsProvider.GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
-                    .Returns(Observable.Never<ProjectSummaryReport>());
+                Interactor.Execute().Returns(Observable.Never<ProjectSummaryReport>());
 
                 await Initialize();
 
@@ -283,8 +286,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var now = DateTimeOffset.Now;
                 var projectsNotSyncedCount = 0;
                 TimeService.CurrentDateTime.Returns(now);
-                ReportsProvider.GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
-                    .Returns(Observable.Return(new ProjectSummaryReport(new ChartSegment[0], projectsNotSyncedCount)));
+                Interactor.Execute().Returns(Observable.Return(new ProjectSummaryReport(new ChartSegment[0], projectsNotSyncedCount)));
 
                 await Initialize();
 
@@ -327,8 +329,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 };
 
                 TimeService.CurrentDateTime.Returns(new DateTimeOffset(2018, 05, 15, 12, 00, 00, TimeSpan.Zero));
-                ReportsProvider.GetProjectSummary(WorkspaceId, Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
-                    .Returns(Observable.Return(new ProjectSummaryReport(segments, projectsNotSyncedCount)));
+                Interactor.Execute().Returns(Observable.Return(new ProjectSummaryReport(segments, projectsNotSyncedCount)));
                 var segmentsObservable = TestScheduler.CreateObserver<IReadOnlyList<ChartSegment>>();
                 var groupedSegmentsObservable = TestScheduler.CreateObserver<IReadOnlyList<ChartSegment>>();
                 ViewModel.SegmentsObservable.Subscribe(segmentsObservable);
@@ -365,8 +366,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 };
 
                 TimeService.CurrentDateTime.Returns(new DateTimeOffset(2018, 05, 15, 12, 00, 00, TimeSpan.Zero));
-                ReportsProvider.GetProjectSummary(WorkspaceId, Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
-                    .Returns(Observable.Return(new ProjectSummaryReport(segments, projectsNotSyncedCount)));
+                Interactor.Execute().Returns(Observable.Return(new ProjectSummaryReport(segments, projectsNotSyncedCount)));
 
                 var segmentsObservable = TestScheduler.CreateObserver<IReadOnlyList<ChartSegment>>();
                 var groupedSegmentsObservable = TestScheduler.CreateObserver<IReadOnlyList<ChartSegment>>();
@@ -404,8 +404,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 };
 
                 TimeService.CurrentDateTime.Returns(new DateTimeOffset(2018, 05, 15, 12, 00, 00, TimeSpan.Zero));
-                ReportsProvider.GetProjectSummary(WorkspaceId, Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
-                    .Returns(Observable.Return(new ProjectSummaryReport(segments, projectsNotSyncedCount)));
+                Interactor.Execute().Returns(Observable.Return(new ProjectSummaryReport(segments, projectsNotSyncedCount)));
 
                 var segmentsObservable = TestScheduler.CreateObserver<IReadOnlyList<ChartSegment>>();
                 var groupedSegmentsObservable = TestScheduler.CreateObserver<IReadOnlyList<ChartSegment>>();
@@ -444,8 +443,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 };
 
                 TimeService.CurrentDateTime.Returns(new DateTimeOffset(2018, 05, 15, 12, 00, 00, TimeSpan.Zero));
-                ReportsProvider.GetProjectSummary(WorkspaceId, Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
-                    .Returns(Observable.Return(new ProjectSummaryReport(segments, projectsNotSyncedCount)));
+                Interactor.Execute().Returns(Observable.Return(new ProjectSummaryReport(segments, projectsNotSyncedCount)));
 
                 var segmentsObservable = TestScheduler.CreateObserver<IReadOnlyList<ChartSegment>>();
                 var groupedSegmentsObservable = TestScheduler.CreateObserver<IReadOnlyList<ChartSegment>>();
@@ -483,8 +481,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 };
 
                 TimeService.CurrentDateTime.Returns(new DateTimeOffset(2018, 05, 15, 12, 00, 00, TimeSpan.Zero));
-                ReportsProvider.GetProjectSummary(WorkspaceId, Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
-                    .Returns(Observable.Return(new ProjectSummaryReport(segments, projectsNotSyncedCount)));
+                Interactor.Execute().Returns(Observable.Return(new ProjectSummaryReport(segments, projectsNotSyncedCount)));
 
                 var segmentsObservable = TestScheduler.CreateObserver<IReadOnlyList<ChartSegment>>();
                 var groupedSegmentsObservable = TestScheduler.CreateObserver<IReadOnlyList<ChartSegment>>();
@@ -528,7 +525,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SelectWorkspace.Execute();
                 TestScheduler.Start();
 
-                await ReportsProvider.Received().GetProjectSummary(Arg.Is(mockWorkspace.Id), Arg.Any<DateTimeOffset>(),
+                InteractorFactory.Received().GetProjectSummary(
+                    Arg.Is(mockWorkspace.Id), Arg.Any<DateTimeOffset>(),
                     Arg.Any<DateTimeOffset>());
             }
 
@@ -566,7 +564,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SelectWorkspace.Execute();
                 TestScheduler.Start();
 
-                await ReportsProvider.DidNotReceive().GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(),
+                InteractorFactory.DidNotReceive().GetProjectSummary(
+                    Arg.Any<long>(),
+                    Arg.Any<DateTimeOffset>(),
                     Arg.Any<DateTimeOffset>());
             }
 
@@ -583,7 +583,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SelectWorkspace.Execute();
                 TestScheduler.Start();
 
-                await ReportsProvider.DidNotReceive().GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(),
+                InteractorFactory.DidNotReceive().GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(),
                     Arg.Any<DateTimeOffset>());
             }
         }
@@ -691,8 +691,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task ShouldTriggerReloadForEveryAppearance(int numberOfAppearances)
             {
                 TimeService.CurrentDateTime.Returns(DateTimeOffset.Now);
-                ReportsProvider.GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(),
-                        Arg.Any<DateTimeOffset>())
+                Interactor.Execute()
                     .ReturnsForAnyArgs(Observable.Empty<ProjectSummaryReport>(SchedulerProvider.TestScheduler));
                 await ViewModel.Initialize();
                 ViewModel.ViewAppeared(); // First call is skipped
@@ -703,8 +702,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 }
                 TestScheduler.Start();
 
-                ReportsProvider.Received(numberOfAppearances).GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(),
-                    Arg.Any<DateTimeOffset>());
+                InteractorFactory
+                    .Received(numberOfAppearances)
+                    .GetProjectSummary(Arg.Any<long>(), Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>());
             }
         }
     }

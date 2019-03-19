@@ -11,6 +11,8 @@ namespace Toggl.Multivac.Extensions
 {
     public static class ReactiveExtensions
     {
+        private static Action<string> outputDebugInfo = Console.WriteLine;
+
         private class Observer<T> : IObserver<T>
         {
             private readonly Action<Exception> onError;
@@ -85,23 +87,22 @@ namespace Toggl.Multivac.Extensions
         public static IObservable<T> Debug<T>(this IObservable<T> observable, string tag = "")
         {
             return Observable.Defer(() => Observable.Create<T>(observer =>
+            {
+                outputDebugInfo($"Subscribed {tag}");
+
+                var disposable = observable.Do(
+                        x => outputDebugInfo($"OnNext {tag}: {x}"),
+                        ex => outputDebugInfo($"OnError {tag}: {ex}"),
+                        () => outputDebugInfo($"OnCompleted {tag}")
+                    )
+                    .Subscribe(observer);
+
+                return Disposable.Create(() =>
                 {
-                    Console.WriteLine($"Subscribed {tag}");
-
-                    var disposable = observable.Do(
-                            x => Console.WriteLine($"OnNext {tag}: {x}"),
-                            ex => Console.WriteLine($"OnError {tag}: {ex}"),
-                            () => Console.WriteLine($"OnCompleted {tag}")
-                        )
-                        .Subscribe(observer);
-
-                    return Disposable.Create(() =>
-                    {
-                        disposable.Dispose();
-                        Console.WriteLine($"Disposed {tag}");
-                    });
-                }
-            ));
+                    disposable.Dispose();
+                    outputDebugInfo($"Disposed {tag}");
+                });
+            }));
         }
 
         public static IObservable<T> DoIf<T>(this IObservable<T> observable, Predicate<T> predicate, Action<T> action)

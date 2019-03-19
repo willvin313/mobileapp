@@ -40,7 +40,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 DataSource.User.Current.Returns(UserSubject.AsObservable());
                 DataSource.Preferences.Current.Returns(PreferencesSubject.AsObservable());
-                DataSource.SyncManager.ProgressObservable.Returns(ProgressSubject.AsObservable());
+                SyncManager.ProgressObservable.Returns(ProgressSubject.AsObservable());
 
                 UserSubject.OnNext(new MockUser());
                 PreferencesSubject.OnNext(new MockPreferences());
@@ -49,6 +49,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 return new SettingsViewModel(
                     DataSource,
+                    SyncManager,
                     PlatformInfo,
                     DialogService,
                     UserPreferences,
@@ -75,6 +76,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(
                 bool useDataSource,
+                bool useSyncManager,
                 bool useUserAccessManager,
                 bool useDialogService,
                 bool useUserPreferences,
@@ -90,6 +92,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 bool useSchedulerProvider)
             {
                 var dataSource = useDataSource ? DataSource : null;
+                var syncManager = useSyncManager ? SyncManager : null;
                 var platformInfo = useplatformInfo ? PlatformInfo : null;
                 var dialogService = useDialogService ? DialogService : null;
                 var userPreferences = useUserPreferences ? UserPreferences : null;
@@ -107,6 +110,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 Action tryingToConstructWithEmptyParameters =
                     () => new SettingsViewModel(
                         dataSource,
+                        syncManager,
                         platformInfo,
                         dialogService,
                         userPreferences,
@@ -439,7 +443,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.PickDefaultWorkspace.Execute();
                 TestScheduler.Start();
 
-                await DataSource.SyncManager.Received().PushSync();
+                SyncManager.Received().PushSync();
             }
         }
 
@@ -584,7 +588,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.SelectDateFormat.Execute();
                 TestScheduler.Start();
 
-                await DataSource.SyncManager.Received().PushSync();
+                SyncManager.Received().PushSync();
             }
         }
 
@@ -619,7 +623,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.ToggleTwentyFourHourSettings.Execute();
                 TestScheduler.Start();
 
-                await DataSource.SyncManager.Received().PushSync();
+                SyncManager.Received().PushSync();
             }
         }
 
@@ -670,13 +674,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 NavigationService
                     .Navigate<SelectDurationFormatViewModel, DurationFormat, DurationFormat>(Arg.Any<DurationFormat>())
                     .Returns(Task.FromResult(newDurationFormat));
-                var syncManager = Substitute.For<ISyncManager>();
-                DataSource.SyncManager.Returns(syncManager);
 
                 ViewModel.SelectDurationFormat.Execute();
                 TestScheduler.Start();
 
-                await syncManager.Received().PushSync();
+                await SyncManager.Received().PushSync();
             }
 
             [Fact, LogIfTooSlow]
@@ -754,13 +756,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 NavigationService
                     .Navigate<SelectBeginningOfWeekViewModel, BeginningOfWeek, BeginningOfWeek>(Arg.Any<BeginningOfWeek>())
                     .Returns(Task.FromResult(newBeginningOfWeek));
-                var syncManager = Substitute.For<ISyncManager>();
-                DataSource.SyncManager.Returns(syncManager);
 
                 ViewModel.SelectBeginningOfWeek.Execute();
                 TestScheduler.Start();
 
-                await syncManager.Received().PushSync();
+                await SyncManager.Received().PushSync();
             }
 
             [Fact, LogIfTooSlow]

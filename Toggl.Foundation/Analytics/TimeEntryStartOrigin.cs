@@ -8,6 +8,8 @@
         Suggestion,
         ContinueMostRecent,
         CalendarEvent,
-        CalendarTapAndDrag
+        CalendarTapAndDrag,
+        CalendarNotification,
+        Siri
     }
 }

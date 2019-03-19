@@ -44,7 +44,10 @@ namespace Toggl.Tests.UI
 
     public static class Main
     {
+        public const string TimeEntryRow = "MainTimeEntryRow";
         public const string TimeEntriesCollection = "MainRecyclerView";
+        public const string CurrentTimeEntryCard = "MainRunningTimeEntryFrame";
+        public const string TimeEntryRowContinueButton = "TimeEntriesLogCellContinueButton";
         public static readonly Func<AppQuery, AppQuery> StartTimeEntryButton = x => x.Id("MainPlayButton");
         public static readonly Func<AppQuery, AppQuery> StopTimeEntryButton = x => x.Id("MainStopButton");
     }
@@ -52,10 +55,17 @@ namespace Toggl.Tests.UI
     public static class StartTimeEntry
     {
         public static readonly Func<AppQuery, AppQuery> DoneButton = x => x.Id("StartTimeEntryDoneButton");
-        public static readonly Func<AppQuery, AppQuery> DescriptionText = x => x.Id("StartTimeEntryDescriptionTextField");
+        public static readonly Func<AppQuery, AppQuery> DescriptionTextField = x => x.Id("StartTimeEntryDescriptionTextField");
         public const string CloseButton = "StartTimeEntryClose";
         public const string DialogDiscard = "Discard";
         public const string DialogCancel = "Cancel";
+        public const string DurationLabel = "StartTimeEntryDurationText";
+    }
+
+    public static class EditDuration
+    {
+        public const string WheelDurationInput = "WheelDurationInput";
+        public const string SaveButton = "SaveMenuItem";
     }
 
     public static class ForgotPassword
@@ -68,8 +78,17 @@ namespace Toggl.Tests.UI
 
     public static class EditTimeEntry
     {
-        public const string EditTags = "EditTimeEntryTagsContainer";
+        public const string Confirm = "EditTimeEntryConfirmButton";
         public const string DeleteButton = "EditTimeEntryDelete";
+        public const string EditTags = "EditTimeEntryTagsContainer";
+        public const string EditProject = "EditTimeEntryProjectContainer";
+        public const string EditDescription = "EditTimeEntryDescriptionTextField";
+    }
+
+    public static class Client
+    {
+        public const string AddFilterTextField = "FilterEditText";
+        public const string ClientCreationCellId = "NameTextView";
     }
 
     public static class NewProject
@@ -78,5 +97,22 @@ namespace Toggl.Tests.UI
         public const string CreateButton = "CreateProjectButton";
         public const string ChangeWorkspace = "ChangeWorkspaceButton";
         public const string TogglePrivateProject = "PrivateProjectSwitchContainer";
+    }
+
+    public static class SelectProject
+    {
+        public const string ProjectNameTextField = "SelectProjectProjectNameEditText";
+        public const string ProjectSuggestionRow = "SelectProjectProjectCell";
+    }
+
+    public static class EditProject
+    {
+        public const string CreateButton = "CreateProjectButton";
+        public const string ChangeClient = "ChangeClientButton";
+    }
+
+    public static class Misc
+    {
+        public const string SnackbarAction = "snackbar_action";
     }
 }

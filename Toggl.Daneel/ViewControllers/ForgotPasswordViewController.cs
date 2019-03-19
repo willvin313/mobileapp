@@ -1,19 +1,16 @@
 using System;
 using System.Reactive.Linq;
-using MvvmCross.Binding;
-using MvvmCross.Binding.BindingContext;
 using MvvmCross.Platforms.Ios.Presenters.Attributes;
 using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Foundation;
-using Toggl.Foundation.MvvmCross.Converters;
 using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using UIKit;
-using static Toggl.Daneel.Extensions.ViewBindingExtensions;
+using Toggl.Foundation.MvvmCross.Extensions;
 
 namespace Toggl.Daneel.ViewControllers
 {
@@ -92,6 +89,10 @@ namespace Toggl.Daneel.ViewControllers
             //Commands
             ResetPasswordButton.Rx()
                 .BindAction(ViewModel.Reset)
+                .DisposedBy(DisposeBag);
+
+            ResetPasswordButton.Rx().Tap()
+                .Subscribe(resetPasswordButtonTapped)
                 .DisposedBy(DisposeBag);
         }
 
@@ -178,5 +179,8 @@ namespace Toggl.Daneel.ViewControllers
             backButton.Frame = frame;
             backButton.HorizontalAlignment = UIControlContentHorizontalAlignment.Left;
         }
+
+        private void resetPasswordButtonTapped()
+            => EmailTextField.ResignFirstResponder();
     }
 }

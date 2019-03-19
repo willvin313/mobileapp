@@ -7,8 +7,8 @@
     android:background="@color/defaultBackground"
     android:layout_height="48dp"
     android:layout_width="match_parent">
-    <TextView
-        local:MvxBind="Text Name"
+  <TextView
+        android:id="@+id/TaskLabel"
         android:maxLines="1"
         android:gravity="left"
         android:textSize="14sp"
