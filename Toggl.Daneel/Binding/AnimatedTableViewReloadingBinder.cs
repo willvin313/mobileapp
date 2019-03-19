@@ -4,10 +4,11 @@ using System.Linq;
 using System.Reactive;
 using Foundation;
 using Toggl.Daneel.ViewSources;
+using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Collections.Diffing;
-using Toggl.Foundation.MvvmCross.Reactive;
 using UIKit;
+using MvvmCross;
 
 namespace Toggl.Daneel.Binding
 {
@@ -17,9 +18,18 @@ namespace Toggl.Daneel.Binding
         where TModel : IDiffable<TKey>, IEquatable<TModel>
         where THeader : IDiffable<TKey>
     {
-        public IObserver<IEnumerable<TSection>> CreateAnimatedReloadObserver(
-            IReactive<UITableView> reactive,
+        private readonly BaseTableViewSource<TSection, THeader, TModel> dataSource;
+        private readonly IStopwatchProvider stopwatchProvider;
+
+        public AnimatedTableViewReloadingBinder(
             BaseTableViewSource<TSection, THeader, TModel> dataSource)
+        {
+            this.dataSource = dataSource;
+
+            stopwatchProvider = Mvx.Resolve<IStopwatchProvider>();
+        }
+
+        public IObserver<IEnumerable<TSection>> CreateAnimatedReloadObserver(UITableView tableView)
         {
             return Observer.Create<IEnumerable<TSection>>(finalSections =>
             {
@@ -27,20 +37,25 @@ namespace Toggl.Daneel.Binding
                 if (initialSections == null || initialSections.Count == 0)
                 {
                     dataSource.SetSections(finalSections);
-                    reactive.Base.ReloadData();
+                    tableView.ReloadData();
                     return;
                 }
 
                 // if view is not in view hierarchy, performing batch updates will crash the app
-                if (reactive.Base.Window == null)
+                if (tableView.Window == null)
                 {
                     dataSource.SetSections(finalSections);
-                    reactive.Base.ReloadData();
+                    tableView.ReloadData();
                     return;
                 }
 
+                var stopwatch = stopwatchProvider.Create(MeasuredOperation.Diffing);
+                stopwatch.Start();
+
                 var diff = new Diffing<TSection, THeader, TModel, TKey>(initialSections, finalSections);
                 var changeset = diff.ComputeDifferences();
+
+                stopwatch.Stop();
 
                 // The changesets have to be applied one after another. Not in one transaction.
                 // iOS is picky about the changes which can happen in a single transaction.
@@ -49,10 +64,10 @@ namespace Toggl.Daneel.Binding
 
                 foreach (var difference in changeset)
                 {
-                    reactive.Base.BeginUpdates();
+                    tableView.BeginUpdates();
                     dataSource.SetSections(difference.FinalSections);
-                    performChangesetUpdates(reactive.Base, difference);
-                    reactive.Base.EndUpdates();
+                    performChangesetUpdates(tableView, difference);
+                    tableView.EndUpdates();
                 }
             });
         }

@@ -23,6 +23,7 @@
         CreateMainLogSuggestionsViewHolder,
         MainActivityOnCreate,
         BackgroundSync,
-        Sync
+        Sync,
+        Diffing
     }
 }
