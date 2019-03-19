@@ -115,10 +115,10 @@ namespace Toggl.Daneel.ViewControllers
             tableViewSource.ObservedHeaders = ViewModel.TimeEntries.Select(e => e.Select(section => section.Header));
 
             TimeEntriesLogTableView.Source = tableViewSource;
-            var binder = new AnimatedTableViewReloadingBinder<MainLogSection, DaySummaryViewModel, LogItemViewModel, IMainLogKey>(tableViewSource);
+            var timeEntriesViewSourceBinder = new AnimatedTableViewReloadingBinder<MainLogSection, DaySummaryViewModel, LogItemViewModel, IMainLogKey>(tableViewSource);
 
             ViewModel.TimeEntries
-                .Subscribe(binder.CreateAnimatedReloadObserver(TimeEntriesLogTableView))
+                .Subscribe(timeEntriesViewSourceBinder.CreateAnimatedReloadObserver(TimeEntriesLogTableView))
                 .DisposedBy(disposeBag);
 
             ViewModel.ShouldReloadTimeEntryLog
