@@ -102,15 +102,4 @@
     {
         public const string SnackBar = "SnackBar";
     }
-
-    public static class SelectProject
-    {
-        public const string ProjectNameTextField = "ProjectNameTextField";
-        public const string ProjectSuggestionRow = "ProjectSuggestionRow";
-    }
-
-    public static class Misc
-    {
-        public const string SnackBar = "SnackBar";
-    }
 }
