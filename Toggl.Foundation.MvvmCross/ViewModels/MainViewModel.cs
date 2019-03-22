@@ -38,6 +38,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
     public sealed class MainViewModel : MvxViewModel
     {
         private const int ratingViewTimeout = 5;
+        private const double throttlePeriodInSeconds = 0.1;
 
         private bool isEditViewOpen;
         private string urlNavigationAction;
@@ -81,7 +82,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public IObservable<bool> ShouldShowRatingView { get; private set; }
 
         public IObservable<IEnumerable<AnimatableSectionModel<DaySummaryViewModel, LogItemViewModel, IMainLogKey>>> TimeEntries
-            => TimeEntriesViewModel.TimeEntries.ObserveOn(schedulerProvider.MainScheduler);
+            => TimeEntriesViewModel.TimeEntries.Throttle(TimeSpan.FromSeconds(throttlePeriodInSeconds)).ObserveOn(schedulerProvider.MainScheduler);
 
         public RatingViewModel RatingViewModel { get; }
         public SuggestionsViewModel SuggestionsViewModel { get; }
