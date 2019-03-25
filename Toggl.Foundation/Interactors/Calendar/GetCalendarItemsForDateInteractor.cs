@@ -51,6 +51,7 @@ namespace Toggl.Foundation.Interactors.Calendar
                     => timeEntry.IsDeleted == false
                     && timeEntry.Start >= date.Date
                     && timeEntry.Start <= date.AddDays(1).Date)
+                .Select(timeEntries => timeEntries.ToList())
                 .Select(convertTimeEntriesToCalendarItems);
 
         private IObservable<IEnumerable<CalendarItem>> calendarItemsFromEvents()

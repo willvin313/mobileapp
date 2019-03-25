@@ -42,7 +42,7 @@ namespace Toggl.Giskard.Adapters
                     var inflatedView = inflater.Inflate(Resource.Layout.SelectClientActivityCell, parent, false);
                     return new ClientSelectionViewHolder(inflatedView);
                 case selectableClientCreationViewType:
-                    var inflatedCreationView = inflater.Inflate(Resource.Layout.EntityCreationActivityCell, parent, false);
+                    var inflatedCreationView = inflater.Inflate(Resource.Layout.AbcCreateEntityCell, parent, false);
                     return new ClientCreationSelectionViewHolder(inflatedCreationView);
                 default:
                     throw new Exception("Unsupported view type");

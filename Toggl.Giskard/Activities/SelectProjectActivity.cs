@@ -1,10 +1,15 @@
-﻿using Android.App;
+﻿using System;
+using System.Reactive.Linq;
+using Android.App;
 using Android.Content.PM;
 using Android.OS;
+using Android.Support.V7.Widget;
 using Android.Views;
-using MvvmCross.Droid.Support.V7.AppCompat;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Giskard.Adapters;
+using Toggl.Giskard.Extensions.Reactive;
+using Toggl.Multivac.Extensions;
 
 namespace Toggl.Giskard.Activities
 {
@@ -12,13 +17,42 @@ namespace Toggl.Giskard.Activities
     [Activity(Theme = "@style/AppTheme.BlueStatusBar",
         ScreenOrientation = ScreenOrientation.Portrait,
         ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize)]
-    public sealed class SelectProjectActivity : MvxAppCompatActivity<SelectProjectViewModel>
+    public sealed partial class SelectProjectActivity : ReactiveActivity<SelectProjectViewModel>
     {
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
             SetContentView(Resource.Layout.SelectProjectActivity);
             OverridePendingTransition(Resource.Animation.abc_slide_in_bottom, Resource.Animation.abc_fade_out);
+            InitializeViews();
+
+            var adapter = new SelectProjectRecyclerAdapter();
+            recyclerView.SetLayoutManager(new LinearLayoutManager(this));
+            recyclerView.SetAdapter(adapter);
+
+            ViewModel.Suggestions
+                .Subscribe(adapter.SetItems)
+                .DisposedBy(DisposeBag);
+
+            adapter.ItemTapObservable
+                .Subscribe(ViewModel.SelectProject.Inputs)
+                .DisposedBy(DisposeBag);
+
+            adapter.ToggleTasks
+                .Subscribe(ViewModel.ToggleTaskSuggestions.Inputs)
+                .DisposedBy(DisposeBag);
+
+            ViewModel.PlaceholderText
+                .Subscribe(searchField.Rx().Hint())
+                .DisposedBy(DisposeBag);
+
+            searchField.Rx().Text()
+                .Subscribe(ViewModel.FilterText)
+                .DisposedBy(DisposeBag);
+
+            closeButton.Rx()
+                .BindAction(ViewModel.Close)
+                .DisposedBy(DisposeBag);
         }
 
         public override void Finish()
@@ -31,7 +65,7 @@ namespace Toggl.Giskard.Activities
         {
             if (keyCode == Keycode.Back)
             {
-                ViewModel.CloseCommand.Execute();
+                ViewModel.Close.Execute();
                 return true;
             }
 

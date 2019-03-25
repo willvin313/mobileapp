@@ -22,7 +22,7 @@ namespace Toggl.Daneel
             #if !USE_PRODUCTION_API
             System.Net.ServicePointManager.ServerCertificateValidationCallback
                   += (sender, certificate, chain, sslPolicyErrors) => true;
-#endif
+            #endif
             var version = NSBundle.MainBundle.InfoDictionary["CFBundleShortVersionString"].ToString();
             IosDependencyContainer.Instance = new IosDependencyContainer(Presenter as ITopViewControllerProvider, version);
         }

@@ -401,20 +401,20 @@ namespace Toggl.PrimeRadiant.Settings
             if (ids == null)
             {
                 keyValueStorage.Remove(enabledCalendarsKey);
-                return;
             }
-
-            if (ids.None())
+            else if (ids.None())
             {
                 keyValueStorage.Remove(enabledCalendarsKey);
-                return;
             }
-
-            if (ids.Any(id => id.Contains(calendarIdSeparator)))
+            else if (ids.Any(id => id.Contains(calendarIdSeparator)))
+            {
                 throw new ArgumentException($"One of the ids contains a character that's used as a separator ({calendarIdSeparator})");
-
-            var aggregatedIds = ids.Aggregate((accumulator, id) => $"{accumulator}{calendarIdSeparator}{id}");
-            keyValueStorage.SetString(enabledCalendarsKey, aggregatedIds);
+            }
+            else
+            {
+                var aggregatedIds = ids.Aggregate((accumulator, id) => $"{accumulator}{calendarIdSeparator}{id}");
+                keyValueStorage.SetString(enabledCalendarsKey, aggregatedIds);
+            }
 
             enabledCalendarsSubject.OnNext(ids?.ToList() ?? new List<string>());
         }

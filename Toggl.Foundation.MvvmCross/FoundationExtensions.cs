@@ -4,6 +4,7 @@ using Toggl.Foundation.Autocomplete;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Login;
 using Toggl.Foundation.Sync;
+using Toggl.Multivac.Extensions;
 using Toggl.Ultrawave;
 
 namespace Toggl.Foundation.MvvmCross

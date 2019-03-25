@@ -5,6 +5,54 @@ using ObjCRuntime;
 
 namespace Toggl.Daneel.Intents
 {
+	// @interface ContinueTimerIntent : INIntent
+	[BaseType (typeof(INIntent))]
+	interface ContinueTimerIntent
+	{
+		// @property (readwrite, copy, nonatomic) INObject * _Nullable workspace;
+		[NullAllowed, Export ("workspace", ArgumentSemantic.Copy)]
+		INObject Workspace { get; set; }
+	}
+
+	// @protocol ContinueTimerIntentHandling <NSObject>
+	[Protocol, Model]
+	[BaseType (typeof(NSObject))]
+	interface ContinueTimerIntentHandling
+	{
+		// @required -(void)handleContinueTimer:(ContinueTimerIntent * _Nonnull)intent completion:(void (^ _Nonnull)(ContinueTimerIntentResponse * _Nonnull))completion;
+		[Abstract]
+		[Export ("handleContinueTimer:completion:")]
+		void HandleContinueTimer (ContinueTimerIntent intent, Action<ContinueTimerIntentResponse> completion);
+
+		// @optional -(void)confirmContinueTimer:(ContinueTimerIntent * _Nonnull)intent completion:(void (^ _Nonnull)(ContinueTimerIntentResponse * _Nonnull))completion;
+		[Export ("confirmContinueTimer:completion:")]
+		void ConfirmContinueTimer (ContinueTimerIntent intent, Action<ContinueTimerIntentResponse> completion);
+	}
+
+	// @interface ContinueTimerIntentResponse : INIntentResponse
+	[BaseType (typeof(INIntentResponse))]
+	[DisableDefaultCtor]
+	interface ContinueTimerIntentResponse
+	{
+		// -(instancetype _Nonnull)initWithCode:(ContinueTimerIntentResponseCode)code userActivity:(NSUserActivity * _Nullable)userActivity __attribute__((objc_designated_initializer));
+		[Export ("initWithCode:userActivity:")]
+		[DesignatedInitializer]
+		IntPtr Constructor (ContinueTimerIntentResponseCode code, [NullAllowed] NSUserActivity userActivity);
+
+		// +(instancetype _Nonnull)successWithEntryDescriptionIntentResponseWithEntryDescription:(NSString * _Nonnull)entryDescription;
+		[Static]
+		[Export ("successWithEntryDescriptionIntentResponseWithEntryDescription:")]
+		ContinueTimerIntentResponse SuccessWithEntryDescriptionIntentResponseWithEntryDescription (string entryDescription);
+
+		// @property (readwrite, copy, nonatomic) NSString * _Nullable entryDescription;
+		[NullAllowed, Export ("entryDescription")]
+		string EntryDescription { get; set; }
+
+		// @property (readonly, nonatomic) ContinueTimerIntentResponseCode code;
+		[Export ("code")]
+		ContinueTimerIntentResponseCode Code { get; }
+	}
+
 	// @interface ShowReportIntent : INIntent
 	[BaseType (typeof(INIntent))]
 	interface ShowReportIntent
@@ -179,6 +227,11 @@ namespace Toggl.Daneel.Intents
 		[Static]
 		[Export ("successIntentResponseWithEntryDescription:entryDurationString:")]
 		StopTimerIntentResponse SuccessIntentResponseWithEntryDescription (string entryDescription, string entryDurationString);
+
+		// +(instancetype _Nonnull)successWithEmptyDescriptionIntentResponseWithEntryDurationString:(NSString * _Nonnull)entryDurationString;
+		[Static]
+		[Export ("successWithEmptyDescriptionIntentResponseWithEntryDurationString:")]
+		StopTimerIntentResponse SuccessWithEmptyDescriptionIntentResponseWithEntryDurationString (string entryDurationString);
 
 		// @property (readwrite, copy, nonatomic) NSString * _Nullable entryDescription;
 		[NullAllowed, Export ("entryDescription")]

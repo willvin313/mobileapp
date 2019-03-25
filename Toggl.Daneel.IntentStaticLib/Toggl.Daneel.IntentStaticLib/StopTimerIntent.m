@@ -40,4 +40,10 @@
     return intentResponse;
 }
 
++ (instancetype)successWithEmptyDescriptionIntentResponseWithEntryDurationString:(NSString *)entryDurationString {
+    StopTimerIntentResponse *intentResponse = [[StopTimerIntentResponse alloc] initWithCode:StopTimerIntentResponseCodeSuccessWithEmptyDescription userActivity:nil];
+    intentResponse.entryDurationString = entryDurationString;
+    return intentResponse;
+}
+
 @end

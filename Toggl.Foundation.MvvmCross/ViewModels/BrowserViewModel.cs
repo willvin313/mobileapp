@@ -1,5 +1,6 @@
 ﻿using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
+using System.Threading.Tasks;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.Services;
 using Toggl.Multivac;
@@ -21,7 +22,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
             Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
 
-            Close = rxActionFactory.FromAsync(() => navigationService.Close(this));
+            Close = rxActionFactory.FromAsync(close);
+
+            Task close() => navigationService.Close(this);
         }
 
         public override void Prepare(BrowserParameters parameter)

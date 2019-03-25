@@ -38,6 +38,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
     {
         private readonly ISubject<Unit> loggingOutSubject = new Subject<Unit>();
         private readonly ISubject<bool> isFeedbackSuccessViewShowing = new Subject<bool>();
+        private readonly ISubject<bool> calendarPermissionGranted = new BehaviorSubject<bool>(false);
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
 
         private readonly ITogglDataSource dataSource;
@@ -54,6 +55,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly IIntentDonationService intentDonationService;
         private readonly IStopwatchProvider stopwatchProvider;
         private readonly IRxActionFactory rxActionFactory;
+        private readonly IPermissionsService permissionsService;
 
         private bool isSyncing;
         private bool isLoggingOut;
@@ -81,8 +83,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public IObservable<bool> UseTwentyFourHourFormat { get; }
         public IObservable<IList<SelectableWorkspaceViewModel>> Workspaces { get; }
         public IObservable<bool> IsFeedbackSuccessViewShowing { get; }
+        public IObservable<bool> IsCalendarSmartRemindersVisible { get; }
+        public IObservable<string> CalendarSmartReminders { get; }
 
         public UIAction OpenCalendarSettings { get; }
+        public UIAction OpenCalendarSmartReminders { get; }
         public UIAction OpenNotificationSettings { get; }
         public UIAction ToggleTwentyFourHourSettings { get; }
         public UIAction OpenHelpView { get; }
@@ -112,6 +117,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IIntentDonationService intentDonationService,
             IStopwatchProvider stopwatchProvider,
             IRxActionFactory rxActionFactory,
+            IPermissionsService permissionsService,
             ISchedulerProvider schedulerProvider)
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
@@ -128,6 +134,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(intentDonationService, nameof(intentDonationService));
             Ensure.Argument.IsNotNull(stopwatchProvider, nameof(stopwatchProvider));
             Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
+            Ensure.Argument.IsNotNull(permissionsService, nameof(permissionsService));
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
 
             this.dataSource = dataSource;
@@ -145,6 +152,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             this.intentDonationService = intentDonationService;
             this.privateSharedStorageService = privateSharedStorageService;
             this.rxActionFactory = rxActionFactory;
+            this.permissionsService = permissionsService;
 
             IsSynced =
                 syncManager.ProgressObservable
@@ -213,12 +221,20 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     .DistinctUntilChanged()
                     .AsDriver(schedulerProvider);
 
+            IsCalendarSmartRemindersVisible = calendarPermissionGranted.AsObservable()
+                .CombineLatest(userPreferences.EnabledCalendars.Select(ids => ids.Any()), CommonFunctions.And);
+
+            CalendarSmartReminders = userPreferences.CalendarNotificationsSettings()
+                .Select(s => s.Title())
+                .DistinctUntilChanged();
+
             UserAvatar =
                 dataSource.User.Current
                     .Select(user => user.ImageUrl)
                     .DistinctUntilChanged()
                     .SelectMany(url => interactorFactory.GetUserAvatar(url).Execute())
-                    .AsDriver(schedulerProvider);
+                    .AsDriver(schedulerProvider)
+                    .Where(avatar => avatar != null);
 
             Workspaces =
                 dataSource.User.Current
@@ -248,7 +264,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IsFeedbackSuccessViewShowing = isFeedbackSuccessViewShowing.AsObservable()
                 .AsDriver(schedulerProvider);
 
+            Close = rxActionFactory.FromAsync(close);
             OpenCalendarSettings = rxActionFactory.FromAsync(openCalendarSettings);
+            OpenCalendarSmartReminders = rxActionFactory.FromAsync(openCalendarSmartReminders);
             OpenNotificationSettings = rxActionFactory.FromAsync(openNotificationSettings);
             ToggleTwentyFourHourSettings = rxActionFactory.FromAsync(toggleUseTwentyFourHourClock);
             OpenHelpView = rxActionFactory.FromAsync(openHelpView);
@@ -260,12 +278,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             SelectDurationFormat = rxActionFactory.FromAsync(selectDurationFormat);
             SelectBeginningOfWeek = rxActionFactory.FromAsync(selectBeginningOfWeek);
             SelectDefaultWorkspace = rxActionFactory.FromAsync<SelectableWorkspaceViewModel>(selectDefaultWorkspace);
-            Close = rxActionFactory.FromAsync(() => navigationService.Close(this));
         }
 
         public override async Task Initialize()
         {
             await base.Initialize();
+            await checkCalendarPermissions();
             navigationFromMainViewModelStopwatch = stopwatchProvider.Get(MeasuredOperation.OpenSettingsView);
             stopwatchProvider.Remove(MeasuredOperation.OpenStartView);
         }
@@ -275,12 +293,16 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             base.ViewAppeared();
             navigationFromMainViewModelStopwatch?.Stop();
             navigationFromMainViewModelStopwatch = null;
+            checkCalendarPermissions();
         }
 
         public void CloseFeedbackSuccessView()
         {
             isFeedbackSuccessViewShowing.OnNext(false);
         }
+
+        private Task close()
+            => navigationService.Close(this);
 
         private Task selectDefaultWorkspace(SelectableWorkspaceViewModel workspace)
             => changeDefaultWorkspace(workspace.WorkspaceId);
@@ -320,6 +342,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private Task openCalendarSettings()
             => navigationService.Navigate<CalendarSettingsViewModel>();
+
+        private Task openCalendarSmartReminders()
+            => navigationService.Navigate<UpcomingEventsNotificationSettingsViewModel, Unit>();
 
         private Task openNotificationSettings()
             => navigationService.Navigate<NotificationSettingsViewModel>();
@@ -457,6 +482,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             await interactorFactory.UpdateUser(new EditUserDTO { BeginningOfWeek = newBeginningOfWeek }).Execute();
             syncManager.InitiatePushSync();
+        }
+
+        private async Task checkCalendarPermissions()
+        {
+            var authorized = await permissionsService.CalendarPermissionGranted;
+            calendarPermissionGranted.OnNext(authorized);
         }
     }
 }

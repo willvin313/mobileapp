@@ -67,7 +67,8 @@ typedef NS_ENUM(NSInteger, StartTimerIntentResponseCode) {
     StartTimerIntentResponseCodeSuccess,
     StartTimerIntentResponseCodeFailure,
     StartTimerIntentResponseCodeFailureRequiringAppLaunch,
-    StartTimerIntentResponseCodeFailureNoApiToken = 100
+    StartTimerIntentResponseCodeFailureNoApiToken = 100,
+    StartTimerIntentResponseCodeFailureSyncConflict
 } API_AVAILABLE(ios(12.0), watchos(5.0));
 
 API_AVAILABLE(ios(12.0), watchos(5.0))

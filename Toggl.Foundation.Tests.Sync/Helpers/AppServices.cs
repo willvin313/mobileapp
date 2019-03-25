@@ -1,25 +1,20 @@
-using System;
 using System.Reactive.Concurrency;
 using MvvmCross.Navigation;
 using NSubstitute;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
-using IStopwatchProvider = Toggl.Foundation.Diagnostics.IStopwatchProvider;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.Services;
-using Toggl.Foundation.Shortcuts;
 using Toggl.Foundation.Sync;
 using Toggl.PrimeRadiant;
 using Toggl.PrimeRadiant.Settings;
 using Toggl.Ultrawave;
+using IStopwatchProvider = Toggl.Foundation.Diagnostics.IStopwatchProvider;
 
 namespace Toggl.Foundation.Tests.Sync.Helpers
 {
     public sealed class AppServices
     {
-        private readonly TimeSpan retryLimit = TimeSpan.FromSeconds(60);
-        private readonly TimeSpan minimumTimeInBackgroundForFullSync = TimeSpan.FromMinutes(5);
-
         private readonly ISyncErrorHandlingService syncErrorHandlingService;
 
         public IScheduler Scheduler { get; }
@@ -40,6 +35,8 @@ namespace Toggl.Foundation.Tests.Sync.Helpers
 
         public ISyncManager SyncManager { get; }
 
+        public IAutomaticSyncingService AutomaticSyncingService { get; } = Substitute.For<IAutomaticSyncingService>();
+
         public AppServices(ITogglApi api, ITogglDatabase database)
         {
             Scheduler = System.Reactive.Concurrency.Scheduler.Default;
@@ -49,7 +46,6 @@ namespace Toggl.Foundation.Tests.Sync.Helpers
             syncErrorHandlingService = new SyncErrorHandlingService(errorHandlingService);
 
             var dataSource = new TogglDataSource(
-                api,
                 database,
                 TimeService,
                 AnalyticsServiceSubstitute);
@@ -62,7 +58,8 @@ namespace Toggl.Foundation.Tests.Sync.Helpers
                 AnalyticsServiceSubstitute,
                 LastTimeUsageStorageSubstitute,
                 Scheduler,
-                StopwatchProvider);
+                StopwatchProvider,
+                AutomaticSyncingService);
 
             syncErrorHandlingService.HandleErrorsOf(SyncManager);
         }

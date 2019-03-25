@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Globalization;
+using System.Resources;
 using CoreGraphics;
 using Foundation;
 using Intents;
@@ -8,6 +9,7 @@ using UIKit;
 using CoreFoundation;
 using CoreAnimation;
 using Toggl.Daneel.Intents;
+using Toggl.Daneel.ExtensionKit.Extensions;
 
 namespace Toggl.Daneel.SiriExtension.UI
 {
@@ -60,20 +62,19 @@ namespace Toggl.Daneel.SiriExtension.UI
                 case StartTimerIntent startTimerIntent:
                     if (interaction.IntentHandlingStatus == INIntentHandlingStatus.Success)
                     {
-                        desiredSize = showStartTimerSuccess(startTimerIntent.EntryDescription);                         
+                        desiredSize = showStartTimerSuccess(startTimerIntent.EntryDescription);
                     }
 
                     if (interaction.IntentHandlingStatus == INIntentHandlingStatus.Ready)
                     {
-                        desiredSize = showConfirmation($"Start {startTimerIntent.EntryDescription}?");
+                        desiredSize = showMessage($"Start tracking {startTimerIntent.EntryDescription ?? "time"}?");
                     }
 
                     break;
                 case StopTimerIntent _:
                     if (interaction.IntentHandlingStatus == INIntentHandlingStatus.Success)
                     {
-                        var response = interaction.IntentResponse as StopTimerIntentResponse;
-                        if (!(response is null))
+                        if (interaction.IntentResponse is StopTimerIntentResponse response)
                         {
                             desiredSize = showStopResponse(response);
                         }
@@ -81,7 +82,38 @@ namespace Toggl.Daneel.SiriExtension.UI
 
                     if (interaction.IntentHandlingStatus == INIntentHandlingStatus.Ready)
                     {
-                        desiredSize = showConfirmation("Stop current entry?");
+                        var entryDescription = interaction.IntentResponse.UserActivity.GetEntryDescription();
+                        desiredSize =
+                            showMessage(
+                                $"Stop tracking {(!string.IsNullOrEmpty(entryDescription) ? entryDescription : "time")}?");
+                    }
+
+                    if (interaction.IntentHandlingStatus == INIntentHandlingStatus.Failure)
+                    {
+                        if (interaction.IntentResponse is StopTimerIntentResponse response)
+                        {
+                            var message = interaction.IntentResponse.UserActivity.GetResponseText();
+                            desiredSize = showMessage(message);
+                        }
+                    }
+
+                    break;
+
+                case ContinueTimerIntent _:
+                    if (interaction.IntentHandlingStatus == INIntentHandlingStatus.Success)
+                    {
+                        if (interaction.IntentResponse is ContinueTimerIntentResponse response)
+                        {
+                            desiredSize = showStartTimerSuccess(response.EntryDescription);
+                        }
+                    }
+
+                    if (interaction.IntentHandlingStatus == INIntentHandlingStatus.Ready)
+                    {
+                        var entryDescription = interaction.IntentResponse.UserActivity.GetEntryDescription();
+                        desiredSize =
+                            showMessage(
+                                $"Start tracking {(!string.IsNullOrEmpty(entryDescription) ? entryDescription : "time")}?");
                     }
 
                     break;
@@ -116,7 +148,7 @@ namespace Toggl.Daneel.SiriExtension.UI
             return frame.Size;
         }
 
-        private CGSize showConfirmation(string confirmationText)
+        private CGSize showMessage(string confirmationText)
         {
             confirmationView.ConfirmationLabel.Text = "";
 
@@ -140,7 +172,7 @@ namespace Toggl.Daneel.SiriExtension.UI
         {
             entryInfoView.TimeLabel.Text = secondsToString(response.EntryDuration.DoubleValue);
 
-            var attributedString = new NSMutableAttributedString(response.EntryDescription, boldAttributes);
+            var attributedString = new NSMutableAttributedString(response.EntryDescription ?? "", boldAttributes);
 
             var startTime = DateTimeOffset.FromUnixTimeSeconds(response.EntryStart.LongValue).ToLocalTime();
             var endTime = DateTimeOffset.FromUnixTimeSeconds(response.EntryStart.LongValue + response.EntryDuration.LongValue).ToLocalTime();

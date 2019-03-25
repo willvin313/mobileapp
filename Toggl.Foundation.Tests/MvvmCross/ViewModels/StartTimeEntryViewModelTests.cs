@@ -2140,4 +2140,3 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             => textFieldInfo.Spans.OfType<TextSpan>().First();
     }
 }
-

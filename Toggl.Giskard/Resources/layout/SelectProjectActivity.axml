@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <ImageView
-            local:MvxBind="Click CloseCommand"
+            android:id="@+id/CloseButton"
             android:padding="16dp"
             android:clickable="true"
             android:src="@drawable/arrow_back"
@@ -22,9 +22,8 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:layout_width="56dp"
             android:layout_height="56dp" />
-        <EditText
-            android:id="@+id/SelectProjectProjectNameEditText"
-            local:MvxBind="Text Text"
+      <EditText
+            android:id="@+id/SearchField"
             android:gravity="left"
             android:textSize="19sp"
             android:letterSpacing="-0.01"
@@ -38,10 +37,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical" />
     </LinearLayout>
-    <toggl.giskard.views.SelectProjectRecyclerView
-        local:MvxBind="ItemsSource Suggestions; ItemClick SelectProjectCommand;  UseGrouping UseGrouping; CreateCommand CreateProjectCommand; Text Text; IsSuggestingCreation SuggestCreation; ToggleTasksCommand ToggleTaskSuggestionsCommand"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/RecyclerView"
         android:scrollbars="vertical"
-        local:MvxTemplateSelector="@string/SelectProjectTemplateSelector"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize" />

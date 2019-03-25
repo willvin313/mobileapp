@@ -3,6 +3,8 @@ using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
+using System.Threading.Tasks;
 
 namespace Toggl.Multivac.Extensions
 {
@@ -111,5 +113,29 @@ namespace Toggl.Multivac.Extensions
         {
             disposeBag?.Dispose();
         }
+
+        public static RxAction<TInput, TElement> FromFunction(Func<TInput, TElement> func, IScheduler mainScheduler)
+        {
+            IObservable<TElement> workFactory(TInput input)
+                => Observable.Create<TElement>(observer =>
+                {
+                    var result = func(input);
+                    observer.CompleteWith(result);
+                    return Disposable.Empty;
+                });
+
+            return new RxAction<TInput, TElement>(workFactory, mainScheduler);
+        }
+
+        public static RxAction<TInput, TElement> FromAsync(Func<TInput, Task<TElement>> asyncFunction, IScheduler mainScheduler, IObservable<bool> enabledIf = null)
+        {
+            IObservable<TElement> workFactory(TInput input)
+                => asyncFunction(input).ToObservable();
+
+            return new RxAction<TInput, TElement>(workFactory, mainScheduler, enabledIf);
+        }
+
+        public static RxAction<TInput, TElement> FromObservable(Func<TInput, IObservable<TElement>> workFactory, IScheduler mainScheduler, IObservable<bool> enabledIf = null)
+            => new RxAction<TInput, TElement>(workFactory, mainScheduler, enabledIf);
     }
 }

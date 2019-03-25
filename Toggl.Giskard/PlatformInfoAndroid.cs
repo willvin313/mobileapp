@@ -1,4 +1,4 @@
-﻿using Android.Icu.Util;
+﻿using Java.Util;
 using Toggl.Foundation;
 
 namespace Toggl.Giskard

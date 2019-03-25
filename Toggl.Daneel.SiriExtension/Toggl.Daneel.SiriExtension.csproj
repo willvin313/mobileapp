@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -56,7 +56,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release.Adhoc|iPhone' ">
     <Optimize>true</Optimize>
     <OutputPath>bin\iPhone\Release.Adhoc</OutputPath>
-    <DefineConstants>__IOS__;__MOBILE__;__UNIFIED__;USE_PRODUCTION_API</DefineConstants>
+    <DefineConstants>__IOS__;__MOBILE__;__UNIFIED__</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodesignKey>iPhone Distribution: Toggl OU (B227VTMZ94)</CodesignKey>
@@ -124,12 +124,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ContinueTimerIntentHandler.cs" />
     <Compile Include="Helper\APIHelper.cs" />
     <Compile Include="IntentHandler.cs" />
     <Compile Include="StartTimerIntentHandler.cs" />
     <Compile Include="StopTimerIntentHandler.cs" />
     <Compile Include="Models\TimeEntry.cs" />
     <Compile Include="Exceptions\NoRunningEntryException.cs" />
+    <Compile Include="Exceptions\AppOutdatedException.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Toggl.Daneel.IntentBinding\Toggl.Daneel.IntentBinding.csproj">

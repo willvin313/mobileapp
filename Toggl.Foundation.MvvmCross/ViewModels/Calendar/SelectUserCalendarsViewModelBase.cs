@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
+using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 using Toggl.Foundation.Exceptions;
 using Toggl.Foundation.Interactors;
@@ -18,30 +21,52 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
 {
     public abstract class SelectUserCalendarsViewModelBase : MvxViewModel<bool, string[]>
     {
-        private readonly IUserPreferences userPreferences;
-        private readonly IInteractorFactory interactorFactory;
+        private readonly CompositeDisposable disposeBag = new CompositeDisposable();
 
-        public IObservable<IImmutableList<CollectionSection<string, SelectableUserCalendarViewModel>>> Calendars { get; private set; }
+        protected readonly IUserPreferences UserPreferences;
+        protected readonly IMvxNavigationService NavigationService;
+        private readonly IInteractorFactory interactorFactory;
+        private readonly IRxActionFactory rxActionFactory;
+
+        private ISubject<bool> doneEnabledSubject = new BehaviorSubject<bool>(false);
+
+        private ISubject<IImmutableList<CollectionSection<UserCalendarSourceViewModel, SelectableUserCalendarViewModel>>> calendarsSubject =
+            new BehaviorSubject<IImmutableList<CollectionSection<UserCalendarSourceViewModel, SelectableUserCalendarViewModel>>>(
+                ImmutableList.Create<CollectionSection<UserCalendarSourceViewModel, SelectableUserCalendarViewModel>>());
+
+        public IObservable<IImmutableList<CollectionSection<UserCalendarSourceViewModel, SelectableUserCalendarViewModel>>> Calendars { get; }
 
         public InputAction<SelectableUserCalendarViewModel> SelectCalendar { get; }
+        public UIAction Close { get; private set; }
+        public UIAction Done { get; private set; }
 
         protected bool ForceItemSelection { get; private set; }
 
+        protected HashSet<string> InitialSelectedCalendarIds { get; } = new HashSet<string>();
         protected HashSet<string> SelectedCalendarIds { get; } = new HashSet<string>();
 
         protected SelectUserCalendarsViewModelBase(
             IUserPreferences userPreferences,
             IInteractorFactory interactorFactory,
+            IMvxNavigationService navigationService,
             IRxActionFactory rxActionFactory)
         {
             Ensure.Argument.IsNotNull(userPreferences, nameof(userPreferences));
             Ensure.Argument.IsNotNull(interactorFactory, nameof(interactorFactory));
+            Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
             Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
 
-            this.userPreferences = userPreferences;
+            this.UserPreferences = userPreferences;
+            this.NavigationService = navigationService;
             this.interactorFactory = interactorFactory;
+            this.rxActionFactory = rxActionFactory;
 
             SelectCalendar = rxActionFactory.FromAction<SelectableUserCalendarViewModel>(toggleCalendarSelection);
+
+            Calendars = calendarsSubject.AsObservable().DistinctUntilChanged();
+
+            Close = rxActionFactory.FromAsync(OnClose);
+            Done = rxActionFactory.FromAsync(OnDone, doneEnabledSubject.AsObservable());
         }
 
         public sealed override void Prepare(bool parameter)
@@ -53,22 +78,38 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
         {
             await base.Initialize();
 
-            Calendars = interactorFactory
+            var calendarIds = UserPreferences.EnabledCalendarIds();
+            InitialSelectedCalendarIds.AddRange(calendarIds);
+            SelectedCalendarIds.AddRange(calendarIds);
+
+            await ReloadCalendars();
+
+            var enabledObservable = ForceItemSelection
+                ? SelectCalendar.Elements
+                    .Select(_ => SelectedCalendarIds.Any())
+                    .DistinctUntilChanged()
+                : Observable.Return(true);
+            enabledObservable.Subscribe(doneEnabledSubject).DisposedBy(disposeBag);
+        }
+
+        protected async Task ReloadCalendars()
+        {
+            var calendars = await interactorFactory
                 .GetUserCalendars()
                 .Execute()
                 .Catch((NotAuthorizedException _) => Observable.Return(new List<UserCalendar>()))
                 .Select(group);
 
-            SelectedCalendarIds.AddRange(userPreferences.EnabledCalendarIds());
+            calendarsSubject.OnNext(calendars);
         }
 
-        private IImmutableList<CollectionSection<string, SelectableUserCalendarViewModel>> group(IEnumerable<UserCalendar> calendars)
+        private IImmutableList<CollectionSection<UserCalendarSourceViewModel, SelectableUserCalendarViewModel>> group(IEnumerable<UserCalendar> calendars)
             => calendars
                 .Select(toSelectable)
                 .GroupBy(calendar => calendar.SourceName)
                 .Select(group =>
-                    new CollectionSection<string, SelectableUserCalendarViewModel>(
-                        group.First().SourceName,
+                    new CollectionSection<UserCalendarSourceViewModel, SelectableUserCalendarViewModel>(
+                        new UserCalendarSourceViewModel(group.First().SourceName),
                         group.OrderBy(calendar => calendar.Name)
                     )
                 )
@@ -85,5 +126,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
                 SelectedCalendarIds.Add(calendar.Id);
             calendar.Selected = !calendar.Selected;
         }
+
+        protected virtual Task OnClose()
+            => NavigationService.Close(this, InitialSelectedCalendarIds.ToArray());
+
+        protected virtual Task OnDone()
+            => NavigationService.Close(this, SelectedCalendarIds.ToArray());
     }
 }

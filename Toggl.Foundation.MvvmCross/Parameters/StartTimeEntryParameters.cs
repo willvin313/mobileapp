@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Toggl.Foundation;
+using Toggl.Foundation.Analytics;
 using static Toggl.Foundation.Helper.Constants;
 
 namespace Toggl.Foundation.MvvmCross.Parameters
@@ -23,7 +24,17 @@ namespace Toggl.Foundation.MvvmCross.Parameters
         
         public IEnumerable<long> TagIds { get; }
 
-        public StartTimeEntryParameters(DateTimeOffset startTime, string placeholderText, TimeSpan? duration, long? workspaceId, string entryDescription = "", long? projectId = null, IEnumerable<long> tagIds = null)
+        public TimeEntryStartOrigin? Origin { get; }
+
+        public StartTimeEntryParameters(
+            DateTimeOffset startTime,
+            string placeholderText,
+            TimeSpan? duration,
+            long? workspaceId,
+            string entryDescription = "",
+            long? projectId = null,
+            IEnumerable<long> tagIds = null,
+            TimeEntryStartOrigin? origin = null)
         {
             StartTime = startTime;
             PlaceholderText = placeholderText;        
@@ -32,6 +43,7 @@ namespace Toggl.Foundation.MvvmCross.Parameters
             EntryDescription = entryDescription;
             ProjectId = projectId;
             TagIds = tagIds;
+            Origin = origin;
         }
 
         public static StartTimeEntryParameters ForManualMode(DateTimeOffset now)

@@ -54,14 +54,14 @@ namespace Toggl.Daneel.Views
 		
 		void ReleaseDesignerOutlets ()
 		{
-			if (FadeViewTrailingConstraint != null) {
-				FadeViewTrailingConstraint.Dispose ();
-				FadeViewTrailingConstraint = null;
-			}
-
 			if (AmountOfTasksLabel != null) {
 				AmountOfTasksLabel.Dispose ();
 				AmountOfTasksLabel = null;
+			}
+
+			if (BottomSeparatorView != null) {
+				BottomSeparatorView.Dispose ();
+				BottomSeparatorView = null;
 			}
 
 			if (ClientNameLabel != null) {
@@ -72,6 +72,11 @@ namespace Toggl.Daneel.Views
 			if (FadeView != null) {
 				FadeView.Dispose ();
 				FadeView = null;
+			}
+
+			if (FadeViewTrailingConstraint != null) {
+				FadeViewTrailingConstraint.Dispose ();
+				FadeViewTrailingConstraint = null;
 			}
 
 			if (ProjectDotView != null) {
@@ -102,11 +107,6 @@ namespace Toggl.Daneel.Views
 			if (TopSeparatorView != null) {
 				TopSeparatorView.Dispose ();
 				TopSeparatorView = null;
-			}
-
-			if (BottomSeparatorView != null) {
-				BottomSeparatorView.Dispose ();
-				BottomSeparatorView = null;
 			}
 		}
 	}

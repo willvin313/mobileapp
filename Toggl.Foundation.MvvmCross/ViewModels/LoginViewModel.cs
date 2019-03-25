@@ -3,6 +3,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
+using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
@@ -36,7 +37,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly IUserAccessManager userAccessManager;
         private readonly IAnalyticsService analyticsService;
         private readonly IOnboardingStorage onboardingStorage;
-        private readonly IForkingNavigationService navigationService;
+        private readonly IMvxNavigationService navigationService;
         private readonly IPasswordManagerService passwordManagerService;
         private readonly IErrorHandlingService errorHandlingService;
         private readonly ILastTimeUsageStorage lastTimeUsageStorage;
@@ -73,7 +74,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IUserAccessManager userAccessManager,
             IAnalyticsService analyticsService,
             IOnboardingStorage onboardingStorage,
-            IForkingNavigationService navigationService,
+            IMvxNavigationService navigationService,
             IPasswordManagerService passwordManagerService,
             IErrorHandlingService errorHandlingService,
             ILastTimeUsageStorage lastTimeUsageStorage,
@@ -266,7 +267,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             onboardingStorage.SetIsNewUser(false);
 
-            await navigationService.ForkNavigate<MainTabBarViewModel, MainViewModel>();
+            await navigationService.Navigate<MainTabBarViewModel>();
         }
 
         private void onError(Exception exception)

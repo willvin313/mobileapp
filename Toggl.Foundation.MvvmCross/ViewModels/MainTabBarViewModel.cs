@@ -8,6 +8,7 @@ using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.Interactors;
+using Toggl.Foundation.Login;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
 using Toggl.Foundation.MvvmCross.ViewModels.Reports;
@@ -25,14 +26,16 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
     {
         private readonly IRemoteConfigService remoteConfigService;
         private readonly IStopwatchProvider stopwatchProvider;
+        private readonly IPlatformInfo platformInfo;
 
         private readonly MainViewModel mainViewModel;
         private readonly ReportsViewModel reportsViewModel;
         private readonly CalendarViewModel calendarViewModel;
+        private readonly SettingsViewModel settingsViewModel;
 
         private bool hasOpenedReports = false;
 
-        public IEnumerable<MvxViewModel> Tabs { get; private set; }
+        public IList<MvxViewModel> Tabs { get; private set; }
 
         public MainTabBarViewModel(
             ITimeService timeService,
@@ -53,7 +56,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IIntentDonationService intentDonationService,
             IAccessRestrictionStorage accessRestrictionStorage,
             IStopwatchProvider stopwatchProvider,
-            IRxActionFactory rxActionFactory)
+            IRxActionFactory rxActionFactory,
+            IUserAccessManager userAccessManager,
+            IPrivateSharedStorageService privateSharedStorageService,
+            IPlatformInfo platformInfo)
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
             Ensure.Argument.IsNotNull(syncManager, nameof(syncManager));
@@ -76,9 +82,13 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
             Ensure.Argument.IsNotNull(stopwatchProvider, nameof(stopwatchProvider));
             Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
+            Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
+            Ensure.Argument.IsNotNull(privateSharedStorageService, nameof(privateSharedStorageService));
+            Ensure.Argument.IsNotNull(platformInfo, nameof(platformInfo));
 
             this.remoteConfigService = remoteConfigService;
             this.stopwatchProvider = stopwatchProvider;
+            this.platformInfo = platformInfo;
 
             mainViewModel = new MainViewModel(
                 dataSource,
@@ -124,15 +134,31 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 navigationService,
                 stopwatchProvider,
                 rxActionFactory);
+
+            settingsViewModel = new SettingsViewModel(
+                dataSource,
+                syncManager,
+                platformInfo,
+                dialogService,
+                userPreferences,
+                analyticsService,
+                userAccessManager,
+                interactorFactory,
+                onboardingStorage,
+                navigationService,
+                privateSharedStorageService,
+                intentDonationService,
+                stopwatchProvider,
+                rxActionFactory,
+                permissionsService,
+                schedulerProvider);
         }
 
         public override async Task Initialize()
         {
             await base.Initialize();
 
-            var isCalendarEnabled = await remoteConfigService.IsCalendarFeatureEnabled;
-
-            Tabs = getViewModels(isCalendarEnabled);
+            Tabs = getViewModels().ToList();
 
             await Tabs
                 .Select(vm => vm.Initialize())
@@ -149,14 +175,15 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             }
         }
 
-        private IEnumerable<MvxViewModel> getViewModels(bool isCalendarEnabled)
+        private IEnumerable<MvxViewModel> getViewModels()
         {
             yield return mainViewModel;
             yield return reportsViewModel;
+            yield return calendarViewModel;
 
-            if (isCalendarEnabled)
+            if (platformInfo.Platform == Platform.Giskard)
             {
-                yield return calendarViewModel;
+                yield return settingsViewModel;
             }
         }
     }

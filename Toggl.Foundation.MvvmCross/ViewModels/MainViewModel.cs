@@ -267,6 +267,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 case ApplicationUrls.Main.Action.Stop:
                     await stopTimeEntry(TimeEntryStopOrigin.Deeplink);
                     break;
+
+                case ApplicationUrls.Main.Action.StopFromSiri:
+                    await stopTimeEntry(TimeEntryStopOrigin.Siri);
+                    break;
             }
 
             ShouldShowRatingView = Observable.Merge(

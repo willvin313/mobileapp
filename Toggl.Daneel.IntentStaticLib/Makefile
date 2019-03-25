@@ -22,7 +22,7 @@ lib$(TARGET).a: lib$(TARGET)-i386.a lib$(TARGET)-armv7.a lib$(TARGET)-arm64.a
 	xcrun -sdk iphoneos lipo -create -output $@ $^
 
 bind: lib$(TARGET).a
-	sharpie bind -scope Toggl.Daneel.IntentStaticLib -output bo -namespace $(NAMESPACE) -sdk iphoneos12.0 Toggl.Daneel.IntentStaticLib/*.h
+	sharpie bind -scope Toggl.Daneel.IntentStaticLib -output bo -namespace $(NAMESPACE) -sdk iphoneos Toggl.Daneel.IntentStaticLib/*.h
 
 clean:
 	-rm -rf bo build *.a *.dll

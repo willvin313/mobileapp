@@ -51,9 +51,9 @@ namespace Toggl.Giskard.Adapters
 
         protected override int SelectHeaderViewType(string headerItem) => WorkspaceHeader;
 
-        protected override int SelectItemViewType(AutocompleteSuggestion headerItem)
+        protected override int SelectItemViewType(AutocompleteSuggestion item)
         {
-            switch (headerItem)
+            switch (item)
             {
                 case TagSuggestion _:
                     return TagSuggestion;

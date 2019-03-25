@@ -95,7 +95,7 @@ namespace Toggl.Tests.UI.Extensions
             app.WaitForElement(projectCellSelector);
             app.Tap(projectCellSelector);
         }
-          
+
         public static void SwipeEntryToDelete(this IApp app, string timeEntryDescription)
         {
             var timeEntryCellRect = RectForTimeEntryCell(app, timeEntryDescription);
@@ -138,7 +138,7 @@ namespace Toggl.Tests.UI.Extensions
 
         public static void WaitForTimeEntryWithProject(this IApp app, string projectName)
             => app.WaitForElement(x => x.Marked(Main.TimeEntryRow).Descendant().Contains(projectName));
-      
+
         public static AppRect RectForTimeEntryCell(this IApp app, string timeEntryDescription)
         {
             var timeEntryViews = app.Query(queryForTimeEntryCell(timeEntryDescription));
@@ -164,7 +164,7 @@ namespace Toggl.Tests.UI.Extensions
             if (shouldCheckProject && !theProjectIsCorrect)
                 throw new NoRunningTimeEntryException($"There is no running time entry with project \"{projectName}\"");
         }
-      
+
         public static void AssertTimeEntryInTheLog(this IApp app, string description)
         {
             var timeEntryExists = app.Query(queryForTimeEntryCell(description)).Any();

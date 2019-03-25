@@ -46,7 +46,7 @@ namespace Toggl.Giskard.Activities
             recyclerView.SetAdapter(adapter);
             
             ViewModel.Suggestions
-                .Subscribe(adapter.Rx().Items())
+                .Subscribe(adapter.SetItems)
                 .DisposedBy(DisposeBag);
 
             adapter.ItemTapObservable
@@ -184,6 +184,7 @@ namespace Toggl.Giskard.Activities
 
             onboardingDisposable = new AddProjectOrTagOnboardingStep(storage, ViewModel.DataSource)
                 .ManageDismissableTooltip(
+                    Observable.Return(true),
                     onboardingPopupWindow,
                     selectProjectToolbarButton,
                     (popup, anchor) => popup.TopHorizontallyCenteredOffsetsTo(anchor, 8),

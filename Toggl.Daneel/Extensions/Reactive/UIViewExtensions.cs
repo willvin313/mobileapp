@@ -77,6 +77,9 @@ namespace Toggl.Daneel.Extensions.Reactive
                 );
             };
 
+        public static Action<UIColor> BackgroundColor(this IReactive<UIView> reactive) =>
+            color => reactive.Base.BackgroundColor = color;
+
         public static Action<UIColor> AnimatedBackgroundColor(this IReactive<UIView> reactive) =>
             color =>
             {
@@ -92,6 +95,27 @@ namespace Toggl.Daneel.Extensions.Reactive
             return Observable.Using(
                     () => action.Enabled.Subscribe(e => { reactive.Base.UserInteractionEnabled = e; }),
                     _ => reactive.Base.Rx().Tap()
+                )
+                .Subscribe(action.Inputs);
+        }
+
+        public static IDisposable BindAction<T>(this IReactive<UIView> reactive, OutputAction<T> action)
+        {
+            return Observable.Using(
+                    () => action.Enabled.Subscribe(e => { reactive.Base.UserInteractionEnabled = e; }),
+                    _ => reactive.Base.Rx().Tap()
+                )
+                .Subscribe(action.Inputs);
+        }
+
+        public static IDisposable BindAction<TInput, TOutput>(
+            this IReactive<UIView> reactive, 
+            RxAction<TInput, TOutput> action, 
+            Func<TInput> transformationFunction)
+        {
+            return Observable.Using(
+                    () => action.Enabled.Subscribe(e => { reactive.Base.UserInteractionEnabled = e; }),
+                    _ => reactive.Base.Rx().Tap().Select(unit => transformationFunction())
                 )
                 .Subscribe(action.Inputs);
         }

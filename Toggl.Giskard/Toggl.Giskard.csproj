@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\Xamarin.Build.Download.0.4.11\build\Xamarin.Build.Download.props" Condition="Exists('..\packages\Xamarin.Build.Download.0.4.11\build\Xamarin.Build.Download.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -217,61 +217,118 @@
       <HintPath>..\packages\Xamarin.Firebase.Config.60.1142.1\lib\MonoAndroid80\Xamarin.Firebase.Config.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Android.Support.Annotations">
-      <HintPath>..\packages\Xamarin.Android.Support.Annotations.27.0.2.1\lib\MonoAndroid81\Xamarin.Android.Support.Annotations.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Android.Support.Annotations.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.Annotations.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Android.Arch.Core.Common">
-      <HintPath>..\packages\Xamarin.Android.Arch.Core.Common.1.0.0.1\lib\MonoAndroid80\Xamarin.Android.Arch.Core.Common.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Android.Arch.Core.Common.1.1.1.1\lib\monoandroid90\Xamarin.Android.Arch.Core.Common.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Android.Arch.Lifecycle.Common">
-      <HintPath>..\packages\Xamarin.Android.Arch.Lifecycle.Common.1.0.3.1\lib\MonoAndroid80\Xamarin.Android.Arch.Lifecycle.Common.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Android.Arch.Lifecycle.Common.1.1.1.1\lib\monoandroid90\Xamarin.Android.Arch.Lifecycle.Common.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Android.Arch.Lifecycle.Runtime">
-      <HintPath>..\packages\Xamarin.Android.Arch.Lifecycle.Runtime.1.0.3.1\lib\MonoAndroid80\Xamarin.Android.Arch.Lifecycle.Runtime.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Android.Arch.Lifecycle.Runtime.1.1.1.1\lib\monoandroid90\Xamarin.Android.Arch.Lifecycle.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Android.Support.Compat">
-      <HintPath>..\packages\Xamarin.Android.Support.Compat.27.0.2.1\lib\MonoAndroid81\Xamarin.Android.Support.Compat.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Android.Support.Compat.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.Compat.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Android.Support.Core.UI">
-      <HintPath>..\packages\Xamarin.Android.Support.Core.UI.27.0.2.1\lib\MonoAndroid81\Xamarin.Android.Support.Core.UI.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Android.Support.Core.UI.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.Core.UI.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Android.Support.Core.Utils">
-      <HintPath>..\packages\Xamarin.Android.Support.Core.Utils.27.0.2.1\lib\MonoAndroid81\Xamarin.Android.Support.Core.Utils.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Android.Support.Core.Utils.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.Core.Utils.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Android.Support.CustomTabs">
-      <HintPath>..\packages\Xamarin.Android.Support.CustomTabs.27.0.2.1\lib\MonoAndroid81\Xamarin.Android.Support.CustomTabs.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Android.Support.CustomTabs.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.CustomTabs.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Android.Support.Fragment">
-      <HintPath>..\packages\Xamarin.Android.Support.Fragment.27.0.2.1\lib\MonoAndroid81\Xamarin.Android.Support.Fragment.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Android.Support.Fragment.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.Fragment.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Android.Support.Media.Compat">
-      <HintPath>..\packages\Xamarin.Android.Support.Media.Compat.27.0.2.1\lib\MonoAndroid81\Xamarin.Android.Support.Media.Compat.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Android.Support.Media.Compat.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.Media.Compat.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Android.Support.Transition">
-      <HintPath>..\packages\Xamarin.Android.Support.Transition.27.0.2.1\lib\MonoAndroid81\Xamarin.Android.Support.Transition.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Android.Support.Transition.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.Transition.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Android.Support.v7.CardView">
-      <HintPath>..\packages\Xamarin.Android.Support.v7.CardView.27.0.2.1\lib\MonoAndroid81\Xamarin.Android.Support.v7.CardView.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Android.Support.v7.CardView.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.v7.CardView.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Android.Support.v7.RecyclerView">
-      <HintPath>..\packages\Xamarin.Android.Support.v7.RecyclerView.27.0.2.1\lib\MonoAndroid81\Xamarin.Android.Support.v7.RecyclerView.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Android.Support.v7.RecyclerView.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.v7.RecyclerView.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Android.Support.Vector.Drawable">
-      <HintPath>..\packages\Xamarin.Android.Support.Vector.Drawable.27.0.2.1\lib\MonoAndroid81\Xamarin.Android.Support.Vector.Drawable.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Android.Support.Vector.Drawable.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.Vector.Drawable.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Android.Support.Animated.Vector.Drawable">
-      <HintPath>..\packages\Xamarin.Android.Support.Animated.Vector.Drawable.27.0.2.1\lib\MonoAndroid81\Xamarin.Android.Support.Animated.Vector.Drawable.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Android.Support.Animated.Vector.Drawable.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.Animated.Vector.Drawable.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Android.Support.v7.AppCompat">
-      <HintPath>..\packages\Xamarin.Android.Support.v7.AppCompat.27.0.2.1\lib\MonoAndroid81\Xamarin.Android.Support.v7.AppCompat.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Android.Support.v7.AppCompat.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.v7.AppCompat.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Android.Support.Design">
-      <HintPath>..\packages\Xamarin.Android.Support.Design.27.0.2.1\lib\MonoAndroid81\Xamarin.Android.Support.Design.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Android.Support.Design.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.Design.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Essentials">
       <HintPath>..\packages\Xamarin.Essentials.1.0.0\lib\monoandroid81\Xamarin.Essentials.dll</HintPath>
     </Reference>
     <Reference Include="System.Numerics" />
     <Reference Include="System.Numerics.Vectors" />
+    <Reference Include="Xamarin.Android.Arch.Core.Runtime">
+      <HintPath>..\packages\Xamarin.Android.Arch.Core.Runtime.1.1.1.1\lib\monoandroid90\Xamarin.Android.Arch.Core.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Arch.Lifecycle.LiveData.Core">
+      <HintPath>..\packages\Xamarin.Android.Arch.Lifecycle.LiveData.Core.1.1.1.1\lib\monoandroid90\Xamarin.Android.Arch.Lifecycle.LiveData.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Arch.Lifecycle.LiveData">
+      <HintPath>..\packages\Xamarin.Android.Arch.Lifecycle.LiveData.1.1.1.1\lib\monoandroid90\Xamarin.Android.Arch.Lifecycle.LiveData.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Arch.Lifecycle.ViewModel">
+      <HintPath>..\packages\Xamarin.Android.Arch.Lifecycle.ViewModel.1.1.1.1\lib\monoandroid90\Xamarin.Android.Arch.Lifecycle.ViewModel.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.Collections">
+      <HintPath>..\packages\Xamarin.Android.Support.Collections.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.Collections.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.CursorAdapter">
+      <HintPath>..\packages\Xamarin.Android.Support.CursorAdapter.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.CursorAdapter.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.DocumentFile">
+      <HintPath>..\packages\Xamarin.Android.Support.DocumentFile.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.DocumentFile.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.Interpolator">
+      <HintPath>..\packages\Xamarin.Android.Support.Interpolator.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.Interpolator.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.LocalBroadcastManager">
+      <HintPath>..\packages\Xamarin.Android.Support.LocalBroadcastManager.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.LocalBroadcastManager.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.Print">
+      <HintPath>..\packages\Xamarin.Android.Support.Print.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.Print.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.VersionedParcelable">
+      <HintPath>..\packages\Xamarin.Android.Support.VersionedParcelable.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.VersionedParcelable.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.AsyncLayoutInflater">
+      <HintPath>..\packages\Xamarin.Android.Support.AsyncLayoutInflater.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.AsyncLayoutInflater.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.CustomView">
+      <HintPath>..\packages\Xamarin.Android.Support.CustomView.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.CustomView.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.CoordinaterLayout">
+      <HintPath>..\packages\Xamarin.Android.Support.CoordinaterLayout.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.CoordinaterLayout.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.DrawerLayout">
+      <HintPath>..\packages\Xamarin.Android.Support.DrawerLayout.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.DrawerLayout.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.Loader">
+      <HintPath>..\packages\Xamarin.Android.Support.Loader.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.Loader.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.SlidingPaneLayout">
+      <HintPath>..\packages\Xamarin.Android.Support.SlidingPaneLayout.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.SlidingPaneLayout.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.SwipeRefreshLayout">
+      <HintPath>..\packages\Xamarin.Android.Support.SwipeRefreshLayout.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.SwipeRefreshLayout.dll</HintPath>
+    </Reference>
+    <Reference Include="Xamarin.Android.Support.ViewPager">
+      <HintPath>..\packages\Xamarin.Android.Support.ViewPager.28.0.0.1\lib\monoandroid90\Xamarin.Android.Support.ViewPager.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Activities\EditDurationActivity.cs" />
@@ -291,11 +348,19 @@
     <Compile Include="Activities\SelectCountryActivity.ViewBinds.cs">
       <DependentUpon>SelectCountryActivity.cs</DependentUpon>
     </Compile>
+    <Compile Include="Activities\SelectProjectActivity.ViewBinds.cs" />
     <Compile Include="Activities\SelectTagsActivity.cs" />
+    <Compile Include="Activities\SelectTagsActivity.ViewBinds.cs">
+      <DependentUpon>SelectTagsActivity.cs</DependentUpon>
+    </Compile>
     <Compile Include="Activities\SendFeedbackActivity.cs" />
     <Compile Include="Activities\SendFeedbackActivity.ViewBinds.cs">
       <DependentUpon>SendFeedbackActivity.cs</DependentUpon>
     </Compile>
+    <Compile Include="Adapters\Calendar\Anchor.cs" />
+    <Compile Include="Adapters\Calendar\AnchorData.cs" />
+    <Compile Include="Adapters\Calendar\CalendarAdapter.cs" />
+    <Compile Include="Adapters\Calendar\LayoutAnchorsCalculator.cs" />
     <Compile Include="Adapters\DiffingStrategies\EquatableDiffingStrategy.cs" />
     <Compile Include="Adapters\DiffingStrategies\IdentifierEqualityDiffingStrategy.cs" />
     <Compile Include="Adapters\DiffingStrategies\IDiffingStrategy.cs" />
@@ -310,6 +375,7 @@
     <Compile Include="ViewHolders\StartTimeEntry\ProjectSuggestionViewHolder.cs" />
     <Compile Include="ViewHolders\StartTimeEntry\TimeEntrySuggestionViewHolder.cs" />
     <Compile Include="Bindings\TextInputLayoutErrorTextTargetBinding.cs" />
+    <Compile Include="BroadcastReceivers\SmartAlertCalendarEventBroadcastReceiver.cs" />
     <Compile Include="BroadcastReceivers\TimezoneChangedBroadcastReceiver.cs" />
     <Compile Include="Extensions\ContextExtensions.cs" />
     <Compile Include="Extensions\DrawableExtensions.cs" />
@@ -319,10 +385,15 @@
     <Compile Include="Extensions\PopupOffsets.cs" />
     <Compile Include="Extensions\PopupWindowWithDefaultGravityExtenstions.cs" />
     <Compile Include="Extensions\Reactive\HueSaturationPickerViewExtensions.cs" />
+    <Compile Include="Extensions\Reactive\LayoutParamsExtensions.cs" />
     <Compile Include="Extensions\Reactive\PagerExtensions.cs" />
     <Compile Include="Extensions\TracingExtensions.cs" />
     <Compile Include="Extensions\Reactive\RecyclerViewExtensions.cs" />
     <Compile Include="Extensions\Reactive\ValueSliderViewExtensions.cs" />
+    <Compile Include="Fragments\CalendarFragment.cs" />
+    <Compile Include="Fragments\CalendarFragment.ViewBinds.cs">
+      <DependentUpon>CalendarFragment.cs</DependentUpon>
+    </Compile>
     <Compile Include="Fragments\SelectWorkspaceFragment.ViewBinds.cs">
       <DependentUpon>SelectWorkspaceFragment.cs</DependentUpon>
     </Compile>
@@ -350,7 +421,6 @@
       <DependentUpon>LoginActivity.cs</DependentUpon>
     </Compile>
     <Compile Include="Services\SharedPreferencesStorageAndroid.cs" />
-    <Compile Include="Activities\MainActivity.cs" />
     <Compile Include="Startup\TogglApplication.cs" />
     <Compile Include="TemplateSelectors\SelectTagsTemplateSelector.cs" />
     <Compile Include="ViewHelpers\BarChartData.cs" />
@@ -361,8 +431,10 @@
     <Compile Include="ViewHelpers\ReportsSummaryData.cs" />
     <Compile Include="ViewHelpers\SimpleRecyclerViewScrollChangeListener.cs" />
     <Compile Include="ViewHelpers\SuggestionsRecyclerViewSnapHelper.cs" />
+    <Compile Include="ViewHolders\AnchorViewHolder.cs" />
     <Compile Include="ViewHelpers\TimePickerListener.cs" />
     <Compile Include="ViewHolders\CalendarDayCellViewHolder.cs" />
+    <Compile Include="ViewHolders\CalendarEntryViewHolder.cs" />
     <Compile Include="ViewHolders\Client\ClientCreationSelectionViewHolder.cs" />
     <Compile Include="ViewHolders\Client\ClientSelectionViewHolder.cs" />
     <Compile Include="ViewHelpers\TimeEntryCollectionViewModel.cs" />
@@ -381,6 +453,23 @@
     <Compile Include="ViewHolders\ReportsItemCellViewHolder.cs" />
     <Compile Include="ViewHolders\ReportsWorkspaceNameViewHolder.cs" />
     <Compile Include="Views\BarChartView.cs" />
+    <Compile Include="Views\CalendarRecyclerView.cs" />
+    <Compile Include="Views\Calendar\CalendarLayoutManager.cs" />
+    <Compile Include="Views\Calendar\CalendarLayoutManager.AnchorInfo.cs">
+      <DependentUpon>CalendarLayoutManager.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Calendar\CalendarLayoutManager.LayoutState.cs">
+      <DependentUpon>CalendarLayoutManager.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Calendar\CalendarLayoutManager.AnchorSavedState.cs">
+      <DependentUpon>CalendarLayoutManager.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Calendar\CalendarLayoutManager.Recycler.cs">
+      <DependentUpon>CalendarLayoutManager.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Calendar\CalendarLayoutManager.ScrollHelper.cs">
+      <DependentUpon>CalendarLayoutManager.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\EditDuration\Shapes\Arc.cs" />
     <Compile Include="Views\EditDuration\Shapes\Cap.cs" />
     <Compile Include="Views\EditDuration\Shapes\ClockDial.cs" />
@@ -389,7 +478,6 @@
     <Compile Include="Views\EditDuration\WheelBackgroundView.cs" />
     <Compile Include="Views\EditDuration\WheelForegroundView.cs" />
     <Compile Include="Views\ReportsCalendarView.cs" />
-    <Compile Include="Views\SelectProjectRecyclerView.cs" />
     <Compile Include="Adapters\MainRecyclerAdapter.cs" />
     <Compile Include="TemplateSelectors\SelectProjectTemplateSelector.cs" />
     <Compile Include="Startup\SetupTargetFactories.cs">
@@ -401,7 +489,6 @@
     <Compile Include="Converters\BoolToConstantOverrides.cs" />
     <Compile Include="Bindings\DrawableColorTargetBinding.cs" />
     <Compile Include="TemplateSelectors\SuggestionsTemplateSelector.cs" />
-    <Compile Include="Activities\SettingsActivity.cs" />
     <Compile Include="Bindings\EditTextFocusTargetBinding.cs" />
     <Compile Include="Presenters\TogglPresenter.cs" />
     <Compile Include="Activities\StartTimeEntryActivity.cs" />
@@ -422,6 +509,9 @@
     <Compile Include="Extensions\ActivityExtensions.cs" />
     <Compile Include="Helper\ApiAvailability.cs" />
     <Compile Include="Activities\EditProjectActivity.cs" />
+    <Compile Include="Activities\EditProjectActivity.ViewBinds.cs">
+      <DependentUpon>EditProjectActivity.cs</DependentUpon>
+    </Compile>
     <Compile Include="Adapters\CreateSuggestionSegmentedRecyclerAdapter.cs" />
     <Compile Include="Views\CircleView.cs" />
     <Compile Include="Views\HueSaturationPickerView.cs" />
@@ -450,7 +540,6 @@
     <Compile Include="Adapters\ReportsRecyclerAdapter.cs" />
     <Compile Include="Extensions\ViewExtensions.cs" />
     <Compile Include="TemplateSelectors\ReportsTemplateSelector.cs" />
-    <Compile Include="Activities\ReportsActivity.cs" />
     <Compile Include="Converters\ReportPercentageLabelValueConverter.cs" />
     <Compile Include="Converters\ReportTimeSpanLabelValueConverter.cs" />
     <Compile Include="Bindings\ViewWidthPercentageTargetBinding.cs" />
@@ -491,9 +580,6 @@
     <Compile Include="Activities\AboutActivity.cs" />
     <Compile Include="Services\RatingServiceAndroid.cs" />
     <Compile Include="Services\RemoteConfigServiceAndroid.cs" />
-    <Compile Include="Activities\SettingsActivity.ViewBinds.cs">
-      <DependentUpon>SettingsActivity.cs</DependentUpon>
-    </Compile>
     <Compile Include="Activities\EditTimeEntryActivity.ViewBinds.cs">
       <DependentUpon>EditTimeEntryActivity.cs</DependentUpon>
     </Compile>
@@ -511,17 +597,8 @@
     <Compile Include="Activities\SignUpActivity.ViewBinds.cs">
       <DependentUpon>SignUpActivity.cs</DependentUpon>
     </Compile>
-    <Compile Include="Activities\MainActivity.ViewBinds.cs">
-      <DependentUpon>MainActivity.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Activities\MainActivity.Onboardings.cs">
-      <DependentUpon>MainActivity.cs</DependentUpon>
-    </Compile>
     <Compile Include="Startup\HandlerScheduler.cs" />
     <Compile Include="Services\NoopPrivateSharedStorageServiceAndroid.cs" />
-    <Compile Include="Activities\ReportsActivity.ViewBinds.cs">
-      <DependentUpon>ReportsActivity.cs</DependentUpon>
-    </Compile>
     <Compile Include="Views\ListSelectionDialog.cs" />
     <Compile Include="Extensions\Reactive\ViewExtensions.cs" />
     <Compile Include="Extensions\Reactive\TextViewExtensions.cs" />
@@ -549,7 +626,6 @@
     <Compile Include="Startup\ApplicationLifecycleObserver.cs" />
     <Compile Include="Services\BackgroundSyncServiceAndroid.cs" />
     <Compile Include="Services\BackgroundSyncJobSchedulerService.cs" />
-    <Compile Include="Activities\SelectTagsActivity.ViewBinds.cs" />
     <Compile Include="ViewHolders\Tags\TagCreationSelectionViewHolder.cs" />
     <Compile Include="ViewHolders\Tags\TagSelectionViewHolder.cs" />
     <Compile Include="Adapters\SelectDateFormatRecyclerAdapter.cs" />
@@ -563,7 +639,54 @@
       <DependentUpon>SelectBeginningOfWeekFragment.cs</DependentUpon>
     </Compile>
     <Compile Include="ViewHolders\BeginningOfWeekViewHolder.cs" />
+    <Compile Include="Fragments\SettingsFragment.cs" />
+    <Compile Include="Fragments\SettingsFragment.ViewBinds.cs">
+      <DependentUpon>SettingsFragment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Fragments\ReactiveFragment.cs" />
+    <Compile Include="Fragments\ReportsFragment.cs" />
+    <Compile Include="Fragments\ReportsFragment.ViewBinds.cs">
+      <DependentUpon>ReportsFragment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Fragments\MainFragment.cs" />
+    <Compile Include="Fragments\MainFragment.ViewBinds.cs">
+      <DependentUpon>MainFragment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Fragments\MainFragment.Onboardings.cs">
+      <DependentUpon>MainFragment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Fragments\SelectUserCalendarsFragment.cs" />
+    <Compile Include="Fragments\SelectUserCalendarsFragment.ViewBinds.cs">
+      <DependentUpon>SelectUserCalendarsFragment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Adapters\UserCalendarsRecyclerAdapter.cs" />
+    <Compile Include="ViewHolders\UserCalendarViewHolder.cs" />
+    <Compile Include="ViewHolders\UserCalendarHeaderViewHolder.cs" />
     <Compile Include="Adapters\BaseSectionedRecyclerAdapter.cs" />
+    <Compile Include="Extensions\Reactive\ButtonExtensions.cs" />
+    <Compile Include="Fragments\ReactiveDialogFragment.cs" />
+    <Compile Include="Activities\MainTabBarActivity.cs" />
+    <Compile Include="Activities\MainTabBarActivity.ViewBinds.cs">
+      <DependentUpon>MainTabBarActivity.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Extensions\Reactive\BottomNavigationViewExtensions.cs" />
+    <Compile Include="Extensions\FragmentManagerExtensions.cs" />
+    <Compile Include="Fragments\CalendarPermissionDeniedFragment.cs" />
+    <Compile Include="Fragments\CalendarPermissionDeniedFragment.ViewBinds.cs">
+      <DependentUpon>CalendarPermissionDeniedFragment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Fragments\UpcomingEventsNotificationSettingsFragment.cs" />
+    <Compile Include="Fragments\UpcomingEventsNotificationSettingsFragment.ViewBinds.cs">
+      <DependentUpon>UpcomingEventsNotificationSettingsFragment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Adapters\SelectCalendarNotificationsOptionAdapter.cs" />
+    <Compile Include="ViewHolders\SelectCalendarNotificationsOptionViewHolder.cs" />
+    <Compile Include="Activities\CalendarSettingsActivity.cs" />
+    <Compile Include="Activities\CalendarSettingsActivity.ViewBinds.cs">
+      <DependentUpon>CalendarSettingsActivity.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BroadcastReceivers\BootCompletedBroadcastReceiver.cs" />
+    <Compile Include="Services\ScheduleEventNotificationsService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\AndroidManifest.xml" />
@@ -572,10 +695,6 @@
     <AndroidResource Include="Resources\color\BlueTextColor.xml" />
     <AndroidResource Include="Resources\drawable\Dot.xml" />
     <AndroidResource Include="Resources\layout\AboutActivity.axml" />
-    <AndroidResource Include="Resources\layout\EntityCreationActivityCell.axml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
-    </AndroidResource>
     <AndroidResource Include="Resources\layout\SelectTagsActivity.axml" />
     <AndroidResource Include="Resources\layout\SelectProjectActivity.axml" />
     <AndroidResource Include="Resources\layout\SelectProjectActivityProjectCell.axml" />
@@ -587,7 +706,7 @@
     </None>
     <AndroidResource Include="Resources\layout\SelectDateFormatFragment.axml" />
     <AndroidResource Include="Resources\layout\SelectDateFormatFragmentCell.axml" />
-    <AndroidResource Include="Resources\layout\SettingsActivityWorkspaceCell.axml" />
+    <AndroidResource Include="Resources\layout\SettingsFragmentWorkspaceCell.axml" />
     <AndroidResource Include="Resources\drawable\TransparentToLightGrayGradient.xml" />
     <GoogleServicesJson Include="google-services.json" />
     <AndroidResource Include="Resources\layout\SelectBeginningOfWeekFragment.axml" />
@@ -595,8 +714,8 @@
     <AndroidResource Include="Resources\layout\SelectDurationFormatFragment.axml" />
     <AndroidResource Include="Resources\layout\SelectDurationFormatFragmentCell.axml" />
     <AndroidResource Include="Resources\drawable\RoundedRectangle.xml" />
-    <AndroidResource Include="Resources\layout\ReportsActivity.axml" />
-    <AndroidResource Include="Resources\layout\ReportsActivityHeader.axml" />
+    <AndroidResource Include="Resources\layout\ReportsFragment.axml" />
+    <AndroidResource Include="Resources\layout\ReportsFragmentHeader.axml" />
     <AndroidResource Include="Resources\drawable-hdpi\logo.png" />
     <AndroidResource Include="Resources\drawable-mdpi\logo.png" />
     <AndroidResource Include="Resources\drawable-xhdpi\logo.png" />
@@ -645,7 +764,7 @@
     <AndroidResource Include="Resources\drawable-xhdpi\add_new.png" />
     <AndroidResource Include="Resources\drawable-xxhdpi\add_new.png" />
     <AndroidResource Include="Resources\drawable-xxxhdpi\add_new.png" />
-    <AndroidResource Include="Resources\layout\MainActivity.axml" />
+    <AndroidResource Include="Resources\layout\MainFragment.axml" />
     <AndroidResource Include="Resources\layout\LoginActivity.axml" />
     <AndroidResource Include="Resources\values\Styles.xml" />
     <AndroidResource Include="Resources\values-v23\Styles.xml" />
@@ -818,7 +937,7 @@
     <AndroidResource Include="Resources\drawable\SmallDot.xml" />
     <AndroidResource Include="Resources\layout\MainSuggestionsCard.axml" />
     <AndroidResource Include="Resources\layout\MainRunningTimeEntry.axml" />
-    <AndroidResource Include="Resources\layout\SettingsActivity.axml" />
+    <AndroidResource Include="Resources\layout\SettingsFragment.axml" />
     <AndroidResource Include="Resources\layout\BrowserActivity.axml" />
     <AndroidResource Include="Resources\drawable\TopShadow.xml" />
     <AndroidResource Include="Resources\layout\StartTimeEntryActivity.axml" />
@@ -842,7 +961,7 @@
     <AndroidResource Include="Resources\layout\SelectClientActivityCell.axml" />
     <AndroidResource Include="Resources\layout\SelectWorkspaceFragment.axml" />
     <AndroidResource Include="Resources\layout\SelectWorkspaceFragmentCell.axml" />
-    <AndroidResource Include="Resources\layout\ReportsActivityItem.axml" />
+    <AndroidResource Include="Resources\layout\ReportsFragmentItem.axml" />
     <AndroidResource Include="Resources\layout\ReportsCalendarFragment.axml" />
     <AndroidResource Include="Resources\layout\ReportsCalendarFragmentDayCell.axml" />
     <AndroidResource Include="Resources\layout\ReportsCalendarFragmentPage.axml" />
@@ -950,7 +1069,7 @@
     <AndroidResource Include="Resources\drawable-xhdpi\ic_illustration_error_workspace.png" />
     <AndroidResource Include="Resources\drawable-xxhdpi\ic_illustration_error_workspace.png" />
     <AndroidResource Include="Resources\drawable-xxxhdpi\ic_illustration_error_workspace.png" />
-    <AndroidResource Include="Resources\layout\ReportsActivityWorkspaceName.axml" />
+    <AndroidResource Include="Resources\layout\ReportsFragmentWorkspaceName.axml" />
     <AndroidResource Include="Resources\drawable\workspace_white.xml" />
     <AndroidResource Include="Resources\values-v23\Strings.xml" />
     <AndroidResource Include="Resources\layout\SelectDefaultWorkspaceFragment.axml" />
@@ -969,6 +1088,33 @@
     <AndroidResource Include="Resources\drawable-xxhdpi\toggl_spider.png" />
     <AndroidResource Include="Resources\drawable-xxxhdpi\toggl_spider.png" />
     <AndroidResource Include="Resources\layout\WelcomeBackPlaceholder.axml" />
+    <AndroidResource Include="Resources\layout\SelectUserCalendarsFragment.axml" />
+    <AndroidResource Include="Resources\layout\UserCalendarItem.axml" />
+    <AndroidResource Include="Resources\layout\UserCalendarHeader.axml" />
+    <AndroidResource Include="Resources\color\BlueLinkTextColor.xml" />
+    <AndroidResource Include="Resources\layout\MainTabBarActivity.axml" />
+    <AndroidResource Include="Resources\menu\MainTabBarBottomMenu.xml" />
+    <AndroidResource Include="Resources\color\MainTabBarItemTextColor.xml" />
+    <AndroidResource Include="Resources\drawable-hdpi\calendar_light.png" />
+    <AndroidResource Include="Resources\drawable-mdpi\calendar_light.png" />
+    <AndroidResource Include="Resources\drawable-xhdpi\calendar_light.png" />
+    <AndroidResource Include="Resources\drawable-xxhdpi\calendar_light.png" />
+    <AndroidResource Include="Resources\drawable-xxxhdpi\calendar_light.png" />
+    <AndroidResource Include="Resources\layout\CalendarOnboardingView.axml" />
+    <AndroidResource Include="Resources\drawable-hdpi\calendar_onboarding.png" />
+    <AndroidResource Include="Resources\drawable-mdpi\calendar_onboarding.png" />
+    <AndroidResource Include="Resources\drawable-xhdpi\calendar_onboarding.png" />
+    <AndroidResource Include="Resources\drawable-xxhdpi\calendar_onboarding.png" />
+    <AndroidResource Include="Resources\drawable-xxxhdpi\calendar_onboarding.png" />
+    <AndroidResource Include="Resources\drawable\BlueButton.axml" />
+    <AndroidResource Include="Resources\layout\CalendarPermissionDeniedFragment.axml" />
+    <AndroidResource Include="Resources\layout\UpcomingEventsNotificationSettingsFragment.axml" />
+    <AndroidResource Include="Resources\layout\SelectCalendarNotificationsOptionItem.axml" />
+    <AndroidResource Include="Resources\layout\CalendarSettingsActivity.axml" />
+    <AndroidResource Include="Resources\layout\SelectUserCalendarsBase.axml" />
+    <AndroidResource Include="Resources\menu\CalendarSettingsMenu.xml" />
+    <AndroidResource Include="Resources\layout\CalendarHeaderView.axml" />
+    <AndroidResource Include="Resources\drawable\CalendarHeaderDayBackground.xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Toggl.Foundation\Toggl.Foundation.csproj">
@@ -1013,16 +1159,17 @@
     <AndroidResource Include="Resources\layout\EditDurationActivity.axml" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable\ic_play.xml" />
-    <AndroidResource Include="Resources\drawable\ic_stop.xml" />
-  </ItemGroup>
-  <ItemGroup>
     <AndroidResource Include="Resources\drawable\ic_separator_dot.xml" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\picker_header_background.xml" />
     <AndroidResource Include="Resources\drawable\ic_play.xml" />
     <AndroidResource Include="Resources\drawable\ic_stop.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\CalendarFragment.axml" />
+    <AndroidResource Include="Resources\drawable\CalendarEntryBackground.xml" />
+    <AndroidResource Include="Resources\layout\CalendarEntryCell.axml" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Import Project="..\packages\NETStandard.Library.2.0.0\build\netstandard2.0\NETStandard.Library.targets" Condition="Exists('..\packages\NETStandard.Library.2.0.0\build\netstandard2.0\NETStandard.Library.targets')" />
@@ -1043,21 +1190,40 @@
   <Import Project="..\packages\Realm.3.0.0\build\Realm.targets" Condition="Exists('..\packages\Realm.3.0.0\build\Realm.targets')" />
   <Import Project="..\packages\Xamarin.Build.Download.0.4.11\build\Xamarin.Build.Download.targets" Condition="Exists('..\packages\Xamarin.Build.Download.0.4.11\build\Xamarin.Build.Download.targets')" />
   <Import Project="..\packages\Xamarin.Firebase.Config.60.1142.1\build\MonoAndroid80\Xamarin.Firebase.Config.targets" Condition="Exists('..\packages\Xamarin.Firebase.Config.60.1142.1\build\MonoAndroid80\Xamarin.Firebase.Config.targets')" />
-  <Import Project="..\packages\Xamarin.Android.Support.Annotations.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Annotations.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Annotations.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Annotations.targets')" />
-  <Import Project="..\packages\Xamarin.Android.Arch.Core.Common.1.0.0.1\build\MonoAndroid80\Xamarin.Android.Arch.Core.Common.targets" Condition="Exists('..\packages\Xamarin.Android.Arch.Core.Common.1.0.0.1\build\MonoAndroid80\Xamarin.Android.Arch.Core.Common.targets')" />
-  <Import Project="..\packages\Xamarin.Android.Arch.Lifecycle.Common.1.0.3.1\build\MonoAndroid80\Xamarin.Android.Arch.Lifecycle.Common.targets" Condition="Exists('..\packages\Xamarin.Android.Arch.Lifecycle.Common.1.0.3.1\build\MonoAndroid80\Xamarin.Android.Arch.Lifecycle.Common.targets')" />
-  <Import Project="..\packages\Xamarin.Android.Arch.Lifecycle.Runtime.1.0.3.1\build\MonoAndroid80\Xamarin.Android.Arch.Lifecycle.Runtime.targets" Condition="Exists('..\packages\Xamarin.Android.Arch.Lifecycle.Runtime.1.0.3.1\build\MonoAndroid80\Xamarin.Android.Arch.Lifecycle.Runtime.targets')" />
-  <Import Project="..\packages\Xamarin.Android.Support.Compat.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Compat.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Compat.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Compat.targets')" />
-  <Import Project="..\packages\Xamarin.Android.Support.Core.UI.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Core.UI.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Core.UI.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Core.UI.targets')" />
-  <Import Project="..\packages\Xamarin.Android.Support.Core.Utils.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Core.Utils.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Core.Utils.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Core.Utils.targets')" />
-  <Import Project="..\packages\Xamarin.Android.Support.CustomTabs.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.CustomTabs.targets" Condition="Exists('..\packages\Xamarin.Android.Support.CustomTabs.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.CustomTabs.targets')" />
-  <Import Project="..\packages\Xamarin.Android.Support.Fragment.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Fragment.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Fragment.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Fragment.targets')" />
-  <Import Project="..\packages\Xamarin.Android.Support.Media.Compat.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Media.Compat.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Media.Compat.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Media.Compat.targets')" />
-  <Import Project="..\packages\Xamarin.Android.Support.Transition.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Transition.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Transition.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Transition.targets')" />
-  <Import Project="..\packages\Xamarin.Android.Support.v7.CardView.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.v7.CardView.targets" Condition="Exists('..\packages\Xamarin.Android.Support.v7.CardView.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.v7.CardView.targets')" />
-  <Import Project="..\packages\Xamarin.Android.Support.v7.RecyclerView.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.v7.RecyclerView.targets" Condition="Exists('..\packages\Xamarin.Android.Support.v7.RecyclerView.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.v7.RecyclerView.targets')" />
-  <Import Project="..\packages\Xamarin.Android.Support.Vector.Drawable.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Vector.Drawable.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Vector.Drawable.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Vector.Drawable.targets')" />
-  <Import Project="..\packages\Xamarin.Android.Support.Animated.Vector.Drawable.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Animated.Vector.Drawable.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Animated.Vector.Drawable.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Animated.Vector.Drawable.targets')" />
-  <Import Project="..\packages\Xamarin.Android.Support.v7.AppCompat.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.v7.AppCompat.targets" Condition="Exists('..\packages\Xamarin.Android.Support.v7.AppCompat.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.v7.AppCompat.targets')" />
-  <Import Project="..\packages\Xamarin.Android.Support.Design.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Design.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Design.27.0.2.1\build\MonoAndroid81\Xamarin.Android.Support.Design.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.Annotations.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Annotations.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Annotations.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Annotations.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Arch.Core.Common.1.1.1.1\build\monoandroid90\Xamarin.Android.Arch.Core.Common.targets" Condition="Exists('..\packages\Xamarin.Android.Arch.Core.Common.1.1.1.1\build\monoandroid90\Xamarin.Android.Arch.Core.Common.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Arch.Core.Runtime.1.1.1.1\build\monoandroid90\Xamarin.Android.Arch.Core.Runtime.targets" Condition="Exists('..\packages\Xamarin.Android.Arch.Core.Runtime.1.1.1.1\build\monoandroid90\Xamarin.Android.Arch.Core.Runtime.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Arch.Lifecycle.Common.1.1.1.1\build\monoandroid90\Xamarin.Android.Arch.Lifecycle.Common.targets" Condition="Exists('..\packages\Xamarin.Android.Arch.Lifecycle.Common.1.1.1.1\build\monoandroid90\Xamarin.Android.Arch.Lifecycle.Common.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Arch.Lifecycle.LiveData.Core.1.1.1.1\build\monoandroid90\Xamarin.Android.Arch.Lifecycle.LiveData.Core.targets" Condition="Exists('..\packages\Xamarin.Android.Arch.Lifecycle.LiveData.Core.1.1.1.1\build\monoandroid90\Xamarin.Android.Arch.Lifecycle.LiveData.Core.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Arch.Lifecycle.LiveData.1.1.1.1\build\monoandroid90\Xamarin.Android.Arch.Lifecycle.LiveData.targets" Condition="Exists('..\packages\Xamarin.Android.Arch.Lifecycle.LiveData.1.1.1.1\build\monoandroid90\Xamarin.Android.Arch.Lifecycle.LiveData.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Arch.Lifecycle.Runtime.1.1.1.1\build\monoandroid90\Xamarin.Android.Arch.Lifecycle.Runtime.targets" Condition="Exists('..\packages\Xamarin.Android.Arch.Lifecycle.Runtime.1.1.1.1\build\monoandroid90\Xamarin.Android.Arch.Lifecycle.Runtime.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Arch.Lifecycle.ViewModel.1.1.1.1\build\monoandroid90\Xamarin.Android.Arch.Lifecycle.ViewModel.targets" Condition="Exists('..\packages\Xamarin.Android.Arch.Lifecycle.ViewModel.1.1.1.1\build\monoandroid90\Xamarin.Android.Arch.Lifecycle.ViewModel.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.Collections.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Collections.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Collections.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Collections.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.CursorAdapter.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.CursorAdapter.targets" Condition="Exists('..\packages\Xamarin.Android.Support.CursorAdapter.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.CursorAdapter.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.DocumentFile.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.DocumentFile.targets" Condition="Exists('..\packages\Xamarin.Android.Support.DocumentFile.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.DocumentFile.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.Interpolator.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Interpolator.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Interpolator.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Interpolator.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.LocalBroadcastManager.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.LocalBroadcastManager.targets" Condition="Exists('..\packages\Xamarin.Android.Support.LocalBroadcastManager.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.LocalBroadcastManager.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.Print.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Print.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Print.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Print.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.v7.CardView.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.v7.CardView.targets" Condition="Exists('..\packages\Xamarin.Android.Support.v7.CardView.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.v7.CardView.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.VersionedParcelable.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.VersionedParcelable.targets" Condition="Exists('..\packages\Xamarin.Android.Support.VersionedParcelable.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.VersionedParcelable.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.Compat.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Compat.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Compat.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Compat.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.AsyncLayoutInflater.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.AsyncLayoutInflater.targets" Condition="Exists('..\packages\Xamarin.Android.Support.AsyncLayoutInflater.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.AsyncLayoutInflater.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.CustomView.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.CustomView.targets" Condition="Exists('..\packages\Xamarin.Android.Support.CustomView.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.CustomView.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.CoordinaterLayout.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.CoordinaterLayout.targets" Condition="Exists('..\packages\Xamarin.Android.Support.CoordinaterLayout.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.CoordinaterLayout.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.DrawerLayout.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.DrawerLayout.targets" Condition="Exists('..\packages\Xamarin.Android.Support.DrawerLayout.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.DrawerLayout.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.Loader.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Loader.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Loader.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Loader.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.Core.Utils.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Core.Utils.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Core.Utils.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Core.Utils.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.Media.Compat.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Media.Compat.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Media.Compat.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Media.Compat.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.SlidingPaneLayout.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.SlidingPaneLayout.targets" Condition="Exists('..\packages\Xamarin.Android.Support.SlidingPaneLayout.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.SlidingPaneLayout.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.SwipeRefreshLayout.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.SwipeRefreshLayout.targets" Condition="Exists('..\packages\Xamarin.Android.Support.SwipeRefreshLayout.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.SwipeRefreshLayout.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.Vector.Drawable.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Vector.Drawable.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Vector.Drawable.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Vector.Drawable.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.ViewPager.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.ViewPager.targets" Condition="Exists('..\packages\Xamarin.Android.Support.ViewPager.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.ViewPager.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.Core.UI.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Core.UI.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Core.UI.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Core.UI.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.Animated.Vector.Drawable.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Animated.Vector.Drawable.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Animated.Vector.Drawable.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Animated.Vector.Drawable.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.CustomTabs.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.CustomTabs.targets" Condition="Exists('..\packages\Xamarin.Android.Support.CustomTabs.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.CustomTabs.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.Fragment.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Fragment.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Fragment.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Fragment.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.Transition.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Transition.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Transition.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Transition.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.v7.AppCompat.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.v7.AppCompat.targets" Condition="Exists('..\packages\Xamarin.Android.Support.v7.AppCompat.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.v7.AppCompat.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.v7.RecyclerView.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.v7.RecyclerView.targets" Condition="Exists('..\packages\Xamarin.Android.Support.v7.RecyclerView.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.v7.RecyclerView.targets')" />
+  <Import Project="..\packages\Xamarin.Android.Support.Design.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Design.targets" Condition="Exists('..\packages\Xamarin.Android.Support.Design.28.0.0.1\build\monoandroid90\Xamarin.Android.Support.Design.targets')" />
 </Project>

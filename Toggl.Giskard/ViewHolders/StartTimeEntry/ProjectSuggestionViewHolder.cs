@@ -2,6 +2,8 @@
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Android.Graphics;
+using Android.Graphics.Drawables;
+using Android.Support.V4.Graphics;
 using Android.Views;
 using Android.Widget;
 using Toggl.Foundation.Autocomplete.Suggestions;
@@ -15,12 +17,12 @@ namespace Toggl.Giskard.ViewHolders
     {
         private View caret;
         private View toggleTasksButton;
+        private View selectedProjectToken;
 
         private TextView taskLabel;
         private TextView projectLabel;
         private TextView taskCountLabel;
         private TextView clientNameLabel;
-
         private IDisposable toggleTasksDisposable;
         private readonly ISubject<ProjectSuggestion> toggleTasksSubject;
         
@@ -38,8 +40,9 @@ namespace Toggl.Giskard.ViewHolders
             projectLabel = ItemView.FindViewById<TextView>(ProjectLabel);
             taskCountLabel = ItemView.FindViewById<TextView>(TaskCountLabel);
             clientNameLabel = ItemView.FindViewById<TextView>(ClientNameLabel);
+            selectedProjectToken = ItemView.FindViewById(ProjectSelectionToken);
 
-            toggleTasksDisposable = Observable.Merge(caret.Rx().Tap(), taskLabel.Rx().Tap())
+            toggleTasksDisposable = toggleTasksButton.Rx().Tap()
                 .Select(_ => Suggestion)
                 .Subscribe(toggleTasksSubject);
         }
@@ -60,6 +63,18 @@ namespace Toggl.Giskard.ViewHolders
             caret.Animate().SetDuration(1).Rotation(caretAngle);
 
             toggleTasksButton.Visibility = Suggestion.HasTasks.ToVisibility();
+
+            if (selectedProjectToken == null)
+                return;
+            
+            selectedProjectToken.Visibility = Suggestion.Selected.ToVisibility(useGone: false);
+            if (Suggestion.Selected && selectedProjectToken.Background is GradientDrawable drawable)
+            {
+                var opacity = (int)Math.Round(2.55 * 12);
+                var argb = ColorUtils.SetAlphaComponent(projectColor.ToArgb(), opacity);
+                drawable.SetColor(argb);
+                drawable.InvalidateSelf();
+            }
         }
     }
 }

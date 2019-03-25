@@ -5,78 +5,97 @@ using Toggl.Multivac.Models;
 
 namespace Toggl.Daneel.ExtensionKit.Analytics
 {
+    public enum SiriTrackingEventType
+    {
+        StartTimer = 1,
+        StopTimer = 2,
+        Error = 3
+    }
+
+    public struct SiriErrorEventKeys
+    {
+        public static string Message = "Message";
+    }
+
+    public struct SiriStartTimerEventKeys
+    {
+        public static string HasEmptyDescription = "HasEmptyDescription";
+        public static string HasProject = "HasProject";
+        public static string HasTask = "HasTask";
+        public static string NumberOfTags = "NumberOfTags";
+        public static string IsBillable = "IsBillable";
+    }
+
     [Register("SiriTrackingEvent")]
     public class SiriTrackingEvent: NSObject, INSCoding
     {
-        private static readonly string eventNameEncodeKey = nameof(eventNameEncodeKey);
+        private static readonly string eventTypeEncodeKey = nameof(eventTypeEncodeKey);
         private static readonly string parametersEncodeKey = nameof(parametersEncodeKey);
 
-        private static readonly string SiriStartTimerEventName = "SiriStartTimer";
-        private static readonly string SiriStopTimerEventName = "SiriStopTimer";
-        private static readonly string SiriIntentErrorEventName = "SiriIntentError";
+        public readonly SiriTrackingEventType EventType;
+        public readonly Dictionary<string, string> Parameters;
 
-        public readonly NSString EventName;
-        public readonly NSDictionary<NSString, NSString> Parameters;
-
-        public SiriTrackingEvent(NSString eventName, NSDictionary<NSString, NSString> parameters)
+        public SiriTrackingEvent(SiriTrackingEventType eventType, Dictionary<string, string> parameters)
         {
-            EventName = eventName;
+            EventType = eventType;
             Parameters = parameters;
         }
 
         public static SiriTrackingEvent Error(string message)
         {
-            var dict = new Dictionary<string, string>
+            return new SiriTrackingEvent(SiriTrackingEventType.Error, new Dictionary<string, string>
             {
-                ["Message"] = message
-            };
-
-            var nativeDict = NSDictionary<NSString, NSString>
-                .FromObjectsAndKeys(dict.Values.ToArray(), dict.Keys.ToArray());
-
-            return new SiriTrackingEvent(new NSString(SiriIntentErrorEventName), nativeDict);
+                [SiriErrorEventKeys.Message] = message
+            });
         }
 
         public static SiriTrackingEvent StartTimer(ITimeEntry te)
         {
-            var dict = new Dictionary<string, string>
+            return new SiriTrackingEvent(SiriTrackingEventType.StartTimer, new Dictionary<string, string>
             {
-                ["HasEmptyDescription"] = string.IsNullOrEmpty(te.Description).ToString(),
-                ["HasProject"] = (te.ProjectId != null).ToString(),
-                ["HasTask"] = (te.TaskId != null).ToString(),
-                ["NumberOfTags"] = te.TagIds.Count().ToString(),
-                ["IsBillable"] = te.Billable.ToString()
-            };
-
-            var nativeDict = NSDictionary<NSString, NSString>
-                .FromObjectsAndKeys(dict.Values.ToArray(), dict.Keys.ToArray());
-
-            return new SiriTrackingEvent(new NSString(SiriStartTimerEventName), nativeDict);
+                [SiriStartTimerEventKeys.HasEmptyDescription] = string.IsNullOrEmpty(te.Description).ToString(),
+                [SiriStartTimerEventKeys.HasProject] = (te.ProjectId != null).ToString(),
+                [SiriStartTimerEventKeys.HasTask] = (te.TaskId != null).ToString(),
+                [SiriStartTimerEventKeys.NumberOfTags] = te.TagIds.Count().ToString(),
+                [SiriStartTimerEventKeys.IsBillable] = te.Billable.ToString()
+            });
         }
 
         public static SiriTrackingEvent StopTimer()
         {
-            return new SiriTrackingEvent(new NSString(SiriStopTimerEventName), null);
+            return new SiriTrackingEvent(SiriTrackingEventType.StopTimer, null);
         }
 
         #region INSCoding
         [Export("initWithCoder:")]
         public SiriTrackingEvent(NSCoder coder)
         {
-            EventName = (NSString) coder.DecodeObject(eventNameEncodeKey);
+            EventType = (SiriTrackingEventType) coder.DecodeInt(eventTypeEncodeKey);
 
-            var dict = (NSDictionary) coder.DecodeObject(parametersEncodeKey);
-            if (dict != null)
+            var nativeDict = (NSDictionary) coder.DecodeObject(parametersEncodeKey);
+
+            if (nativeDict != null)
             {
-                Parameters = NSDictionary<NSString, NSString>.FromObjectsAndKeys(dict.Values, dict.Keys);
+                var dict = new Dictionary<string, string>();
+                foreach (var item in nativeDict)
+                {
+                    dict.Add ((NSString)item.Key, (NSString)item.Value);
+                }
+                Parameters = dict;
             }
         }
 
         [Export ("encodeWithCoder:")]
         public void EncodeTo(NSCoder encoder)
         {
-            encoder.Encode(EventName, eventNameEncodeKey);
-            encoder.Encode(Parameters, parametersEncodeKey);
+            encoder.Encode((int)EventType, eventTypeEncodeKey);
+
+            if (Parameters != null)
+            {
+                var nativeDict = NSDictionary
+                .FromObjectsAndKeys(Parameters.Values.ToArray(), Parameters.Keys.ToArray());
+                encoder.Encode(nativeDict, parametersEncodeKey);
+            }
         }
         #endregion
     }

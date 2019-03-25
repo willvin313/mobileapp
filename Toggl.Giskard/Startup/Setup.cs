@@ -26,10 +26,11 @@ namespace Toggl.Giskard
     {
         public Setup()
         {
-#if !USE_PRODUCTION_API
+            #if !USE_PRODUCTION_API
             System.Net.ServicePointManager.ServerCertificateValidationCallback
                   += (sender, certificate, chain, sslPolicyErrors) => true;
-#endif
+            #endif
+
             var applicationContext = Application.Context;
             var packageInfo = applicationContext.PackageManager.GetPackageInfo(applicationContext.PackageName, 0);
 

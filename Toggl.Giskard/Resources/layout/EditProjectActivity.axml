@@ -15,7 +15,7 @@
             android:layout_height="48dp"
             android:layout_width="match_parent">
             <ImageView
-                android:id="@+id/EditProjectProjectImage"
+                android:id="@+id/ProjectImageView"
                 android:src="@drawable/project"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
@@ -23,8 +23,7 @@
                 android:layout_marginRight="16dp"
                 android:layout_centerVertical="true" />
             <EditText
-                android:id="@+id/EditProjectProjectName"
-                local:MvxBind="Text Name; TopMargin EditProjectErrorOffset(IsNameAlreadyTaken)"
+                android:id="@+id/ProjectNameTextView"
                 android:lines="1"
                 android:gravity="left"
                 android:textSize="15sp"
@@ -39,15 +38,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginRight="40dp" />
             <TextView
-                local:MvxBind="Visibility Visibility(IsNameAlreadyTaken)"
+				android:id="@+id/ErrorText"
                 android:textSize="12sp"
                 android:lineSpacingExtra="4sp"
                 android:textColor="@color/errorText"
                 android:text="@string/NameTakenError"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/EditProjectProjectName"
-                android:layout_alignStart="@+id/EditProjectProjectName" />
+                android:layout_below="@+id/ProjectNameTextView"
+                android:layout_alignStart="@+id/ProjectNameTextView" />
             <View
                 android:background="@drawable/TransparentToWhiteGradient"
                 android:layout_width="80dp"
@@ -57,24 +56,22 @@
                 android:layout_alignParentRight="true"
                 android:layout_alignParentBottom="true" />
             <toggl.giskard.views.CircleView
-                android:id="@+id/EditProjectColorCircle"
-                local:MvxBind="CircleColor NativeColor(Color); Click PickColorCommand"
+                android:id="@+id/ColorCircle"
                 android:clickable="true"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginRight="4dp"
                 android:layout_centerVertical="true"
-                android:layout_toLeftOf="@+id/EditProjectColorArrow" />
+                android:layout_toLeftOf="@+id/ColorArrow" />
             <ImageView
-                android:id="@+id/EditProjectColorArrow"
-                local:MvxBind="Click PickColorCommand"
+                android:id="@+id/ColorArrow"
                 android:clickable="true"
                 android:src="@drawable/dropdown"
                 android:layout_marginRight="16dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:layout_alignTop="@id/EditProjectProjectImage" />
+                android:layout_alignTop="@id/ProjectImageView" />
         </RelativeLayout>
         <View
             android:background="@color/separator"
@@ -82,14 +79,13 @@
             android:layout_marginLeft="55dp"
             android:layout_width="match_parent" />
         <RelativeLayout
-            android:id="@+id/ChangeWorkspaceButton"
-            local:MvxBind="Click PickWorkspaceCommand"
+            android:id="@+id/ChangeWorkspaceView"
             android:clickable="true"
             android:background="?attr/selectableItemBackground"
             android:layout_height="48dp"
             android:layout_width="match_parent">
             <ImageView
-                android:id="@+id/EditProjectWorkspaceImage"
+                android:id="@+id/ChangeWorkspaceViewWorkspaceImage"
                 android:src="@drawable/workspace"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
@@ -97,9 +93,9 @@
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
                 android:layout_centerVertical="true"
-                android:layout_below="@+id/EditProjectProjectImage" />
+                android:layout_below="@+id/ProjectImageView" />
             <TextView
-                local:MvxBind="Text WorkspaceName"
+                android:id="@+id/WorkspaceNameLabel" 
                 android:lines="1"
                 android:textSize="15sp"
                 android:singleLine="true"
@@ -109,8 +105,8 @@
                 android:layout_marginTop="4dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignTop="@id/EditProjectWorkspaceImage"
-                android:layout_toRightOf="@id/EditProjectWorkspaceImage"
+                android:layout_alignTop="@id/ChangeWorkspaceViewWorkspaceImage"
+                android:layout_toRightOf="@id/ChangeWorkspaceViewWorkspaceImage"
                 android:layout_marginRight="16dp" />
             <View
                 android:background="@drawable/TransparentToWhiteGradient"
@@ -126,7 +122,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:layout_alignTop="@id/EditProjectWorkspaceImage" />
+                android:layout_alignTop="@id/ChangeWorkspaceViewWorkspaceImage" />
         </RelativeLayout>
         <View
             android:background="@color/separator"
@@ -134,14 +130,13 @@
             android:layout_marginLeft="55dp"
             android:layout_width="match_parent" />
         <RelativeLayout
-            android:id="@+id/ChangeClientButton"
-            local:MvxBind="Click PickClientCommand"
+            android:id="@+id/ChangeClientView"
             android:clickable="true"
             android:background="?attr/selectableItemBackground"
             android:layout_height="48dp"
             android:layout_width="match_parent">
             <ImageView
-                android:id="@+id/EditProjectClientImage"
+                android:id="@+id/ChangeWorkspaceViewClientImage"
                 android:src="@drawable/client"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
@@ -149,9 +144,9 @@
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
                 android:layout_centerVertical="true"
-                android:layout_below="@id/EditProjectWorkspaceImage" />
+                android:layout_below="@id/ChangeWorkspaceViewWorkspaceImage" />
             <TextView
-                local:MvxBind="Text If(ClientName, ClientName, 'No Client'); TextColor ARGB(If(ClientName, '#000000', '#CECECE'))"
+                android:id="@+id/ClientNameTextView"
                 android:lines="1"
                 android:textSize="15sp"
                 android:singleLine="true"
@@ -161,8 +156,8 @@
                 android:layout_marginTop="4dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignTop="@id/EditProjectClientImage"
-                android:layout_toRightOf="@id/EditProjectClientImage"
+                android:layout_alignTop="@id/ChangeWorkspaceViewClientImage"
+                android:layout_toRightOf="@id/ChangeWorkspaceViewClientImage"
                 android:layout_marginRight="16dp" />
             <View
                 android:background="@drawable/TransparentToWhiteGradient"
@@ -173,13 +168,12 @@
                 android:layout_alignParentBottom="true"
                 android:layout_marginRight="16dp" />
             <ImageView
-                android:clickable="true"
                 android:src="@drawable/dropdown"
                 android:layout_marginRight="16dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:layout_alignTop="@id/EditProjectClientImage" />
+                android:layout_alignTop="@id/ChangeWorkspaceViewClientImage" />
         </RelativeLayout>
         <View
             android:background="@color/separator"
@@ -187,25 +181,24 @@
             android:layout_marginLeft="55dp"
             android:layout_width="match_parent" />
         <RelativeLayout
-            android:id="@+id/PrivateProjectSwitchContainer"
-            local:MvxBind="Click TogglePrivateProjectCommand"
+            android:id="@+id/ToggleIsPrivateView"
             android:clickable="true"
             android:paddingTop="12dp"
             android:paddingBottom="12dp"
             android:background="?attr/selectableItemBackground"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="48dp">
             <ImageView
-                android:id="@+id/EditProjectPrivateProjectImage"
+                android:id="@+id/ChangeWorkspaceViewPrivateProjectImage"
                 android:src="@drawable/padlock"
                 android:layout_width="24dp"
                 android:layout_gravity="end"
                 android:layout_height="24dp"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
-                android:layout_below="@+id/EditProjectClientImage" />
+                android:layout_below="@+id/ChangeWorkspaceViewClientImage" />
             <TextView
-                android:id="@+id/EditProjectPrivateProjectLabel"
+                android:id="@+id/ChangeWorkspaceViewPrivateProjectLabel"
                 android:lines="1"
                 android:textSize="15sp"
                 android:singleLine="true"
@@ -215,8 +208,8 @@
                 android:layout_marginTop="4dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignTop="@id/EditProjectPrivateProjectImage"
-                android:layout_toRightOf="@id/EditProjectPrivateProjectImage" />
+                android:layout_alignTop="@id/ChangeWorkspaceViewPrivateProjectImage"
+                android:layout_toRightOf="@id/ChangeWorkspaceViewPrivateProjectImage" />
             <TextView
                 android:textSize="12sp"
                 android:lineSpacingExtra="5sp"
@@ -225,8 +218,8 @@
                 android:layout_marginTop="4dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/EditProjectPrivateProjectLabel"
-                android:layout_alignStart="@+id/EditProjectPrivateProjectLabel" />
+                android:layout_below="@+id/ChangeWorkspaceViewPrivateProjectLabel"
+                android:layout_alignStart="@+id/ChangeWorkspaceViewPrivateProjectLabel" />
             <View
                 android:background="@drawable/TransparentToWhiteGradient"
                 android:layout_width="84dp"
@@ -235,12 +228,12 @@
                 android:layout_alignParentRight="true"
                 android:layout_alignParentBottom="true" />
             <Switch
-                local:MvxBind="Checked IsPrivate"
+                android:id="@+id/IsPrivateSwitch"
                 android:layout_marginRight="16dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:layout_alignTop="@id/EditProjectPrivateProjectImage" />
+                android:layout_alignTop="@id/ChangeWorkspaceViewPrivateProjectImage" />
         </RelativeLayout>
         <View
             android:background="@color/separator"
@@ -262,7 +255,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
-            local:MvxBind="Click DoneCommand; TextColor CreateProjectButtonColor(SaveEnabled)"
             android:id="@+id/CreateProjectButton"
             android:padding="16dp"
             android:textSize="14sp"

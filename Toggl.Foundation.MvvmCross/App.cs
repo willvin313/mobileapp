@@ -77,7 +77,7 @@ namespace Toggl.Foundation.MvvmCross
 
             dependencyContainer.SyncManager.Value.ForceFullSync().Subscribe();
 
-            await navigationService.ForkNavigate<MainTabBarViewModel, MainViewModel>();
+            await navigationService.Navigate<MainTabBarViewModel>();
         }
     }
 }

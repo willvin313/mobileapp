@@ -2,6 +2,6 @@
 {
     internal sealed class ResponseError
     {
-        public string ErrorMessage { get; set; }
+        public ErrorMessage ErrorMessage { get; set; }
     }
 }

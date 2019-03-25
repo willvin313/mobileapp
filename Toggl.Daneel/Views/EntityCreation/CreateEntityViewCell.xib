@@ -41,7 +41,7 @@
                 </constraints>
             </tableViewCellContentView>
             <connections>
-                <outlet property="TextLabel" destination="5dX-Pl-R9i" id="980-ks-5dg"/>
+                <outlet property="TextLabel" destination="5dX-Pl-R9i" id="YZ3-mc-ues"/>
             </connections>
         </tableViewCell>
     </objects>

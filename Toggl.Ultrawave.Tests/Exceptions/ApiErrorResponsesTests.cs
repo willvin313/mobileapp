@@ -115,7 +115,7 @@ namespace Toggl.Ultrawave.Tests.Exceptions
             {
                 var defaultMessage = "Default message";
                 var message = "Couldn't find workspace with id blah blah blah...";
-                var body = $"{{\"error_message\": \"{message}\"}}";
+                var body = $"{{\"error_message\": {{\"id\": \"machine-readable-id\", \"default_message\": \"{message}\", \"values\": {{\"number1\": \"2\", \"number2\": \"5\" }}}}}}";
                 var endpoint = new Uri("https://www.some.url");
                 var method = new HttpMethod("GET");
                 var request = new Request("", endpoint, new HttpHeader[0], method);
@@ -129,9 +129,10 @@ namespace Toggl.Ultrawave.Tests.Exceptions
             [InlineData("null")]
             [InlineData("{}")]
             [InlineData("{\"error_message\":null}")]
-            [InlineData("{\"message\":\"this is the old format\"}")]
+            [InlineData("{\"message\":\"this is the oldest format\"}")]
+            [InlineData("{\"error_message\": \"this is the old format now\"}")]
             [InlineData("{\"notAMessage\":\"hi\"}")]
-            public void ReturnsFallbackLocalisedErrorMessageIfJsonErrorHasNoMessage(string noMessageJson)
+            public void ReturnsFallbackLocalisedErrorMessageIfJsonErrorHasNoDefaultMessage(string noMessageJson)
             {
                 var defaultMessage = "Default message";
                 var endpoint = new Uri("https://www.some.url");

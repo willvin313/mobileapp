@@ -8,7 +8,7 @@
     android:layout_height="48dp"
     android:layout_width="match_parent">
     <TextView
-        local:MvxBind="Text Name"
+        android:id="@+id/TaskNameLabel"
         android:maxLines="1"
         android:textSize="15sp"
         android:fontFamily="sans-serif-medium"

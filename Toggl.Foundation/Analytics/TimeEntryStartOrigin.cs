@@ -9,6 +9,7 @@
         ContinueMostRecent,
         CalendarEvent,
         CalendarTapAndDrag,
-        CalendarNotification
+        CalendarNotification,
+        Siri
     }
 }
