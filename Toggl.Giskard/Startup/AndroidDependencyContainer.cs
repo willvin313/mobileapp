@@ -17,6 +17,7 @@ using Toggl.Ultrawave;
 using Toggl.Ultrawave.Network;
 using Android.Content;
 using Android.App;
+using MvvmCross.Navigation;
 
 namespace Toggl.Giskard
 {
@@ -34,7 +35,7 @@ namespace Toggl.Giskard
 
         private readonly Lazy<SettingsStorage> settingsStorage;
 
-        public IForkingNavigationService ForkingNavigationService { get; internal set; }
+        public IMvxNavigationService ForkingNavigationService { get; internal set; }
 
         public AndroidDependencyContainer(string version)
             : base(environment, new UserAgent(clientName, version))
@@ -114,7 +115,7 @@ namespace Toggl.Giskard
                 new MostUsedTimeEntrySuggestionProvider(Database.Value, TimeService.Value, numberOfSuggestions)
             );
 
-        protected override IForkingNavigationService CreateNavigationService()
+        protected override IMvxNavigationService CreateNavigationService()
             => ForkingNavigationService;
 
         protected override ILastTimeUsageStorage CreateLastTimeUsageStorage()

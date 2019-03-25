@@ -4,6 +4,7 @@ using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.Services;
 using Toggl.Ultrawave;
 using Toggl.Ultrawave.Network;
+using MvvmCross.Navigation;
 
 namespace Toggl.Foundation.MvvmCross
 {
@@ -14,7 +15,7 @@ namespace Toggl.Foundation.MvvmCross
         public Lazy<IKeyValueStorage> KeyValueStorage { get; }
         public Lazy<IOnboardingStorage> OnboardingStorage { get; }
         public Lazy<IPermissionsService> PermissionsService { get; }
-        public Lazy<IForkingNavigationService> NavigationService { get; }
+        public Lazy<IMvxNavigationService> NavigationService { get; }
         public Lazy<IPasswordManagerService> PasswordManagerService { get; }
         public Lazy<IAccessRestrictionStorage> AccessRestrictionStorage { get; }
 
@@ -26,7 +27,7 @@ namespace Toggl.Foundation.MvvmCross
             KeyValueStorage = new Lazy<IKeyValueStorage>(CreateKeyValueStorage);
             OnboardingStorage = new Lazy<IOnboardingStorage>(CreateOnboardingStorage);
             PermissionsService = new Lazy<IPermissionsService>(CreatePermissionsService);
-            NavigationService = new Lazy<IForkingNavigationService>(CreateNavigationService);
+            NavigationService = new Lazy<IMvxNavigationService>(CreateNavigationService);
             PasswordManagerService = new Lazy<IPasswordManagerService>(CreatePasswordManagerService);
             AccessRestrictionStorage = new Lazy<IAccessRestrictionStorage>(CreateAccessRestrictionStorage);
         }
@@ -36,7 +37,7 @@ namespace Toggl.Foundation.MvvmCross
         protected abstract IKeyValueStorage CreateKeyValueStorage();
         protected abstract IOnboardingStorage CreateOnboardingStorage();
         protected abstract IPermissionsService CreatePermissionsService();
-        protected abstract IForkingNavigationService CreateNavigationService();
+        protected abstract IMvxNavigationService CreateNavigationService();
         protected abstract IPasswordManagerService CreatePasswordManagerService();
         protected abstract IAccessRestrictionStorage CreateAccessRestrictionStorage();
 

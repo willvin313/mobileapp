@@ -1,4 +1,5 @@
 ﻿using Foundation;
+using MvvmCross.Navigation;
 using System;
 using Toggl.Daneel.Services;
 using Toggl.Foundation;
@@ -33,7 +34,7 @@ namespace Toggl.Daneel
         
         private readonly Lazy<SettingsStorage> settingsStorage;
 
-        public IForkingNavigationService ForkingNavigationService { get; internal set; }
+        public IMvxNavigationService ForkingNavigationService { get; internal set; }
 
         public ITopViewControllerProvider TopViewControllerProvider { get; }
 
@@ -71,7 +72,7 @@ namespace Toggl.Daneel
             => new GoogleServiceIos();
 
         protected override IIntentDonationService CreateIntentDonationService()
-            => new IntentDonationServiceIos();
+            => new IntentDonationServiceIos(AnalyticsService.Value);
 
         protected override IKeyValueStorage CreateKeyValueStorage()
             => new UserDefaultsStorageIos();
@@ -114,7 +115,7 @@ namespace Toggl.Daneel
                 new MostUsedTimeEntrySuggestionProvider(Database.Value, TimeService.Value, numberOfSuggestions)
             );
 
-        protected override IForkingNavigationService CreateNavigationService()
+        protected override IMvxNavigationService CreateNavigationService()
             => ForkingNavigationService;
 
         protected override ILastTimeUsageStorage CreateLastTimeUsageStorage()

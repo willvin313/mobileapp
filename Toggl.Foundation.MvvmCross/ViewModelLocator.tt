@@ -57,8 +57,9 @@ namespace Toggl.Foundation.MvvmCross
 		|| fileName.Contains("Base")
 		|| fileName.Contains("ReportsCalendarDay")
 		|| fileName.Contains("ReportsCalendarPage")
-		|| fileName.Contains("BarViewModel")
+		|| fileName.Contains("\\BarViewModel")
 		|| fileName.Contains("TimeEntriesViewModel")
+		|| fileName.Contains("UserCalendarSourceViewModel")
 		|| fileName.Contains("TimeEntryViewModel"));
                  
     Func<string, string> selectDependencyContainerPropertyName = dep => 

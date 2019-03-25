@@ -19,39 +19,20 @@ namespace Toggl.Foundation.MvvmCross
 
         public override IMvxViewModel Load(Type viewModelType, IMvxBundle parameterValues, IMvxBundle savedState)
         {
-            try
-            {
-                var viewModel = findViewModel(viewModelType);
+            var viewModel = findViewModel(viewModelType);
 
+            RunViewModelLifecycle(viewModel, parameterValues, savedState);
 
-                RunViewModelLifecycle(viewModel, parameterValues, savedState);
-
-                return viewModel;
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-
-            throw new Exception();
+            return viewModel;
         }
 
         public override IMvxViewModel<TParameter> Load<TParameter>(Type viewModelType, TParameter param, IMvxBundle parameterValues, IMvxBundle savedState)
         {
-            try
-            {
-                var viewModel = findViewModel(viewModelType) as IMvxViewModel<TParameter>;
+            var viewModel = findViewModel(viewModelType) as IMvxViewModel<TParameter>;
 
-                RunViewModelLifecycle(viewModel, param, parameterValues, savedState);
+            RunViewModelLifecycle(viewModel, param, parameterValues, savedState);
 
-                return viewModel;
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-
-            throw new Exception();
+            return viewModel;
         }
 
         private IMvxViewModel findViewModel(Type viewModelType)
@@ -74,9 +55,11 @@ namespace Toggl.Foundation.MvvmCross
                 return new EditProjectViewModel(
                     dependencyContainer.DataSource.Value,
                     dependencyContainer.DialogService.Value,
+                    dependencyContainer.RxActionFactory.Value,
                     dependencyContainer.InteractorFactory.Value,
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.StopwatchProvider.Value);
+                    dependencyContainer.SchedulerProvider.Value,
+                    dependencyContainer.StopwatchProvider.Value,
+                    dependencyContainer.NavigationService.Value);
 
             if (viewModelType == typeof(ForgotPasswordViewModel))
                 return new ForgotPasswordViewModel(
@@ -98,6 +81,31 @@ namespace Toggl.Foundation.MvvmCross
                     dependencyContainer.TimeService.Value,
                     dependencyContainer.SchedulerProvider.Value,
                     dependencyContainer.RxActionFactory.Value);
+
+            if (viewModelType == typeof(MainTabBarViewModel))
+                return new MainTabBarViewModel(
+                    dependencyContainer.TimeService.Value,
+                    dependencyContainer.DataSource.Value,
+                    dependencyContainer.SyncManager.Value,
+                    dependencyContainer.DialogService.Value,
+                    dependencyContainer.RatingService.Value,
+                    dependencyContainer.UserPreferences.Value,
+                    dependencyContainer.AnalyticsService.Value,
+                    dependencyContainer.BackgroundService.Value,
+                    dependencyContainer.InteractorFactory.Value,
+                    dependencyContainer.OnboardingStorage.Value,
+                    dependencyContainer.SchedulerProvider.Value,
+                    dependencyContainer.PermissionsService.Value,
+                    dependencyContainer.NavigationService.Value,
+                    dependencyContainer.RemoteConfigService.Value,
+                    dependencyContainer.SuggestionProviderContainer.Value,
+                    dependencyContainer.IntentDonationService.Value,
+                    dependencyContainer.AccessRestrictionStorage.Value,
+                    dependencyContainer.StopwatchProvider.Value,
+                    dependencyContainer.RxActionFactory.Value,
+                    dependencyContainer.UserAccessManager,
+                    dependencyContainer.PrivateSharedStorageService.Value,
+                    dependencyContainer.PlatformInfo.Value);
 
             if (viewModelType == typeof(MainViewModel))
                 return new MainViewModel(
@@ -206,6 +214,7 @@ namespace Toggl.Foundation.MvvmCross
             if (viewModelType == typeof(SelectProjectViewModel))
                 return new SelectProjectViewModel(
                     dependencyContainer.DataSource.Value,
+                    dependencyContainer.RxActionFactory.Value,
                     dependencyContainer.InteractorFactory.Value,
                     dependencyContainer.NavigationService.Value,
                     dependencyContainer.DialogService.Value,
@@ -272,6 +281,7 @@ namespace Toggl.Foundation.MvvmCross
 
             if (viewModelType == typeof(CalendarPermissionDeniedViewModel))
                 return new CalendarPermissionDeniedViewModel(
+                    dependencyContainer.NavigationService.Value,
                     dependencyContainer.PermissionsService.Value,
                     dependencyContainer.RxActionFactory.Value);
 
@@ -320,8 +330,9 @@ namespace Toggl.Foundation.MvvmCross
                 return new CalendarSettingsViewModel(
                     dependencyContainer.UserPreferences.Value,
                     dependencyContainer.InteractorFactory.Value,
-                    dependencyContainer.PermissionsService.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.NavigationService.Value,
+                    dependencyContainer.RxActionFactory.Value,
+                    dependencyContainer.PermissionsService.Value);
 
             if (viewModelType == typeof(LicensesViewModel))
                 return new LicensesViewModel(
@@ -360,6 +371,7 @@ namespace Toggl.Foundation.MvvmCross
                     dependencyContainer.IntentDonationService.Value,
                     dependencyContainer.StopwatchProvider.Value,
                     dependencyContainer.RxActionFactory.Value,
+                    dependencyContainer.PermissionsService.Value,
                     dependencyContainer.SchedulerProvider.Value);
 
             if (viewModelType == typeof(UpcomingEventsNotificationSettingsViewModel))

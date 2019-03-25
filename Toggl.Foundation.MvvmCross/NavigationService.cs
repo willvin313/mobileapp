@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 using Toggl.Foundation.Analytics;
-using Toggl.Foundation.MvvmCross.Services;
 
 namespace Toggl.Foundation.MvvmCross
 {
