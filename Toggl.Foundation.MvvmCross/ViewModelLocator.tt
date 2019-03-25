@@ -73,8 +73,7 @@ namespace Toggl.Foundation.MvvmCross
             .Replace("Mvx", "");
 
         var propName = dependencyType.Substring(1, dependencyType.Length - 1);
-		var accessor = propName == "UserAccessManager" ? "" : ".Value";
-        return $"dependencyContainer.{propName}{accessor}";
+        return $"dependencyContainer.{propName}";
     };
 
     var filePath = Path.GetDirectoryName(Host.TemplateFile);

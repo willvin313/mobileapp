@@ -10,26 +10,35 @@ namespace Toggl.Foundation.MvvmCross
 {
     public abstract class UiDependencyContainer : DependencyContainer
     {
-        public Lazy<IDialogService> DialogService { get; }
-        public Lazy<IBrowserService> BrowserService { get; }
-        public Lazy<IKeyValueStorage> KeyValueStorage { get; }
-        public Lazy<IOnboardingStorage> OnboardingStorage { get; }
-        public Lazy<IPermissionsService> PermissionsService { get; }
-        public Lazy<IMvxNavigationService> NavigationService { get; }
-        public Lazy<IPasswordManagerService> PasswordManagerService { get; }
-        public Lazy<IAccessRestrictionStorage> AccessRestrictionStorage { get; }
+        private readonly Lazy<IDialogService> dialogService;
+        private readonly Lazy<IBrowserService> browserService;
+        private readonly Lazy<IKeyValueStorage> keyValueStorage;
+        private readonly Lazy<IOnboardingStorage> onboardingStorage;
+        private readonly Lazy<IPermissionsService> permissionsService;
+        private readonly Lazy<IMvxNavigationService> navigationService;
+        private readonly Lazy<IPasswordManagerService> passwordManagerService;
+        private readonly Lazy<IAccessRestrictionStorage> accessRestrictionStorage;
+
+        public IDialogService DialogService => dialogService.Value;
+        public IBrowserService BrowserService => browserService.Value;
+        public IKeyValueStorage KeyValueStorage => keyValueStorage.Value;
+        public IOnboardingStorage OnboardingStorage => onboardingStorage.Value;
+        public IPermissionsService PermissionsService => permissionsService.Value;
+        public IMvxNavigationService NavigationService => navigationService.Value;
+        public IPasswordManagerService PasswordManagerService => passwordManagerService.Value;
+        public IAccessRestrictionStorage AccessRestrictionStorage => accessRestrictionStorage.Value;
 
         protected UiDependencyContainer(ApiEnvironment apiEnvironment, UserAgent userAgent)
             : base(apiEnvironment, userAgent)
         {
-            DialogService = new Lazy<IDialogService>(CreateDialogService);
-            BrowserService = new Lazy<IBrowserService>(CreateBrowserService);
-            KeyValueStorage = new Lazy<IKeyValueStorage>(CreateKeyValueStorage);
-            OnboardingStorage = new Lazy<IOnboardingStorage>(CreateOnboardingStorage);
-            PermissionsService = new Lazy<IPermissionsService>(CreatePermissionsService);
-            NavigationService = new Lazy<IMvxNavigationService>(CreateNavigationService);
-            PasswordManagerService = new Lazy<IPasswordManagerService>(CreatePasswordManagerService);
-            AccessRestrictionStorage = new Lazy<IAccessRestrictionStorage>(CreateAccessRestrictionStorage);
+            dialogService = new Lazy<IDialogService>(CreateDialogService);
+            browserService = new Lazy<IBrowserService>(CreateBrowserService);
+            keyValueStorage = new Lazy<IKeyValueStorage>(CreateKeyValueStorage);
+            onboardingStorage = new Lazy<IOnboardingStorage>(CreateOnboardingStorage);
+            permissionsService = new Lazy<IPermissionsService>(CreatePermissionsService);
+            navigationService = new Lazy<IMvxNavigationService>(CreateNavigationService);
+            passwordManagerService = new Lazy<IPasswordManagerService>(CreatePasswordManagerService);
+            accessRestrictionStorage = new Lazy<IAccessRestrictionStorage>(CreateAccessRestrictionStorage);
         }
 
         protected abstract IDialogService CreateDialogService();
@@ -42,6 +51,6 @@ namespace Toggl.Foundation.MvvmCross
         protected abstract IAccessRestrictionStorage CreateAccessRestrictionStorage();
 
         protected override IErrorHandlingService CreateErrorHandlingService()
-            => new ErrorHandlingService(NavigationService.Value, AccessRestrictionStorage.Value);
+            => new ErrorHandlingService(NavigationService, AccessRestrictionStorage);
     }
 }

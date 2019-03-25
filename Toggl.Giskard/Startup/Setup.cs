@@ -9,7 +9,6 @@ using MvvmCross.Platforms.Android.Presenters;
 using MvvmCross.Platforms.Android.Views;
 using MvvmCross.Plugin;
 using MvvmCross.ViewModels;
-using System;
 using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross;
 using Toggl.Foundation.MvvmCross.ViewModels;
@@ -46,7 +45,7 @@ namespace Toggl.Giskard
 
             var container = AndroidDependencyContainer.Instance;
             container.ForkingNavigationService =
-                new NavigationService(null, loader, container.AnalyticsService.Value, Platform.Giskard);
+                new NavigationService(null, loader, container.AnalyticsService, Platform.Giskard);
 
             Mvx.RegisterSingleton<IMvxNavigationService>(container.ForkingNavigationService);
             return container.ForkingNavigationService;
@@ -61,25 +60,16 @@ namespace Toggl.Giskard
         protected override void InitializeApp(IMvxPluginManager pluginManager, IMvxApplication app)
         {
             var dependencyContainer = AndroidDependencyContainer.Instance;
-            ApplicationContext.RegisterReceiver(new TimezoneChangedBroadcastReceiver(dependencyContainer.TimeService.Value),
+            ApplicationContext.RegisterReceiver(new TimezoneChangedBroadcastReceiver(dependencyContainer.TimeService),
                 new IntentFilter(Intent.ActionTimezoneChanged));
 
             //TODO: Move this elsewhere
             //foundation.RevokeNewUserIfNeeded().Initialize();
 
             //ensureDataSourceInitializationIfLoggedIn();
-            createApplicationLifecycleObserver(dependencyContainer.BackgroundService.Value);
+            createApplicationLifecycleObserver(dependencyContainer.BackgroundService);
 
-            try
-            {
-                base.InitializeApp(pluginManager, app);
-
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
+            base.InitializeApp(pluginManager, app);
         }
 
         protected override IMvxAndroidCurrentTopActivity CreateAndroidCurrentTopActivity()

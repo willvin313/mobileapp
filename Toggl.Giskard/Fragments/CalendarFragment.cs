@@ -5,7 +5,6 @@ using Android.Util;
 using Android.Views;
 using Android.Widget;
 using MvvmCross;
-using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
 using Toggl.Giskard.Adapters.Calendar;
 using Toggl.Giskard.Views.Calendar;
@@ -21,14 +20,13 @@ namespace Toggl.Giskard.Fragments
     public partial class CalendarFragment : ReactiveFragment<CalendarViewModel>
     {
         private CalendarLayoutManager calendarLayoutManager;
-        private ITimeService timeService;
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             var view = inflater.Inflate(Resource.Layout.CalendarFragment, container, false);
             InitializeViews(view);
 
-            timeService = Mvx.Resolve<ITimeService>();
+            var timeService = AndroidDependencyContainer.Instance.TimeService;
             var schedulerProvider = Mvx.Resolve<ISchedulerProvider>();
             calendarLayoutManager = new CalendarLayoutManager();
             calendarRecyclerView.SetLayoutManager(calendarLayoutManager);

@@ -42,17 +42,17 @@ namespace Toggl.Foundation.MvvmCross
         private readonly UiDependencyContainer dependencyContainer;
 
         public AppStart(IMvxApplication app, UiDependencyContainer dependencyContainer)
-            : base (app, dependencyContainer.NavigationService.Value)
+            : base (app, dependencyContainer.NavigationService)
         {
             this.dependencyContainer = dependencyContainer;
         }
 
         protected override async void NavigateToFirstViewModel(object hint = null)
         {
-            var timeService = dependencyContainer.TimeService.Value;
-            var navigationService = dependencyContainer.NavigationService.Value;
-            var onboardingStorage = dependencyContainer.OnboardingStorage.Value;
-            var accessRestrictionStorage = dependencyContainer.AccessRestrictionStorage.Value;
+            var timeService = dependencyContainer.TimeService;
+            var navigationService = dependencyContainer.NavigationService;
+            var onboardingStorage = dependencyContainer.OnboardingStorage;
+            var accessRestrictionStorage = dependencyContainer.AccessRestrictionStorage;
 
             onboardingStorage.SetFirstOpened(timeService.CurrentDateTime);
 
@@ -68,14 +68,14 @@ namespace Toggl.Foundation.MvvmCross
                 return;
             }
             
-            var user = await dependencyContainer.InteractorFactory.Value.GetCurrentUser().Execute();
+            var user = await dependencyContainer.InteractorFactory.GetCurrentUser().Execute();
             if (accessRestrictionStorage.IsUnauthorized(user.ApiToken))
             {
                 await navigationService.Navigate<TokenResetViewModel>();
                 return;
             }
 
-            dependencyContainer.SyncManager.Value.ForceFullSync().Subscribe();
+            dependencyContainer.SyncManager.ForceFullSync().Subscribe();
 
             await navigationService.Navigate<MainTabBarViewModel>();
         }

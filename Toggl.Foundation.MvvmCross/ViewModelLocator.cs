@@ -12,7 +12,7 @@ namespace Toggl.Foundation.MvvmCross
         private readonly UiDependencyContainer dependencyContainer;
 
         public TogglViewModelLocator(UiDependencyContainer dependencyContainer)
-            : base(dependencyContainer.NavigationService.Value)
+            : base(dependencyContainer.NavigationService)
         {
             this.dependencyContainer = dependencyContainer;
         }
@@ -39,346 +39,346 @@ namespace Toggl.Foundation.MvvmCross
         {
             if (viewModelType == typeof(BrowserViewModel))
                 return new BrowserViewModel(
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(EditDurationViewModel))
                 return new EditDurationViewModel(
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.TimeService.Value,
-                    dependencyContainer.DataSource.Value,
-                    dependencyContainer.AnalyticsService.Value,
-                    dependencyContainer.RxActionFactory.Value,
-                    dependencyContainer.SchedulerProvider.Value);
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.TimeService,
+                    dependencyContainer.DataSource,
+                    dependencyContainer.AnalyticsService,
+                    dependencyContainer.RxActionFactory,
+                    dependencyContainer.SchedulerProvider);
 
             if (viewModelType == typeof(EditProjectViewModel))
                 return new EditProjectViewModel(
-                    dependencyContainer.DataSource.Value,
-                    dependencyContainer.DialogService.Value,
-                    dependencyContainer.RxActionFactory.Value,
-                    dependencyContainer.InteractorFactory.Value,
-                    dependencyContainer.SchedulerProvider.Value,
-                    dependencyContainer.StopwatchProvider.Value,
-                    dependencyContainer.NavigationService.Value);
+                    dependencyContainer.DataSource,
+                    dependencyContainer.DialogService,
+                    dependencyContainer.RxActionFactory,
+                    dependencyContainer.InteractorFactory,
+                    dependencyContainer.SchedulerProvider,
+                    dependencyContainer.StopwatchProvider,
+                    dependencyContainer.NavigationService);
 
             if (viewModelType == typeof(ForgotPasswordViewModel))
                 return new ForgotPasswordViewModel(
-                    dependencyContainer.TimeService.Value,
+                    dependencyContainer.TimeService,
                     dependencyContainer.UserAccessManager,
-                    dependencyContainer.AnalyticsService.Value,
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.AnalyticsService,
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(LoginViewModel))
                 return new LoginViewModel(
                     dependencyContainer.UserAccessManager,
-                    dependencyContainer.AnalyticsService.Value,
-                    dependencyContainer.OnboardingStorage.Value,
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.PasswordManagerService.Value,
-                    dependencyContainer.ErrorHandlingService.Value,
-                    dependencyContainer.LastTimeUsageStorage.Value,
-                    dependencyContainer.TimeService.Value,
-                    dependencyContainer.SchedulerProvider.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.AnalyticsService,
+                    dependencyContainer.OnboardingStorage,
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.PasswordManagerService,
+                    dependencyContainer.ErrorHandlingService,
+                    dependencyContainer.LastTimeUsageStorage,
+                    dependencyContainer.TimeService,
+                    dependencyContainer.SchedulerProvider,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(MainTabBarViewModel))
                 return new MainTabBarViewModel(
-                    dependencyContainer.TimeService.Value,
-                    dependencyContainer.DataSource.Value,
-                    dependencyContainer.SyncManager.Value,
-                    dependencyContainer.DialogService.Value,
-                    dependencyContainer.RatingService.Value,
-                    dependencyContainer.UserPreferences.Value,
-                    dependencyContainer.AnalyticsService.Value,
-                    dependencyContainer.BackgroundService.Value,
-                    dependencyContainer.InteractorFactory.Value,
-                    dependencyContainer.OnboardingStorage.Value,
-                    dependencyContainer.SchedulerProvider.Value,
-                    dependencyContainer.PermissionsService.Value,
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.RemoteConfigService.Value,
-                    dependencyContainer.SuggestionProviderContainer.Value,
-                    dependencyContainer.IntentDonationService.Value,
-                    dependencyContainer.AccessRestrictionStorage.Value,
-                    dependencyContainer.StopwatchProvider.Value,
-                    dependencyContainer.RxActionFactory.Value,
+                    dependencyContainer.TimeService,
+                    dependencyContainer.DataSource,
+                    dependencyContainer.SyncManager,
+                    dependencyContainer.DialogService,
+                    dependencyContainer.RatingService,
+                    dependencyContainer.UserPreferences,
+                    dependencyContainer.AnalyticsService,
+                    dependencyContainer.BackgroundService,
+                    dependencyContainer.InteractorFactory,
+                    dependencyContainer.OnboardingStorage,
+                    dependencyContainer.SchedulerProvider,
+                    dependencyContainer.PermissionsService,
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.RemoteConfigService,
+                    dependencyContainer.SuggestionProviderContainer,
+                    dependencyContainer.IntentDonationService,
+                    dependencyContainer.AccessRestrictionStorage,
+                    dependencyContainer.StopwatchProvider,
+                    dependencyContainer.RxActionFactory,
                     dependencyContainer.UserAccessManager,
-                    dependencyContainer.PrivateSharedStorageService.Value,
-                    dependencyContainer.PlatformInfo.Value);
+                    dependencyContainer.PrivateSharedStorageService,
+                    dependencyContainer.PlatformInfo);
 
             if (viewModelType == typeof(MainViewModel))
                 return new MainViewModel(
-                    dependencyContainer.DataSource.Value,
-                    dependencyContainer.SyncManager.Value,
-                    dependencyContainer.TimeService.Value,
-                    dependencyContainer.RatingService.Value,
-                    dependencyContainer.UserPreferences.Value,
-                    dependencyContainer.AnalyticsService.Value,
-                    dependencyContainer.OnboardingStorage.Value,
-                    dependencyContainer.InteractorFactory.Value,
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.RemoteConfigService.Value,
-                    dependencyContainer.SuggestionProviderContainer.Value,
-                    dependencyContainer.IntentDonationService.Value,
-                    dependencyContainer.AccessRestrictionStorage.Value,
-                    dependencyContainer.SchedulerProvider.Value,
-                    dependencyContainer.StopwatchProvider.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.DataSource,
+                    dependencyContainer.SyncManager,
+                    dependencyContainer.TimeService,
+                    dependencyContainer.RatingService,
+                    dependencyContainer.UserPreferences,
+                    dependencyContainer.AnalyticsService,
+                    dependencyContainer.OnboardingStorage,
+                    dependencyContainer.InteractorFactory,
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.RemoteConfigService,
+                    dependencyContainer.SuggestionProviderContainer,
+                    dependencyContainer.IntentDonationService,
+                    dependencyContainer.AccessRestrictionStorage,
+                    dependencyContainer.SchedulerProvider,
+                    dependencyContainer.StopwatchProvider,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(NoWorkspaceViewModel))
                 return new NoWorkspaceViewModel(
-                    dependencyContainer.SyncManager.Value,
-                    dependencyContainer.InteractorFactory.Value,
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.AccessRestrictionStorage.Value,
-                    dependencyContainer.SchedulerProvider.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.SyncManager,
+                    dependencyContainer.InteractorFactory,
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.AccessRestrictionStorage,
+                    dependencyContainer.SchedulerProvider,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(OnboardingViewModel))
                 return new OnboardingViewModel(
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.OnboardingStorage.Value,
-                    dependencyContainer.AnalyticsService.Value,
-                    dependencyContainer.RxActionFactory.Value,
-                    dependencyContainer.SchedulerProvider.Value);
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.OnboardingStorage,
+                    dependencyContainer.AnalyticsService,
+                    dependencyContainer.RxActionFactory,
+                    dependencyContainer.SchedulerProvider);
 
             if (viewModelType == typeof(OutdatedAppViewModel))
                 return new OutdatedAppViewModel(
-                    dependencyContainer.BrowserService.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.BrowserService,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(RatingViewModel))
                 return new RatingViewModel(
-                    dependencyContainer.TimeService.Value,
-                    dependencyContainer.DataSource.Value,
-                    dependencyContainer.RatingService.Value,
-                    dependencyContainer.AnalyticsService.Value,
-                    dependencyContainer.OnboardingStorage.Value,
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.SchedulerProvider.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.TimeService,
+                    dependencyContainer.DataSource,
+                    dependencyContainer.RatingService,
+                    dependencyContainer.AnalyticsService,
+                    dependencyContainer.OnboardingStorage,
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.SchedulerProvider,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(ReportsCalendarViewModel))
                 return new ReportsCalendarViewModel(
-                    dependencyContainer.TimeService.Value,
-                    dependencyContainer.DialogService.Value,
-                    dependencyContainer.DataSource.Value,
-                    dependencyContainer.IntentDonationService.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.TimeService,
+                    dependencyContainer.DialogService,
+                    dependencyContainer.DataSource,
+                    dependencyContainer.IntentDonationService,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(SelectBeginningOfWeekViewModel))
                 return new SelectBeginningOfWeekViewModel(
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(SelectClientViewModel))
                 return new SelectClientViewModel(
-                    dependencyContainer.InteractorFactory.Value,
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.SchedulerProvider.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.InteractorFactory,
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.SchedulerProvider,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(SelectColorViewModel))
                 return new SelectColorViewModel(
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(SelectCountryViewModel))
                 return new SelectCountryViewModel(
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(SelectDateFormatViewModel))
                 return new SelectDateFormatViewModel(
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(SelectDateTimeViewModel))
                 return new SelectDateTimeViewModel(
-                    dependencyContainer.NavigationService.Value);
+                    dependencyContainer.NavigationService);
 
             if (viewModelType == typeof(SelectDefaultWorkspaceViewModel))
                 return new SelectDefaultWorkspaceViewModel(
-                    dependencyContainer.DataSource.Value,
-                    dependencyContainer.InteractorFactory.Value,
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.AccessRestrictionStorage.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.DataSource,
+                    dependencyContainer.InteractorFactory,
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.AccessRestrictionStorage,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(SelectDurationFormatViewModel))
                 return new SelectDurationFormatViewModel(
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(SelectProjectViewModel))
                 return new SelectProjectViewModel(
-                    dependencyContainer.DataSource.Value,
-                    dependencyContainer.RxActionFactory.Value,
-                    dependencyContainer.InteractorFactory.Value,
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.DialogService.Value,
-                    dependencyContainer.SchedulerProvider.Value,
-                    dependencyContainer.StopwatchProvider.Value);
+                    dependencyContainer.DataSource,
+                    dependencyContainer.RxActionFactory,
+                    dependencyContainer.InteractorFactory,
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.DialogService,
+                    dependencyContainer.SchedulerProvider,
+                    dependencyContainer.StopwatchProvider);
 
             if (viewModelType == typeof(SelectTagsViewModel))
                 return new SelectTagsViewModel(
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.StopwatchProvider.Value,
-                    dependencyContainer.InteractorFactory.Value,
-                    dependencyContainer.SchedulerProvider.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.StopwatchProvider,
+                    dependencyContainer.InteractorFactory,
+                    dependencyContainer.SchedulerProvider,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(SelectWorkspaceViewModel))
                 return new SelectWorkspaceViewModel(
-                    dependencyContainer.InteractorFactory.Value,
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.InteractorFactory,
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(SignupViewModel))
                 return new SignupViewModel(
-                    dependencyContainer.ApiFactory.Value,
+                    dependencyContainer.ApiFactory,
                     dependencyContainer.UserAccessManager,
-                    dependencyContainer.AnalyticsService.Value,
-                    dependencyContainer.OnboardingStorage.Value,
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.ErrorHandlingService.Value,
-                    dependencyContainer.LastTimeUsageStorage.Value,
-                    dependencyContainer.TimeService.Value,
-                    dependencyContainer.SchedulerProvider.Value,
-                    dependencyContainer.RxActionFactory.Value,
-                    dependencyContainer.PlatformInfo.Value);
+                    dependencyContainer.AnalyticsService,
+                    dependencyContainer.OnboardingStorage,
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.ErrorHandlingService,
+                    dependencyContainer.LastTimeUsageStorage,
+                    dependencyContainer.TimeService,
+                    dependencyContainer.SchedulerProvider,
+                    dependencyContainer.RxActionFactory,
+                    dependencyContainer.PlatformInfo);
 
             if (viewModelType == typeof(SuggestionsViewModel))
                 return new SuggestionsViewModel(
-                    dependencyContainer.DataSource.Value,
-                    dependencyContainer.InteractorFactory.Value,
-                    dependencyContainer.OnboardingStorage.Value,
-                    dependencyContainer.SuggestionProviderContainer.Value,
-                    dependencyContainer.SchedulerProvider.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.DataSource,
+                    dependencyContainer.InteractorFactory,
+                    dependencyContainer.OnboardingStorage,
+                    dependencyContainer.SuggestionProviderContainer,
+                    dependencyContainer.SchedulerProvider,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(SyncFailuresViewModel))
                 return new SyncFailuresViewModel(
-                    dependencyContainer.InteractorFactory.Value);
+                    dependencyContainer.InteractorFactory);
 
             if (viewModelType == typeof(TermsOfServiceViewModel))
                 return new TermsOfServiceViewModel(
-                    dependencyContainer.BrowserService.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.BrowserService,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(TokenResetViewModel))
                 return new TokenResetViewModel(
                     dependencyContainer.UserAccessManager,
-                    dependencyContainer.DataSource.Value,
-                    dependencyContainer.DialogService.Value,
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.UserPreferences.Value,
-                    dependencyContainer.AnalyticsService.Value,
-                    dependencyContainer.SchedulerProvider.Value,
-                    dependencyContainer.RxActionFactory.Value,
-                    dependencyContainer.InteractorFactory.Value);
+                    dependencyContainer.DataSource,
+                    dependencyContainer.DialogService,
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.UserPreferences,
+                    dependencyContainer.AnalyticsService,
+                    dependencyContainer.SchedulerProvider,
+                    dependencyContainer.RxActionFactory,
+                    dependencyContainer.InteractorFactory);
 
             if (viewModelType == typeof(CalendarPermissionDeniedViewModel))
                 return new CalendarPermissionDeniedViewModel(
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.PermissionsService.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.PermissionsService,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(CalendarViewModel))
                 return new CalendarViewModel(
-                    dependencyContainer.DataSource.Value,
-                    dependencyContainer.TimeService.Value,
-                    dependencyContainer.DialogService.Value,
-                    dependencyContainer.UserPreferences.Value,
-                    dependencyContainer.AnalyticsService.Value,
-                    dependencyContainer.BackgroundService.Value,
-                    dependencyContainer.InteractorFactory.Value,
-                    dependencyContainer.OnboardingStorage.Value,
-                    dependencyContainer.SchedulerProvider.Value,
-                    dependencyContainer.PermissionsService.Value,
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.StopwatchProvider.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.DataSource,
+                    dependencyContainer.TimeService,
+                    dependencyContainer.DialogService,
+                    dependencyContainer.UserPreferences,
+                    dependencyContainer.AnalyticsService,
+                    dependencyContainer.BackgroundService,
+                    dependencyContainer.InteractorFactory,
+                    dependencyContainer.OnboardingStorage,
+                    dependencyContainer.SchedulerProvider,
+                    dependencyContainer.PermissionsService,
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.StopwatchProvider,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(SelectUserCalendarsViewModel))
                 return new SelectUserCalendarsViewModel(
-                    dependencyContainer.UserPreferences.Value,
-                    dependencyContainer.InteractorFactory.Value,
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.UserPreferences,
+                    dependencyContainer.InteractorFactory,
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(ReportsViewModel))
                 return new ReportsViewModel(
-                    dependencyContainer.DataSource.Value,
-                    dependencyContainer.TimeService.Value,
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.InteractorFactory.Value,
-                    dependencyContainer.AnalyticsService.Value,
-                    dependencyContainer.DialogService.Value,
-                    dependencyContainer.IntentDonationService.Value,
-                    dependencyContainer.SchedulerProvider.Value,
-                    dependencyContainer.StopwatchProvider.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.DataSource,
+                    dependencyContainer.TimeService,
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.InteractorFactory,
+                    dependencyContainer.AnalyticsService,
+                    dependencyContainer.DialogService,
+                    dependencyContainer.IntentDonationService,
+                    dependencyContainer.SchedulerProvider,
+                    dependencyContainer.StopwatchProvider,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(AboutViewModel))
                 return new AboutViewModel(
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(CalendarSettingsViewModel))
                 return new CalendarSettingsViewModel(
-                    dependencyContainer.UserPreferences.Value,
-                    dependencyContainer.InteractorFactory.Value,
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.RxActionFactory.Value,
-                    dependencyContainer.PermissionsService.Value);
+                    dependencyContainer.UserPreferences,
+                    dependencyContainer.InteractorFactory,
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.RxActionFactory,
+                    dependencyContainer.PermissionsService);
 
             if (viewModelType == typeof(LicensesViewModel))
                 return new LicensesViewModel(
-                    dependencyContainer.LicenseProvider.Value);
+                    dependencyContainer.LicenseProvider);
 
             if (viewModelType == typeof(NotificationSettingsViewModel))
                 return new NotificationSettingsViewModel(
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.BackgroundService.Value,
-                    dependencyContainer.PermissionsService.Value,
-                    dependencyContainer.UserPreferences.Value,
-                    dependencyContainer.SchedulerProvider.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.BackgroundService,
+                    dependencyContainer.PermissionsService,
+                    dependencyContainer.UserPreferences,
+                    dependencyContainer.SchedulerProvider,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(SendFeedbackViewModel))
                 return new SendFeedbackViewModel(
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.InteractorFactory.Value,
-                    dependencyContainer.DialogService.Value,
-                    dependencyContainer.SchedulerProvider.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.InteractorFactory,
+                    dependencyContainer.DialogService,
+                    dependencyContainer.SchedulerProvider,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(SettingsViewModel))
                 return new SettingsViewModel(
-                    dependencyContainer.DataSource.Value,
-                    dependencyContainer.SyncManager.Value,
-                    dependencyContainer.PlatformInfo.Value,
-                    dependencyContainer.DialogService.Value,
-                    dependencyContainer.UserPreferences.Value,
-                    dependencyContainer.AnalyticsService.Value,
+                    dependencyContainer.DataSource,
+                    dependencyContainer.SyncManager,
+                    dependencyContainer.PlatformInfo,
+                    dependencyContainer.DialogService,
+                    dependencyContainer.UserPreferences,
+                    dependencyContainer.AnalyticsService,
                     dependencyContainer.UserAccessManager,
-                    dependencyContainer.InteractorFactory.Value,
-                    dependencyContainer.OnboardingStorage.Value,
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.PrivateSharedStorageService.Value,
-                    dependencyContainer.IntentDonationService.Value,
-                    dependencyContainer.StopwatchProvider.Value,
-                    dependencyContainer.RxActionFactory.Value,
-                    dependencyContainer.PermissionsService.Value,
-                    dependencyContainer.SchedulerProvider.Value);
+                    dependencyContainer.InteractorFactory,
+                    dependencyContainer.OnboardingStorage,
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.PrivateSharedStorageService,
+                    dependencyContainer.IntentDonationService,
+                    dependencyContainer.StopwatchProvider,
+                    dependencyContainer.RxActionFactory,
+                    dependencyContainer.PermissionsService,
+                    dependencyContainer.SchedulerProvider);
 
             if (viewModelType == typeof(UpcomingEventsNotificationSettingsViewModel))
                 return new UpcomingEventsNotificationSettingsViewModel(
-                    dependencyContainer.NavigationService.Value,
-                    dependencyContainer.UserPreferences.Value,
-                    dependencyContainer.RxActionFactory.Value);
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.UserPreferences,
+                    dependencyContainer.RxActionFactory);
 
 
             throw new InvalidOperationException($"Trying to locate ViewModel {viewModelType.Name} failed.");

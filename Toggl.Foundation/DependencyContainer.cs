@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Disposables;
 using Toggl.Foundation.Analytics;
@@ -25,43 +24,71 @@ namespace Toggl.Foundation
         private readonly UserAgent userAgent;
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
 
+        // Require recreation during login/logout
         private Lazy<ITogglApi> api;
+        private Lazy<ISyncManager> syncManager;
+        private Lazy<IInteractorFactory> interactorFactory;
+
+        // Normal dependencies
+        private readonly Lazy<IApiFactory> apiFactory;
+        private readonly Lazy<ITogglDatabase> database;
+        private readonly Lazy<ITimeService> timeService;
+        private readonly Lazy<IPlatformInfo> platformInfo;
+        private readonly Lazy<ITogglDataSource> dataSource;
+        private readonly Lazy<IGoogleService> googleService;
+        private readonly Lazy<IRatingService> ratingService;
+        private readonly Lazy<ICalendarService> calendarService;
+        private readonly Lazy<ILicenseProvider> licenseProvider;
+        private readonly Lazy<IUserPreferences> userPreferences;
+        private readonly Lazy<IRxActionFactory> rxActionFactory;
+        private readonly Lazy<IAnalyticsService> analyticsService;
+        private readonly Lazy<IBackgroundService> backgroundService;
+        private readonly Lazy<ISchedulerProvider> schedulerProvider;
+        private readonly Lazy<IStopwatchProvider> stopwatchProvider;
+        private readonly Lazy<INotificationService> notificationService;
+        private readonly Lazy<IRemoteConfigService> remoteConfigService;
+        private readonly Lazy<IErrorHandlingService> errorHandlingService;
+        private readonly Lazy<ILastTimeUsageStorage> lastTimeUsageStorage;
+        private readonly Lazy<IApplicationShortcutCreator> shortcutCreator;
+        private readonly Lazy<IBackgroundSyncService> backgroundSyncService;
+        private readonly Lazy<IIntentDonationService> intentDonationService;
+        private readonly Lazy<IAutomaticSyncingService> automaticSyncingService;
+        private readonly Lazy<ISyncErrorHandlingService> syncErrorHandlingService;
+        private readonly Lazy<IPrivateSharedStorageService> privateSharedStorageService;
+        private readonly Lazy<ISuggestionProviderContainer> suggestionProviderContainer;
 
         // Non lazy
         public ApiEnvironment ApiEnvironment { get; }
         public UserAccessManager UserAccessManager { get; }
+        public ISyncManager SyncManager => syncManager.Value;
+        public IInteractorFactory InteractorFactory => interactorFactory.Value;
 
-        // Require recreation during login/logout
-        public Lazy<ISyncManager> SyncManager { get; private set; }
-        public Lazy<IInteractorFactory> InteractorFactory { get; private set; }
-
-        // Normal dependencies
-        public Lazy<IApiFactory> ApiFactory { get; }
-        public Lazy<ITogglDatabase> Database { get; }
-        public Lazy<ITimeService> TimeService { get; }
-        public Lazy<IPlatformInfo> PlatformInfo { get; }
-        public Lazy<ITogglDataSource> DataSource { get; }
-        public Lazy<IGoogleService> GoogleService { get; }
-        public Lazy<IRatingService> RatingService { get; }
-        public Lazy<ICalendarService> CalendarService { get; }
-        public Lazy<ILicenseProvider> LicenseProvider { get; }
-        public Lazy<IUserPreferences> UserPreferences { get; }
-        public Lazy<IRxActionFactory> RxActionFactory { get; }
-        public Lazy<IAnalyticsService> AnalyticsService { get; }
-        public Lazy<IStopwatchProvider> StopwatchProvider { get; }
-        public Lazy<IBackgroundService> BackgroundService { get; }
-        public Lazy<ISchedulerProvider> SchedulerProvider { get; }
-        public Lazy<INotificationService> NotificationService { get; }
-        public Lazy<IRemoteConfigService> RemoteConfigService { get; }
-        public Lazy<IErrorHandlingService> ErrorHandlingService { get; }
-        public Lazy<ILastTimeUsageStorage> LastTimeUsageStorage { get; }
-        public Lazy<IApplicationShortcutCreator> ShortcutCreator { get; }
-        public Lazy<IBackgroundSyncService> BackgroundSyncService { get; }
-        public Lazy<IIntentDonationService> IntentDonationService { get; }
-        public Lazy<IAutomaticSyncingService> AutomaticSyncingService { get; }
-        public Lazy<ISyncErrorHandlingService> SyncErrorHandlingService { get; }
-        public Lazy<IPrivateSharedStorageService> PrivateSharedStorageService { get; }
-        public Lazy<ISuggestionProviderContainer> SuggestionProviderContainer { get; }
+        public IApiFactory ApiFactory => apiFactory.Value;
+        public ITogglDatabase Database => database.Value;
+        public ITimeService TimeService => timeService.Value;
+        public IPlatformInfo PlatformInfo => platformInfo.Value;
+        public ITogglDataSource DataSource => dataSource.Value;
+        public IGoogleService GoogleService => googleService.Value;
+        public IRatingService RatingService => ratingService.Value;
+        public ICalendarService CalendarService => calendarService.Value;
+        public ILicenseProvider LicenseProvider => licenseProvider.Value;
+        public IUserPreferences UserPreferences => userPreferences.Value;
+        public IRxActionFactory RxActionFactory => rxActionFactory.Value;
+        public IAnalyticsService AnalyticsService => analyticsService.Value;
+        public IStopwatchProvider StopwatchProvider => stopwatchProvider.Value;
+        public IBackgroundService BackgroundService => backgroundService.Value;
+        public ISchedulerProvider SchedulerProvider => schedulerProvider.Value;
+        public INotificationService NotificationService => notificationService.Value;
+        public IRemoteConfigService RemoteConfigService => remoteConfigService.Value;
+        public IErrorHandlingService ErrorHandlingService => errorHandlingService.Value;
+        public ILastTimeUsageStorage LastTimeUsageStorage => lastTimeUsageStorage.Value;
+        public IApplicationShortcutCreator ShortcutCreator => shortcutCreator.Value;
+        public IBackgroundSyncService BackgroundSyncService => backgroundSyncService.Value;
+        public IIntentDonationService IntentDonationService => intentDonationService.Value;
+        public IAutomaticSyncingService AutomaticSyncingService => automaticSyncingService.Value;
+        public ISyncErrorHandlingService SyncErrorHandlingService => syncErrorHandlingService.Value;
+        public IPrivateSharedStorageService PrivateSharedStorageService => privateSharedStorageService.Value;
+        public ISuggestionProviderContainer SuggestionProviderContainer => suggestionProviderContainer.Value;
 
         protected DependencyContainer(ApiEnvironment apiEnvironment, UserAgent userAgent)
         {
@@ -69,42 +96,42 @@ namespace Toggl.Foundation
 
             ApiEnvironment = apiEnvironment;
 
-            SyncManager = new Lazy<ISyncManager>(unusableDependency<ISyncManager>);
-            InteractorFactory = new Lazy<IInteractorFactory>(unusableDependency<IInteractorFactory>);
+            syncManager = new Lazy<ISyncManager>(unusableDependency<ISyncManager>);
+            interactorFactory = new Lazy<IInteractorFactory>(unusableDependency<IInteractorFactory>);
 
-            Database = new Lazy<ITogglDatabase>(CreateDatabase);
-            ApiFactory = new Lazy<IApiFactory>(CreateApiFactory);
-            TimeService = new Lazy<ITimeService>(CreateTimeService);
-            DataSource = new Lazy<ITogglDataSource>(CreateDataSource);
-            PlatformInfo = new Lazy<IPlatformInfo>(CreatePlatformInfo);
-            GoogleService = new Lazy<IGoogleService>(CreateGoogleService);
-            RatingService = new Lazy<IRatingService>(CreateRatingService);
-            CalendarService = new Lazy<ICalendarService>(CreateCalendarService);
-            LicenseProvider = new Lazy<ILicenseProvider>(CreateLicenseProvider);
-            RxActionFactory = new Lazy<IRxActionFactory>(CreateRxActionFactory);
-            UserPreferences = new Lazy<IUserPreferences>(CreateUserPreferences);
-            AnalyticsService = new Lazy<IAnalyticsService>(CreateAnalyticsService);
-            StopwatchProvider = new Lazy<IStopwatchProvider>(CreateStopwatchProvider);
-            BackgroundService = new Lazy<IBackgroundService>(CreateBackgroundService);
-            SchedulerProvider = new Lazy<ISchedulerProvider>(CreateSchedulerProvider);
-            ShortcutCreator = new Lazy<IApplicationShortcutCreator>(CreateShortcutCreator);
-            NotificationService = new Lazy<INotificationService>(CreateNotificationService);
-            RemoteConfigService = new Lazy<IRemoteConfigService>(CreateRemoteConfigService);
-            ErrorHandlingService = new Lazy<IErrorHandlingService>(CreateErrorHandlingService);
-            LastTimeUsageStorage = new Lazy<ILastTimeUsageStorage>(CreateLastTimeUsageStorage);
-            BackgroundSyncService = new Lazy<IBackgroundSyncService>(CreateBackgroundSyncService);
-            IntentDonationService = new Lazy<IIntentDonationService>(CreateIntentDonationService);
-            AutomaticSyncingService = new Lazy<IAutomaticSyncingService>(CreateAutomaticSyncingService);
-            SyncErrorHandlingService = new Lazy<ISyncErrorHandlingService>(CreateSyncErrorHandlingService);
-            PrivateSharedStorageService = new Lazy<IPrivateSharedStorageService>(CreatePrivateSharedStorageService);
-            SuggestionProviderContainer = new Lazy<ISuggestionProviderContainer>(CreateSuggestionProviderContainer);
+            database = new Lazy<ITogglDatabase>(CreateDatabase);
+            apiFactory = new Lazy<IApiFactory>(CreateApiFactory);
+            timeService = new Lazy<ITimeService>(CreateTimeService);
+            dataSource = new Lazy<ITogglDataSource>(CreateDataSource);
+            platformInfo = new Lazy<IPlatformInfo>(CreatePlatformInfo);
+            googleService = new Lazy<IGoogleService>(CreateGoogleService);
+            ratingService = new Lazy<IRatingService>(CreateRatingService);
+            calendarService = new Lazy<ICalendarService>(CreateCalendarService);
+            licenseProvider = new Lazy<ILicenseProvider>(CreateLicenseProvider);
+            rxActionFactory = new Lazy<IRxActionFactory>(CreateRxActionFactory);
+            userPreferences = new Lazy<IUserPreferences>(CreateUserPreferences);
+            analyticsService = new Lazy<IAnalyticsService>(CreateAnalyticsService);
+            stopwatchProvider = new Lazy<IStopwatchProvider>(CreateStopwatchProvider);
+            backgroundService = new Lazy<IBackgroundService>(CreateBackgroundService);
+            schedulerProvider = new Lazy<ISchedulerProvider>(CreateSchedulerProvider);
+            shortcutCreator = new Lazy<IApplicationShortcutCreator>(CreateShortcutCreator);
+            notificationService = new Lazy<INotificationService>(CreateNotificationService);
+            remoteConfigService = new Lazy<IRemoteConfigService>(CreateRemoteConfigService);
+            errorHandlingService = new Lazy<IErrorHandlingService>(CreateErrorHandlingService);
+            lastTimeUsageStorage = new Lazy<ILastTimeUsageStorage>(CreateLastTimeUsageStorage);
+            backgroundSyncService = new Lazy<IBackgroundSyncService>(CreateBackgroundSyncService);
+            intentDonationService = new Lazy<IIntentDonationService>(CreateIntentDonationService);
+            automaticSyncingService = new Lazy<IAutomaticSyncingService>(CreateAutomaticSyncingService);
+            syncErrorHandlingService = new Lazy<ISyncErrorHandlingService>(CreateSyncErrorHandlingService);
+            privateSharedStorageService = new Lazy<IPrivateSharedStorageService>(CreatePrivateSharedStorageService);
+            suggestionProviderContainer = new Lazy<ISuggestionProviderContainer>(CreateSuggestionProviderContainer);
 
-            api = ApiFactory.Select(factory => factory.CreateApiWith(Credentials.None));
+            api = apiFactory.Select(factory => factory.CreateApiWith(Credentials.None));
             UserAccessManager = new UserAccessManager(
-                ApiFactory,
-                Database,
-                GoogleService,
-                PrivateSharedStorageService);
+                apiFactory,
+                database,
+                googleService,
+                privateSharedStorageService);
 
             UserAccessManager
                 .UserLoggedIn
@@ -138,22 +165,22 @@ namespace Toggl.Foundation
         protected abstract ISuggestionProviderContainer CreateSuggestionProviderContainer();
 
         protected virtual ITimeService CreateTimeService()
-            => new TimeService(SchedulerProvider.Value.DefaultScheduler);
+            => new TimeService(SchedulerProvider.DefaultScheduler);
 
         protected virtual IBackgroundService CreateBackgroundService()
-            => new BackgroundService(TimeService.Value, AnalyticsService.Value);
+            => new BackgroundService(TimeService, AnalyticsService);
 
         protected virtual IAutomaticSyncingService CreateAutomaticSyncingService()
-            => new AutomaticSyncingService(BackgroundService.Value, TimeService.Value);
+            => new AutomaticSyncingService(BackgroundService, TimeService);
 
         protected virtual ISyncErrorHandlingService CreateSyncErrorHandlingService()
-            => new SyncErrorHandlingService(ErrorHandlingService.Value);
+            => new SyncErrorHandlingService(ErrorHandlingService);
 
         protected virtual ITogglDataSource CreateDataSource()
-            => new TogglDataSource(Database.Value, TimeService.Value, AnalyticsService.Value);
+            => new TogglDataSource(Database, TimeService, AnalyticsService);
 
         protected virtual IRxActionFactory CreateRxActionFactory()
-            => new RxActionFactory(SchedulerProvider.Value);
+            => new RxActionFactory(SchedulerProvider);
 
         protected virtual IApiFactory CreateApiFactory()
             => new ApiFactory(ApiEnvironment, userAgent);
@@ -161,48 +188,48 @@ namespace Toggl.Foundation
         protected virtual IInteractorFactory CreateInteractorFactory() => new InteractorFactory(
             api.Value,
             UserAccessManager,
-            Database.Select(database => database.IdProvider),
-            Database,
-            TimeService,
-            SyncManager,
-            PlatformInfo,
-            DataSource,
-            CalendarService,
-            UserPreferences,
-            AnalyticsService,
-            StopwatchProvider,
-            NotificationService,
-            LastTimeUsageStorage,
-            ShortcutCreator,
-            IntentDonationService,
-            PrivateSharedStorageService
+            database.Select(database => database.IdProvider),
+            database,
+            timeService,
+            syncManager,
+            platformInfo,
+            dataSource,
+            calendarService,
+            userPreferences,
+            analyticsService,
+            stopwatchProvider,
+            notificationService,
+            lastTimeUsageStorage,
+            shortcutCreator,
+            intentDonationService,
+            privateSharedStorageService
         );
 
         private void recreateLazyDependenciesForLogin(ITogglApi api)
         {
-            //TODO: Make the interactor factor take lazies for easier recreation
             this.api = new Lazy<ITogglApi>(() => api);
-            InteractorFactory = new Lazy<IInteractorFactory>(CreateInteractorFactory);
-            SyncManager = new Lazy<ISyncManager>(() =>
+
+            interactorFactory = new Lazy<IInteractorFactory>(CreateInteractorFactory);
+            syncManager = new Lazy<ISyncManager>(() =>
                 TogglSyncManager.CreateSyncManager(
-                    Database.Value,
+                    Database,
                     api,
-                    DataSource.Value,
-                    TimeService.Value,
-                    AnalyticsService.Value,
-                    LastTimeUsageStorage.Value,
-                    SchedulerProvider.Value.DefaultScheduler,
-                    StopwatchProvider.Value,
-                    AutomaticSyncingService.Value
+                    DataSource,
+                    TimeService,
+                    AnalyticsService,
+                    LastTimeUsageStorage,
+                    SchedulerProvider.DefaultScheduler,
+                    StopwatchProvider,
+                    AutomaticSyncingService
                 )
             );
         }
 
         private void recreateLazyDependenciesForLogout()
         {
-            api = ApiFactory.Select(factory => factory.CreateApiWith(Credentials.None));
-            SyncManager = new Lazy<ISyncManager>(unusableDependency<ISyncManager>);
-            InteractorFactory = new Lazy<IInteractorFactory>(CreateInteractorFactory);
+            api = apiFactory.Select(factory => factory.CreateApiWith(Credentials.None));
+            syncManager = new Lazy<ISyncManager>(unusableDependency<ISyncManager>);
+            interactorFactory = new Lazy<IInteractorFactory>(CreateInteractorFactory);
         }
 
         private T unusableDependency<T>()

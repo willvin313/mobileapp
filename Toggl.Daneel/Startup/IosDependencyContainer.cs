@@ -45,7 +45,7 @@ namespace Toggl.Daneel
             
             var appVersion = Version.Parse(version);
             
-            settingsStorage = new Lazy<SettingsStorage>(() => new SettingsStorage(appVersion, KeyValueStorage.Value));
+            settingsStorage = new Lazy<SettingsStorage>(() => new SettingsStorage(appVersion, KeyValueStorage));
         }
 
         public static IosDependencyContainer Instance { get; set; }
@@ -60,7 +60,7 @@ namespace Toggl.Daneel
             => new BrowserServiceIos();
 
         protected override ICalendarService CreateCalendarService()
-            => new CalendarServiceIos(PermissionsService.Value);
+            => new CalendarServiceIos(PermissionsService);
 
         protected override ITogglDatabase CreateDatabase()
             => new Database();
@@ -72,7 +72,7 @@ namespace Toggl.Daneel
             => new GoogleServiceIos();
 
         protected override IIntentDonationService CreateIntentDonationService()
-            => new IntentDonationServiceIos(AnalyticsService.Value);
+            => new IntentDonationServiceIos(AnalyticsService);
 
         protected override IKeyValueStorage CreateKeyValueStorage()
             => new UserDefaultsStorageIos();
@@ -81,7 +81,7 @@ namespace Toggl.Daneel
             => new LicenseProviderIos();
 
         protected override INotificationService CreateNotificationService()
-            => new NotificationServiceIos(PermissionsService.Value, TimeService.Value);
+            => new NotificationServiceIos(PermissionsService, TimeService);
 
         protected override IPasswordManagerService CreatePasswordManagerService()
             => new OnePasswordServiceIos();
@@ -112,7 +112,7 @@ namespace Toggl.Daneel
 
         protected override ISuggestionProviderContainer CreateSuggestionProviderContainer()
             => new SuggestionProviderContainer(
-                new MostUsedTimeEntrySuggestionProvider(Database.Value, TimeService.Value, numberOfSuggestions)
+                new MostUsedTimeEntrySuggestionProvider(Database, TimeService, numberOfSuggestions)
             );
 
         protected override IMvxNavigationService CreateNavigationService()

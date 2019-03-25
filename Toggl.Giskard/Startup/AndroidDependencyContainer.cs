@@ -42,7 +42,7 @@ namespace Toggl.Giskard
         {
             var appVersion = Version.Parse(version);
             
-            settingsStorage = new Lazy<SettingsStorage>(() => new SettingsStorage(appVersion, KeyValueStorage.Value));
+            settingsStorage = new Lazy<SettingsStorage>(() => new SettingsStorage(appVersion, KeyValueStorage));
         }
 
         public static AndroidDependencyContainer Instance { get; set; }
@@ -57,7 +57,7 @@ namespace Toggl.Giskard
             => new BrowserServiceAndroid();
 
         protected override ICalendarService CreateCalendarService()
-            => new CalendarServiceAndroid(PermissionsService.Value);
+            => new CalendarServiceAndroid(PermissionsService);
 
         protected override ITogglDatabase CreateDatabase()
             => new Database();
@@ -112,7 +112,7 @@ namespace Toggl.Giskard
 
         protected override ISuggestionProviderContainer CreateSuggestionProviderContainer()
             => new SuggestionProviderContainer(
-                new MostUsedTimeEntrySuggestionProvider(Database.Value, TimeService.Value, numberOfSuggestions)
+                new MostUsedTimeEntrySuggestionProvider(Database, TimeService, numberOfSuggestions)
             );
 
         protected override IMvxNavigationService CreateNavigationService()
