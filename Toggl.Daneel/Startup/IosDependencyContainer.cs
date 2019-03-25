@@ -1,6 +1,8 @@
 ﻿using Foundation;
 using MvvmCross.Navigation;
+using MvvmCross.Platforms.Ios.Presenters;
 using System;
+using Toggl.Daneel.Presentation;
 using Toggl.Daneel.Services;
 using Toggl.Foundation;
 using Toggl.Foundation.Analytics;
@@ -36,12 +38,12 @@ namespace Toggl.Daneel
 
         public IMvxNavigationService ForkingNavigationService { get; internal set; }
 
-        public ITopViewControllerProvider TopViewControllerProvider { get; }
+        public TogglPresenter ViewPresenter { get; }
 
-        public IosDependencyContainer(ITopViewControllerProvider topViewControllerProvider, string version)
+        public IosDependencyContainer(TogglPresenter viewPresenter, string version)
             : base(environment, new UserAgent(clientName, version))
         {
-            TopViewControllerProvider = topViewControllerProvider;
+            ViewPresenter = viewPresenter;
             
             var appVersion = Version.Parse(version);
             
@@ -66,7 +68,7 @@ namespace Toggl.Daneel
             => new Database();
 
         protected override IDialogService CreateDialogService()
-            => new DialogServiceIos(TopViewControllerProvider);
+            => new DialogServiceIos(ViewPresenter);
 
         protected override IGoogleService CreateGoogleService()
             => new GoogleServiceIos();

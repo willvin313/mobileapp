@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Android.App;
 using Android.Database;
-using MvvmCross;
-using MvvmCross.Platforms.Android;
 using Toggl.Foundation.Calendar;
-using Toggl.Foundation.Helper;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Multivac;
 using static Android.Provider.CalendarContract;
@@ -56,7 +54,7 @@ namespace Toggl.Giskard.Services
 
         protected override IEnumerable<UserCalendar> NativeGetUserCalendars()
         {
-            var appContext = Mvx.Resolve<IMvxAndroidGlobals>().ApplicationContext;
+            var appContext = Application.Context;
 
             var cursor = appContext.ContentResolver.Query(Calendars.ContentUri, calendarProjection, null, null, null);
             if (cursor.Count <= 0)
@@ -74,7 +72,7 @@ namespace Toggl.Giskard.Services
 
         protected override IEnumerable<CalendarItem> NativeGetEventsInRange(DateTimeOffset start, DateTimeOffset end)
         {
-            var appContext = Mvx.Resolve<IMvxAndroidGlobals>().ApplicationContext;
+            var appContext = Application.Context;
 
             var cursor = Instances.Query(appContext.ContentResolver, eventsProjection, start.ToUnixTimeMilliseconds(), end.ToUnixTimeMilliseconds());
             if (cursor.Count <= 0)
@@ -92,7 +90,7 @@ namespace Toggl.Giskard.Services
 
         protected override CalendarItem NativeGetCalendarItemWithId(string id)
         {
-            var appContext = Mvx.Resolve<IMvxAndroidGlobals>().ApplicationContext;
+            var appContext = Application.Context;
 
             var cursor = appContext.ContentResolver.Query(Instances.ContentUri, eventsProjection, $"({Instances.InterfaceConsts.Id} = ?)", new [] { id }, null);
             if (cursor.Count <= 0)

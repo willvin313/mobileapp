@@ -14,37 +14,32 @@ namespace Toggl.Daneel.ViewControllers
     [MvxRootPresentation(WrapInNavigationController = false)]
     public class MainTabBarController : MvxTabBarViewController<MainTabBarViewModel>
     {
-        private static readonly Dictionary<Type, String> imageNameForType = new Dictionary<Type, String>
+        private static readonly Dictionary<Type, string> imageNameForType = new Dictionary<Type, string>
         {
             { typeof(MainViewModel), "icTime" },
             { typeof(ReportsViewModel), "icReports" },
             { typeof(CalendarViewModel), "icCalendar" },
             { typeof(SettingsViewModel), "icSettings" }
         };
-
-        public MainTabBarController()
-        {
-            ViewControllers = ViewModel.Tabs.Select(createTabFor).ToArray();
-
-            UIViewController createTabFor(IMvxViewModel viewModel)
-            {
-                var controller = new UINavigationController();
-                var screen = this.CreateViewControllerFor(viewModel) as UIViewController;
-                var item = new UITabBarItem();
-                item.Title = "";
-                item.Image = UIImage.FromBundle(imageNameForType[viewModel.GetType()]);
-                item.ImageInsets = new UIEdgeInsets(6, 0, -6, 0);
-                screen.TabBarItem = item;
-                controller.PushViewController(screen, true);
-                return controller;
-            }
-        }
-
+        
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
-
+            
+            ViewControllers = ViewModel.Tabs.Select(createTabFor).ToArray();
             TabBar.Translucent = UIDevice.CurrentDevice.CheckSystemVersion(11, 0);
+
+            UIViewController createTabFor(IMvxViewModel viewModel)
+            {
+                var viewController = this.CreateViewControllerFor(viewModel) as UIViewController;
+                viewController.TabBarItem = new UITabBarItem
+                {
+                    Title = "",
+                    Image = UIImage.FromBundle(imageNameForType[viewModel.GetType()]),
+                    ImageInsets = new UIEdgeInsets(6, 0, -6, 0)
+                };
+                return new UINavigationController(viewController);
+            }
         }
 
         public override void ItemSelected(UITabBar tabbar, UITabBarItem item)

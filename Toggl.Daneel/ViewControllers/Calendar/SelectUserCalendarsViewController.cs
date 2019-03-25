@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Reactive.Linq;
 using CoreGraphics;
-using MvvmCross;
 using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Daneel.ViewSources;
 using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
-using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using UIKit;
 
@@ -26,11 +24,9 @@ namespace Toggl.Daneel.ViewControllers.Calendar
         private const float enabledDoneButtonAlpha = 1;
         private const float disabledDoneButtonAlpha = 0.32f;
 
-        private readonly ISchedulerProvider schedulerProvider;
-
-        public SelectUserCalendarsViewController() : base(null)
+        public SelectUserCalendarsViewController()
+            : base(null)
         {
-            schedulerProvider = Mvx.Resolve<ISchedulerProvider>();
         }
 
         public override void ViewDidLoad()

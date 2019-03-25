@@ -4,8 +4,6 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Foundation;
 using Google.SignIn;
-using MvvmCross.Platforms.Ios.Presenters;
-using MvvmCross;
 using Toggl.Foundation.Exceptions;
 using Toggl.Foundation.Login;
 using UIKit;
@@ -65,15 +63,19 @@ namespace Toggl.Daneel.Services
         [Export("signIn:presentViewController:")]
         public void PresentViewController(SignIn signIn, UIViewController viewController)
         {
-            var presenter = Mvx.Resolve<IMvxIosViewPresenter>() as MvxIosViewPresenter;
-            presenter.MasterNavigationController.PresentViewController(viewController, true, null);
+            IosDependencyContainer.Instance
+                .ViewPresenter
+                .MasterNavigationController
+                .PresentViewController(viewController, true, null);
         }
 
         [Export("signIn:dismissViewController:")]
         public void DismissViewController(SignIn signIn, UIViewController viewController)
         {
-            var presenter = Mvx.Resolve<IMvxIosViewPresenter>() as MvxIosViewPresenter;
-            presenter.MasterNavigationController.DismissViewController(true, null);
+            IosDependencyContainer.Instance
+                .ViewPresenter
+                .MasterNavigationController
+                .DismissViewController(true, null);
         }
     }
 }

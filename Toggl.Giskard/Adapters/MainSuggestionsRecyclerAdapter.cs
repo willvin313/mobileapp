@@ -1,20 +1,16 @@
 ﻿using System;
 using System.Collections.Immutable;
-using System.Collections.Specialized;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Android.App;
 using Android.Content;
 using Android.Graphics;
 using Android.Runtime;
 using Android.Support.V7.Widget;
 using Android.Views;
-using MvvmCross;
-using MvvmCross.Platforms.Android;
-using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Suggestions;
 using Toggl.Giskard.Extensions;
 using Toggl.Giskard.ViewHolders;
-using Toggl.Giskard.Views;
 
 namespace Toggl.Giskard.Adapters
 {
@@ -33,7 +29,7 @@ namespace Toggl.Giskard.Adapters
 
         static MainSuggestionsRecyclerAdapter()
         {
-            var context = Mvx.Resolve<IMvxAndroidGlobals>().ApplicationContext;
+            var context = Application.Context;
             var service = context.GetSystemService(Context.WindowService).JavaCast<IWindowManager>();
             var display = service.DefaultDisplay;
             var size = new Point();

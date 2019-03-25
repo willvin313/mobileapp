@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Android.Content;
-using Android.Icu.Text;
 using Android.Support.V4.App;
 using MvvmCross;
 using MvvmCross.Droid.Support.V7.AppCompat;

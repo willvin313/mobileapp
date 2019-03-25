@@ -100,20 +100,6 @@ namespace Toggl.Giskard
             // calls their Run method. We can skip it since we don't have such classes.
         }
 
-        //TODO: Verify this works
-        //void ensureDataSourceInitializationIfLoggedIn()
-        //{
-        //    /* Why? The ITogglDataSource is lazily initialized by the login manager
-        //     * during some of it's methods calls.
-        //     * The App.cs code that makes those calls don't have time to
-        //     * do so during rehydration and on starup on some phones.
-        //     * This call makes sure the ITogglDataSource singleton is registered
-        //     * and ready to be injected during those times.
-        //     */
-        //    var userAccessManager = Mvx.Resolve<IUserAccessManager>();
-        //    userAccessManager.TryInitializingAccessToUserData(out _, out _);
-        //}
-
         private void createApplicationLifecycleObserver(IBackgroundService backgroundService)
         {
             var mvxApplication = MvxAndroidApplication.Instance;

@@ -1,9 +1,8 @@
 ﻿using System;
+using Android.App;
 using Android.Runtime;
 using Android.Views;
-using MvvmCross;
 using MvvmCross.Droid.Support.V7.RecyclerView;
-using MvvmCross.Platforms.Android;
 using MvvmCross.Platforms.Android.Binding.BindingContext;
 using Toggl.Giskard.Extensions;
 
@@ -16,7 +15,7 @@ namespace Toggl.Giskard.Views
 
         static ReportsRecyclerViewHolder()
         {
-            var context = Mvx.Resolve<IMvxAndroidGlobals>().ApplicationContext;
+            var context = Application.Context;
 
             lastContainerHeight = 72.DpToPixels(context);
             normalContainerHeight = 48.DpToPixels(context);

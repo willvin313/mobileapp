@@ -1,4 +1,5 @@
-﻿using Android.Graphics;
+﻿using Android.App;
+using Android.Graphics;
 using Android.Text.Style;
 using Java.Lang;
 using MvvmCross;
@@ -22,7 +23,7 @@ namespace Toggl.Giskard.Autocomplete
 
         static TokenSpan()
         {
-            var context = Mvx.Resolve<IMvxAndroidGlobals>().ApplicationContext;
+            var context = Application.Context;
 
             tokenHeight = 24.DpToPixels(context);
             padding = margin = cornerRadius = 6.DpToPixels(context);

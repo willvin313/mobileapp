@@ -36,7 +36,7 @@ namespace Toggl.Daneel.ViewControllers
         public CalendarViewController()
             : base(nameof(CalendarViewController))
         {
-            timeService = Mvx.Resolve<ITimeService>();
+            timeService = IosDependencyContainer.Instance.TimeService;
         }
 
         public override void ViewDidLoad()

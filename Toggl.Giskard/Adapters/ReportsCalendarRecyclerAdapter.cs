@@ -1,10 +1,9 @@
-﻿using Android.Content;
+﻿using Android.App;
+using Android.Content;
 using Android.Graphics;
 using Android.Runtime;
 using Android.Support.V7.Widget;
 using Android.Views;
-using MvvmCross;
-using MvvmCross.Platforms.Android;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar;
 using Toggl.Giskard.Extensions;
@@ -15,12 +14,11 @@ namespace Toggl.Giskard.Adapters
     public sealed class ReportsCalendarRecyclerAdapter : BaseRecyclerAdapter<ReportsCalendarDayViewModel>
     {
         private static readonly int itemWidth;
-        private ReportsDateRangeParameter dateRangeParameter;
-        public ReportsDateRangeParameter DateRangeParameter => dateRangeParameter;
+        public ReportsDateRangeParameter DateRangeParameter { get; private set; }
 
         static ReportsCalendarRecyclerAdapter()
         {
-            var context = Mvx.Resolve<IMvxAndroidGlobals>().ApplicationContext;
+            var context = Application.Context;
             var service = context.GetSystemService(Context.WindowService).JavaCast<IWindowManager>();
             var display = service.DefaultDisplay;
             var size = new Point();
@@ -31,7 +29,7 @@ namespace Toggl.Giskard.Adapters
 
         public ReportsCalendarRecyclerAdapter(ReportsDateRangeParameter dateRangeParameter)
         {
-            this.dateRangeParameter = dateRangeParameter;
+            DateRangeParameter = dateRangeParameter;
         }
 
         protected override BaseRecyclerViewHolder<ReportsCalendarDayViewModel> CreateViewHolder(ViewGroup parent, LayoutInflater inflater, int viewType)
@@ -47,12 +45,12 @@ namespace Toggl.Giskard.Adapters
         public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
         {
             base.OnBindViewHolder(holder, position);
-            (holder as CalendarDayCellViewHolder)?.UpdateSelectionState(dateRangeParameter);
+            (holder as CalendarDayCellViewHolder)?.UpdateSelectionState(DateRangeParameter);
         }
 
         public void UpdateDateRangeParameter(ReportsDateRangeParameter newDateRange)
         {
-            dateRangeParameter = newDateRange;
+            DateRangeParameter = newDateRange;
             NotifyDataSetChanged();
         }
     }

@@ -76,10 +76,10 @@ namespace Toggl.Daneel
 
             var container = IosDependencyContainer.Instance;
 
-            analyticsService = container.AnalyticsService.Value;
-            backgroundService = container.BackgroundService.Value;
-            navigationService = container.NavigationService.Value;
-            timeService = container.TimeService.Value;
+            timeService = container.TimeService;
+            analyticsService = container.AnalyticsService;
+            backgroundService = container.BackgroundService;
+            navigationService = container.NavigationService;
             setupNavigationBar();
             setupTabBar();
         }

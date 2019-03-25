@@ -1,9 +1,7 @@
 using Android.App;
 using Android.Content.PM;
 using Android.OS;
-using MvvmCross;
 using MvvmCross.Droid.Support.V7.AppCompat;
-using MvvmCross.Navigation;
 using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross;
 using Toggl.Foundation.MvvmCross.ViewModels;
@@ -39,7 +37,7 @@ namespace Toggl.Giskard
         {
             base.RunAppStart(bundle);
             var navigationUrl = Intent.Data?.ToString() ?? getTrackUrlFromProcessedText();
-            var navigationService = Mvx.Resolve<IMvxNavigationService>();
+            var navigationService = AndroidDependencyContainer.Instance.NavigationService;
             if (string.IsNullOrEmpty(navigationUrl))
             {
                 Finish();

@@ -24,7 +24,7 @@ namespace Toggl.Daneel
                   += (sender, certificate, chain, sslPolicyErrors) => true;
             #endif
             var version = NSBundle.MainBundle.InfoDictionary["CFBundleShortVersionString"].ToString();
-            IosDependencyContainer.Instance = new IosDependencyContainer(Presenter as ITopViewControllerProvider, version);
+            IosDependencyContainer.Instance = new IosDependencyContainer(Presenter as TogglPresenter, version);
         }
 
         protected override IMvxApplication CreateApp()
@@ -43,7 +43,7 @@ namespace Toggl.Daneel
 
             var container = IosDependencyContainer.Instance;
             container.ForkingNavigationService =
-                new NavigationService(null, loader, container.AnalyticsService.Value, Platform.Daneel);
+                new NavigationService(null, loader, container.AnalyticsService, Platform.Daneel);
 
             Mvx.RegisterSingleton<IMvxNavigationService>(container.ForkingNavigationService);
             return container.ForkingNavigationService;

@@ -1,12 +1,9 @@
-﻿using System;
-using MvvmCross;
-using MvvmCross.Platforms.Ios.Presenters.Attributes;
+﻿using MvvmCross.Platforms.Ios.Presenters.Attributes;
 using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Daneel.ViewSources;
 using Toggl.Foundation.MvvmCross.ViewModels.Settings;
-using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Color = Toggl.Foundation.MvvmCross.Helper.Color;
 using FoundationResources = Toggl.Foundation.Resources;
@@ -18,11 +15,9 @@ namespace Toggl.Daneel.ViewControllers.Settings
     {
         private const int tableViewHeaderHeight = 106;
 
-        private readonly ISchedulerProvider schedulerProvider;
-
-        public CalendarSettingsViewController() : base(nameof(CalendarSettingsViewController))
+        public CalendarSettingsViewController()
+            : base(nameof(CalendarSettingsViewController))
         {
-            schedulerProvider = Mvx.Resolve<ISchedulerProvider>();
         }
 
         public override void ViewDidLoad()
