@@ -16,6 +16,7 @@ using Toggl.PrimeRadiant;
 using Toggl.Ultrawave;
 using Toggl.Ultrawave.Network;
 using Toggl.PrimeRadiant.Settings;
+using Toggl.Foundation.Autocomplete;
 
 namespace Toggl.Foundation
 {
@@ -47,6 +48,7 @@ namespace Toggl.Foundation
         private readonly Lazy<IStopwatchProvider> stopwatchProvider;
         private readonly Lazy<INotificationService> notificationService;
         private readonly Lazy<IRemoteConfigService> remoteConfigService;
+        private readonly Lazy<IAutocompleteProvider> autocompleteProvider;
         private readonly Lazy<IErrorHandlingService> errorHandlingService;
         private readonly Lazy<ILastTimeUsageStorage> lastTimeUsageStorage;
         private readonly Lazy<IApplicationShortcutCreator> shortcutCreator;
@@ -56,10 +58,11 @@ namespace Toggl.Foundation
         private readonly Lazy<ISyncErrorHandlingService> syncErrorHandlingService;
         private readonly Lazy<IPrivateSharedStorageService> privateSharedStorageService;
         private readonly Lazy<ISuggestionProviderContainer> suggestionProviderContainer;
-
+        
         // Non lazy
         public ApiEnvironment ApiEnvironment { get; }
         public UserAccessManager UserAccessManager { get; }
+
         public ISyncManager SyncManager => syncManager.Value;
         public IInteractorFactory InteractorFactory => interactorFactory.Value;
 
@@ -78,11 +81,12 @@ namespace Toggl.Foundation
         public IStopwatchProvider StopwatchProvider => stopwatchProvider.Value;
         public IBackgroundService BackgroundService => backgroundService.Value;
         public ISchedulerProvider SchedulerProvider => schedulerProvider.Value;
+        public IApplicationShortcutCreator ShortcutCreator => shortcutCreator.Value;
         public INotificationService NotificationService => notificationService.Value;
         public IRemoteConfigService RemoteConfigService => remoteConfigService.Value;
+        public IAutocompleteProvider AutocompleteProvider => autocompleteProvider.Value;
         public IErrorHandlingService ErrorHandlingService => errorHandlingService.Value;
         public ILastTimeUsageStorage LastTimeUsageStorage => lastTimeUsageStorage.Value;
-        public IApplicationShortcutCreator ShortcutCreator => shortcutCreator.Value;
         public IBackgroundSyncService BackgroundSyncService => backgroundSyncService.Value;
         public IIntentDonationService IntentDonationService => intentDonationService.Value;
         public IAutomaticSyncingService AutomaticSyncingService => automaticSyncingService.Value;
@@ -117,6 +121,7 @@ namespace Toggl.Foundation
             shortcutCreator = new Lazy<IApplicationShortcutCreator>(CreateShortcutCreator);
             notificationService = new Lazy<INotificationService>(CreateNotificationService);
             remoteConfigService = new Lazy<IRemoteConfigService>(CreateRemoteConfigService);
+            autocompleteProvider = new Lazy<IAutocompleteProvider>(CreateAutocompleteProvider);
             errorHandlingService = new Lazy<IErrorHandlingService>(CreateErrorHandlingService);
             lastTimeUsageStorage = new Lazy<ILastTimeUsageStorage>(CreateLastTimeUsageStorage);
             backgroundSyncService = new Lazy<IBackgroundSyncService>(CreateBackgroundSyncService);
@@ -175,6 +180,9 @@ namespace Toggl.Foundation
 
         protected virtual ISyncErrorHandlingService CreateSyncErrorHandlingService()
             => new SyncErrorHandlingService(ErrorHandlingService);
+
+        protected virtual IAutocompleteProvider CreateAutocompleteProvider()
+            => new AutocompleteProvider(InteractorFactory);
 
         protected virtual ITogglDataSource CreateDataSource()
             => new TogglDataSource(Database, TimeService, AnalyticsService);

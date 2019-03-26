@@ -19,7 +19,7 @@ namespace Toggl.Foundation.MvvmCross
         private readonly UiDependencyContainer dependencyContainer;
 
         public TogglViewModelLocator(UiDependencyContainer dependencyContainer)
-            : base(dependencyContainer.NavigationService.Value)
+            : base(dependencyContainer.NavigationService)
         {
             this.dependencyContainer = dependencyContainer;
         }
@@ -60,7 +60,7 @@ namespace Toggl.Foundation.MvvmCross
 		|| fileName.Contains("\\BarViewModel")
 		|| fileName.Contains("TimeEntriesViewModel")
 		|| fileName.Contains("UserCalendarSourceViewModel")
-		|| fileName.Contains("TimeEntryViewModel"));
+		|| fileName.Contains("/TimeEntryViewModel"));
                  
     Func<string, string> selectDependencyContainerPropertyName = dep => 
     {
@@ -94,9 +94,6 @@ namespace Toggl.Foundation.MvvmCross
             .Replace("\n", "")
             .Split(',');
 
-        try
-        {
-
         var dependencies = dependencyList
             .Select(selectDependencyContainerPropertyName)
 			.ToList();
@@ -105,12 +102,7 @@ namespace Toggl.Foundation.MvvmCross
 
         WriteLine(string.Format(ifLine, vmName));
         WriteLine(string.Format(returnLine, vmName, dependencyInjection));
-        WriteLine("");
-        }
-        catch(Exception ex)
-        {
-            WriteLine($"Failed for ViewModel {vmName}, Ex: {ex}, Length: {vmFile.Length}, Start: {firstDependencyIndex}, Length: {lengthOfDependencyString}");
-        }
+		WriteLine("");
     }
 #>
 

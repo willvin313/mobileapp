@@ -61,6 +61,18 @@ namespace Toggl.Foundation.MvvmCross
                     dependencyContainer.StopwatchProvider,
                     dependencyContainer.NavigationService);
 
+            if (viewModelType == typeof(EditTimeEntryViewModel))
+                return new EditTimeEntryViewModel(
+                    dependencyContainer.TimeService,
+                    dependencyContainer.DataSource,
+                    dependencyContainer.SyncManager,
+                    dependencyContainer.InteractorFactory,
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.OnboardingStorage,
+                    dependencyContainer.DialogService,
+                    dependencyContainer.AnalyticsService,
+                    dependencyContainer.StopwatchProvider);
+
             if (viewModelType == typeof(ForgotPasswordViewModel))
                 return new ForgotPasswordViewModel(
                     dependencyContainer.TimeService,
@@ -248,6 +260,22 @@ namespace Toggl.Foundation.MvvmCross
                     dependencyContainer.SchedulerProvider,
                     dependencyContainer.RxActionFactory,
                     dependencyContainer.PlatformInfo);
+
+            if (viewModelType == typeof(StartTimeEntryViewModel))
+                return new StartTimeEntryViewModel(
+                    dependencyContainer.TimeService,
+                    dependencyContainer.DataSource,
+                    dependencyContainer.DialogService,
+                    dependencyContainer.UserPreferences,
+                    dependencyContainer.OnboardingStorage,
+                    dependencyContainer.InteractorFactory,
+                    dependencyContainer.NavigationService,
+                    dependencyContainer.AnalyticsService,
+                    dependencyContainer.AutocompleteProvider,
+                    dependencyContainer.SchedulerProvider,
+                    dependencyContainer.IntentDonationService,
+                    dependencyContainer.StopwatchProvider,
+                    dependencyContainer.RxActionFactory);
 
             if (viewModelType == typeof(SuggestionsViewModel))
                 return new SuggestionsViewModel(
