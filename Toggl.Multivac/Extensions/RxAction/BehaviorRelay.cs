@@ -14,8 +14,8 @@ namespace Toggl.Multivac.Extensions.Reactive
     /// <typeparam name="T">The type of the elements processed by the subject.</typeparam>
     public class BehaviorRelay<T> : IObservable<T>
     {
-        private BehaviorSubject<T> subject;
-        private Func<T, T> sanitizationFunction;
+        private readonly BehaviorSubject<T> subject;
+        private readonly Func<T, T> sanitizationFunction;
 
         public BehaviorRelay(T value, Func<T, T> sanitizationFunction = null)
         {

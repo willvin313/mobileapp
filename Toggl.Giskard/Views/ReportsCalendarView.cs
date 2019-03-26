@@ -101,6 +101,10 @@ namespace Toggl.Giskard.Views
                 .Subscribe(viewModel.SetCurrentPage)
                 .DisposedBy(disposeBag);
 
+            monthsPager.Rx().CurrentItem()
+                .Subscribe(viewModel.UpdateMonth)
+                .DisposedBy(disposeBag);
+
             calendarPagesAdapter.DayTaps
                 .Subscribe(viewModel.SelectDay.Inputs)
                 .DisposedBy(disposeBag);

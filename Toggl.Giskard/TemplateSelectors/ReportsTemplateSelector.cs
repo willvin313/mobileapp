@@ -18,11 +18,11 @@ namespace Toggl.Giskard.TemplateSelectors
             switch (fromViewType)
             {
                 case WorkspaceName:
-                    return Resource.Layout.ReportsActivityWorkspaceName;
+                    return Resource.Layout.ReportsFragmentWorkspaceName;
                 case Header:
-                    return Resource.Layout.ReportsActivityHeader;
+                    return Resource.Layout.ReportsFragmentHeader;
                 case Item:
-                    return Resource.Layout.ReportsActivityItem;
+                    return Resource.Layout.ReportsFragmentItem;
             }
 
             throw new ArgumentOutOfRangeException(nameof(fromViewType));

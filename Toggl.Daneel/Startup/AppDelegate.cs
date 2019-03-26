@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -42,6 +43,8 @@ namespace Toggl.Daneel
         private ITimeService timeService;
 
         public override UIWindow Window { get; set; }
+
+        private CompositeDisposable lastUpdateDateDisposable = new CompositeDisposable();
 
         public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
         {
@@ -87,6 +90,11 @@ namespace Toggl.Daneel
             return Google.SignIn.SignIn.SharedInstance.HandleUrl(url, openUrlOptions.SourceApplication, openUrlOptions.Annotation);
         }
         #endif
+
+        public override void OnActivated(UIApplication application)
+        {
+            observeAndStoreLastUpdateDate();
+        }
 
         public override void WillEnterForeground(UIApplication application)
         {
@@ -186,7 +194,7 @@ namespace Toggl.Daneel
             switch (intent)
             {
                 case StopTimerIntent _:
-                    navigationService.Navigate(ApplicationUrls.Main.StopTimeEntry);
+                    navigationService.Navigate(ApplicationUrls.Main.StopFromSiri);
                     return true;
                 case ShowReportIntent _:
                     navigationService.Navigate(ApplicationUrls.Reports);
@@ -219,7 +227,8 @@ namespace Toggl.Daneel
                 string.IsNullOrEmpty(intent.Workspace?.Identifier) ? null : (long?)Convert.ToDouble(intent.Workspace?.Identifier),
                 intent.EntryDescription ?? "",
                 string.IsNullOrEmpty(intent.ProjectId?.Identifier) ? null : (long?)Convert.ToDouble(intent.ProjectId?.Identifier),
-                tags
+                tags,
+                TimeEntryStartOrigin.Siri
             );
         }
 
@@ -263,6 +272,21 @@ namespace Toggl.Daneel
                 Font = UIFont.SystemFontOfSize(14, UIFontWeight.Medium),
                 ForegroundColor = UIColor.Black
             };
+        }
+
+        private void observeAndStoreLastUpdateDate()
+        {
+            lastUpdateDateDisposable.Dispose();
+            lastUpdateDateDisposable = new CompositeDisposable();
+
+            if (Mvx.TryResolve<IInteractorFactory>(out var interactorFactory) && Mvx.TryResolve<IPrivateSharedStorageService>(out var privateSharedStorage))
+            {
+                interactorFactory.ObserveTimeEntriesChanges().Execute().StartWith(default(Unit))
+                    .SelectMany(interactorFactory.GetAllTimeEntriesVisibleToTheUser().Execute())
+                    .Select(timeEntries => timeEntries.OrderBy(te => te.At).Last().At)
+                    .Subscribe(privateSharedStorage.SaveLastUpdateDate)
+                    .DisposedBy(lastUpdateDateDisposable);
+            }
         }
 
         #region Notification Actions

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -58,15 +58,24 @@
     <Compile Include="Analytics\SiriTrackingEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SharedStorage.cs" />
+    <Compile Include="Extensions\UserActivityExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\Toggl.Daneel.IntentCodeGen\Toggl.Daneel.IntentCodeGen\Intents.intentdefinition">
-      <Link>Intents.intentdefinition</Link>
+    <BundleResource Include="..\Toggl.Daneel.IntentCodeGen\Toggl.Daneel.IntentCodeGen\en.lproj\Intents.strings">
+      <Link>en.lproj\Intents.strings</Link>
+    </BundleResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\Toggl.Daneel.IntentCodeGen\Toggl.Daneel.IntentCodeGen\Base.lproj\Intents.intentdefinition">
+      <Link>Base.lproj\Intents.intentdefinition</Link>
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Extensions\" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Toggl.Multivac\Toggl.Multivac.csproj">
-      <Project>{6af7be5e-af9d-4ea7-af7f-28d07b8def24}</Project>
+      <Project>{6AF7BE5E-AF9D-4EA7-AF7F-28D07B8DEF24}</Project>
       <Name>Toggl.Multivac</Name>
     </ProjectReference>
   </ItemGroup>

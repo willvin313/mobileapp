@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive.Concurrency;
+using MvvmCross.Navigation;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.Login;
 using Toggl.Foundation.MvvmCross.Services;
@@ -49,7 +50,7 @@ namespace Toggl.Foundation.MvvmCross
         public IKeyValueStorage KeyValueStorage { get; }
         public IUserPreferences UserPreferences { get; }
         public IOnboardingStorage OnboardingStorage { get; }
-        public IForkingNavigationService NavigationService { get; }
+        public IMvxNavigationService NavigationService { get; }
         public IPasswordManagerService PasswordManagerService { get; }
         public IErrorHandlingService ErrorHandlingService { get; }
         public ISyncErrorHandlingService SyncErrorHandlingService { get; }
@@ -112,7 +113,7 @@ namespace Toggl.Foundation.MvvmCross
             public IKeyValueStorage KeyValueStorage { get; private set; }
             public IUserPreferences UserPreferences { get; private set; }
             public IOnboardingStorage OnboardingStorage { get; private set; }
-            public IForkingNavigationService NavigationService { get; private set; }
+            public IMvxNavigationService NavigationService { get; private set; }
             public IPasswordManagerService PasswordManagerService { get; private set; }
             public IErrorHandlingService ErrorHandlingService { get; private set; }
             public ISyncErrorHandlingService SyncErrorHandlingService { get; private set; }
@@ -171,7 +172,7 @@ namespace Toggl.Foundation.MvvmCross
                 return this;
             }
 
-            public Builder WithNavigationService(IForkingNavigationService navigationService)
+            public Builder WithNavigationService(IMvxNavigationService navigationService)
             {
                 NavigationService = navigationService;
                 return this;
@@ -238,7 +239,7 @@ namespace Toggl.Foundation.MvvmCross
                 => WithOnboardingStorage(new TOnboardingStorage());
 
             public Builder WithNavigationService<TNavigationService>()
-                where TNavigationService : IForkingNavigationService, new()
+                where TNavigationService : IMvxNavigationService, new()
                 => WithNavigationService(new TNavigationService());
 
             public Builder WithPasswordManagerService<TPasswordManagerService>()

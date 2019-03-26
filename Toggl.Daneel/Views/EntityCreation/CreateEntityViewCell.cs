@@ -11,6 +11,7 @@ namespace Toggl.Daneel.Views.EntityCreation
 {
     public sealed partial class CreateEntityViewCell : BaseTableViewCell<CreateEntitySuggestion>
     {
+        public static readonly NSString Key = new NSString(nameof(CreateEntityViewCell));
         public static readonly string Identifier = nameof(CreateEntityViewCell);
         public static readonly UINib Nib;
 
@@ -21,7 +22,7 @@ namespace Toggl.Daneel.Views.EntityCreation
             Nib = UINib.FromName(nameof(CreateEntityViewCell), NSBundle.MainBundle);
         }
 
-        protected CreateEntityViewCell(IntPtr handle) : base(handle)
+        public CreateEntityViewCell(IntPtr handle) : base(handle)
         {
             // Note: this .ctor should not contain any initialization logic.
         }

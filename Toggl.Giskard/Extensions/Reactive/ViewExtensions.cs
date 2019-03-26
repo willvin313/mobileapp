@@ -84,5 +84,25 @@ namespace Toggl.Giskard.Extensions.Reactive
                 .Select(_ => convert(reactive.Base))
                 .Subscribe(action.Inputs);
         }
+
+        public static IDisposable BindAction<T>(this IReactive<View> reactive, OutputAction<T> action, ButtonEventType eventType = ButtonEventType.Tap)
+        {
+            IObservable<Unit> eventObservable = Observable.Empty<Unit>();
+            switch (eventType)
+            {
+                case ButtonEventType.Tap:
+                    eventObservable = reactive.Base.Rx().Tap();
+                    break;
+                case ButtonEventType.LongPress:
+                    eventObservable = reactive.Base.Rx().LongPress();
+                    break;
+            }
+
+            return Observable.Using(
+                    () => action.Enabled.Subscribe(e => { reactive.Base.Enabled = e; }),
+                    _ => eventObservable
+                )
+                .Subscribe(action.Inputs);
+        }
     }
 }

@@ -1,92 +1,114 @@
 ﻿using System;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
-using MvvmCross.Binding.BindingContext;
-using MvvmCross.Platforms.Ios.Binding;
-using MvvmCross.Platforms.Ios.Views;
-using MvvmCross.Plugin.Color;
+using Foundation;
+using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Daneel.Extensions;
+using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Foundation;
-using Toggl.Foundation.MvvmCross.Converters;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Multivac.Extensions;
 using UIKit;
 
 namespace Toggl.Daneel.ViewControllers
 {
     [ModalCardPresentation]
-    public sealed partial class EditProjectViewController : MvxViewController<EditProjectViewModel>, IDismissableViewController
+    public sealed partial class EditProjectViewController : ReactiveViewController<EditProjectViewModel>, IDismissableViewController
     {
-        private const float nameAlreadyTakenHeight = 16;
+        private static readonly nfloat nameAlreadyTakenHeight = 16;
 
         public EditProjectViewController() 
-            : base(nameof(EditProjectViewController), null)
+            : base(nameof(EditProjectViewController))
         {
         }
 
-        public async Task<bool> Dismiss()
+        public Task<bool> Dismiss()
         {
-            await ViewModel.CloseCommand.ExecuteAsync();
-            return true;
+            ViewModel.Close.Execute();
+            return Task.FromResult(true);
         }
 
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
 
-            NameTakenErrorLabel.Text = Resources.NameTakenError;
             TitleLabel.Text = Resources.NewProject;
             NameTextField.Placeholder = Resources.ProjectName;
+            NameTakenErrorLabel.Text = Resources.NameTakenError;
             DoneButton.SetTitle(Resources.Create, UIControlState.Normal);
 
-            var heightConverter = new BoolToConstantValueConverter<nfloat>(nameAlreadyTakenHeight, 0);
+            // Name
+            NameTextField.Rx().Text()
+                .Subscribe(ViewModel.Name.Accept)
+                .DisposedBy(DisposeBag);
 
-            var bindingSet = this.CreateBindingSet<EditProjectViewController, EditProjectViewModel>();
+            ViewModel.Name
+                .Subscribe(NameTextField.Rx().TextObserver())
+                .DisposedBy(DisposeBag);
 
-            PrivateProjectSwitch.SetState(ViewModel.IsPrivate, false);
+            // Color
+            ColorPickerOpeningView.Rx()
+                .BindAction(ViewModel.PickColor)
+                .DisposedBy(DisposeBag);
 
-            //Commands
-            bindingSet.Bind(DoneButton).To(vm => vm.DoneCommand);
-            bindingSet.Bind(CloseButton).To(vm => vm.CloseCommand);
-            bindingSet.Bind(ColorPickerOpeningView)
-                      .For(v => v.BindTap())
-                      .To(vm => vm.PickColorCommand);
+            ViewModel.Color
+                .Select(color => color.ToNativeColor())
+                .Subscribe(ColorCircleView.Rx().BackgroundColor())
+                .DisposedBy(DisposeBag);
 
-            bindingSet.Bind(ClientLabel)
-                      .For(v => v.BindTap())
-                      .To(vm => vm.PickClientCommand);
-            
-            bindingSet.Bind(WorkspaceLabel)
-                      .For(v => v.BindTap())
-                      .To(vm => vm.PickWorkspaceCommand);
+            // Error
+            ViewModel.NameIsAlreadyTaken
+                .Select(nameIsTaken => nameIsTaken ? nameAlreadyTakenHeight : 0)
+                .Subscribe(ProjectNameUsedErrorTextHeight.Rx().Constant())
+                .DisposedBy(DisposeBag);
 
-            bindingSet.Bind(ProjectNameUsedErrorTextHeight)
-                      .For(v => v.Constant)
-                      .To(vm => vm.IsNameAlreadyTaken)
-                      .WithConversion(heightConverter);
-            
-            bindingSet.Bind(PrivateProjectSwitch)
-                      .For(v => v.BindValueChanged())
-                      .To(vm => vm.TogglePrivateProjectCommand);
+            // Workspace
+            WorkspaceLabel.Rx()
+                .BindAction(ViewModel.PickWorkspace)
+                .DisposedBy(DisposeBag);
 
-            //State
-            bindingSet.Bind(NameTextField).To(vm => vm.Name);
-            bindingSet.Bind(WorkspaceLabel).To(vm => vm.WorkspaceName);
+            ViewModel.WorkspaceName
+                .Subscribe(WorkspaceLabel.Rx().Text())
+                .DisposedBy(DisposeBag);
 
-            bindingSet.Bind(ColorCircleView)
-                      .For(v => v.BackgroundColor)
-                      .To(vm => vm.Color)
-                      .WithConversion(new MvxNativeColorValueConverter());
+            // Client
+            ClientLabel.Rx()
+                .BindAction(ViewModel.PickClient)
+                .DisposedBy(DisposeBag);
 
-            bindingSet.Bind(DoneButton)
-                      .For(v => v.Enabled)
-                      .To(vm => vm.SaveEnabled);
+            var emptyText = Resources.AddClient.PrependWithAddIcon(ClientLabel.Font.CapHeight);
+            ViewModel.ClientName
+                .Select(attributedClientName)
+                .Subscribe(ClientLabel.Rx().AttributedText())
+                .DisposedBy(DisposeBag);
 
-            bindingSet.Bind(ClientLabel)
-                      .For(v => v.AttributedText)
-                      .To(vm => vm.ClientName)
-                      .WithConversion(new AddNewAttributedStringConverter(Resources.AddClient, ClientLabel.Font.CapHeight));
+            // Is Private
+            PrivateProjectSwitchContainer.Rx().Tap()
+                .Select(_ => PrivateProjectSwitch.On)
+                .Subscribe(ViewModel.IsPrivate.Accept)
+                .DisposedBy(DisposeBag);
 
-            bindingSet.Apply();
+            ViewModel.IsPrivate
+                .Subscribe(PrivateProjectSwitch.Rx().On())
+                .DisposedBy(DisposeBag);
+
+            // Save
+            DoneButton.Rx()
+                .BindAction(ViewModel.Save)
+                .DisposedBy(DisposeBag);
+
+            CloseButton.Rx()
+                .BindAction(ViewModel.Close)
+                .DisposedBy(DisposeBag);
+
+            NSAttributedString attributedClientName(string clientName)
+            {
+                if (string.IsNullOrEmpty(clientName))
+                    return emptyText;
+
+                return new NSAttributedString(clientName);
+            }
         }
     }
 }

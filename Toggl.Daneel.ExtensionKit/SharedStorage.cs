@@ -11,6 +11,7 @@ namespace Toggl.Daneel.ExtensionKit
         private const string NeedsSyncKey = "NeedsSyncKey";
         private const string UserIdKey = "UserId";
         private const string SiriTrackingEventsKey = "SiriTrackingEventsKey";
+        private const string LastUpdateKey = "LastUpdateKey";
 
         private NSUserDefaults userDefaults;
 
@@ -44,6 +45,12 @@ namespace Toggl.Daneel.ExtensionKit
             userDefaults.Synchronize();
         }
 
+        public void SetLastUpdateDate(DateTimeOffset date)
+        {
+            userDefaults.SetDouble(date.ToUnixTimeMilliseconds(), LastUpdateKey);
+            userDefaults.Synchronize();
+        }
+
         public void AddSiriTrackingEvent(SiriTrackingEvent e)
         {
             var currentEvents = (NSMutableArray)getTrackableEvents().MutableCopy();
@@ -66,7 +73,9 @@ namespace Toggl.Daneel.ExtensionKit
 
         public bool GetNeedsSync() => userDefaults.BoolForKey(NeedsSyncKey);
 
-        public void DeleteEverything() 
+        public DateTimeOffset GetLastUpdateDate() => DateTimeOffset.FromUnixTimeMilliseconds((long)userDefaults.DoubleForKey(LastUpdateKey));
+
+        public void DeleteEverything()
         {
             userDefaults.RemoveObject(ApiTokenKey);
             userDefaults.RemoveObject(NeedsSyncKey);

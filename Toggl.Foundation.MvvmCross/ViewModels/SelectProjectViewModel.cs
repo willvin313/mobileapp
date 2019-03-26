@@ -4,28 +4,24 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
-using MvvmCross.Commands;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
-using PropertyChanged;
 using Toggl.Foundation.Autocomplete.Suggestions;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Interactors;
-using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.Services;
+using Toggl.Foundation.Services;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using static Toggl.Foundation.Helper.Constants;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels
 {
-    using WorkspaceGroupedSuggestionsCollection = WorkspaceGroupedCollection<AutocompleteSuggestion>;
-
     [Preserve(AllMembers = true)]
     public sealed class SelectProjectViewModel
         : MvxViewModel<SelectProjectParameter, SelectProjectParameter>
@@ -36,65 +32,35 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly IMvxNavigationService navigationService;
         private readonly ISchedulerProvider schedulerProvider;
         private readonly IStopwatchProvider stopwatchProvider;
-        private readonly Subject<string> infoSubject = new Subject<string>();
 
         private long? taskId;
         private long? projectId;
         private long workspaceId;
-        private bool shouldShowProjectCreationSuggestion;
         private IStopwatch navigationFromEditTimeEntryViewModelStopwatch;
 
-        private List<IThreadSafeWorkspace> allWorkspaces = new List<IThreadSafeWorkspace>();
-
-        public string Text { get; set; } = "";
-
-        [DependsOn(nameof(Text))]
-        public bool UsesFilter => !string.IsNullOrEmpty(Text.Trim());
-
-        [DependsOn(nameof(Text))]
-        public bool SuggestCreation
-        {
-            get
-            {
-                if (!shouldShowProjectCreationSuggestion)
-                    return false;
-
-                if (!UsesFilter)
-                    return false;
-
-                var text = Text.Trim();
-
-                var isOfAllowedLength = text.LengthInBytes() <= MaxProjectNameLengthInBytes;
-                if (!isOfAllowedLength)
-                    return false;
-
-                return true;
-            }
-        }
+        private bool projectCreationSuggestionsAreEnabled;
 
         public bool UseGrouping { get; private set; }
 
-        public bool IsEmpty { get; set; } = false;
+        private BehaviorSubject<IList<CollectionSection<string, AutocompleteSuggestion>>> suggestionsSubject
+            = new BehaviorSubject<IList<CollectionSection<string, AutocompleteSuggestion>>>(new CollectionSection<string, AutocompleteSuggestion>[0]);
+        public IObservable<IList<CollectionSection<string, AutocompleteSuggestion>>> Suggestions => suggestionsSubject.AsObservable();
 
-        [DependsOn(nameof(IsEmpty))]
-        public string PlaceholderText
-            => IsEmpty
-            ? Resources.EnterProject
-            : Resources.AddFilterProjects;
+        public ISubject<string> FilterText { get; } = new BehaviorSubject<string>(string.Empty);
 
-        public IMvxAsyncCommand CloseCommand { get; }
+        public IObservable<bool> IsEmpty { get; }
 
-        public IMvxAsyncCommand CreateProjectCommand { get; }
+        public IObservable<string> PlaceholderText { get; }
 
-        public IMvxCommand<ProjectSuggestion> ToggleTaskSuggestionsCommand { get; }
+        public UIAction Close { get; }
 
-        public IMvxAsyncCommand<AutocompleteSuggestion> SelectProjectCommand { get; }
+        public InputAction<ProjectSuggestion> ToggleTaskSuggestions { get; }
 
-        public MvxObservableCollection<WorkspaceGroupedCollection<AutocompleteSuggestion>> Suggestions { get; }
-            = new MvxObservableCollection<WorkspaceGroupedCollection<AutocompleteSuggestion>>();
+        public InputAction<AutocompleteSuggestion> SelectProject { get; }
 
         public SelectProjectViewModel(
             ITogglDataSource dataSource,
+            IRxActionFactory rxActionFactory,
             IInteractorFactory interactorFactory,
             IMvxNavigationService navigationService,
             IDialogService dialogService,
@@ -103,6 +69,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
             Ensure.Argument.IsNotNull(dialogService, nameof(dialogService));
+            Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
             Ensure.Argument.IsNotNull(interactorFactory, nameof(interactorFactory));
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
@@ -115,10 +82,29 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             this.schedulerProvider = schedulerProvider;
             this.stopwatchProvider = stopwatchProvider;
 
-            CloseCommand = new MvxAsyncCommand(close);
-            CreateProjectCommand = new MvxAsyncCommand(createProject);
-            SelectProjectCommand = new MvxAsyncCommand<AutocompleteSuggestion>(selectProject);
-            ToggleTaskSuggestionsCommand = new MvxCommand<ProjectSuggestion>(toggleTaskSuggestions);
+            Close = rxActionFactory.FromAsync(close);
+            ToggleTaskSuggestions = rxActionFactory.FromAction<ProjectSuggestion>(toggleTaskSuggestions);
+            SelectProject = rxActionFactory.FromAsync<AutocompleteSuggestion>(selectProject);
+
+            IsEmpty = dataSource.Projects.GetAll().Select(projects => projects.None());
+            PlaceholderText = IsEmpty.Select(isEmpty => isEmpty ? Resources.EnterProject : Resources.AddFilterProjects);
+        }
+
+        private bool shouldSuggestCreation(string text)
+        {
+            if (!projectCreationSuggestionsAreEnabled)
+                return false;
+
+            text = text.Trim();
+
+            if (string.IsNullOrEmpty(text))
+                return false;
+
+            var isOfAllowedLength = text.LengthInBytes() <= MaxProjectNameLengthInBytes;
+            if (!isOfAllowedLength)
+                return false;
+
+            return true;
         }
 
         public override void Prepare(SelectProjectParameter parameter)
@@ -136,24 +122,40 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             var workspaces = await interactorFactory.GetAllWorkspaces().Execute();
 
-            shouldShowProjectCreationSuggestion = workspaces.Any(ws => ws.IsEligibleForProjectCreation());
-            allWorkspaces = workspaces.ToList();
-            UseGrouping = allWorkspaces.Count > 1;
+            projectCreationSuggestionsAreEnabled = workspaces.Any(ws => ws.IsEligibleForProjectCreation());
+            UseGrouping = workspaces.Count() > 1;
 
-            dataSource.Projects
-                      .GetAll()
-                      .Select(projects => projects.Any())
-                      .Subscribe(hasProjects => IsEmpty = !hasProjects);
+            FilterText.Subscribe(async text =>
+            {
+                var suggestions = interactorFactory.GetProjectsAutocompleteSuggestions(text.SplitToQueryWords()).Execute().SelectMany(x => x).ToEnumerable()
+                    .Cast<ProjectSuggestion>()
+                    .Select(setSelectedProject);
 
-            infoSubject.AsObservable()
-                       .StartWith(Text)
-                       .Select(text => text.SplitToQueryWords())
-                       .ObserveOn(schedulerProvider.BackgroundScheduler)
-                       .SelectMany(query => interactorFactory.GetProjectsAutocompleteSuggestions(query).Execute())
-                       .SubscribeOn(schedulerProvider.MainScheduler)
-                       .Select(suggestions => suggestions.Cast<ProjectSuggestion>())
-                       .Select(setSelectedProject)
-                       .Subscribe(onSuggestions);
+                var collectionSections = suggestions
+                    .GroupBy(project => project.WorkspaceId)
+                    .Select(grouping => grouping.OrderBy(projectSuggestion => projectSuggestion.ProjectName))
+                    .OrderBy(grouping => grouping.First().WorkspaceName)
+                    .Select(grouping => collectionSection(grouping, prependNoProject: string.IsNullOrEmpty(text)))
+                    .ToList();
+
+                if (shouldSuggestCreation(text))
+                {
+                    var createEntitySuggestion = new CreateEntitySuggestion(Resources.CreateProject, text);
+                    var section = new CollectionSection<string, AutocompleteSuggestion>(null, new[] { createEntitySuggestion });
+                    collectionSections.Insert(0, section);
+                }
+
+                if (collectionSections.None())
+                {
+                    var workspace = await interactorFactory.GetWorkspaceById(workspaceId).Execute();
+                    var noProjectSuggestion = ProjectSuggestion.NoProject(workspace.Id, workspace.Name);
+                    collectionSections.Add(
+                        new CollectionSection<string, AutocompleteSuggestion>(null, new[] { noProjectSuggestion })
+                    );
+                }
+
+                suggestionsSubject.OnNext(collectionSections);
+            });
         }
 
         public override void ViewAppeared()
@@ -163,66 +165,30 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             navigationFromEditTimeEntryViewModelStopwatch = null;
         }
 
-        private IEnumerable<ProjectSuggestion> setSelectedProject(IEnumerable<ProjectSuggestion> suggestions)
+        private CollectionSection<string, AutocompleteSuggestion> collectionSection(IEnumerable<ProjectSuggestion> suggestions, bool prependNoProject)
         {
-            return suggestions.Select(s =>
+            var workspaceName = suggestions.First().WorkspaceName;
+            var sectionItems = suggestions.ToList();
+
+            if (prependNoProject)
             {
-                s.Selected = s.ProjectId == projectId;
-                return s;
-            });
+                var workspaceIdForNoProject = suggestions.First().WorkspaceId;
+                var noProjectSuggestion = ProjectSuggestion.NoProject(workspaceIdForNoProject, workspaceName);
+                sectionItems.Insert(0, noProjectSuggestion);
+            }
+
+            return new CollectionSection<string, AutocompleteSuggestion>(workspaceName, sectionItems);
         }
 
-        private void OnTextChanged()
+        private ProjectSuggestion setSelectedProject(ProjectSuggestion suggestion)
         {
-            infoSubject.OnNext(Text);
+            suggestion.Selected = suggestion.ProjectId == projectId;
+            return suggestion; 
         }
 
-        private void onSuggestions(IEnumerable<ProjectSuggestion> suggestions)
+        private async Task createProject(string name)
         {
-            var workspaces = groupByWorkspace(suggestions, !UsesFilter);
-            if (!UsesFilter)
-                workspaces = addMissingWorkspacesTo(workspaces);
-
-            workspaces = workspaces
-                .OrderByDescending(ws => ws.WorkspaceId == workspaceId)
-                .ThenBy(ws => ws.WorkspaceName);
-
-            Suggestions.ReplaceWith(workspaces);
-        }
-
-        private IEnumerable<WorkspaceGroupedSuggestionsCollection> addMissingWorkspacesTo(IEnumerable<WorkspaceGroupedSuggestionsCollection> workspaces)
-        {
-            var usedWorkspaceIds = new HashSet<long>(workspaces.Select(ws => ws.WorkspaceId));
-
-            var unusedWorkspaces = allWorkspaces
-                .Where(ws => !usedWorkspaceIds.Contains(ws.Id))
-                .Select(workspaceGroupedSuggestionCollection);
-
-            return workspaces.Concat(unusedWorkspaces);
-        }
-
-        private WorkspaceGroupedSuggestionsCollection workspaceGroupedSuggestionCollection(IThreadSafeWorkspace workspace)
-            => new WorkspaceGroupedSuggestionsCollection(
-                workspace.Name,
-                workspace.Id,
-                new[] { ProjectSuggestion.NoProject(workspace.Id, workspace.Name) });
-
-        private IEnumerable<WorkspaceGroupedSuggestionsCollection> groupByWorkspace(IEnumerable<ProjectSuggestion> suggestions, bool prependNoProjectItem)
-        {
-            var sortedSuggestions = suggestions.OrderBy(ps => ps.ProjectName);
-
-            var groupedSuggestions = prependNoProjectItem
-                ? sortedSuggestions.GroupByWorkspaceAddingNoProject()
-                : sortedSuggestions.GroupByWorkspace();
-
-            return groupedSuggestions;
-        }
-
-        private async Task createProject()
-        {
-            if (!SuggestCreation) return;
-
-            var createdProjectId = await navigationService.Navigate<EditProjectViewModel, string, long?>(Text.Trim());
+            var createdProjectId = await navigationService.Navigate<EditProjectViewModel, string, long?>(name);
             if (createdProjectId == null) return;
 
             var project = await interactorFactory.GetProjectById(createdProjectId.Value).Execute();
@@ -237,6 +203,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private async Task selectProject(AutocompleteSuggestion suggestion)
         {
+            if (suggestion is CreateEntitySuggestion createEntitySuggestion)
+            {
+                await createProject(createEntitySuggestion.EntityName);
+                return;
+            }
+
             if (suggestion.WorkspaceId == workspaceId || suggestion.WorkspaceId == 0)
             {
                 setProject(suggestion);
@@ -282,41 +254,46 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private void toggleTaskSuggestions(ProjectSuggestion projectSuggestion)
         {
-            var grouping = Suggestions.FirstOrDefault(s => s.WorkspaceId == projectSuggestion.WorkspaceId);
-            if (grouping == null) return;
-
-            var suggestionIndex = grouping.IndexOf(projectSuggestion);
-            if (suggestionIndex < 0) return;
+            if (projectSuggestion.TasksVisible)
+                removeTasksFor(projectSuggestion);
+            else
+                insertTasksFor(projectSuggestion);
 
             projectSuggestion.TasksVisible = !projectSuggestion.TasksVisible;
-
-            var groupingIndex = Suggestions.IndexOf(grouping);
-            Suggestions.Remove(grouping);
-            Suggestions.Insert(groupingIndex,
-                new WorkspaceGroupedCollection<AutocompleteSuggestion>(
-                    grouping.WorkspaceName, grouping.WorkspaceId, getSuggestionsWithTasks(grouping)
-                )
-            );
         }
 
-        private IEnumerable<AutocompleteSuggestion> getSuggestionsWithTasks(
-            IEnumerable<AutocompleteSuggestion> suggestions)
+        private void insertTasksFor(ProjectSuggestion projectSuggestion)
         {
-            foreach (var suggestion in suggestions)
-            {
-                if (suggestion is TaskSuggestion) continue;
+            var indexOfTargetSection = suggestionsSubject.Value.IndexOf(section => section.Header == projectSuggestion.WorkspaceName);
+            if (indexOfTargetSection < 0) return;
+            var targetSection = suggestionsSubject.Value.ElementAt(indexOfTargetSection);
 
-                yield return suggestion;
+            var indexOfSuggestion = targetSection.Items.IndexOf(project => project == projectSuggestion);
+            if (indexOfSuggestion < 0) return;
+            var newItemsInSection = targetSection.Items.InsertRange(indexOfSuggestion + 1, projectSuggestion.Tasks.OrderBy(task => task.Name));
 
-                if (suggestion is ProjectSuggestion projectSuggestion && projectSuggestion.TasksVisible)
-                {
-                    var orderedTasks = projectSuggestion.Tasks
-                        .OrderBy(t => t.Name);
+            var newSection = new CollectionSection<string, AutocompleteSuggestion>(targetSection.Header, newItemsInSection);
+            var newSuggestions = suggestionsSubject.Value.ToList();
+            newSuggestions[indexOfTargetSection] = newSection;
 
-                    foreach (var taskSuggestion in orderedTasks)
-                        yield return taskSuggestion;
-                }
-            }
+            suggestionsSubject.OnNext(newSuggestions);
+        }
+
+        private void removeTasksFor(ProjectSuggestion projectSuggestion)
+        {
+            var indexOfTargetSection = suggestionsSubject.Value.IndexOf(section => section.Items.Contains(projectSuggestion));
+            if (indexOfTargetSection < 0) return;
+
+            var targetSection = suggestionsSubject.Value.ElementAt(indexOfTargetSection);
+            var newItemsInSection = targetSection.Items.ToList();
+            foreach (var task in projectSuggestion.Tasks)
+                newItemsInSection.Remove(task);
+
+            var newSection = new CollectionSection<string, AutocompleteSuggestion>(targetSection.Header, newItemsInSection);
+            var newSuggestions = suggestionsSubject.Value.ToList();
+            newSuggestions[indexOfTargetSection] = newSection;
+
+            suggestionsSubject.OnNext(newSuggestions);
         }
     }
 }

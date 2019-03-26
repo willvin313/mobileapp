@@ -234,336 +234,996 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\Contents.json" />
-    <ImageAsset Include="Assets.xcassets\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icArrowUp.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icBillable.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icClose.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icContinue.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icDatetime.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icDone.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icDownS.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icProjects.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icRefresh.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icReports.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icSettings.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icSyncerror.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icTags.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icUpS.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\playIcon.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\stopIcon.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icArrowUp.imageset\icArrowUp.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icArrowUp.imageset\icArrowUp%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icArrowUp.imageset\icArrowUp%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icBillable.imageset\icBillable.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icBillable.imageset\icBillable%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icBillable.imageset\icBillable%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icClose.imageset\icClose.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icClose.imageset\icClose%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icClose.imageset\icClose%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icContinue.imageset\icContinue.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icContinue.imageset\icContinue%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icContinue.imageset\icContinue%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icDatetime.imageset\icDatetime.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icDatetime.imageset\icDatetime%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icDatetime.imageset\icDatetime%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icDone.imageset\icDone.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icDone.imageset\icDone%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icDone.imageset\icDone%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icDownS.imageset\icDownS.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icDownS.imageset\icDownS%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icDownS.imageset\icDownS%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icProjects.imageset\icProjects.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icProjects.imageset\icProjects%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icProjects.imageset\icProjects%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icRefresh.imageset\icRefresh.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icRefresh.imageset\icRefresh%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icRefresh.imageset\icRefresh%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icReports.imageset\icReports.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icReports.imageset\icReports%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icReports.imageset\icReports%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icSettings.imageset\icSettings.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icSettings.imageset\icSettings%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icSettings.imageset\icSettings%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icSyncerror.imageset\icSyncerror.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icSyncerror.imageset\icSyncerror%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icSyncerror.imageset\icSyncerror%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icTags.imageset\icTags.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icTags.imageset\icTags%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icTags.imageset\icTags%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icUpS.imageset\icUpS.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icUpS.imageset\icUpS%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icUpS.imageset\icUpS%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\stopIcon.imageset\stopIcon.png" />
-    <ImageAsset Include="Resources\Images.xcassets\stopIcon.imageset\stopIcon%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\stopIcon.imageset\stopIcon%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\togglLogoWhite.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\togglLogoWhite.imageset\togglLogoWhite.png" />
-    <ImageAsset Include="Resources\Images.xcassets\togglLogoWhite.imageset\togglLogoWhite%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\togglLogoWhite.imageset\togglLogoWhite%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\notebook.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\notebook.imageset\illustration1.png" />
-    <ImageAsset Include="Resources\Images.xcassets\notebook.imageset\illustration1%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\notebook.imageset\illustration1%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\togglCronometer.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\togglCronometer.imageset\illustration2.png" />
-    <ImageAsset Include="Resources\Images.xcassets\togglCronometer.imageset\illustration2%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\togglCronometer.imageset\illustration2%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icOnePassword.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icPassword.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icPassword.imageset\icPassword.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icPassword.imageset\icPassword%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icPassword.imageset\icPassword%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\togglLogo.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\togglLogo.imageset\togglLogo.png" />
-    <ImageAsset Include="Resources\Images.xcassets\togglLogo.imageset\togglLogo%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\togglLogo.imageset\togglLogo%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\line.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\line.imageset\line.png" />
-    <ImageAsset Include="Resources\Images.xcassets\line.imageset\line%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\line.imageset\line%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icLoader.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icLoader.imageset\ic-spinner.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icLoader.imageset\ic-spinner%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icLoader.imageset\ic-spinner%403x.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-App-29x29.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\Icon-App-29x29.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\Icon-App-29x29.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-App-80x80.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\Icon-App-80x80.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\Icon-App-80x80.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-App-120x120.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\Icon-App-120x120.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\Icon-App-120x120.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-App-58x58.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\Icon-App-58x58.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\Icon-App-58x58.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-App-87x87.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\Icon-App-87x87.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\Icon-App-87x87.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-App-57x57.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\Icon-App-57x57.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\Icon-App-57x57.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-App-114x114.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\Icon-App-114x114.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\Icon-App-114x114.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-App-180x180.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\Icon-App-180x180.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\Icon-App-180x180.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icAdd.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icAdd.imageset\icAddS.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icAdd.imageset\icAddS%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icAdd.imageset\icAddS%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icProjectDot.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icProjectDot.imageset\icProjectDot.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icProjectDot.imageset\icProjectDot%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icProjectDot.imageset\icProjectDot%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\duration.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\duration.imageset\duration.png" />
-    <ImageAsset Include="Resources\Images.xcassets\duration.imageset\duration%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\duration.imageset\duration%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationSpider.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationSpider.imageset\icIllustrationSpider.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationSpider.imageset\icIllustrationSpider%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationSpider.imageset\icIllustrationSpider%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icDoneSmall.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icDoneSmall.imageset\icDone.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icDoneSmall.imageset\icDone%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icDoneSmall.imageset\icDone%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icSearch.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icSearch.imageset\search.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icSearch.imageset\search%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icSearch.imageset\search%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icCheckBoxChecked.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icCheckBoxChecked.imageset\checkboxChecked.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icCheckBoxChecked.imageset\checkboxChecked%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icCheckBoxChecked.imageset\checkboxChecked%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icCheckBoxUnchecked.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icCheckBoxUnchecked.imageset\icCheckboxUnchecked.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icCheckBoxUnchecked.imageset\icCheckboxUnchecked%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icCheckBoxUnchecked.imageset\icCheckboxUnchecked%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icUnsynced.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icUnsynced.imageset\icUnsynced.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icUnsynced.imageset\icUnsynced%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icUnsynced.imageset\icUnsynced%403x.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\toggl-app-icon-1024x1024.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\toggl-app-icon-1024x1024.png" />
-    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\toggl-app-icon-1024x1024.png" />
-    <ImageAsset Include="Resources\Images.xcassets\search.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\search.imageset\search.png" />
-    <ImageAsset Include="Resources\Images.xcassets\search.imageset\search%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\search.imageset\search%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationTags.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationTags.imageset\icIllustrationTags.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationTags.imageset\icIllustrationTags%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationTags.imageset\icIllustrationTags%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationProject.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationProject.imageset\icIllustrationProjects.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationProject.imageset\icIllustrationProjects%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationProject.imageset\icIllustrationProjects%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icArrowRight.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icArrowRight.imageset\icArrowRight.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icArrowRight.imageset\icArrowRight%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icArrowRight.imageset\icArrowRight%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icGoogle.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icGoogle.imageset\icGoogle.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icGoogle.imageset\icGoogle%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icGoogle.imageset\icGoogle%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icErrorSmall.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icErrorSmall.imageset\icErrorSmall.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icErrorSmall.imageset\icErrorSmall%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icErrorSmall.imageset\icErrorSmall%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationReports.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationReports.imageset\icIllustrationReports.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationReports.imageset\icIllustrationReports%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationReports.imageset\icIllustrationReports%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icChartEmpty.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icChartEmpty.imageset\icChartEmpty.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icChartEmpty.imageset\icChartEmpty%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icChartEmpty.imageset\icChartEmpty%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationTagsSmall.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationTagsSmall.imageset\icIllustrationTagsS.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationTagsSmall.imageset\icIllustrationTagsS%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationTagsSmall.imageset\icIllustrationTagsS%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icJustSpider.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icJustSpider.imageset\icJustSpider.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icJustSpider.imageset\icJustSpider%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icJustSpider.imageset\icJustSpider%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationProjectsSmall.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationProjectsSmall.imageset\icIllustrationProjectsS.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationProjectsSmall.imageset\icIllustrationProjectsS%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationProjectsSmall.imageset\icIllustrationProjectsS%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\manualIcon.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\manualIcon.imageset\manualIcon.png" />
-    <ImageAsset Include="Resources\Images.xcassets\manualIcon.imageset\manualIcon%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\manualIcon.imageset\manualIcon%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icBack.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icBack.imageset\icBack.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icBack.imageset\icBack%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icBack.imageset\icBack%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icStartLabel.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icStartLabel.imageset\icStartLabel.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icStartLabel.imageset\icStartLabel%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icStartLabel.imageset\icStartLabel%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icEndLabel.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icEndLabel.imageset\icEndLabel.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icEndLabel.imageset\icEndLabel%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icEndLabel.imageset\icEndLabel%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\date.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\date.imageset\date.png" />
-    <ImageAsset Include="Resources\Images.xcassets\date.imageset\date%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\date.imageset\date%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icErrorEdit.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icErrorEdit.imageset\icErrorEdit.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icErrorEdit.imageset\icErrorEdit%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icErrorEdit.imageset\icErrorEdit%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\playIcon.imageset\play.png" />
-    <ImageAsset Include="Resources\Images.xcassets\playIcon.imageset\play%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\playIcon.imageset\play%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\bgNoiseBlue.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\bgNoiseBlue.imageset\bgNoiseBlue.png" />
-    <ImageAsset Include="Resources\Images.xcassets\bgNoiseBlue.imageset\bgNoiseBlue%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\bgNoiseBlue.imageset\bgNoiseBlue%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\bgNoisePurple.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\bgNoisePurple.imageset\bgNoisePurple.png" />
-    <ImageAsset Include="Resources\Images.xcassets\bgNoisePurple.imageset\bgNoisePurple%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\bgNoisePurple.imageset\bgNoisePurple%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\bgNoiseYellow.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\bgNoiseYellow.imageset\bgNoiseYellow.png" />
-    <ImageAsset Include="Resources\Images.xcassets\bgNoiseYellow.imageset\bgNoiseYellow%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\bgNoiseYellow.imageset\bgNoiseYellow%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\doneGreen.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\doneGreen.imageset\doneGreen.png" />
-    <ImageAsset Include="Resources\Images.xcassets\doneGreen.imageset\doneGreen%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\doneGreen.imageset\doneGreen%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\emojiRaisedHands.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\emojiRaisedHands.imageset\emoji1.png" />
-    <ImageAsset Include="Resources\Images.xcassets\emojiRaisedHands.imageset\emoji1%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\emojiRaisedHands.imageset\emoji1%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icCheckGrey.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icCheckGrey.imageset\icCheckGrey.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icCheckGrey.imageset\icCheckGrey%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icCheckGrey.imageset\icCheckGrey%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\bike.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\bike.imageset\bike.png" />
-    <ImageAsset Include="Resources\Images.xcassets\bike.imageset\bike%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\bike.imageset\bike%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\togglLogoBig.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\togglLogoBig.imageset\logo.png" />
-    <ImageAsset Include="Resources\Images.xcassets\togglLogoBig.imageset\logo%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\togglLogoBig.imageset\logo%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icGoogleColored.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icGoogleColored.imageset\google.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icGoogleColored.imageset\google%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icGoogleColored.imageset\google%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icOnePassword.imageset\passwordman.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icOnePassword.imageset\passwordman%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icOnePassword.imageset\passwordman%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\thumbsup.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\thumbsup.imageset\thumbsup.png" />
-    <ImageAsset Include="Resources\Images.xcassets\thumbsup.imageset\thumbsup%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\thumbsup.imageset\thumbsup%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\thumbsdown.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\thumbsdown.imageset\thumbsdown.png" />
-    <ImageAsset Include="Resources\Images.xcassets\thumbsdown.imageset\thumbsdown%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\thumbsdown.imageset\thumbsdown%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\confirmation.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\confirmation.imageset\confirmation.png" />
-    <ImageAsset Include="Resources\Images.xcassets\confirmation.imageset\confirmation%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\confirmation.imageset\confirmation%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icBackNoPadding.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icBackNoPadding.imageset\icBack.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icBackNoPadding.imageset\icBack%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icBackNoPadding.imageset\icBack%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\paws.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\paws.imageset\paws.png" />
-    <ImageAsset Include="Resources\Images.xcassets\paws.imageset\paws%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\paws.imageset\paws%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icBackNoPadding.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icBackNoPadding.imageset\icBack.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icBackNoPadding.imageset\icBack%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icBackNoPadding.imageset\icBack%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icWarning.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icWarning.imageset\icWarning.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icWarning.imageset\icWarning%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icWarning.imageset\icWarning%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icCalendar.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icCalendar.imageset\icCalendar.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icCalendar.imageset\icCalendar%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icCalendar.imageset\icCalendar%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationCalendar.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationCalendar.imageset\icIllustrationCalendar.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationCalendar.imageset\icIllustrationCalendar%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationCalendar.imageset\icIllustrationCalendar%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationErrorSpider.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationErrorSpider.imageset\icIllustrationErrorSpider.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationErrorSpider.imageset\icIllustrationErrorSpider%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationErrorSpider.imageset\icIllustrationErrorSpider%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icTime.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icTime.imageset\icTime.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icTime.imageset\icTime%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icTime.imageset\icTime%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icWorkspace.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icWorkspace.imageset\icWorkspace.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icWorkspace.imageset\icWorkspace%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icWorkspace.imageset\icWorkspace%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationErrorWorkspace.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationErrorWorkspace.imageset\icIllustrationErrorWorkspace.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationErrorWorkspace.imageset\icIllustrationErrorWorkspace%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icIllustrationErrorWorkspace.imageset\icIllustrationErrorWorkspace%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icCalendarSmall.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\icCalendarSmall.imageset\icCalendarSmall.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icCalendarSmall.imageset\icCalendarSmall%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\icCalendarSmall.imageset\icCalendarSmall%403x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\togglLogoWithoutTextRed.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\togglLogoWithoutTextRed.imageset\togglLogoRed.pdf" />
-    <ImageAsset Include="Resources\Images.xcassets\stripes.imageset\Contents.json" />
-    <ImageAsset Include="Resources\Images.xcassets\stripes.imageset\stripes.png" />
-    <ImageAsset Include="Resources\Images.xcassets\stripes.imageset\stripes%402x.png" />
-    <ImageAsset Include="Resources\Images.xcassets\stripes.imageset\stripes%403x.png" />
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icArrowUp.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icBillable.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icClose.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icContinue.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icDatetime.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icDone.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icDownS.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icProjects.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icRefresh.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icReports.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icSettings.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icSyncerror.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icTags.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icUpS.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\playIcon.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\stopIcon.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icArrowUp.imageset\icArrowUp.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icArrowUp.imageset\icArrowUp%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icArrowUp.imageset\icArrowUp%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icBillable.imageset\icBillable.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icBillable.imageset\icBillable%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icBillable.imageset\icBillable%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icClose.imageset\icClose.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icClose.imageset\icClose%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icClose.imageset\icClose%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icContinue.imageset\icContinue.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icContinue.imageset\icContinue%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icContinue.imageset\icContinue%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icDatetime.imageset\icDatetime.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icDatetime.imageset\icDatetime%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icDatetime.imageset\icDatetime%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icDone.imageset\icDone.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icDone.imageset\icDone%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icDone.imageset\icDone%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icDownS.imageset\icDownS.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icDownS.imageset\icDownS%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icDownS.imageset\icDownS%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icProjects.imageset\icProjects.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icProjects.imageset\icProjects%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icProjects.imageset\icProjects%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icRefresh.imageset\icRefresh.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icRefresh.imageset\icRefresh%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icRefresh.imageset\icRefresh%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icReports.imageset\icReports.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icReports.imageset\icReports%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icReports.imageset\icReports%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icSettings.imageset\icSettings.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icSettings.imageset\icSettings%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icSettings.imageset\icSettings%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icSyncerror.imageset\icSyncerror.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icSyncerror.imageset\icSyncerror%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icSyncerror.imageset\icSyncerror%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icTags.imageset\icTags.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icTags.imageset\icTags%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icTags.imageset\icTags%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icUpS.imageset\icUpS.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icUpS.imageset\icUpS%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icUpS.imageset\icUpS%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\stopIcon.imageset\stopIcon.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\stopIcon.imageset\stopIcon%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\stopIcon.imageset\stopIcon%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\togglLogoWhite.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\togglLogoWhite.imageset\togglLogoWhite.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\togglLogoWhite.imageset\togglLogoWhite%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\togglLogoWhite.imageset\togglLogoWhite%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\notebook.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\notebook.imageset\illustration1.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\notebook.imageset\illustration1%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\notebook.imageset\illustration1%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\togglCronometer.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\togglCronometer.imageset\illustration2.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\togglCronometer.imageset\illustration2%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\togglCronometer.imageset\illustration2%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icOnePassword.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icPassword.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icPassword.imageset\icPassword.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icPassword.imageset\icPassword%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icPassword.imageset\icPassword%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\togglLogo.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\togglLogo.imageset\togglLogo.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\togglLogo.imageset\togglLogo%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\togglLogo.imageset\togglLogo%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\line.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\line.imageset\line.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\line.imageset\line%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\line.imageset\line%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icLoader.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icLoader.imageset\ic-spinner.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icLoader.imageset\ic-spinner%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icLoader.imageset\ic-spinner%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-App-29x29.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\Icon-App-29x29.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\Icon-App-29x29.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-App-80x80.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\Icon-App-80x80.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\Icon-App-80x80.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-App-120x120.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\Icon-App-120x120.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\Icon-App-120x120.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-App-58x58.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\Icon-App-58x58.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\Icon-App-58x58.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-App-87x87.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\Icon-App-87x87.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\Icon-App-87x87.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-App-57x57.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\Icon-App-57x57.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\Icon-App-57x57.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-App-114x114.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\Icon-App-114x114.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\Icon-App-114x114.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon-App-180x180.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\Icon-App-180x180.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\Icon-App-180x180.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icAdd.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icAdd.imageset\icAddS.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icAdd.imageset\icAddS%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icAdd.imageset\icAddS%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icProjectDot.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icProjectDot.imageset\icProjectDot.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icProjectDot.imageset\icProjectDot%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icProjectDot.imageset\icProjectDot%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\duration.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\duration.imageset\duration.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\duration.imageset\duration%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\duration.imageset\duration%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationSpider.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationSpider.imageset\icIllustrationSpider.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationSpider.imageset\icIllustrationSpider%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationSpider.imageset\icIllustrationSpider%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icDoneSmall.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icDoneSmall.imageset\icDone.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icDoneSmall.imageset\icDone%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icDoneSmall.imageset\icDone%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icSearch.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icSearch.imageset\search.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icSearch.imageset\search%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icSearch.imageset\search%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCheckBoxChecked.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCheckBoxChecked.imageset\checkboxChecked.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCheckBoxChecked.imageset\checkboxChecked%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCheckBoxChecked.imageset\checkboxChecked%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCheckBoxUnchecked.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCheckBoxUnchecked.imageset\icCheckboxUnchecked.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCheckBoxUnchecked.imageset\icCheckboxUnchecked%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCheckBoxUnchecked.imageset\icCheckboxUnchecked%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icUnsynced.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icUnsynced.imageset\icUnsynced.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icUnsynced.imageset\icUnsynced%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icUnsynced.imageset\icUnsynced%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\toggl-app-icon-1024x1024.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-adhoc.appiconset\toggl-app-icon-1024x1024.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon-debug.appiconset\toggl-app-icon-1024x1024.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\search.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\search.imageset\search.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\search.imageset\search%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\search.imageset\search%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationTags.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationTags.imageset\icIllustrationTags.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationTags.imageset\icIllustrationTags%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationTags.imageset\icIllustrationTags%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationProject.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationProject.imageset\icIllustrationProjects.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationProject.imageset\icIllustrationProjects%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationProject.imageset\icIllustrationProjects%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icArrowRight.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icArrowRight.imageset\icArrowRight.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icArrowRight.imageset\icArrowRight%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icArrowRight.imageset\icArrowRight%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icGoogle.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icGoogle.imageset\icGoogle.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icGoogle.imageset\icGoogle%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icGoogle.imageset\icGoogle%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icErrorSmall.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icErrorSmall.imageset\icErrorSmall.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icErrorSmall.imageset\icErrorSmall%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icErrorSmall.imageset\icErrorSmall%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationReports.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationReports.imageset\icIllustrationReports.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationReports.imageset\icIllustrationReports%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationReports.imageset\icIllustrationReports%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icChartEmpty.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icChartEmpty.imageset\icChartEmpty.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icChartEmpty.imageset\icChartEmpty%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icChartEmpty.imageset\icChartEmpty%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationTagsSmall.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationTagsSmall.imageset\icIllustrationTagsS.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationTagsSmall.imageset\icIllustrationTagsS%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationTagsSmall.imageset\icIllustrationTagsS%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icJustSpider.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icJustSpider.imageset\icJustSpider.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icJustSpider.imageset\icJustSpider%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icJustSpider.imageset\icJustSpider%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationProjectsSmall.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationProjectsSmall.imageset\icIllustrationProjectsS.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationProjectsSmall.imageset\icIllustrationProjectsS%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationProjectsSmall.imageset\icIllustrationProjectsS%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\manualIcon.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\manualIcon.imageset\manualIcon.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\manualIcon.imageset\manualIcon%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\manualIcon.imageset\manualIcon%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icBack.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icBack.imageset\icBack.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icBack.imageset\icBack%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icBack.imageset\icBack%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icStartLabel.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icStartLabel.imageset\icStartLabel.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icStartLabel.imageset\icStartLabel%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icStartLabel.imageset\icStartLabel%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icEndLabel.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icEndLabel.imageset\icEndLabel.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icEndLabel.imageset\icEndLabel%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icEndLabel.imageset\icEndLabel%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\date.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\date.imageset\date.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\date.imageset\date%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\date.imageset\date%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icErrorEdit.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icErrorEdit.imageset\icErrorEdit.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icErrorEdit.imageset\icErrorEdit%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icErrorEdit.imageset\icErrorEdit%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\playIcon.imageset\play.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\playIcon.imageset\play%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\playIcon.imageset\play%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\bgNoiseBlue.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\bgNoiseBlue.imageset\bgNoiseBlue.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\bgNoiseBlue.imageset\bgNoiseBlue%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\bgNoiseBlue.imageset\bgNoiseBlue%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\bgNoisePurple.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\bgNoisePurple.imageset\bgNoisePurple.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\bgNoisePurple.imageset\bgNoisePurple%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\bgNoisePurple.imageset\bgNoisePurple%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\bgNoiseYellow.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\bgNoiseYellow.imageset\bgNoiseYellow.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\bgNoiseYellow.imageset\bgNoiseYellow%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\bgNoiseYellow.imageset\bgNoiseYellow%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\doneGreen.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\doneGreen.imageset\doneGreen.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\doneGreen.imageset\doneGreen%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\doneGreen.imageset\doneGreen%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\emojiRaisedHands.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\emojiRaisedHands.imageset\emoji1.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\emojiRaisedHands.imageset\emoji1%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\emojiRaisedHands.imageset\emoji1%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCheckGrey.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCheckGrey.imageset\icCheckGrey.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCheckGrey.imageset\icCheckGrey%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCheckGrey.imageset\icCheckGrey%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\bike.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\bike.imageset\bike.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\bike.imageset\bike%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\bike.imageset\bike%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\togglLogoBig.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\togglLogoBig.imageset\logo.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\togglLogoBig.imageset\logo%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\togglLogoBig.imageset\logo%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icGoogleColored.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icGoogleColored.imageset\google.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icGoogleColored.imageset\google%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icGoogleColored.imageset\google%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icOnePassword.imageset\passwordman.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icOnePassword.imageset\passwordman%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icOnePassword.imageset\passwordman%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\thumbsup.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\thumbsup.imageset\thumbsup.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\thumbsup.imageset\thumbsup%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\thumbsup.imageset\thumbsup%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\thumbsdown.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\thumbsdown.imageset\thumbsdown.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\thumbsdown.imageset\thumbsdown%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\thumbsdown.imageset\thumbsdown%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\confirmation.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\confirmation.imageset\confirmation.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\confirmation.imageset\confirmation%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\confirmation.imageset\confirmation%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icBackNoPadding.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icBackNoPadding.imageset\icBack.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icBackNoPadding.imageset\icBack%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icBackNoPadding.imageset\icBack%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\paws.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\paws.imageset\paws.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\paws.imageset\paws%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\paws.imageset\paws%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icBackNoPadding.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icBackNoPadding.imageset\icBack.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icBackNoPadding.imageset\icBack%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icBackNoPadding.imageset\icBack%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icWarning.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icWarning.imageset\icWarning.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icWarning.imageset\icWarning%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icWarning.imageset\icWarning%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCalendar.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCalendar.imageset\icCalendar.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCalendar.imageset\icCalendar%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCalendar.imageset\icCalendar%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationCalendar.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationCalendar.imageset\icIllustrationCalendar.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationCalendar.imageset\icIllustrationCalendar%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationCalendar.imageset\icIllustrationCalendar%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationErrorSpider.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationErrorSpider.imageset\icIllustrationErrorSpider.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationErrorSpider.imageset\icIllustrationErrorSpider%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationErrorSpider.imageset\icIllustrationErrorSpider%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icTime.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icTime.imageset\icTime.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icTime.imageset\icTime%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icTime.imageset\icTime%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icWorkspace.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icWorkspace.imageset\icWorkspace.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icWorkspace.imageset\icWorkspace%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icWorkspace.imageset\icWorkspace%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationErrorWorkspace.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationErrorWorkspace.imageset\icIllustrationErrorWorkspace.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationErrorWorkspace.imageset\icIllustrationErrorWorkspace%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icIllustrationErrorWorkspace.imageset\icIllustrationErrorWorkspace%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCalendarSmall.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCalendarSmall.imageset\icCalendarSmall.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCalendarSmall.imageset\icCalendarSmall%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\icCalendarSmall.imageset\icCalendarSmall%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\togglLogoWithoutTextRed.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\togglLogoWithoutTextRed.imageset\togglLogoRed.pdf">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\stripes.imageset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\stripes.imageset\stripes.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\stripes.imageset\stripes%402x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Resources\Images.xcassets\stripes.imageset\stripes%403x.png">
+      <Visible>false</Visible>
+    </ImageAsset>
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="LaunchScreen.storyboard" />
@@ -644,6 +1304,9 @@
     <InterfaceDefinition Include="Cells\SelectDefaultWorkspaceTableViewCell.xib" />
     <InterfaceDefinition Include="Views\Tag\CreateTagViewCell.xib" />
     <InterfaceDefinition Include="Views\Tag\NewTagViewCell.xib" />
+    <InterfaceDefinition Include="Views\StartTimeEntry\ReactiveProjectSuggestionViewCell.xib" />
+    <InterfaceDefinition Include="Views\StartTimeEntry\ReactiveWorkspaceHeaderViewCell.xib" />
+    <InterfaceDefinition Include="Views\StartTimeEntry\ReactiveTaskSuggestionViewCell.xib" />
     <InterfaceDefinition Include="Cells\TimeEntriesLog\TimeEntriesLogHeaderView.xib" />
     <InterfaceDefinition Include="Cells\TimeEntriesLog\TimeEntriesLogViewCell.xib" />
     <InterfaceDefinition Include="Views\EntityCreation\CreateEntityViewCell.xib" />
@@ -663,7 +1326,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Analytics\SiriTrackableEvent.cs" />
+    <Compile Include="Analytics\SiriIntentErrorTrackingEvent.cs" />
+    <Compile Include="Analytics\SiriTrackingEventExtensions.cs" />
     <Compile Include="Binding\DatePickerDateTimeOffsetTargetBinding.cs" />
     <Compile Include="Cells\BaseCollectionViewCell.cs" />
     <Compile Include="Extensions\Binders\ReactiveTableViewBinder.cs" />
@@ -713,7 +1377,6 @@
     <Compile Include="ViewSources\Generic\ReactiveSectionedListTableViewSource.cs" />
     <Compile Include="ViewSources\Generic\MutableSectionedListTableViewSource.cs" />
     <Compile Include="ViewSources\Generic\TableView\BaseTableViewSource.cs" />
-    <Compile Include="ViewSources\SelectProjectTableViewSource.cs" />
     <Compile Include="Binding\TextFieldSecureTextEntryTargetBinding.cs" />
     <Compile Include="Binding\BarButtonAnimatedEnabledTargetBinding.cs" />
     <Compile Include="Binding\TextFieldFocusTargetBinding.cs" />
@@ -823,7 +1486,6 @@
     <Compile Include="ViewControllers\SelectClientViewController.designer.cs">
       <DependentUpon>SelectClientViewController.cs</DependentUpon>
     </Compile>
-    <Compile Include="ViewSources\CreateSuggestionGroupedTableViewSource.cs" />
     <Compile Include="Views\TextViewWithPlaceholder.cs" />
     <Compile Include="Binding\TextViewWithPlaceholderTextTargetBinding.cs" />
     <Compile Include="Binding\TextFieldPlaceholderTargetBinding.cs" />
@@ -1165,6 +1827,19 @@
       <DependentUpon>NewTagViewCell.cs</DependentUpon>
     </Compile>
     <Compile Include="Extensions\TimeSpanExtensions.cs" />
+    <Compile Include="Views\StartTimeEntry\ReactiveProjectSuggestionViewCell.cs" />
+    <Compile Include="Views\StartTimeEntry\ReactiveProjectSuggestionViewCell.designer.cs">
+      <DependentUpon>ReactiveProjectSuggestionViewCell.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ViewSources\SelectProjectTableViewSource.cs" />
+    <Compile Include="Views\StartTimeEntry\ReactiveWorkspaceHeaderViewCell.cs" />
+    <Compile Include="Views\StartTimeEntry\ReactiveWorkspaceHeaderViewCell.designer.cs">
+      <DependentUpon>ReactiveWorkspaceHeaderViewCell.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\StartTimeEntry\ReactiveTaskSuggestionViewCell.cs" />
+    <Compile Include="Views\StartTimeEntry\ReactiveTaskSuggestionViewCell.designer.cs">
+      <DependentUpon>ReactiveTaskSuggestionViewCell.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\Calendar\CalendarCollectionViewZoomHelper.cs" />
     <Compile Include="ViewSources\Generic\TableView\CustomTableViewSource.cs" />
     <Compile Include="Cells\TimeEntriesLog\TimeEntriesLogHeaderView.cs" />

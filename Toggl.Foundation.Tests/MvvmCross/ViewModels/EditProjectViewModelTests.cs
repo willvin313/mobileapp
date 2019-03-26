@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.Reactive.Testing;
 using MvvmCross.UI;
 using NSubstitute;
 using Toggl.Foundation.DTOs;
@@ -11,9 +13,8 @@ using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Tests.Generators;
+using Toggl.Foundation.Tests.TestExtensions;
 using Toggl.Multivac.Extensions;
-using Toggl.Multivac.Models;
-using Toggl.PrimeRadiant.Models;
 using Xunit;
 using ProjectPredicate = System.Func<Toggl.PrimeRadiant.Models.IDatabaseProject, bool>;
 
@@ -29,26 +30,34 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
             protected EditProjectViewModelTest()
             {
-                ViewModel.Name = "A valid name";
+                ViewModel.Prepare("A valid name");
             }
 
             protected override EditProjectViewModel CreateViewModel()
-                => new EditProjectViewModel(DataSource, DialogService, InteractorFactory, NavigationService, StopwatchProvider);
+                => new EditProjectViewModel(
+                    DataSource,
+                    DialogService,
+                    RxActionFactory,
+                    InteractorFactory,
+                    SchedulerProvider,
+                    StopwatchProvider,
+                    NavigationService
+                );
         }
 
-        public abstract class EditProjectWithSpecificNameViewModelTest : EditProjectViewModelTest
+        public abstract class WorkspaceChangeAwareTests : EditProjectViewModelTest
         {
             private const long otherWorkspaceId = DefaultWorkspaceId + 1;
             private const long projectId = 12345;
 
             protected string ProjectName { get; } = "A random project";
 
-            protected void SetupDataSource(bool isFromSameWorkspace)
+            protected void SetupDataSourceToReturnExistingProjectsAndDefaultWorkspace(bool dataSourceProjectIsInSameWorkspace)
             {
                 var project = Substitute.For<IThreadSafeProject>();
                 project.Id.Returns(projectId);
                 project.Name.Returns(ProjectName);
-                project.WorkspaceId.Returns(isFromSameWorkspace ? DefaultWorkspaceId : otherWorkspaceId);
+                project.WorkspaceId.Returns(dataSourceProjectIsInSameWorkspace ? DefaultWorkspaceId : otherWorkspaceId);
 
                 var defaultWorkspace = Substitute.For<IThreadSafeWorkspace>();
                 defaultWorkspace.Id.Returns(DefaultWorkspaceId);
@@ -70,7 +79,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                                                          .Select(projects => projects.Where<IThreadSafeProject>(callInfo.Arg<ProjectPredicate>())));
             }
 
-            private void setupChangingWorkspaceScenario()
+            protected void SetupDataSourceToReturnMultipleWorkspaces()
             {
                 List<IThreadSafeWorkspace> workspaces = new List<IThreadSafeWorkspace>();
                 List<IThreadSafeProject> projects = new List<IThreadSafeProject>();
@@ -116,30 +125,15 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Returns(Observable.Return(false));
 
                 DataSource.Projects
-                          .GetAll(Arg.Any<ProjectPredicate>())
-                          .Returns(callInfo => Observable.Return(projects)
-                                                         .Select(p => p.Where<IThreadSafeProject>(callInfo.Arg<ProjectPredicate>())));
-
-            }
-
-            protected async Task TestChangeAfterWorkspaceChange(
-                string projectName, Func<EditProjectViewModel, bool> valueSelector, bool before, bool after)
-            {
-                setupChangingWorkspaceScenario();
+                    .GetAll(Arg.Any<ProjectPredicate>())
+                    .Returns(callInfo =>
+                        Observable.Return(projects)
+                            .Select(p => p.Where<IThreadSafeProject>(callInfo.Arg<ProjectPredicate>())));
 
                 NavigationService
                     .Navigate<SelectWorkspaceViewModel, long, long>(Arg.Any<long>())
                     .Returns(Task.FromResult(1L));
 
-                ViewModel.Prepare(projectName);
-
-                await ViewModel.Initialize();
-
-                valueSelector(ViewModel).Should().Be(before);
-
-                await ViewModel.PickWorkspaceCommand.ExecuteAsync();
-
-                valueSelector(ViewModel).Should().Be(after);
             }
         }
 
@@ -150,177 +144,164 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public void ThrowsIfAnyOfTheArgumentsIsNull(
                 bool useDataSource,
                 bool useDialogService,
+                bool useRxActionFactory,
                 bool useInteractorFactory,
+                bool useSchedulerProvider,
                 bool useNavigationService,
                 bool useStopwatchProvider)
             {
                 var dataSource = useDataSource ? DataSource : null;
                 var dialogService = useDialogService ? DialogService : null;
+                var rxActionFactory = useRxActionFactory ? RxActionFactory : null;
                 var interactorFactory = useInteractorFactory ? InteractorFactory : null;
                 var navigationService = useNavigationService ? NavigationService : null;
+                var schedulerProvider = useSchedulerProvider ? SchedulerProvider : null;
                 var stopwatchProvider = useStopwatchProvider ? StopwatchProvider : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new EditProjectViewModel(dataSource, dialogService, interactorFactory, navigationService, stopwatchProvider);
+                    () => new EditProjectViewModel(
+                        dataSource,
+                        dialogService,
+                        rxActionFactory,
+                        interactorFactory,
+                        schedulerProvider,
+                        stopwatchProvider,
+                        navigationService
+                    );
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
             }
         }
 
-        public sealed class TheIsNameAlreadyTakenProperty : EditProjectWithSpecificNameViewModelTest
+        public sealed class TheNameIsTakenProperty : WorkspaceChangeAwareTests
         {
-            [Fact, LogIfTooSlow]
-            public async Task IsTrueWhenProjectWithSameNameAlreadyExistsInSameWorkspace()
+            private ITestableObserver<bool> isNameTakenObserver;
+
+            public TheNameIsTakenProperty()
             {
-                SetupDataSource(isFromSameWorkspace: true);
-
-                ViewModel.Prepare(ProjectName);
-
-                await ViewModel.Initialize();
-
-                ViewModel.IsNameAlreadyTaken.Should().BeTrue();
+                isNameTakenObserver = TestScheduler.CreateObserver<bool>();
             }
 
-            [Fact, LogIfTooSlow]
-            public async Task IsFalseWhenProjectWithSameNameAlreadyExistsOnlyInAnotherWorkspace()
+            [Theory, LogIfTooSlow]
+            [InlineData(true)]
+            [InlineData(false)]
+            public void ReflectsWhetherOrNotAProjectWithTheSameNameExistsInTheSameWorkspace(bool configureForSameWorkspace)
             {
-                SetupDataSource(isFromSameWorkspace: false);
+                SetupDataSourceToReturnExistingProjectsAndDefaultWorkspace(dataSourceProjectIsInSameWorkspace: configureForSameWorkspace);
+                var viewModel = CreateViewModel();
+                viewModel.NameIsAlreadyTaken.Subscribe(isNameTakenObserver);
 
-                ViewModel.Prepare(ProjectName);
+                viewModel.Name.Accept(ProjectName);
+                TestScheduler.Start();
 
-                await ViewModel.Initialize();
-
-                ViewModel.IsNameAlreadyTaken.Should().BeFalse();
+                isNameTakenObserver.LastEmittedValue().Should().Be(configureForSameWorkspace);
             }
 
-            [Fact, LogIfTooSlow]
-            public async Task IsCorrectAfterWorkspaceChangeWhenNameDoesNotExistInAny()
+            [Theory, LogIfTooSlow]
+            [InlineData("NotUsedProject", false)]
+            [InlineData("Project-1-1", true)]
+            [InlineData("Project-0-2", false)]
+            [InlineData("Project", true)]
+            public void TakesIntoAccountWorkspaceChanges(string projectName, bool nameIsTakenInWorkspace)
             {
-                await TestChangeAfterWorkspaceChange("NotUsedProject",
-                                                     vm => vm.IsNameAlreadyTaken,
-                                                     before: false,
-                                                     after: false);
-            }
+                SetupDataSourceToReturnMultipleWorkspaces();
+                var viewModel = CreateViewModel();
+                viewModel.NameIsAlreadyTaken.Subscribe(isNameTakenObserver);
 
-            [Fact, LogIfTooSlow]
-            public async Task IsCorrectAfterWorkspaceChangeWhenNameExistOnlyInDestinationWorkspace()
-            {
-                await TestChangeAfterWorkspaceChange("Project-1-1",
-                                                     vm => vm.IsNameAlreadyTaken,
-                                                     before: false,
-                                                     after: true);
-            }
+                viewModel.Name.Accept(projectName);
+                TestScheduler.Start();
+                viewModel.PickWorkspace.Execute();
+                TestScheduler.Start();
 
-            [Fact, LogIfTooSlow]
-            public async Task IsCorrectAfterWorkspaceChangeWhenNameExistOnlyInDefaultWorkspace()
-            {
-                await TestChangeAfterWorkspaceChange("Project-0-2",
-                                                     vm => vm.IsNameAlreadyTaken,
-                                                     before: true,
-                                                     after: false);
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task IsCorrectAfterWorkspaceChangeWhenNameExistInBothWorkspaces()
-            {
-                await TestChangeAfterWorkspaceChange("Project",
-                                                     vm => vm.IsNameAlreadyTaken,
-                                                     before: true,
-                                                     after: true);
+                isNameTakenObserver.LastEmittedValue().Should().Be(nameIsTakenInWorkspace);
             }
         }
 
-        public sealed class TheSaveEnabledProperty : EditProjectWithSpecificNameViewModelTest
+        public sealed class TheSaveEnabledProperty : WorkspaceChangeAwareTests
         {
+            private ITestableObserver<bool> saveEnabledObserver;
+
+            protected override void AdditionalViewModelSetup()
+            {
+                saveEnabledObserver = TestScheduler.CreateObserver<bool>();
+                ViewModel.Name.Subscribe();
+                ViewModel.Save.Enabled.Subscribe(saveEnabledObserver);
+            }
+
             [Fact, LogIfTooSlow]
             public void IsFalseWhenTheNameIsEmpty()
             {
-                ViewModel.Name = "";
+                TestScheduler.Start();
+                ViewModel.Name.Accept("");
+                TestScheduler.Start();
 
-                ViewModel.SaveEnabled.Should().BeFalse();
+                saveEnabledObserver.LastEmittedValue().Should().BeFalse();
             }
 
             [Fact, LogIfTooSlow]
             public void IsFalseWhenTheNameIsJustWhiteSpace()
             {
-                ViewModel.Name = "            ";
+                TestScheduler.Start();
+                ViewModel.Name.Accept("            ");
+                TestScheduler.Start();
 
-                ViewModel.SaveEnabled.Should().BeFalse();
+                saveEnabledObserver.LastEmittedValue().Should().BeFalse();
             }
 
             [Fact, LogIfTooSlow]
             public void IsFalseWhenTheNameIsLongerThanTheThresholdInBytes()
             {
-                ViewModel.Name = "This is a ridiculously big project name made solely with the purpose of testing whether or not Toggl apps UI has validation logic that prevents such a large name to be persisted or, even worse, pushed to the api, an event that might end up in crashes and whatnot";
+                TestScheduler.Start();
+                ViewModel.Name.Accept("This is a ridiculously big project name made solely with the purpose of testing whether or not Toggl apps UI has validation logic that prevents such a large name to be persisted or, even worse, pushed to the api, an event that might end up in crashes and whatnot");
+                TestScheduler.Start();
 
-                ViewModel.SaveEnabled.Should().BeFalse();
+                saveEnabledObserver.LastEmittedValue().Should().BeFalse();
             }
 
-            [Fact, LogIfTooSlow]
-            public async Task IsFalseWhenProjectWithSameNameAlreadyExistsInSameWorkspace()
+            [Theory, LogIfTooSlow]
+            [InlineData(true)]
+            [InlineData(false)]
+            public void ReflectsWhetherOrNotAProjectWithTheSameNameExistsInTheSameWorkspace(bool configureForSameWorkspace)
             {
-                SetupDataSource(isFromSameWorkspace: true);
+                saveEnabledObserver = TestScheduler.CreateObserver<bool>();
+                SetupDataSourceToReturnExistingProjectsAndDefaultWorkspace(dataSourceProjectIsInSameWorkspace: configureForSameWorkspace);
+                var viewModel = CreateViewModel();
+                viewModel.Save.Enabled.Subscribe(saveEnabledObserver);
+                TestScheduler.Start();
 
-                ViewModel.Prepare(ProjectName);
+                viewModel.Name.Accept(ProjectName);
+                TestScheduler.Start();
 
-                await ViewModel.Initialize();
-
-                ViewModel.SaveEnabled.Should().BeFalse();
+                saveEnabledObserver.LastEmittedValue().Should().Be(!configureForSameWorkspace);
             }
 
-            [Fact, LogIfTooSlow]
-            public async Task IsTrueWhenProjectWithSameNameAlreadyExistsOnlyInAnotherWorkspace()
+            [Theory, LogIfTooSlow]
+            [InlineData("NotUsedProject", true)]
+            [InlineData("Project-1-1", false)]
+            [InlineData("Project-0-2", true)]
+            [InlineData("Project", false)]
+            public void TakesIntoAccountWorkspaceChanges(string projectName, bool saveShouldBeEnabled)
             {
-                SetupDataSource(isFromSameWorkspace: false);
+                saveEnabledObserver = TestScheduler.CreateObserver<bool>();
+                SetupDataSourceToReturnMultipleWorkspaces();
+                var viewModel = CreateViewModel();
+                viewModel.Save.Enabled.Subscribe(saveEnabledObserver);
+                TestScheduler.Start();
 
-                ViewModel.Prepare(ProjectName);
+                viewModel.Name.Accept(projectName);
+                TestScheduler.Start();
+                viewModel.PickWorkspace.Execute();
+                TestScheduler.Start();
 
-                await ViewModel.Initialize();
-
-                ViewModel.SaveEnabled.Should().BeTrue();
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task IsCorrectAfterWorkspaceChangeWhenNameDoesNotExistInAny()
-            {
-                await TestChangeAfterWorkspaceChange("NotUsedProject",
-                                                     vm => vm.SaveEnabled,
-                                                     before: true,
-                                                     after: true);
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task IsCorrectAfterWorkspaceChangeWhenNameExistOnlyInDestinationWorkspace()
-            {
-                await TestChangeAfterWorkspaceChange("Project-1-1",
-                                                     vm => vm.SaveEnabled,
-                                                     before: true,
-                                                     after: false);
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task IsCorrectAfterWorkspaceChangeWhenNameExistOnlyInDefaultWorkspace()
-            {
-                await TestChangeAfterWorkspaceChange("Project-0-2",
-                                                     vm => vm.SaveEnabled,
-                                                     before: false,
-                                                     after: true);
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task IsCorrectAfterWorkspaceChangeWhenNameExistInBothWorkspaces()
-            {
-                await TestChangeAfterWorkspaceChange("Project",
-                                                     vm => vm.SaveEnabled,
-                                                     before: false,
-                                                     after: false);
+                saveEnabledObserver.LastEmittedValue().Should().Be(saveShouldBeEnabled);
             }
         }
 
-        public sealed class TheInitializeMethod : EditProjectViewModelTest
+        public sealed class TheWorkspace : EditProjectViewModelTest
         {
-            private void setupDefaultWorkspace()
+            [Fact, LogIfTooSlow]
+            public async Task SetsTheWorkspace()
             {
                 InteractorFactory
                     .GetDefaultWorkspace()
@@ -330,15 +311,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 Workspace.Id.Returns(DefaultWorkspaceId);
                 Workspace.Name.Returns(DefaultWorkspaceName);
 
-                ViewModel.Prepare("Some name");
-            }
+                var viewModel = CreateViewModel();
+                viewModel.Prepare("Some name");
 
-            [Fact, LogIfTooSlow]
-            public async Task SetsTheWorkspaceId()
-            {
-                setupDefaultWorkspace();
-                await ViewModel.Initialize();
-                await ViewModel.DoneCommand.ExecuteAsync();
+                viewModel.Save.Execute();
+                TestScheduler.Start();
 
                 await InteractorFactory
                     .Received()
@@ -347,103 +324,99 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task SetsTheWorkspaceName()
+            public void IsSetToTheFirstEligibleForProjectCreationIfDefaultIsNotEligible()
             {
-                setupDefaultWorkspace();
-                await ViewModel.Initialize();
-
-                ViewModel.WorkspaceName.Should().Be(DefaultWorkspaceName);
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task SetsToTheFirstEligibleProjectIfDefaultIsNotEligible()
-            {
+                var observer = TestScheduler.CreateObserver<string>();
                 var defaultWorkspace = Substitute.For<IThreadSafeWorkspace>();
                 defaultWorkspace.Name.Returns(DefaultWorkspaceName);
                 defaultWorkspace.Admin.Returns(false);
                 defaultWorkspace.OnlyAdminsMayCreateProjects.Returns(true);
-
                 var eligibleWorkspace = Substitute.For<IThreadSafeWorkspace>();
                 eligibleWorkspace.Name.Returns("Eligible workspace for project creation");
                 eligibleWorkspace.Admin.Returns(true);
-
                 InteractorFactory.GetDefaultWorkspace().Execute()
                     .Returns(Observable.Return(defaultWorkspace));
                 InteractorFactory.GetAllWorkspaces().Execute()
                     .Returns(Observable.Return(new[] { defaultWorkspace, eligibleWorkspace }));
 
-                await ViewModel.Initialize();
+                var viewModel = CreateViewModel();
+                viewModel.WorkspaceName.Subscribe(observer);
+                TestScheduler.Start();
 
-                ViewModel.WorkspaceName.Should().Be(eligibleWorkspace.Name);
+                observer.LastEmittedValue().Should().Be(eligibleWorkspace.Name);
             }
 
             [Fact, LogIfTooSlow]
-            public async Task SetToDefaultWorkspaceIfAllWorkspacesAreEligible()
+            public void IsSetToTheDefaultWorkspaceIfAllWorkspacesAreEligibleForProjectCreation()
             {
+                var observer = TestScheduler.CreateObserver<string>();
                 var defaultWorkspace = Substitute.For<IThreadSafeWorkspace>();
                 defaultWorkspace.Name.Returns(DefaultWorkspaceName);
                 defaultWorkspace.Admin.Returns(true);
-
                 var eligibleWorkspace = Substitute.For<IThreadSafeWorkspace>();
                 eligibleWorkspace.Name.Returns("Eligible workspace for project creation");
                 eligibleWorkspace.Admin.Returns(true);
-
                 var eligibleWorkspace2 = Substitute.For<IThreadSafeWorkspace>();
                 eligibleWorkspace.Name.Returns("Another Eligible Workspace");
                 eligibleWorkspace.Admin.Returns(true);
-
                 InteractorFactory.GetDefaultWorkspace().Execute()
                     .Returns(Observable.Return(defaultWorkspace));
                 InteractorFactory.GetAllWorkspaces().Execute()
                     .Returns(Observable.Return(new[] { eligibleWorkspace2, defaultWorkspace, eligibleWorkspace }));
 
-                await ViewModel.Initialize();
+                var viewModel = CreateViewModel();
+                TestScheduler.Start();
+                viewModel.WorkspaceName.Subscribe(observer);
+                TestScheduler.Start();
 
-                ViewModel.WorkspaceName.Should().Be(defaultWorkspace.Name);
+                observer.LastEmittedValue().Should().Be(defaultWorkspace.Name);
             }
         }
 
-        public sealed class TheCloseCommand : EditProjectViewModelTest
+        public sealed class TheCloseAction : EditProjectViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task ClosesTheViewModel()
+            public void ClosesTheViewModel()
             {
-                await ViewModel.CloseCommand.ExecuteAsync();
+                ViewModel.Close.Execute();
+                TestScheduler.Start();
 
-                await NavigationService.Received()
+                NavigationService.Received()
                     .Close(Arg.Is(ViewModel), Arg.Any<long?>());
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ReturnsNull()
+            public void ReturnsNull()
             {
                 ViewModel.Prepare("Some name");
 
-                await ViewModel.CloseCommand.ExecuteAsync();
+                ViewModel.Close.Execute();
+                TestScheduler.Start();
 
-                await NavigationService.Received()
+                NavigationService.Received()
                     .Close(Arg.Is(ViewModel), Arg.Is<long?>(result => result == null));
             }
 
             [Fact, LogIfTooSlow]
-            public async Task DoesNotTrySavingTheChanges()
+            public void DoesNotTrySavingTheChanges()
             {
                 ViewModel.Prepare("Some name");
 
-                await ViewModel.CloseCommand.ExecuteAsync();
+                ViewModel.Close.Execute();
+                TestScheduler.Start();
 
-                await InteractorFactory.CreateProject(Arg.Any<CreateProjectDTO>()).DidNotReceive().Execute();
+                InteractorFactory.CreateProject(Arg.Any<CreateProjectDTO>()).DidNotReceive().Execute();
             }
         }
 
-        public sealed class TheDoneCommand : EditProjectViewModelTest
+        public sealed class TheDoneAction : EditProjectViewModelTest
         {
             private const long proWorkspaceId = 11;
             private const long projectId = 12;
 
             private readonly IThreadSafeProject project = Substitute.For<IThreadSafeProject>();
 
-            public TheDoneCommand()
+            public TheDoneAction()
             {
                 InteractorFactory
                     .AreCustomColorsEnabledForWorkspace(DefaultWorkspaceId)
@@ -475,50 +448,47 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ClosesTheViewModel()
-            {
-                ViewModel.Prepare("Some name");
-
-                await ViewModel.DoneCommand.ExecuteAsync();
-
-                await NavigationService.Received()
-                    .Close(Arg.Is(ViewModel), Arg.Any<long?>());
-            }
-
-            [Fact, LogIfTooSlow]
             public async Task ReturnsTheIdOfTheCreatedProject()
             {
                 ViewModel.Prepare("Some name");
+                TestScheduler.Start();
 
-                await ViewModel.DoneCommand.ExecuteAsync();
+                ViewModel.Save.Execute();
+                TestScheduler.Start();
 
                 await NavigationService.Received()
                     .Close(Arg.Is(ViewModel), Arg.Is(projectId));
             }
 
             [Fact, LogIfTooSlow]
-            public async Task DoesNotCallCreateIfTheProjectNameIsInvalid()
+            public void DoesNotCallCreateIfTheProjectNameIsInvalid()
             {
                 ViewModel.Prepare("Some name");
-                ViewModel.Name = "";
+                TestScheduler.Start();
+                ViewModel.Name.Accept("");
+                TestScheduler.Start();
 
-                await ViewModel.DoneCommand.ExecuteAsync();
+                ViewModel.Save.Execute();
+                TestScheduler.Start();
 
-                await InteractorFactory
+                InteractorFactory
                     .DidNotReceive()
                     .CreateProject(Arg.Any<CreateProjectDTO>())
                     .Execute();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task DoesNotCloseTheViewModelIfTheProjectNameIsInvalid()
+            public void DoesNotCloseTheViewModelIfTheProjectNameIsInvalid()
             {
                 ViewModel.Prepare("Some name");
-                ViewModel.Name = "";
+                TestScheduler.Start();
+                ViewModel.Name.Accept("");
+                TestScheduler.Start();
 
-                await ViewModel.DoneCommand.ExecuteAsync();
+                ViewModel.Save.Execute();
+                TestScheduler.Start();
 
-                await NavigationService.DidNotReceive()
+                NavigationService.DidNotReceive()
                     .Close(ViewModel, projectId);
             }
 
@@ -531,10 +501,10 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task TrimsNameFromTheStartAndTheEndBeforeSaving(string name, string trimmed)
             {
                 ViewModel.Prepare(name);
-                await ViewModel.Initialize();
 
-                await ViewModel.DoneCommand.ExecuteAsync();
+                ViewModel.Save.Execute();
 
+                TestScheduler.Start();
                 await InteractorFactory
                     .Received()
                     .CreateProject(Arg.Is<CreateProjectDTO>(dto => dto.Name == trimmed))
@@ -546,7 +516,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 private const long defaultWorkspaceId = 101;
                 private const long selectedWorkspaceId = 102;
 
-                private void prepare()
+                protected override void AdditionalSetup()
                 {
                     var defaultWorkspace = Substitute.For<IThreadSafeWorkspace>();
                     defaultWorkspace.Id.Returns(defaultWorkspaceId);
@@ -559,19 +529,26 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     NavigationService
                        .Navigate<SelectWorkspaceViewModel, long, long>(Arg.Any<long>())
                        .Returns(Task.FromResult(selectedWorkspaceId));
+                }
+
+                protected override void AdditionalViewModelSetup()
+                {
+                    TestScheduler.Start();
                     ViewModel.Prepare("Some project");
-                    ViewModel.Initialize().Wait();
-                    ViewModel.PickWorkspaceCommand.ExecuteAsync().Wait();
+                    TestScheduler.Start();
+                    ViewModel.WorkspaceName.Subscribe();
+                    TestScheduler.Start();
+                    ViewModel.PickWorkspace.Execute();
+                    TestScheduler.Start();
                 }
 
                 [Fact, LogIfTooSlow]
-                public async Task AsksUserForConfirmationIfWorkspaceHasChanged()
+                public void AsksUserForConfirmationIfWorkspaceHasChanged()
                 {
-                    prepare();
+                    ViewModel.Save.Execute();
+                    TestScheduler.Start();
 
-                    await ViewModel.DoneCommand.ExecuteAsync();
-
-                    await DialogService.Received().Confirm(
+                    DialogService.Received().Confirm(
                         Arg.Is(Resources.WorkspaceChangedAlertTitle),
                         Arg.Is(Resources.WorkspaceChangedAlertMessage),
                         Arg.Is(Resources.Ok),
@@ -580,9 +557,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 }
 
                 [Fact, LogIfTooSlow]
-                public async Task DoesNothingIfUserCancels()
+                public void DoesNothingIfUserCancels()
                 {
-                    prepare();
                     DialogService
                         .Confirm(
                             Arg.Is(Resources.WorkspaceChangedAlertTitle),
@@ -591,81 +567,47 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                             Arg.Is(Resources.Cancel))
                         .Returns(Observable.Return(false));
 
-                    await ViewModel.DoneCommand.ExecuteAsync();
+                    ViewModel.Save.Execute();
+                    TestScheduler.Start();
 
-                    await InteractorFactory.CreateProject(Arg.Any<CreateProjectDTO>()).DidNotReceive().Execute();
-                    await NavigationService.DidNotReceive().Close(Arg.Is(ViewModel), Arg.Any<long>());
-                }
-
-                [Fact, LogIfTooSlow]
-                public async Task CreatesProjectInTheSelectedWorkspaceIfUserConfirms()
-                {
-                    prepare();
-                    DialogService
-                        .Confirm(
-                            Arg.Is(Resources.WorkspaceChangedAlertTitle),
-                            Arg.Is(Resources.WorkspaceChangedAlertMessage),
-                            Arg.Is(Resources.Ok),
-                            Arg.Is(Resources.Cancel))
-                        .Returns(Observable.Return(true));
-
-                    await ViewModel.DoneCommand.ExecuteAsync();
-
-                    await InteractorFactory
-                        .Received()
-                        .CreateProject(Arg.Is<CreateProjectDTO>(dto => dto.WorkspaceId == selectedWorkspaceId))
-                        .Execute();
-                }
-
-                [Fact, LogIfTooSlow]
-                public async Task ClosesTheViewModelIfUserConfirms()
-                {
-                    prepare();
-                    DialogService
-                        .Confirm(
-                            Arg.Is(Resources.WorkspaceChangedAlertTitle),
-                            Arg.Is(Resources.WorkspaceChangedAlertMessage),
-                            Arg.Is(Resources.Ok),
-                            Arg.Is(Resources.Cancel))
-                        .Returns(Observable.Return(true));
-
-                    await ViewModel.DoneCommand.ExecuteAsync();
-
-                    await NavigationService.Received().Close(Arg.Is(ViewModel), Arg.Any<long>());
+                    InteractorFactory.CreateProject(Arg.Any<CreateProjectDTO>()).DidNotReceive().Execute();
+                    NavigationService.DidNotReceive().Close(Arg.Is(ViewModel), Arg.Any<long>());
                 }
             }
         }
 
-        public sealed class ThePickColorCommand : EditProjectViewModelTest
+        public sealed class ThePickColorAction : EditProjectViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task CallsTheSelectColorViewModel()
+            public void CallsTheSelectColorViewModel()
             {
                 ViewModel.Prepare("Some name");
 
-                await ViewModel.PickColorCommand.ExecuteAsync();
+                ViewModel.PickColor.Execute();
+                TestScheduler.Start();
 
-                await NavigationService.Received()
+                NavigationService.Received()
                     .Navigate<SelectColorViewModel, ColorParameters, MvxColor>(Arg.Any<ColorParameters>());
             }
 
             [Fact, LogIfTooSlow]
-            public async Task SetsTheReturnedColorAsTheColorProperty()
+            public void SetsTheReturnedColorAsTheColorProperty()
             {
+                var colorObserver = TestScheduler.CreateObserver<MvxColor>();
                 var expectedColor = MvxColors.AliceBlue;
                 NavigationService
                     .Navigate<SelectColorViewModel, ColorParameters, MvxColor>(Arg.Any<ColorParameters>())
                     .Returns(Task.FromResult(expectedColor));
-                ViewModel.Prepare("Some name");
-                ViewModel.Color = MvxColors.Azure;
+                ViewModel.Color.Subscribe(colorObserver);
 
-                await ViewModel.PickColorCommand.ExecuteAsync();
+                ViewModel.PickColor.Execute();
+                TestScheduler.Start();
 
-                ViewModel.Color.ARGB.Should().Be(expectedColor.ARGB);
+                colorObserver.LastEmittedValue().ARGB.Should().Be(expectedColor.ARGB);
             }
         }
 
-        public sealed class ThePickWorkspaceCommand : EditProjectViewModelTest
+        public sealed class ThePickWorkspaceAction : EditProjectViewModelTest
         {
             private const long workspaceId = 10;
             private const long defaultWorkspaceId = 11;
@@ -673,7 +615,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             private readonly IThreadSafeWorkspace workspace = Substitute.For<IThreadSafeWorkspace>();
             private readonly IThreadSafeWorkspace defaultWorkspace = Substitute.For<IThreadSafeWorkspace>();
 
-            public ThePickWorkspaceCommand()
+            public ThePickWorkspaceAction()
             {
                 workspace.Id.Returns(workspaceId);
                 workspace.Name.Returns(workspaceName);
@@ -693,40 +635,48 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
 
             [Fact, LogIfTooSlow]
-            public async Task CallsTheSelectWorkspaceViewModel()
+            public void CallsTheSelectWorkspaceViewModel()
             {
-                await ViewModel.PickWorkspaceCommand.ExecuteAsync();
+                ViewModel.PickWorkspace.Execute();
+                TestScheduler.Start();
 
-                await NavigationService.Received()
+                NavigationService.Received()
                     .Navigate<SelectWorkspaceViewModel, long, long>(Arg.Any<long>());
             }
 
             [Fact, LogIfTooSlow]
-            public async Task SetsTheReturnedWorkspaceNameAsTheWorkspaceNameProperty()
+            public void SetsTheReturnedWorkspaceNameAsTheWorkspaceNameProperty()
             {
                 NavigationService
                     .Navigate<SelectWorkspaceViewModel, long, long>(Arg.Any<long>())
                     .Returns(Task.FromResult(workspaceId));
+                TestScheduler.Start();
+                var workspaceObserver = TestScheduler.CreateObserver<string>();
+                ViewModel.WorkspaceName.Subscribe(workspaceObserver);
 
-                await ViewModel.PickWorkspaceCommand.ExecuteAsync();
+                ViewModel.PickWorkspace.Execute();
+                TestScheduler.Start();
 
-                ViewModel.WorkspaceName.Should().Be(workspaceName);
+                workspaceObserver.LastEmittedValue().Should().Be(workspaceName);
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ResetsTheClientNameWhenTheWorkspaceChanges()
+            public void ResetsTheClientNameWhenTheWorkspaceChanges()
             {
                 NavigationService
                     .Navigate<SelectWorkspaceViewModel, long, long>(Arg.Any<long>())
                     .Returns(Task.FromResult(workspaceId));
+                var clientObserver = TestScheduler.CreateObserver<string>();
+                ViewModel.ClientName.Subscribe(clientObserver);
 
-                await ViewModel.PickWorkspaceCommand.ExecuteAsync();
+                ViewModel.PickWorkspace.Execute();
+                TestScheduler.Start();
 
-                ViewModel.ClientName.Should().BeNullOrEmpty();
+                clientObserver.LastEmittedValue().Should().BeNullOrEmpty();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task PicksADefaultColorIfTheSelectedColorIsCustomAndTheWorkspaceIsNotPro()
+            public void PicksADefaultColorIfTheSelectedColorIsCustomAndTheWorkspaceIsNotPro()
             {
                 NavigationService
                     .Navigate<SelectColorViewModel, ColorParameters, MvxColor>(Arg.Any<ColorParameters>())
@@ -736,49 +686,55 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Returns(Task.FromResult(workspaceId));
                 InteractorFactory.AreCustomColorsEnabledForWorkspace(workspaceId).Execute()
                     .Returns(Observable.Return(false));
-                await ViewModel.PickColorCommand.ExecuteAsync();
+                ViewModel.PickColor.Execute();
+                TestScheduler.Start();
 
-                await ViewModel.PickWorkspaceCommand.ExecuteAsync();
+                ViewModel.PickWorkspace.Execute();
+                TestScheduler.Start();
 
                 ViewModel.Color.Should().NotBe(MvxColors.Azure);
             }
         }
 
-        public sealed class ThePickClientCommand : EditProjectViewModelTest
+        public sealed class ThePickClientAction : EditProjectViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task CallsTheSelectClientViewModel()
+            public void CallsTheSelectClientViewModel()
             {
                 ViewModel.Prepare("Some name");
 
-                await ViewModel.PickClientCommand.ExecuteAsync();
+                ViewModel.PickClient.Execute();
+                TestScheduler.Start();
 
-                await NavigationService.Received()
+                NavigationService.Received()
                     .Navigate<SelectClientViewModel, SelectClientParameters, long?>(Arg.Any<SelectClientParameters>());
             }
 
             [Fact, LogIfTooSlow]
-            public async Task PassesTheCurrentWorkspaceToTheViewModel()
+            public void PassesTheCurrentWorkspaceToTheViewModel()
             {
                 InteractorFactory
                     .GetDefaultWorkspace()
                     .Execute()
                     .Returns(Observable.Return(Workspace));
                 Workspace.Id.Returns(DefaultWorkspaceId);
-                ViewModel.Prepare("Some name");
-                await ViewModel.Initialize();
+                var viewModel = CreateViewModel();
+                viewModel.Prepare("Some name");
+                TestScheduler.Start();
 
-                await ViewModel.PickClientCommand.ExecuteAsync();
+                viewModel.PickClient.Execute();
+                TestScheduler.Start();
 
-                await NavigationService.Received()
+                NavigationService.Received()
                     .Navigate<SelectClientViewModel, SelectClientParameters, long?>(
                         Arg.Is<SelectClientParameters>(parameter => parameter.WorkspaceId == DefaultWorkspaceId)
                     );
             }
 
             [Fact, LogIfTooSlow]
-            public async Task SetsTheReturnedClientAsTheClientNameProperty()
+            public void SetsTheReturnedClientAsTheClientNameProperty()
             {
+                var clientObserver = TestScheduler.CreateObserver<string>();
                 const string expectedName = "Some client";
                 long? expectedId = 10;
                 var client = Substitute.For<IThreadSafeClient>();
@@ -796,15 +752,18 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Returns(Observable.Return(client));
                 Workspace.Id.Returns(DefaultWorkspaceId);
                 ViewModel.Prepare("Some name");
+                ViewModel.ClientName.Subscribe(clientObserver);
 
-                await ViewModel.PickClientCommand.ExecuteAsync();
+                ViewModel.PickClient.Execute();
+                TestScheduler.Start();
 
-                ViewModel.ClientName.Should().Be(expectedName);
+                clientObserver.LastEmittedValue().Should().Be(expectedName);
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ClearsTheCurrentClientIfZeroIsReturned()
+            public void ClearsTheCurrentClientIfZeroIsReturned()
             {
+                var clientObserver = TestScheduler.CreateObserver<string>();
                 const string expectedName = "Some client";
                 long? expectedId = 10;
                 var client = Substitute.For<IThreadSafeClient>();
@@ -812,25 +771,19 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 client.Name.Returns(expectedName);
                 NavigationService
                     .Navigate<SelectClientViewModel, SelectClientParameters, long?>(Arg.Any<SelectClientParameters>())
-                    .Returns(Task.FromResult(expectedId));
-                InteractorFactory
-                    .GetDefaultWorkspace()
-                    .Execute()
-                    .Returns(Observable.Return(Workspace));
-                InteractorFactory.GetClientById(expectedId.Value)
-                    .Execute()
-                    .Returns(Observable.Return(client));
+                    .Returns(Task.FromResult(expectedId), Task.FromResult<long?>(0));
+                InteractorFactory.GetDefaultWorkspace().Execute().Returns(Observable.Return(Workspace));
+                InteractorFactory.GetClientById(expectedId.Value).Execute().Returns(Observable.Return(client));
                 Workspace.Id.Returns(DefaultWorkspaceId);
                 ViewModel.Prepare("Some name");
-                await ViewModel.Initialize();
-                await ViewModel.PickClientCommand.ExecuteAsync();
-                NavigationService
-                    .Navigate<SelectClientViewModel, SelectClientParameters, long?>(Arg.Any<SelectClientParameters>())
-                    .Returns(Task.FromResult<long?>(0));
+                ViewModel.PickClient.Execute();
+                TestScheduler.Start();
+                ViewModel.ClientName.Subscribe(clientObserver);
 
-                await ViewModel.PickClientCommand.ExecuteAsync();
+                ViewModel.PickClient.Execute();
+                TestScheduler.Start();
 
-                ViewModel.ClientName.Should().BeNullOrEmpty();
+                clientObserver.LastEmittedValue().Should().BeNullOrEmpty();
             }
         }
     }

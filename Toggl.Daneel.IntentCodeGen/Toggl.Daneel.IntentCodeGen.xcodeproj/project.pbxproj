@@ -7,16 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8C292494222FF10900D52409 /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 8C292496222FF10900D52409 /* Intents.intentdefinition */; };
 		D65A35FC212F0B0200A9F81E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A35FB212F0B0200A9F81E /* AppDelegate.m */; };
 		D65A35FF212F0B0200A9F81E /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A35FE212F0B0200A9F81E /* ViewController.m */; };
 		D65A3602212F0B0200A9F81E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D65A3600212F0B0200A9F81E /* Main.storyboard */; };
 		D65A3604212F0B0300A9F81E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D65A3603212F0B0300A9F81E /* Assets.xcassets */; };
 		D65A3607212F0B0300A9F81E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D65A3605212F0B0300A9F81E /* LaunchScreen.storyboard */; };
 		D65A360A212F0B0300A9F81E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D65A3609212F0B0300A9F81E /* main.m */; };
-		D65A3611212F0B3200A9F81E /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = D65A3610212F0B3200A9F81E /* Intents.intentdefinition */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8C292497222FF10B00D52409 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; name = Base; path = Base.lproj/Intents.intentdefinition; sourceTree = "<group>"; };
+		8CCB8E2A223802F8001BD374 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Intents.strings; sourceTree = "<group>"; };
 		D65A35F7212F0B0200A9F81E /* Toggl.Daneel.IntentCodeGen.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Toggl.Daneel.IntentCodeGen.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D65A35FA212F0B0200A9F81E /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		D65A35FB212F0B0200A9F81E /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -27,7 +29,6 @@
 		D65A3606212F0B0300A9F81E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D65A3608212F0B0300A9F81E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D65A3609212F0B0300A9F81E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		D65A3610212F0B3200A9F81E /* Intents.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; path = Intents.intentdefinition; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,7 +70,7 @@
 				D65A3605212F0B0300A9F81E /* LaunchScreen.storyboard */,
 				D65A3608212F0B0300A9F81E /* Info.plist */,
 				D65A3609212F0B0300A9F81E /* main.m */,
-				D65A3610212F0B3200A9F81E /* Intents.intentdefinition */,
+				8C292496222FF10900D52409 /* Intents.intentdefinition */,
 			);
 			path = Toggl.Daneel.IntentCodeGen;
 			sourceTree = "<group>";
@@ -113,8 +114,8 @@
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
 				Base,
+				en,
 			);
 			mainGroup = D65A35EE212F0B0200A9F81E;
 			productRefGroup = D65A35F8212F0B0200A9F81E /* Products */;
@@ -146,7 +147,7 @@
 			files = (
 				D65A35FF212F0B0200A9F81E /* ViewController.m in Sources */,
 				D65A360A212F0B0300A9F81E /* main.m in Sources */,
-				D65A3611212F0B3200A9F81E /* Intents.intentdefinition in Sources */,
+				8C292494222FF10900D52409 /* Intents.intentdefinition in Sources */,
 				D65A35FC212F0B0200A9F81E /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -154,6 +155,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		8C292496222FF10900D52409 /* Intents.intentdefinition */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8C292497222FF10B00D52409 /* Base */,
+				8CCB8E2A223802F8001BD374 /* en */,
+			);
+			name = Intents.intentdefinition;
+			sourceTree = "<group>";
+		};
 		D65A3600212F0B0200A9F81E /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (

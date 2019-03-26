@@ -21,7 +21,7 @@ namespace Toggl.Giskard.ViewHolders
 
         protected override void InitializeViews()
         {
-            creationTextView = ItemView.FindViewById<TextView>(Resource.Id.CreationTextView);
+            creationTextView = ItemView.FindViewById<TextView>(Resource.Id.CreationLabel);
         }
 
         protected override void UpdateView()

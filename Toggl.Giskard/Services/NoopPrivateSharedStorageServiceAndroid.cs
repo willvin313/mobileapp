@@ -13,6 +13,10 @@ namespace Toggl.Giskard.Services
         {
         }
 
+        public void SaveLastUpdateDate(DateTimeOffset date)
+        {
+        }
+
         public void ClearAll()
         {
         }

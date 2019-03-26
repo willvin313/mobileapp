@@ -40,10 +40,10 @@ namespace Toggl.Giskard.ViewHolders
 
         protected override void InitializeViews()
         {
-            projectName = ItemView.FindViewById<TextView>(Resource.Id.ReportsActivityItemProjectName);
-            clientName = ItemView.FindViewById<TextView>(Resource.Id.ReportsActivityItemClientName);
-            duration = ItemView.FindViewById<TextView>(Resource.Id.ReportsActivityItemDuration);
-            percentage = ItemView.FindViewById<TextView>(Resource.Id.ReportsActivityItemPercentage);
+            projectName = ItemView.FindViewById<TextView>(Resource.Id.ReportsFragmentItemProjectName);
+            clientName = ItemView.FindViewById<TextView>(Resource.Id.ReportsFragmentItemClientName);
+            duration = ItemView.FindViewById<TextView>(Resource.Id.ReportsFragmentItemDuration);
+            percentage = ItemView.FindViewById<TextView>(Resource.Id.ReportsFragmentItemPercentage);
         }
 
         protected override void UpdateView()

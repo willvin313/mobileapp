@@ -28,6 +28,7 @@
 			<array>
 				<string>StopTimerIntent</string>
 				<string>StartTimerIntent</string>
+				<string>ContinueTimerIntent</string>
 			</array>
 		</dict>
 		<key>NSExtensionMainStoryboard</key>

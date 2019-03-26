@@ -36,7 +36,7 @@ namespace Toggl.Giskard.ViewHolders
 
         public void UpdateSelectionState(ReportsDateRangeParameter selectedDateRange)
         {
-            dayView.SetTextColor(Item.IsSelected(selectedDateRange) ? Color.White : DayNotInMonth.ToNativeColor());
+            dayView.SetTextColor(Item.IsSelected(selectedDateRange) || Item.IsToday ? Color.White : DayNotInMonth.ToNativeColor());
             dayView.RoundLeft = Item.IsStartOfSelectedPeriod(selectedDateRange);
             dayView.RoundRight = Item.IsEndOfSelectedPeriod(selectedDateRange);
             dayView.IsSelected = Item.IsSelected(selectedDateRange);

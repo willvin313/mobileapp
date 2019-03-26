@@ -58,17 +58,17 @@ namespace Toggl.Giskard.Adapters
             switch (viewType)
             {
                 case WorkspaceName:
-                    var workpaceNameCell = layoutInflater.Inflate(Resource.Layout.ReportsActivityWorkspaceName, parent, false);
+                    var workpaceNameCell = layoutInflater.Inflate(Resource.Layout.ReportsFragmentWorkspaceName, parent, false);
                     return new ReportsWorkspaceNameViewHolder(workpaceNameCell);
 
                 case Header:
-                    var headerCellView = layoutInflater.Inflate(Resource.Layout.ReportsActivityHeader, parent, false);
+                    var headerCellView = layoutInflater.Inflate(Resource.Layout.ReportsFragmentHeader, parent, false);
                     var reportsHeaderCellViewHolder = new ReportsHeaderCellViewHolder(headerCellView);
                     reportsHeaderCellViewHolder.SummaryCardClicksSubject = summaryCardClicks;
                     return reportsHeaderCellViewHolder;
 
                 case Item:
-                    var itemCellView = layoutInflater.Inflate(Resource.Layout.ReportsActivityItem, parent, false);
+                    var itemCellView = layoutInflater.Inflate(Resource.Layout.ReportsFragmentItem, parent, false);
                     return new ReportsItemCellViewHolder(itemCellView, lastItemCellHeight, normalItemCellHeight);
 
                 default:

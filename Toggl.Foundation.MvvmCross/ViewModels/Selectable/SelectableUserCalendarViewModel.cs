@@ -1,8 +1,9 @@
-﻿using Toggl.Multivac;
+﻿using Toggl.Foundation.MvvmCross.Interfaces;
+using Toggl.Multivac;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels.Selectable
 {
-    public sealed class SelectableUserCalendarViewModel
+    public sealed class SelectableUserCalendarViewModel : IDiffableByIdentifier<SelectableUserCalendarViewModel>
     {
         public string Id { get; }
 
@@ -12,6 +13,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Selectable
 
         public bool Selected { get; set; }
 
+        public long Identifier => Id.GetHashCode();
+
         public SelectableUserCalendarViewModel(UserCalendar calendar, bool selected)
         {
             Ensure.Argument.IsNotNull(calendar, nameof(calendar));
@@ -20,6 +23,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Selectable
             Name = calendar.Name;
             SourceName = calendar.SourceName;
             Selected = selected;
+        }
+
+        public bool Equals(SelectableUserCalendarViewModel other)
+        {
+            return Id == other.Id;
         }
     }
 }

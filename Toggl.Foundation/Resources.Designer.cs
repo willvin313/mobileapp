@@ -10,7 +10,6 @@
 
 namespace Toggl.Foundation {
     using System;
-    using System.Reflection;
     
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
@@ -1565,6 +1564,12 @@ namespace Toggl.Foundation {
             }
         }
         
+        public static string ContinueTimerInvocationPhrase {
+            get {
+                return ResourceManager.GetString("ContinueTimerInvocationPhrase", resourceCulture);
+            }
+        }
+        
         public static string NumberOfTasksPlural {
             get {
                 return ResourceManager.GetString("NumberOfTasksPlural", resourceCulture);
@@ -1574,6 +1579,30 @@ namespace Toggl.Foundation {
         public static string NumberOfTasksSingular {
             get {
                 return ResourceManager.GetString("NumberOfTasksSingular", resourceCulture);
+            }
+        }
+        
+        public static string TwelveHoursFormat {
+            get {
+                return ResourceManager.GetString("TwelveHoursFormat", resourceCulture);
+            }
+        }
+        
+        public static string TwentyFourHoursFormat {
+            get {
+                return ResourceManager.GetString("TwentyFourHoursFormat", resourceCulture);
+            }
+        }
+        
+        public static string EditingTwelveHoursFormat {
+            get {
+                return ResourceManager.GetString("EditingTwelveHoursFormat", resourceCulture);
+            }
+        }
+        
+        public static string EditingTwentyFourHoursFormat {
+            get {
+                return ResourceManager.GetString("EditingTwentyFourHoursFormat", resourceCulture);
             }
         }
     }

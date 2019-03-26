@@ -12,14 +12,19 @@ namespace Toggl.Daneel.Services
             SharedStorage.instance.SetApiToken(apiToken);
         }
 
-        public void ClearAll()
-        {
-            SharedStorage.instance.DeleteEverything();
-        }
-
         public void SaveUserId(long userId)
         {
             SharedStorage.instance.SetUserId(userId);
+        }
+
+        public void SaveLastUpdateDate(DateTimeOffset date)
+        {
+            SharedStorage.instance.SetLastUpdateDate(date);
+        }
+
+        public void ClearAll()
+        {
+            SharedStorage.instance.DeleteEverything();
         }
     }
 }

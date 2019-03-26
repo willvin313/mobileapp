@@ -21,5 +21,8 @@ namespace Toggl.Daneel.Extensions.Reactive
 
                 return Disposable.Create(() => reactive.Base.ValueChanged -= changed);
             });
+
+        public static Action<bool> On(this IReactive<UISwitch> reactive)
+            => isOn => reactive.Base.SetState(isOn, true);
     }
 }

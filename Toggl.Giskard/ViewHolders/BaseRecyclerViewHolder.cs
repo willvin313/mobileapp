@@ -11,7 +11,7 @@ namespace Toggl.Giskard.ViewHolders
     {
         private bool viewsAreInitialized = false;
 
-        public Subject<T> TappedSubject { get; set; }
+        public ISubject<T> TappedSubject { get; set; }
 
         private T item;
         public T Item
@@ -34,7 +34,7 @@ namespace Toggl.Giskard.ViewHolders
         protected BaseRecyclerViewHolder(View itemView)
             : base(itemView)
         {
-            ItemView.Click += onItemViewClick;
+            ItemView.Click += OnItemViewClick;
         }
 
         protected BaseRecyclerViewHolder(IntPtr handle, JniHandleOwnership ownership)
@@ -51,10 +51,10 @@ namespace Toggl.Giskard.ViewHolders
             base.Dispose(disposing);
 
             if (!disposing || ItemView == null) return;
-            ItemView.Click -= onItemViewClick;
+            ItemView.Click -= OnItemViewClick;
         }
 
-        private void onItemViewClick(object sender, EventArgs args)
+        protected virtual void OnItemViewClick(object sender, EventArgs args)
         {
             TappedSubject?.OnNext(Item);
         }

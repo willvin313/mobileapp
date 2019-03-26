@@ -19,6 +19,10 @@ namespace Toggl.Giskard.Extensions.Reactive
                 .FromEventPattern<TextChangedEventArgs>(e => reactive.Base.TextChanged += e, e => reactive.Base.TextChanged -= e)
                 .Select(args => ((EditText)args.Sender).TextFormatted);
 
+
+        public static Action<string> Hint(this IReactive<TextView> reactive)
+            => text => reactive.Base.Hint = text;
+
         public static Action<string> TextObserver(this IReactive<TextView> reactive, bool ignoreUnchanged = false)
         {
             return text =>

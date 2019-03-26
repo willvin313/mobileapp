@@ -1,5 +1,7 @@
-﻿using System.Reactive.Disposables;
+﻿using System;
+using System.Reactive.Disposables;
 using Android.Content;
+using Android.Content.PM;
 using Android.OS;
 using MvvmCross.Binding.BindingContext;
 using MvvmCross.Droid.Support.V7.AppCompat.EventSource;
@@ -7,11 +9,11 @@ using MvvmCross.Platforms.Android.Binding.BindingContext;
 using MvvmCross.Platforms.Android.Views;
 using MvvmCross.ViewModels;
 using MvvmCross.Views;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using static Toggl.Giskard.Services.PermissionsServiceAndroid;
 
 namespace Toggl.Giskard.Activities
 {
-    public abstract class ReactiveActivity<TViewModel> : MvxEventSourceAppCompatActivity, IMvxAndroidView
+    public abstract class ReactiveActivity<TViewModel> : MvxEventSourceAppCompatActivity, IMvxAndroidView, IPermissionAskingActivity
         where TViewModel : class, IMvxViewModel
     {
         public CompositeDisposable DisposeBag { get; private set; } = new CompositeDisposable();
@@ -37,6 +39,8 @@ namespace Toggl.Giskard.Activities
         }
 
         public IMvxBindingContext BindingContext { get; set; }
+
+        public Action<int, string[], Permission[]> OnPermissionChangedCallback { get; set; }
 
         protected ReactiveActivity()
         {
@@ -91,6 +95,14 @@ namespace Toggl.Giskard.Activities
 
             if (!disposing) return;
             DisposeBag?.Dispose();
+        }
+
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+        {
+            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+
+            OnPermissionChangedCallback?.Invoke(requestCode, permissions, grantResults);
+            OnPermissionChangedCallback = null;
         }
     }
 }

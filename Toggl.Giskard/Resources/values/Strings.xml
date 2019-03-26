@@ -135,7 +135,28 @@ understand and agree to Toggl\'s</string>
     <string name="PlusThirtyMinutes">30m</string>
     <string name="PlusThirtyMinutes">30m</string>
     <string name="LoginBackRequest">Enter your password to log back in to your account:</string>
-
+    <string name="Timer">Timer</string>
+    <string name="Calendar">Calendar</string>
+    <string name="Settings">Settings</string>
+    <string name="CalendarOnboardingTitle">Get started with Calendar</string>
+    <string name="CalendarOnboardingMessage">View your calendar events in Toggl and turn them into time entries with a tap</string>
+    <string name="LinkYourCalendars">Link your calendars</string>
+    <string name="Skip">Skip</string>
+    <string name="SelectCalendars">Select calendars</string>
+    <string name="SelectCalendarsMessage">Choose the calendars containing events you’d like to log in Toggl</string>
+    <string name="NoWorries">No worries</string>
+    <string name="CalendarPermissionDeniedMessage">Toggl needs access to your calendar to display events. You can enable this later.</string>
+    <string name="AllowAccess">Allow access</string>
+    <string name="SetSmartReminders">Set smart reminders</string>
+    <string name="SetSmartRemindersMessage">Get an actionable reminder to start tracking time for your event</string>
+    <string name="CalendarSettings">Calendar Settings</string>
+    <string name="SmartReminders">Smart reminders</string>
+    <string name="LinkCalendars">Link calendars</string>
+    <string name="LinkCalendarsMessage">View your calendar events in Toggl and log them  with a single tap</string>
+    <string name="CalendarEvents">Calendar events</string>
+    <string name="TimeEntries">Time entries</string>
+    <string name="TotalEvents">%s events</string>
+    
     <string name="ReportsCalendarShortcutsTemplateSelector" translatable="false">Toggl.Giskard.TemplateSelectors.ReportsCalendarShortcutsTemplateSelector, Toggl.Giskard</string>
     <string name="ReportsCalendarTemplateSelector" translatable="false">Toggl.Giskard.TemplateSelectors.ReportsCalendarTemplateSelector, Toggl.Giskard</string>
     <string name="ReportsTemplateSelector" translatable="false">Toggl.Giskard.TemplateSelectors.ReportsTemplateSelector, Toggl.Giskard</string>

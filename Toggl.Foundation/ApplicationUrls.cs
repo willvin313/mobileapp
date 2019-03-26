@@ -1,4 +1,4 @@
-﻿namespace Toggl.Foundation
+namespace Toggl.Foundation
 {
     public static class ApplicationUrls
     {
@@ -11,6 +11,7 @@
             public static class Action
             {
                 public const string Stop = "stop";
+                public const string StopFromSiri = "stopfromSiri";
                 public const string Continue = "continue";
             }
 
@@ -19,6 +20,8 @@
             public static readonly string Open = "toggl://main";
 
             public static readonly string StopTimeEntry = $"toggl://main?action={Action.Stop}";
+
+            public static readonly string StopFromSiri = $"toggl://main?action={Action.StopFromSiri}";
 
             public static readonly string ContinueLastEntry = $"toggl://main?action={Action.Continue}";
 
