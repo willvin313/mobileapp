@@ -89,6 +89,7 @@ namespace Toggl.Giskard.ViewHelpers
         {
             if (viewHolder is MainLogCellViewHolder logViewHolder)
             {
+                logViewHolder.HideSwipeBackgrounds();
                 DefaultUIUtil.ClearView(logViewHolder.MainLogContentView);
             }
             else
