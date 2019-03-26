@@ -76,7 +76,7 @@
     <DefineConstants>
     </DefineConstants>
     <WarningLevel>4</WarningLevel>
-    <CodesignProvision>Daneel_AdHoc</CodesignProvision>
+    <CodesignProvision>Daneel AdHoc</CodesignProvision>
     <CodesignKey>iPhone Distribution: Toggl OU (B227VTMZ94)</CodesignKey>
     <MtouchExtraArgs>--linkskip Toggl.Daneel</MtouchExtraArgs>
     <MtouchVerbosity>
