@@ -47,6 +47,31 @@ namespace Toggl.Foundation.MvvmCross
             this.dependencyContainer = dependencyContainer;
         }
 
+        protected override void Startup(object hint = null)
+        {
+            revokeNewUserIfNeeded();
+
+            dependencyContainer.BackgroundSyncService.SetupBackgroundSync(dependencyContainer.UserAccessManager);
+
+            base.Startup(hint);
+        }
+        
+        private void revokeNewUserIfNeeded()
+        {
+            const int newUserThreshold = 60;
+            var now = dependencyContainer.TimeService.CurrentDateTime;
+            var lastUsed = dependencyContainer.OnboardingStorage.GetLastOpened();
+            dependencyContainer.OnboardingStorage.SetLastOpened(now);
+            if (!lastUsed.HasValue)
+                return;
+
+            var offset = now - lastUsed;
+            if (offset < TimeSpan.FromDays(newUserThreshold))
+                return;
+
+            dependencyContainer.OnboardingStorage.SetIsNewUser(false);
+        }
+
         protected override async void NavigateToFirstViewModel(object hint = null)
         {
             var timeService = dependencyContainer.TimeService;

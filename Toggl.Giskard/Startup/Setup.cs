@@ -62,11 +62,7 @@ namespace Toggl.Giskard
             var dependencyContainer = AndroidDependencyContainer.Instance;
             ApplicationContext.RegisterReceiver(new TimezoneChangedBroadcastReceiver(dependencyContainer.TimeService),
                 new IntentFilter(Intent.ActionTimezoneChanged));
-
-            //TODO: Move this elsewhere
-            //foundation.RevokeNewUserIfNeeded().Initialize();
-
-            //ensureDataSourceInitializationIfLoggedIn();
+            
             createApplicationLifecycleObserver(dependencyContainer.BackgroundService);
 
             base.InitializeApp(pluginManager, app);

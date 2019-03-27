@@ -49,15 +49,6 @@ namespace Toggl.Daneel
             return container.ForkingNavigationService;
         }
 
-        // TODO: incorporate these calls somewher (container .ctor maybe?)
-        //protected override void InitializeApp(IMvxPluginManager pluginManager, IMvxApplication app)
-        //{
-            
-        //    foundation.RevokeNewUserIfNeeded().Initialize();
-
-        //    base.InitializeApp(pluginManager, app);
-        //}
-
         // Skip the sluggish and reflection-based manager and load our plugins by hand
         protected override IMvxPluginManager InitializePluginFramework()
         {

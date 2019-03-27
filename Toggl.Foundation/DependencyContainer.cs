@@ -101,7 +101,6 @@ namespace Toggl.Foundation
             ApiEnvironment = apiEnvironment;
 
             syncManager = new Lazy<ISyncManager>(unusableDependency<ISyncManager>);
-            interactorFactory = new Lazy<IInteractorFactory>(unusableDependency<IInteractorFactory>);
 
             database = new Lazy<ITogglDatabase>(CreateDatabase);
             apiFactory = new Lazy<IApiFactory>(CreateApiFactory);
@@ -115,6 +114,7 @@ namespace Toggl.Foundation
             rxActionFactory = new Lazy<IRxActionFactory>(CreateRxActionFactory);
             userPreferences = new Lazy<IUserPreferences>(CreateUserPreferences);
             analyticsService = new Lazy<IAnalyticsService>(CreateAnalyticsService);
+            interactorFactory = new Lazy<IInteractorFactory>(CreateInteractorFactory);
             stopwatchProvider = new Lazy<IStopwatchProvider>(CreateStopwatchProvider);
             backgroundService = new Lazy<IBackgroundService>(CreateBackgroundService);
             schedulerProvider = new Lazy<ISchedulerProvider>(CreateSchedulerProvider);
@@ -219,7 +219,8 @@ namespace Toggl.Foundation
 
             interactorFactory = new Lazy<IInteractorFactory>(CreateInteractorFactory);
             syncManager = new Lazy<ISyncManager>(() =>
-                TogglSyncManager.CreateSyncManager(
+            {
+                var syncManager = TogglSyncManager.CreateSyncManager(
                     Database,
                     api,
                     DataSource,
@@ -229,8 +230,12 @@ namespace Toggl.Foundation
                     SchedulerProvider.DefaultScheduler,
                     StopwatchProvider,
                     AutomaticSyncingService
-                )
-            );
+                );
+
+                SyncErrorHandlingService.HandleErrorsOf(syncManager);
+
+                return syncManager;
+            });
         }
 
         private void recreateLazyDependenciesForLogout()
