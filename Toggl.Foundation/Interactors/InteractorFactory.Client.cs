@@ -15,6 +15,7 @@ namespace Toggl.Foundation.Interactors
             => new CreateClientInteractor(idProvider, timeService, dataSource.Clients, clientName, workspaceId);
 
         public IInteractor<IObservable<IThreadSafeClient>> GetClientById(long id)
-            => new GetByIdInteractor<IThreadSafeClient, IDatabaseClient>(dataSource.Clients, id);
+            => new GetByIdInteractor<IThreadSafeClient, IDatabaseClient>(dataSource.Clients, analyticsService, id)
+                .TrackException<Exception, IThreadSafeClient>("GetClientById");
     }
 }

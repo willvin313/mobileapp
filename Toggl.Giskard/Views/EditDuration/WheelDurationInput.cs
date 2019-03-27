@@ -90,7 +90,7 @@ namespace Toggl.Giskard.Views.EditDuration
         {
             this.duration = duration;
             input = DurationFieldInfo.FromTimeSpan(duration);
-            Text = input.ToTimeSpan().AsDurationString();
+            Text = duration.AsDurationString();
         }
 
         public override void OnEditorAction(ImeAction actionCode)
@@ -133,11 +133,6 @@ namespace Toggl.Giskard.Views.EditDuration
             }
 
             base.OnFocusChanged(gainFocus, direction, previouslyFocusedRect);
-        }
-
-        private void showCurrentDuration()
-        {
-            Text = duration.AsDurationString();
         }
 
         private void initialize()

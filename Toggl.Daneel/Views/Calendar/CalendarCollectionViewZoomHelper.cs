@@ -46,6 +46,7 @@ namespace Toggl.Daneel.Views.Calendar
 
                 case UIGestureRecognizerState.Ended:
                     layout.ScaleHourHeight(gesture.Scale, pinchCenter);
+                    layout.OnScalingEnded();
                     break;
 
                 case UIGestureRecognizerState.Cancelled:

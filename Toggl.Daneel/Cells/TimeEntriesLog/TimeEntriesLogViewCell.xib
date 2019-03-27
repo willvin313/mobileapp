@@ -269,7 +269,7 @@
                     <constraint firstAttribute="trailing" secondItem="2Q5-T6-UvK" secondAttribute="trailing" constant="27" id="xx9-4r-fxJ"/>
                 </constraints>
             </tableViewCellContentView>
-            <accessibility key="accessibilityConfiguration" label="TimeEntryRow">
+            <accessibility key="accessibilityConfiguration" identifier="TimeEntryRow">
                 <bool key="isElement" value="YES"/>
             </accessibility>
             <connections>

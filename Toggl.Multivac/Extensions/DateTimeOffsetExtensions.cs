@@ -21,6 +21,9 @@ namespace Toggl.Multivac.Extensions
                 ? time + TimeSpan.FromSeconds(SecondsInAMinute - time.Second)
                 : time - TimeSpan.FromSeconds(time.Second);
 
+        public static DateTimeOffset RoundDownToMinute(this DateTimeOffset time)
+            => new DateTimeOffset(time.Year, time.Month, time.Day, time.Hour, time.Minute, 0, time.Offset);
+
         public static DateTimeOffset WithDate(this DateTimeOffset original, DateTimeOffset date)
             => new DateTimeOffset(date.Year, date.Month, date.Day,
                                   original.Hour, original.Minute, original.Second, original.Offset);

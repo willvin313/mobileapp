@@ -6,6 +6,7 @@ using FluentAssertions;
 using FsCheck;
 using FsCheck.Xunit;
 using NSubstitute;
+using Toggl.Foundation.Analytics;
 using Toggl.Foundation.Helper;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Reports;
@@ -36,6 +37,7 @@ namespace Toggl.Foundation.Tests.Interactors
                 Substitute.For<IRepository<IDatabaseProject>>();
             protected IRepository<IDatabaseClient> ClientsRepository { get; } =
                 Substitute.For<IRepository<IDatabaseClient>>();
+            protected IAnalyticsService AnalyticsService { get; } = Substitute.For<IAnalyticsService>();
 
             protected GetProjectSummaryInteractorTest()
             {
@@ -51,6 +53,7 @@ namespace Toggl.Foundation.Tests.Interactors
                 => new GetProjectSummaryInteractor(
                     Api,
                     Database,
+                    AnalyticsService,
                     ReportsMemoryCache,
                     workspaceId,
                     startDate,
@@ -62,15 +65,17 @@ namespace Toggl.Foundation.Tests.Interactors
         {
             [Theory, LogIfTooSlow]
             [ConstructorData]
-            public void ThrowsIfAnyOfTheArgumentsIsNull(bool useApi, bool useDatabase)
+            public void ThrowsIfAnyOfTheArgumentsIsNull(bool useApi, bool useDatabase, bool useAnalyticsService)
             {
                 var api = useApi ? Api : null;
                 var database = useDatabase ? Database : null;
+                var analyticsService = useAnalyticsService ? AnalyticsService : null;
 
                 Action tryingToConstructWithEmptyParameters =
                     () => new GetProjectSummaryInteractor(
                         api,
                         database,
+                        analyticsService,
                         ReportsMemoryCache, 0, DateTimeOffset.Now, null
                     );
 
@@ -89,7 +94,7 @@ namespace Toggl.Foundation.Tests.Interactors
             {
                 ProjectsSummaryApi
                     .GetByWorkspace(Arg.Any<long>(), Arg.Any<DateTimeOffset>(), Arg.Any<DateTimeOffset>())
-                    .Returns(Observable.Return(apiProjectsSummary)); 
+                    .Returns(Observable.Return(apiProjectsSummary));
             }
 
             [Property]
@@ -135,7 +140,7 @@ namespace Toggl.Foundation.Tests.Interactors
             {
                 var actualProjectIds = projectIds.Get.Select(i => (long)i.Get).Distinct().ToArray();
                 if (actualProjectIds.Length < 2) return;
-                
+
                 var projectsInDb = actualProjectIds.Where((i, id) => i % 2 == 0).ToArray();
                 var projectsInApi = actualProjectIds.Where((i, id) => i % 2 != 0).ToArray();
                 var summaries = getSummaryList(actualProjectIds);
@@ -150,7 +155,7 @@ namespace Toggl.Foundation.Tests.Interactors
 
                 lists.Should().HaveCount(1);
             }
-            
+
             [Property(MaxTest = 10, StartSize = 10, EndSize = 20)]
             public void ReturnsOnlyOneListIfItUsesTheMemoryCache(NonEmptyArray<NonNegativeInt> projectIds)
             {
@@ -165,7 +170,7 @@ namespace Toggl.Foundation.Tests.Interactors
                 apiProjectsSummary.ProjectsSummaries.Returns(summaries);
                 configureRepositoryToReturn(projectsInDb, projectsInApi);
                 configureApiToReturn(projectsInApi);
-                
+
                 GetInteractor(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now).Execute().Wait();
                 var lists = GetInteractor(workspaceId, DateTimeOffset.Now.AddDays(-7), DateTimeOffset.Now)
                     .Execute()
@@ -296,7 +301,7 @@ namespace Toggl.Foundation.Tests.Interactors
                     .Search(Arg.Any<long>(), Arg.Any<long[]>())
                     .Returns(Observable.Return(projects));
             }
-            
+
             private bool ensureExpectedIdsAreReturned(long[] actual, long[] expected)
             {
                 if (actual.Length != expected.Length) return false;

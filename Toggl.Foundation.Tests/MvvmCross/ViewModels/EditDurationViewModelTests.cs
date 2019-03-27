@@ -375,6 +375,52 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
         }
 
+        public sealed class TheStopTimeEntryCommand : EditDurationViewModelTest
+        {
+            private static DurationParameter parameter = DurationParameter.WithStartAndDuration(
+                 new DateTimeOffset(2018, 01, 13, 0, 0, 0, TimeSpan.Zero),
+                 TimeSpan.FromMinutes(7));
+
+            [Fact]
+            public void StopsARunningTimeEntry()
+            {
+                var now = new DateTimeOffset(2018, 02, 20, 0, 0, 0, TimeSpan.Zero);
+                var runningTEParameter = DurationParameter.WithStartAndDuration(parameter.Start, null);
+                ViewModel.Prepare(new EditDurationParameters(runningTEParameter));
+                TimeService.CurrentDateTime.Returns(now);
+                var stopObserver = TestScheduler.CreateObserver<DateTimeOffset>();
+                var isRunningObserver = TestScheduler.CreateObserver<bool>();
+                ViewModel.StopTime.Subscribe(stopObserver);
+                ViewModel.IsRunning.Subscribe(isRunningObserver);
+
+                ViewModel.StopTimeEntry.Execute();
+
+                TestScheduler.Start();
+                isRunningObserver.LastEmittedValue().Should().BeFalse();
+                stopObserver.LastEmittedValue().Should().Be(now);
+            }
+
+            [Fact]
+            public void UnsubscribesFromTheTheRunningTimeEntryObservable()
+            {
+                var now = new DateTimeOffset(2018, 02, 20, 0, 0, 0, TimeSpan.Zero);
+                var runningTEParameter = DurationParameter.WithStartAndDuration(parameter.Start, null);
+                var subject = new BehaviorSubject<DateTimeOffset>(now);
+                var observable = subject.AsObservable().Publish();
+                var stopObserver = TestScheduler.CreateObserver<DateTimeOffset>();
+                ViewModel.StopTime.Subscribe(stopObserver);
+                ViewModel.Prepare(new EditDurationParameters(runningTEParameter));
+                TimeService.CurrentDateTime.Returns(now);
+                TimeService.CurrentDateTimeObservable.Returns(observable);
+
+                ViewModel.StopTimeEntry.Execute();
+                subject.OnNext(now.AddSeconds(1));
+
+                TestScheduler.Start();
+                stopObserver.LastEmittedValue().Should().Be(now);
+            }
+        }
+
         public sealed class TheEditStopTimeCommand : EditDurationViewModelTest
         {
             private static DurationParameter parameter = DurationParameter.WithStartAndDuration(
@@ -445,46 +491,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 TestScheduler.Start();
                 minTimeObserver.LastEmittedValue().Should().Be(parameter.Start);
                 maxTimeObserver.LastEmittedValue().Should().Be(parameter.Start + TimeSpan.FromHours(999));
-            }
-
-            [Fact]
-            public void StopsARunningTimeEntry()
-            {
-                var now = new DateTimeOffset(2018, 02, 20, 0, 0, 0, TimeSpan.Zero);
-                var runningTEParameter = DurationParameter.WithStartAndDuration(parameter.Start, null);
-                ViewModel.Prepare(new EditDurationParameters(runningTEParameter));
-                TimeService.CurrentDateTime.Returns(now);
-                var stopObserver = TestScheduler.CreateObserver<DateTimeOffset>();
-                var isRunningObserver = TestScheduler.CreateObserver<bool>();
-                ViewModel.StopTime.Subscribe(stopObserver);
-                ViewModel.IsRunning.Subscribe(isRunningObserver);
-
-
-                ViewModel.EditStopTime.Execute();
-
-                TestScheduler.Start();
-                isRunningObserver.LastEmittedValue().Should().BeFalse();
-                stopObserver.LastEmittedValue().Should().Be(now);
-            }
-
-            [Fact]
-            public void UnsubscribesFromTheTheRunningTimeEntryObservable()
-            {
-                var now = new DateTimeOffset(2018, 02, 20, 0, 0, 0, TimeSpan.Zero);
-                var runningTEParameter = DurationParameter.WithStartAndDuration(parameter.Start, null);
-                var subject = new BehaviorSubject<DateTimeOffset>(now);
-                var observable = subject.AsObservable().Publish();
-                var stopObserver = TestScheduler.CreateObserver<DateTimeOffset>();
-                ViewModel.StopTime.Subscribe(stopObserver);
-                ViewModel.Prepare(new EditDurationParameters(runningTEParameter));
-                TimeService.CurrentDateTime.Returns(now);
-                TimeService.CurrentDateTimeObservable.Returns(observable);
-
-                ViewModel.EditStopTime.Execute();
-                subject.OnNext(now.AddSeconds(1));
-
-                TestScheduler.Start();
-                stopObserver.LastEmittedValue().Should().Be(now);
             }
         }
 

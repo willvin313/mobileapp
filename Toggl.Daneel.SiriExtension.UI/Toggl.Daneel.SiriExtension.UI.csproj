@@ -90,7 +90,7 @@
     <MtouchHttpClientHandler>HttpClientHandler</MtouchHttpClientHandler>
     <MtouchVerbosity>
     </MtouchVerbosity>
-    <CodesignProvision>Toggl Mobile Siri UI Extension AdHoc</CodesignProvision>
+    <CodesignProvision>Daneel AdHoc SiriUIExtension</CodesignProvision>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

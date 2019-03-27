@@ -13,6 +13,7 @@ namespace Toggl.Foundation.Interactors
 
         public IInteractor<IObservable<ProjectSummaryReport>> GetProjectSummary(
             long workspaceId, DateTimeOffset startDate, DateTimeOffset? endDate)
-            => new GetProjectSummaryInteractor(api, database, reportsMemoryCache, workspaceId, startDate, endDate);
+            => new GetProjectSummaryInteractor(api, database, analyticsService, reportsMemoryCache, workspaceId, startDate, endDate)
+                .TrackException<Exception, ProjectSummaryReport>("GetProjectSummary");
     }
 }

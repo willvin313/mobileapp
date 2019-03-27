@@ -8,6 +8,7 @@ namespace Toggl.Foundation.Interactors
     public sealed partial class InteractorFactory : IInteractorFactory
     {
         public IInteractor<IObservable<IThreadSafeWorkspaceFeatureCollection>> GetWorkspaceFeaturesById(long id)
-            => new GetByIdInteractor<IThreadSafeWorkspaceFeatureCollection, IDatabaseWorkspaceFeatureCollection>(dataSource.WorkspaceFeatures, id);
+            => new GetByIdInteractor<IThreadSafeWorkspaceFeatureCollection, IDatabaseWorkspaceFeatureCollection>(dataSource.WorkspaceFeatures, analyticsService, id)
+                .TrackException<Exception, IThreadSafeWorkspaceFeatureCollection>("GetWorkspaceFeaturesById");
     }
 }

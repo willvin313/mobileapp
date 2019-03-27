@@ -270,13 +270,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 setup(i => i % 2 == 0 ? irrelevantWorkspaceId : workspaceId);
 
-                var autocompleteProvider = Substitute.For<IAutocompleteProvider>();
-
-                autocompleteProvider
-                    .Query(Arg.Is<QueryInfo>(
-                        arg => arg.SuggestionType == AutocompleteSuggestionType.Tags))
-                    .Returns(Observable.Return(new List<TagSuggestion>()));
-
                 ViewModel.Prepare((new long[] { }, workspaceId));
                 await ViewModel.Initialize();
                 var observer = TestScheduler.CreateObserver<bool>();

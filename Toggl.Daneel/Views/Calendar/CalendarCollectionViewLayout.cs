@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -26,6 +27,9 @@ namespace Toggl.Daneel.Views.Calendar
         private float maxHourHeight = 28 * 4;
 
         public float HourHeight { get; private set; } = 56;
+
+        private ISubject<Unit> scalingEndedSubject = new Subject<Unit>();
+        public IObservable<Unit> ScalingEnded => scalingEndedSubject.AsObservable();
 
         private static readonly nfloat leftPadding = 76;
         private static readonly nfloat rightPadding = 16;
@@ -211,6 +215,9 @@ namespace Toggl.Daneel.Views.Calendar
                 return currentTimeLayoutAttributes;
             }
         }
+
+        public void OnScalingEnded()
+            => scalingEndedSubject.OnNext(Unit.Default);
 
         internal CGRect FrameForCurrentTime()
         {

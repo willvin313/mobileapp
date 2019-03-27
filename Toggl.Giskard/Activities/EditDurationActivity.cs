@@ -22,7 +22,7 @@ namespace Toggl.Giskard.Activities
 {
     [MvxActivityPresentation]
     [Activity(Theme = "@style/AppTheme.BlueStatusBar",
-        WindowSoftInputMode = SoftInput.StateHidden|SoftInput.AdjustResize,
+        WindowSoftInputMode = SoftInput.StateHidden | SoftInput.AdjustResize,
         ScreenOrientation = ScreenOrientation.Portrait,
         ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize)]
     public sealed partial class EditDurationActivity : ReactiveActivity<EditDurationViewModel>
@@ -36,7 +36,7 @@ namespace Toggl.Giskard.Activities
         };
 
         private readonly Subject<DateTimeOffset> activeEditionChangedSubject = new Subject<DateTimeOffset>();
-        private readonly Subject<Unit> editionEndedSubject = new Subject<Unit>();
+        private readonly Subject<Unit> viewClosedSubject = new Subject<Unit>();
         private readonly Subject<Unit> saveSubject = new Subject<Unit>();
 
         private DateTimeOffset minDateTime;
@@ -76,14 +76,7 @@ namespace Toggl.Giskard.Activities
                 .DisposedBy(DisposeBag);
 
             ViewModel.IsRunning
-                .Subscribe(running =>
-                {
-                    var stopDateTimeViewsVisibility = (!running).ToVisibility(useGone: false);
-                    stopTimerLabel.Visibility = running.ToVisibility(useGone: false);
-                    stopTimeText.Visibility = stopDateTimeViewsVisibility;
-                    stopDateText.Visibility = stopDateTimeViewsVisibility;
-                    stopDotSeparator.Visibility = stopDateTimeViewsVisibility;
-                })
+                .Subscribe(updateStopTimeUIVisibility)
                 .DisposedBy(DisposeBag);
 
             ViewModel.MinimumDateTime
@@ -94,12 +87,8 @@ namespace Toggl.Giskard.Activities
                 .Subscribe(max => maxDateTime = max)
                 .DisposedBy(DisposeBag);
 
-            stopTimerLabel.Rx().Tap()
-                .Subscribe(_ => { editMode = EditMode.Time; })
-                .DisposedBy(DisposeBag);
-
             stopTimerLabel.Rx()
-                .BindAction(ViewModel.EditStopTime)
+                .BindAction(ViewModel.StopTimeEntry)
                 .DisposedBy(DisposeBag);
 
             startTimeText.Rx().Tap()
@@ -134,14 +123,6 @@ namespace Toggl.Giskard.Activities
                 .BindAction(ViewModel.EditStopTime)
                 .DisposedBy(DisposeBag);
 
-            stopTimeText.Rx().Tap()
-                .Subscribe()
-                .DisposedBy(DisposeBag);
-
-            stopDateText.Rx().Tap()
-                .Subscribe()
-                .DisposedBy(DisposeBag);
-
             ViewModel.TemporalInconsistencies
                 .Subscribe(onTemporalInconsistency)
                 .DisposedBy(DisposeBag);
@@ -162,7 +143,7 @@ namespace Toggl.Giskard.Activities
                 .Subscribe(ViewModel.ChangeActiveTime.Inputs)
                 .DisposedBy(DisposeBag);
 
-            editionEndedSubject
+            viewClosedSubject
                 .Subscribe(ViewModel.StopEditingTime.Inputs)
                 .DisposedBy(DisposeBag);
 
@@ -176,6 +157,7 @@ namespace Toggl.Giskard.Activities
                 .DisposedBy(DisposeBag);
 
             ViewModel.Duration
+                .Where(_ => !wheelNumericInput.HasFocus)
                 .Subscribe(wheelNumericInput.SetDuration)
                 .DisposedBy(DisposeBag);
 
@@ -243,12 +225,21 @@ namespace Toggl.Giskard.Activities
 
         private void setupToolbar()
         {
-           toolbar.Title = Foundation.Resources.StartAndStopTime;
+            toolbar.Title = Foundation.Resources.StartAndStopTime;
 
             SetSupportActionBar(toolbar);
 
             SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             SupportActionBar.SetDisplayShowHomeEnabled(true);
+        }
+
+        private void updateStopTimeUIVisibility(bool isRunning)
+        {
+            var stopDateTimeViewsVisibility = (!isRunning).ToVisibility();
+            stopTimerLabel.Visibility = isRunning.ToVisibility();
+            stopTimeText.Visibility = stopDateTimeViewsVisibility;
+            stopDateText.Visibility = stopDateTimeViewsVisibility;
+            stopDotSeparator.Visibility = stopDateTimeViewsVisibility;
         }
 
         public override void OnBackPressed()
@@ -284,22 +275,26 @@ namespace Toggl.Giskard.Activities
 
         private void startEditing(DateTimeOffset initialValue)
         {
-            if (editMode == EditMode.None) return;
+            if (editMode == EditMode.None)
+                return;
 
             var localInitialValue = initialValue.ToLocalTime();
+
             if (editMode == EditMode.Time)
             {
                 editTime(localInitialValue);
-                return;
             }
-            editDate(localInitialValue);
+            else
+            {
+                editDate(localInitialValue);
+            }
         }
 
         private void editTime(DateTimeOffset currentTime)
         {
             if (editDialog == null)
             {
-                var timePickerDialog = new TimePickerDialog(this, Resource.Style.WheelDialogStyle,  new TimePickerListener(currentTime, activeEditionChangedSubject.OnNext),
+                var timePickerDialog = new TimePickerDialog(this, Resource.Style.WheelDialogStyle, new TimePickerListener(currentTime, activeEditionChangedSubject.OnNext),
                     currentTime.Hour, currentTime.Minute, is24HoursFormat);
 
                 void resetAction()
@@ -345,7 +340,7 @@ namespace Toggl.Giskard.Activities
             if (canDismiss)
             {
                 editDialog = null;
-                editionEndedSubject.OnNext(Unit.Default);
+                viewClosedSubject.OnNext(Unit.Default);
                 editMode = EditMode.None;
             }
             else

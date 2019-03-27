@@ -18,6 +18,7 @@ using Toggl.Foundation.Autocomplete.Span;
 using Toggl.Foundation.Autocomplete.Suggestions;
 using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Interactors;
+using Toggl.Foundation.Interactors.AutocompleteSuggestions;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Parameters;
@@ -83,7 +84,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     InteractorFactory,
                     NavigationService,
                     AnalyticsService,
-                    AutocompleteProvider,
                     SchedulerProvider,
                     IntentDonationService,
                     StopwatchProvider,
@@ -104,7 +104,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 bool useOnboardingStorage,
                 bool useNavigationService,
                 bool useAnalyticsService,
-                bool useAutocompleteProvider,
                 bool useSchedulerProvider,
                 bool useIntentDonationService,
                 bool useStopwatchProvider,
@@ -118,7 +117,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var onboardingStorage = useOnboardingStorage ? OnboardingStorage : null;
                 var navigationService = useNavigationService ? NavigationService : null;
                 var analyticsService = useAnalyticsService ? AnalyticsService : null;
-                var autocompleteProvider = useAutocompleteProvider ? AutocompleteProvider : null;
                 var schedulerProvider = useSchedulerProvider ? SchedulerProvider : null;
                 var intentDonationService = useIntentDonationService ? IntentDonationService : null;
                 var stopwatchProvider = useStopwatchProvider ? StopwatchProvider : null;
@@ -134,7 +132,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         interactorFactory,
                         navigationService,
                         analyticsService,
-                        autocompleteProvider,
                         schedulerProvider,
                         intentDonationService,
                         stopwatchProvider,
@@ -340,8 +337,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     project.Workspace.Name.Returns("Some workspace");
                     var projectSuggestion = new ProjectSuggestion(project);
 
-                    AutocompleteProvider
-                        .Query(Arg.Is<QueryInfo>(info => info.SuggestionType == AutocompleteSuggestionType.Projects))
+                    InteractorFactory
+                        .GetAutocompleteSuggestions(Arg.Is<QueryInfo>(info => info.SuggestionType == AutocompleteSuggestionType.Projects))
+                        .Execute()
                         .Returns(Observable.Return(new ProjectSuggestion[] { projectSuggestion }));
 
                     ViewModel.Prepare(DefaultParameter);
@@ -455,8 +453,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     tag.Name.Returns(TagName);
                     var tagSuggestion = new TagSuggestion(tag);
 
-                    AutocompleteProvider
-                        .Query(Arg.Is<QueryInfo>(info => info.SuggestionType == AutocompleteSuggestionType.Tags))
+                    InteractorFactory.GetAutocompleteSuggestions(Arg.Is<QueryInfo>(info => info.SuggestionType == AutocompleteSuggestionType.Tags))
+                        .Execute()
                         .Returns(Observable.Return(new TagSuggestion[] { tagSuggestion }));
 
                     ViewModel.Prepare(DefaultParameter);
@@ -813,13 +811,14 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public TheToggleProjectSuggestionsAction()
             {
                 var suggestions = ProjectSuggestion.FromProjects(Enumerable.Empty<IThreadSafeProject>());
-                AutocompleteProvider
-                    .Query(Arg.Is<QueryInfo>(info => info.Text.Contains("@")))
+
+                InteractorFactory.GetAutocompleteSuggestions(Arg.Is<QueryInfo>(info => info.Text.Contains("@")))
+                    .Execute()
                     .Returns(Observable.Return(suggestions));
 
-                AutocompleteProvider
-                    .Query(Arg.Is<QueryInfo>(
+                InteractorFactory.GetAutocompleteSuggestions(Arg.Is<QueryInfo>(
                         arg => arg.SuggestionType == AutocompleteSuggestionType.Projects))
+                    .Execute()
                     .Returns(Observable.Return(suggestions));
 
                 var defaultWorkspace = new MockWorkspace { Id = WorkspaceId };
@@ -886,7 +885,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var projectSuggestions = ProjectSuggestion.FromProjects(projects);
                 var chosenProject = projectSuggestions.First();
                 DataSource.Projects.GetAll().Returns(Observable.Return(projects));
-                AutocompleteProvider.Query(Arg.Any<QueryInfo>()).Returns(Observable.Return(projectSuggestions));
+                InteractorFactory.GetAutocompleteSuggestions(Arg.Any<QueryInfo>())
+                    .Execute()
+                    .Returns(Observable.Return(projectSuggestions));
                 ViewModel.Prepare(DefaultParameter);
                 await ViewModel.Initialize();
                 ViewModel.OnTextFieldInfoFromView(new QueryTextSpan(Description, Description.Length));
@@ -910,7 +911,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var projects = createProjects(5);
                 var projectSuggestions = ProjectSuggestion.FromProjects(projects);
                 var chosenProject = projectSuggestions.First();
-                AutocompleteProvider.Query(Arg.Any<QueryInfo>()).Returns(Observable.Return(projectSuggestions));
+                InteractorFactory.GetAutocompleteSuggestions(Arg.Any<QueryInfo>())
+                    .Execute()
+                    .Returns(Observable.Return(projectSuggestions));
 
                 ViewModel.Prepare(DefaultParameter);
                 await ViewModel.Initialize();
@@ -1019,8 +1022,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 tag.Id.Returns(TagId);
                 tag.Name.Returns(TagName);
                 var suggestions = TagSuggestion.FromTags(new[] { tag });
-                AutocompleteProvider
-                    .Query(Arg.Is<QueryInfo>(info => info.Text.Contains("#")))
+
+                InteractorFactory.GetAutocompleteSuggestions(Arg.Is<QueryInfo>(info => info.Text.Contains("#")))
+                    .Execute()
                     .Returns(Observable.Return(suggestions));
             }
 
@@ -1853,7 +1857,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 suggestions.AddRange(getProjectSuggestions(1, 10));
                 suggestions.AddRange(getProjectSuggestions(10, 54));
                 var suggestionsObservable = Observable.Return(suggestions);
-                AutocompleteProvider.Query(Arg.Any<QueryInfo>()).Returns(suggestionsObservable);
+                InteractorFactory.GetAutocompleteSuggestions(Arg.Any<QueryInfo>())
+                    .Execute()
+                    .Returns(suggestionsObservable);
                 ViewModel.Prepare();
 
                 var observer = TestScheduler
@@ -1906,7 +1912,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                         new TimeEntrySuggestion(timeEntryA),
                         new TimeEntrySuggestion(timeEntryB)
                     });
-                AutocompleteProvider.Query(Arg.Any<QueryInfo>()).Returns(suggestions);
+                InteractorFactory.GetAutocompleteSuggestions(Arg.Any<QueryInfo>())
+                    .Execute()
+                    .Returns(suggestions);
 
                 ViewModel.Prepare(DefaultParameter);
 
@@ -1934,7 +1942,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 suggestions.Add(getProjectSuggestion(33, 1));
                 suggestions.Add(getProjectSuggestion(10, 1));
                 var suggestionsObservable = Observable.Return(suggestions);
-                AutocompleteProvider.Query(Arg.Any<QueryInfo>()).Returns(suggestionsObservable);
+                InteractorFactory.GetAutocompleteSuggestions(Arg.Any<QueryInfo>())
+                    .Execute()
+                    .Returns(suggestionsObservable);
 
                 var observer = TestScheduler
                     .CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
@@ -1958,7 +1968,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     new MockTask { Id = 3, WorkspaceId = 0, ProjectId = 3, Name = "Task3" }
                 }));
                 var suggestionsObservable = Observable.Return(suggestions);
-                AutocompleteProvider.Query(Arg.Any<QueryInfo>()).Returns(suggestionsObservable);
+                InteractorFactory.GetAutocompleteSuggestions(Arg.Any<QueryInfo>())
+                    .Execute()
+                    .Returns(suggestionsObservable);
 
                 var observer = TestScheduler
                     .CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
@@ -1987,14 +1999,16 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [InlineData("abc #def")]
             public async Task DoesNotChangeSuggestionsWhenOnlyTheCursorMovesForward(string text)
             {
+                var interactor = Substitute.For<GetAutocompleteSuggestions>(InteractorFactory, new QueryInfo("", AutocompleteSuggestionType.None));
+                InteractorFactory.GetAutocompleteSuggestions(Arg.Any<QueryInfo>()).Returns(interactor);
+
                 ViewModel.Prepare(DefaultParameter);
                 ViewModel.OnTextFieldInfoFromView(new QueryTextSpan(text, text.Length));
-                AutocompleteProvider.ClearReceivedCalls();
 
                 ViewModel.OnTextFieldInfoFromView(new QueryTextSpan(text, 0));
 
                 TestScheduler.Start();
-                await AutocompleteProvider.DidNotReceive().Query(Arg.Any<QueryInfo>());
+                await interactor.DidNotReceive().Execute();
             }
 
             [Theory, LogIfTooSlow]
@@ -2002,18 +2016,20 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [InlineData("abc #def")]
             public async Task ChangesSuggestionsWhenTheCursorMovesBackBehindTheOldCursorPosition(string text)
             {
+                var interactor = Substitute.For<GetAutocompleteSuggestions>(InteractorFactory, new QueryInfo("", AutocompleteSuggestionType.None));
+                InteractorFactory.GetAutocompleteSuggestions(Arg.Any<QueryInfo>()).Returns(interactor);
+
                 ViewModel.Suggestions.Subscribe();
 
                 var extendedText = text + "x";
                 ViewModel.Prepare(DefaultParameter);
                 ViewModel.OnTextFieldInfoFromView(new QueryTextSpan(extendedText, text.Length));
                 ViewModel.OnTextFieldInfoFromView(new QueryTextSpan(extendedText, 0));
-                AutocompleteProvider.ClearReceivedCalls();
 
                 ViewModel.OnTextFieldInfoFromView(new QueryTextSpan(extendedText, extendedText.Length));
                 TestScheduler.Start();
 
-                await AutocompleteProvider.Received().Query(Arg.Any<QueryInfo>());
+                await interactor.Received().Execute();
             }
 
             [Theory, LogIfTooSlow]
@@ -2021,6 +2037,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [InlineData("abc #def")]
             public async Task ChangesSuggestionsWhenTheCursorMovesBeforeTheQuerySymbolAndUserStartsTyping(string text)
             {
+                var interactor = Substitute.For<GetAutocompleteSuggestions>(InteractorFactory, new QueryInfo("", AutocompleteSuggestionType.None));
+                InteractorFactory.GetAutocompleteSuggestions(Arg.Is<QueryInfo>(query => query.Text.StartsWith("x"))).Returns(interactor);
+
                 ViewModel.Suggestions.Subscribe();
 
                 ViewModel.Prepare(DefaultParameter);
@@ -2030,12 +2049,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ).Subscribe();
 
                 TestScheduler.Start();
-                AutocompleteProvider.ClearReceivedCalls();
 
                 ViewModel.SetTextSpans.Execute(new List<ISpan> { new QueryTextSpan("x" + text, 1) });
 
                 TestScheduler.Start();
-                await AutocompleteProvider.Received().Query(Arg.Is<QueryInfo>(query => query.Text.StartsWith("x")));
+                await interactor.Received().Execute();
             }
         }
 

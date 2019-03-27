@@ -44,8 +44,12 @@ namespace Toggl.Foundation.Tests.Autocomplete
                 }
             }
 
-            public sealed class TimeEntries : AutocompleteProviderTests.AutocompleteProviderTest
+            public sealed class TimeEntries
             {
+                protected const long ProjectId = 10;
+                protected const string ProjectName = "Toggl";
+                protected const string ProjectColor = "#F41F19";
+
                 [Property]
                 public void ExtractsTheProjectNameWhileTyping(NonEmptyString nonEmptyString)
                 {
@@ -81,7 +85,7 @@ namespace Toggl.Foundation.Tests.Autocomplete
                 }
             }
 
-            public sealed class Projects : AutocompleteProviderTests.AutocompleteProviderTest
+            public sealed class Projects
             {
                 [Theory, LogIfTooSlow]
                 [InlineData("@", "")]
@@ -154,8 +158,12 @@ namespace Toggl.Foundation.Tests.Autocomplete
                 }
             }
 
-            public sealed class Tags : AutocompleteProviderTests.AutocompleteProviderTest
+            public sealed class Tags
             {
+                protected const long ProjectId = 10;
+                protected const string ProjectName = "Toggl";
+                protected const string ProjectColor = "#F41F19";
+
                 [Theory, LogIfTooSlow]
                 [InlineData("#", "")]
                 [InlineData("abcde #", "")]

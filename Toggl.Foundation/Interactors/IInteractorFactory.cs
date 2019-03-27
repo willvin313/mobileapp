@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reactive;
 using Toggl.Foundation.Analytics;
+using Toggl.Foundation.Autocomplete;
 using Toggl.Foundation.Autocomplete.Suggestions;
 using Toggl.Foundation.Calendar;
 using Toggl.Foundation.DTOs;
@@ -100,6 +101,9 @@ namespace Toggl.Foundation.Interactors
         #endregion
 
         #region Autocomplete Suggestions
+
+        IInteractor<IObservable<IEnumerable<AutocompleteSuggestion>>> GetAutocompleteSuggestions(
+            QueryInfo queryInfo);
 
         IInteractor<IObservable<IEnumerable<AutocompleteSuggestion>>> GetTimeEntriesAutocompleteSuggestions(
             IList<string> wordsToQuery);

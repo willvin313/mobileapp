@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using Toggl.Foundation.Analytics;
 using Toggl.Foundation.Models;
 using Toggl.Foundation.Reports;
 using Toggl.Multivac;
@@ -16,7 +17,9 @@ using Toggl.Ultrawave.ApiClients.Interfaces;
 
 namespace Toggl.Foundation.Interactors
 {
-    public sealed class GetProjectSummaryInteractor : IInteractor<IObservable<ProjectSummaryReport>>
+    public sealed class GetProjectSummaryInteractor
+        : TrackableInteractor,
+          IInteractor<IObservable<ProjectSummaryReport>>
     {
         private readonly long workspaceId;
         private readonly DateTimeOffset startDate;
@@ -32,10 +35,12 @@ namespace Toggl.Foundation.Interactors
         public GetProjectSummaryInteractor(
             ITogglApi api,
             ITogglDatabase database,
+            IAnalyticsService analyticsService,
             ReportsMemoryCache memoryCache,
             long workspaceId,
             DateTimeOffset startDate,
             DateTimeOffset? endDate)
+            : base(analyticsService)
         {
             Ensure.Argument.IsNotNull(api, nameof(api));
             Ensure.Argument.IsNotNull(database, nameof(database));

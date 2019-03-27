@@ -22,7 +22,8 @@ namespace Toggl.Foundation.Interactors
             => new AreProjectsBillableByDefaultInteractor(this, workspaceId);
 
         public IInteractor<IObservable<IThreadSafeWorkspace>> GetWorkspaceById(long workspaceId)
-            => new GetByIdInteractor<IThreadSafeWorkspace, IDatabaseWorkspace>(dataSource.Workspaces, workspaceId);
+            => new GetByIdInteractor<IThreadSafeWorkspace, IDatabaseWorkspace>(dataSource.Workspaces, analyticsService, workspaceId)
+                .TrackException<Exception, IThreadSafeWorkspace>("GetWorkspaceById");
 
         public IInteractor<IObservable<IEnumerable<IThreadSafeWorkspace>>> GetAllWorkspaces()
             => new GetAllWorkspacesInteractor(dataSource);

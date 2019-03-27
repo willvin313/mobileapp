@@ -11,6 +11,7 @@ namespace Toggl.Foundation.Interactors
             => new CreateTagInteractor(idProvider, timeService, dataSource.Tags, tagName, workspaceId);
 
         public IInteractor<IObservable<IThreadSafeTag>> GetTagById(long id)
-            => new GetByIdInteractor<IThreadSafeTag, IDatabaseTag>(dataSource.Tags, id);
+            => new GetByIdInteractor<IThreadSafeTag, IDatabaseTag>(dataSource.Tags, analyticsService, id)
+                .TrackException<Exception, IThreadSafeTag>("GetTagById");
     }
 }

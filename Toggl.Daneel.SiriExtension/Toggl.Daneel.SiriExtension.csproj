@@ -67,7 +67,7 @@
     <MtouchHttpClientHandler>HttpClientHandler</MtouchHttpClientHandler>
     <MtouchVerbosity>
     </MtouchVerbosity>
-    <CodesignProvision>Toggl Mobile Siri Extension AdHoc</CodesignProvision>
+    <CodesignProvision>Daneel AdHoc SiriExtension</CodesignProvision>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release.AppStore|iPhone' ">
     <Optimize>true</Optimize>
