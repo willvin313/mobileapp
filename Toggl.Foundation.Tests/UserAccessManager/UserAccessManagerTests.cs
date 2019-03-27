@@ -11,7 +11,6 @@ using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Login;
-using Toggl.Foundation.Shortcuts;
 using Toggl.Foundation.Sync;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Multivac;
@@ -57,7 +56,12 @@ namespace Toggl.Foundation.Tests.Login
 
             protected UserAccessManagerTest()
             {
-                UserAccessManager = new UserAccessManager(ApiFactory, Database, GoogleService, PrivateSharedStorageService, Initialize);
+                UserAccessManager = new UserAccessManager(
+                    new Lazy<IApiFactory>(() => ApiFactory),
+                    new Lazy<ITogglDatabase>(() => Database),
+                    new Lazy<IGoogleService>(() => GoogleService),
+                    new Lazy<IPrivateSharedStorageService>(() => PrivateSharedStorageService)
+                );
 
                 Api.User.Get().Returns(Observable.Return(User));
                 Api.User.SignUp(Email, Password, TermsAccepted, CountryId, Timezone).Returns(Observable.Return(User));
@@ -81,17 +85,15 @@ namespace Toggl.Foundation.Tests.Login
                 bool useApiFactory,
                 bool useDatabase,
                 bool useGoogleService,
-                bool useCreateInteractorFactory,
                 bool usePrivateSharedStorageService)
             {
-                var database = useDatabase ? Database : null;
-                var apiFactory = useApiFactory ? ApiFactory : null;
-                var googleService = useGoogleService ? GoogleService : null;
-                var privateSharedStorageService = usePrivateSharedStorageService ? PrivateSharedStorageService : null;
-                var initialize = useCreateInteractorFactory ? Initialize : (Func<ITogglApi, (ISyncManager, IInteractorFactory)>)null;
+                var database = useDatabase ? new Lazy<ITogglDatabase>(() => Database) : null;
+                var apiFactory = useApiFactory ? new Lazy<IApiFactory>(() => ApiFactory) : null;
+                var googleService = useGoogleService ? new Lazy<IGoogleService>(() => GoogleService) : null;
+                var privateSharedStorageService = usePrivateSharedStorageService ? new Lazy<IPrivateSharedStorageService>(() => PrivateSharedStorageService) : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new UserAccessManager(apiFactory, database, googleService, privateSharedStorageService, initialize);
+                    () => new UserAccessManager(apiFactory, database, googleService, privateSharedStorageService);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
@@ -232,11 +234,9 @@ namespace Toggl.Foundation.Tests.Login
                 var observable = Observable.Throw<IDatabaseUser>(new InvalidOperationException());
                 Database.User.Single().Returns(observable);
 
-                var result = UserAccessManager.TryInitializingAccessToUserData(out var syncManager, out var interactorFactory);
+                var result = UserAccessManager.CheckIfLoggedIn();
 
                 result.Should().BeFalse();
-                syncManager.Should().BeNull();
-                interactorFactory.Should().BeNull();
             }
 
             [Fact, LogIfTooSlow]
@@ -245,37 +245,35 @@ namespace Toggl.Foundation.Tests.Login
                 var observable = Observable.Return<IDatabaseUser>(FoundationUser.Clean(User));
                 Database.User.Single().Returns(observable);
 
-                var result = UserAccessManager.TryInitializingAccessToUserData(out var syncManager, out var interactorFactory);
+                var result = UserAccessManager.CheckIfLoggedIn();
 
                 result.Should().BeTrue();
-                syncManager.Should().NotBeNull();
-                interactorFactory.Should().NotBeNull();
             }
 
             [Fact, LogIfTooSlow]
             public void DoesNotEmitWhenUserIsNotLoggedIn()
             {
-                var observer = Substitute.For<IObserver<Unit>>();
+                var observer = Substitute.For<IObserver<ITogglApi>>();
                 var observable = Observable.Throw<IDatabaseUser>(new InvalidOperationException());
                 Database.User.Single().Returns(observable);
                 UserAccessManager.UserLoggedIn.Subscribe(observer);
 
-                UserAccessManager.TryInitializingAccessToUserData(out _, out _);
+                UserAccessManager.CheckIfLoggedIn();
 
-                observer.DidNotReceive().OnNext(Arg.Any<Unit>());
+                observer.DidNotReceive().OnNext(Arg.Any<ITogglApi>());
             }
 
             [Fact, LogIfTooSlow]
             public void EmitsWhenUserIsLoggedIn()
             {
-                var observer = Substitute.For<IObserver<Unit>>();
+                var observer = Substitute.For<IObserver<ITogglApi>>();
                 var observable = Observable.Return<IDatabaseUser>(FoundationUser.Clean(User));
                 Database.User.Single().Returns(observable);
                 UserAccessManager.UserLoggedIn.Subscribe(observer);
 
-                UserAccessManager.TryInitializingAccessToUserData(out _, out _);
+                UserAccessManager.CheckIfLoggedIn();
 
-                observer.Received().OnNext(Arg.Any<Unit>());
+                observer.Received().OnNext(Arg.Any<ITogglApi>());
             }
         }
 

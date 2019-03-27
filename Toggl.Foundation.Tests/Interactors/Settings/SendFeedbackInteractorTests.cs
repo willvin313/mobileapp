@@ -17,7 +17,6 @@ using Toggl.PrimeRadiant;
 using Toggl.PrimeRadiant.Models;
 using Toggl.PrimeRadiant.Settings;
 using Toggl.Ultrawave.ApiClients;
-using Toggl.Ultrawave.Network;
 using Xunit;
 using static Toggl.Foundation.Interactors.Settings.SendFeedbackInteractor;
 
@@ -38,7 +37,6 @@ namespace Toggl.Foundation.Tests.Interactors.Settings
                 bool useUserPreferences,
                 bool useLastTimeUsageStorage,
                 bool useTimeService,
-                bool useUserAgent,
                 bool useMessage)
             {
                 // ReSharper disable once ObjectCreationAsStatement
@@ -51,7 +49,6 @@ namespace Toggl.Foundation.Tests.Interactors.Settings
                     useUserPreferences ? UserPreferences : null,
                     useLastTimeUsageStorage ? Substitute.For<ILastTimeUsageStorage>() : null,
                     useTimeService ? TimeService : null,
-                    useUserAgent ? new UserAgent("a", "b") : null,
                     useMessage ? "some message" : null);
 
                 createInstance.Should().Throw<ArgumentException>();
@@ -117,12 +114,13 @@ namespace Toggl.Foundation.Tests.Interactors.Settings
             [Fact, LogIfTooSlow]
             public async Task SendsTheAppPlatformSlashAppVersion()
             {
-                var agent = "Eliah";
-                var version = "42.2";
-                var userAgent = new UserAgent(agent, version);
-                var formattedUserAgent = $"{agent}/{version}";
+                const string version = "42.2";
+                var platform = Platform.Giskard;
+                PlatformInfo.Version.Returns(version);
+                PlatformInfo.Platform.Returns(platform);
+                var formattedUserAgent = $"{platform}/{version}";
 
-                await executeInteractor(userAgent: userAgent);
+                await executeInteractor();
 
                 await feedbackApi.Received().Send(Arg.Any<Email>(), Arg.Any<string>(), Arg.Is<Dictionary<string, string>>(
                     data => data[AppNameAndVersion] == formattedUserAgent));
@@ -188,9 +186,7 @@ namespace Toggl.Foundation.Tests.Interactors.Settings
                         && data[NumberOfUnsyncableTimeEntries] == "2"));
             }
 
-            private async Task executeInteractor(
-                UserAgent userAgent = null,
-                string message = "")
+            private async Task executeInteractor(string message = "")
             {
                 var interactor = new SendFeedbackInteractor(
                     feedbackApi,
@@ -201,7 +197,6 @@ namespace Toggl.Foundation.Tests.Interactors.Settings
                     UserPreferences,
                     LastTimeUsageStorage,
                     TimeService,
-                    userAgent ?? new UserAgent("agent", "version"),
                     message);
 
                 await interactor.Execute();

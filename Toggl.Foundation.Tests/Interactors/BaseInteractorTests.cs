@@ -7,11 +7,11 @@ using Toggl.Foundation.Shortcuts;
 using Toggl.PrimeRadiant;
 using Toggl.PrimeRadiant.Settings;
 using Toggl.Ultrawave.Network;
-using Toggl.Foundation.Services;
 using Toggl.Foundation.Sync;
 using Toggl.Foundation.Diagnostics;
 using Toggl.Ultrawave;
 using Toggl.Foundation.Login;
+using System;
 
 namespace Toggl.Foundation.Tests
 {
@@ -43,24 +43,23 @@ namespace Toggl.Foundation.Tests
         protected BaseInteractorTests()
         {
             InteractorFactory = new InteractorFactory(
-                IdProvider,
-                TimeService,
-                DataSource,
                 Api,
-                UserPreferences,
-                AnalyticsService,
-                NotificationService,
-                IntentDonationService,
-                ApplicationShortcutCreator,
-                LastTimeUsageStorage,
-                PlatformInfo,
-                UserAgent,
-                CalendarService,
-                SyncManager,
-                StopwatchProvider,
-                Database,
-                PrivateSharedStorageService,
-                UserAccessManager
+                UserAccessManager,
+                new Lazy<IIdProvider>(() => IdProvider),
+                new Lazy<ITogglDatabase>(() => Database),
+                new Lazy<ITimeService>(() => TimeService),
+                new Lazy<ISyncManager>(() => SyncManager),
+                new Lazy<IPlatformInfo>(() => PlatformInfo),
+                new Lazy<ITogglDataSource>(() => DataSource),
+                new Lazy<ICalendarService>(() => CalendarService),
+                new Lazy<IUserPreferences>(() => UserPreferences),
+                new Lazy<IAnalyticsService>(() => AnalyticsService),
+                new Lazy<IStopwatchProvider>(() => StopwatchProvider),
+                new Lazy<INotificationService>(() => NotificationService),
+                new Lazy<ILastTimeUsageStorage>(() => LastTimeUsageStorage),
+                new Lazy<IApplicationShortcutCreator>(() => ApplicationShortcutCreator),
+                new Lazy<IIntentDonationService>(() => IntentDonationService),
+                new Lazy<IPrivateSharedStorageService>(() => PrivateSharedStorageService)
             );
         }
     }
