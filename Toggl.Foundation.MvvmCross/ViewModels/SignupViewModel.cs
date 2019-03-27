@@ -301,9 +301,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             lastTimeUsageStorage.SetLogin(timeService.CurrentDateTime);
 
-            //TODO: Fix this
-            //await syncManager.ForceFullSync();
-
             onboardingStorage.SetIsNewUser(true);
             onboardingStorage.SetUserSignedUp();
 

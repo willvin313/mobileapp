@@ -6,17 +6,14 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FsCheck;
-using FsCheck.Xunit;
 using Microsoft.Reactive.Testing;
 using NSubstitute;
 using NUnit.Framework;
 using Toggl.Foundation.Analytics;
-using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Exceptions;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
-using Toggl.Foundation.Sync;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Multivac;
 using Toggl.Multivac.Models;
@@ -895,15 +892,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public abstract class SuccessfulSignupTest : SignupViewModelTest
         {
             protected abstract void ExecuteCommand();
-
-            [Fact, LogIfTooSlow]
-            public void StartsSyncing()
-            {
-                ExecuteCommand();
-
-                TestScheduler.Start();
-                SyncManager.Received().ForceFullSync();
-            }
 
             [Fact, LogIfTooSlow]
             public void SetsIsNewUserToTrue()

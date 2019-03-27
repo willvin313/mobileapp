@@ -10,13 +10,10 @@ using Microsoft.Reactive.Testing;
 using NSubstitute;
 using NUnit.Framework;
 using Toggl.Foundation.Analytics;
-using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Exceptions;
-using Toggl.Foundation.Interactors;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.MvvmCross.ViewModels;
-using Toggl.Foundation.Sync;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Multivac;
 using Toggl.PrimeRadiant.Settings;
@@ -187,14 +184,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     ViewModel.SetPassword(ValidPassword);
                     UserAccessManager.Login(Arg.Any<Email>(), Arg.Any<Password>())
                         .Returns(Observable.Return(Unit.Default));
-                }
-
-                [Fact, LogIfTooSlow]
-                public async Task StartsSyncing()
-                {
-                    ViewModel.Login();
-
-                    SyncManager.Received().ForceFullSync();
                 }
 
                 [Fact, LogIfTooSlow]

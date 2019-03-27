@@ -151,9 +151,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private void onLogin()
         {
-            // TODO: Fix this
-            //syncManager.ForceFullSync();
-
             navigationService.Navigate<MainTabBarViewModel>();
         }
 

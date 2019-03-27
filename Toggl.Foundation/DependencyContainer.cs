@@ -231,9 +231,9 @@ namespace Toggl.Foundation
                     StopwatchProvider,
                     AutomaticSyncingService
                 );
-
                 SyncErrorHandlingService.HandleErrorsOf(syncManager);
 
+                syncManager.ForceFullSync().GetAwaiter().GetResult();
                 return syncManager;
             });
         }

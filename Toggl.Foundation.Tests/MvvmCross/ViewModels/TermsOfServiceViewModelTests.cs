@@ -14,7 +14,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             : BaseViewModelTests<TermsOfServiceViewModel>
         {
             protected override TermsOfServiceViewModel CreateViewModel()
-                => new TermsOfServiceViewModel(BrowserService, RxActionFactory);
+                => new TermsOfServiceViewModel(BrowserService, RxActionFactory, NavigationService);
         }
 
         public sealed class TheConstructor : TermsOfServiceViewModelTest
@@ -23,13 +23,15 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [ConstructorData]
             public void ThrowsIfAnyOfTheArgumentsIsNull(
                 bool useBrowserService,
-                bool useRxActionFactory)
+                bool useRxActionFactory,
+                bool useNavigationService)
             {
                 var browserService = useBrowserService ? BrowserService : null;
                 var rxActionFactory = useRxActionFactory ? RxActionFactory : null;
+                var navigationService = useNavigationService ? NavigationService : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new TermsOfServiceViewModel(browserService, rxActionFactory);
+                    () => new TermsOfServiceViewModel(browserService, rxActionFactory, navigationService);
 
                 tryingToConstructWithEmptyParameters
                     .Should().Throw<ArgumentNullException>();
