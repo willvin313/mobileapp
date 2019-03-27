@@ -18,6 +18,7 @@ namespace Toggl.Foundation.Interactors
             => new CreateProjectInteractor(idProvider, timeService, dataSource.Projects, dto);
 
         public IInteractor<IObservable<IThreadSafeProject>> GetProjectById(long id)
-            => new GetByIdInteractor<IThreadSafeProject, IDatabaseProject>(dataSource.Projects, id);
+            => new GetByIdInteractor<IThreadSafeProject, IDatabaseProject>(dataSource.Projects, analyticsService, id)
+                .TrackException<Exception, IThreadSafeProject>("GetProjectById");
     }
 }

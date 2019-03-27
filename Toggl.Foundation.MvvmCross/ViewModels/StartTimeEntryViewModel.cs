@@ -124,7 +124,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IInteractorFactory interactorFactory,
             IMvxNavigationService navigationService,
             IAnalyticsService analyticsService,
-            IAutocompleteProvider autocompleteProvider,
             ISchedulerProvider schedulerProvider,
             IIntentDonationService intentDonationService,
             IStopwatchProvider stopwatchProvider,
@@ -139,7 +138,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(onboardingStorage, nameof(onboardingStorage));
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
             Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
-            Ensure.Argument.IsNotNull(autocompleteProvider, nameof(autocompleteProvider));
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
             Ensure.Argument.IsNotNull(intentDonationService, nameof(intentDonationService));
             Ensure.Argument.IsNotNull(stopwatchProvider, nameof(stopwatchProvider));
@@ -182,14 +180,14 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             var queryByType = queryByTypeSubject
                 .AsObservable()
-                .SelectMany(type => autocompleteProvider.Query(new QueryInfo("", type)));
+                .SelectMany(type => interactorFactory.GetAutocompleteSuggestions(new QueryInfo("", type)).Execute());
 
             var queryByText = textFieldInfo
                 .SelectMany(setBillableValues)
                 .Select(QueryInfo.ParseFieldInfo)
                 .Do(onParsedQuery)
                 .ObserveOn(schedulerProvider.BackgroundScheduler)
-                .SelectMany(autocompleteProvider.Query);
+                .SelectMany(query => interactorFactory.GetAutocompleteSuggestions(query).Execute());
 
             Suggestions = Observable.Merge(queryByText, queryByType)
                 .Select(items => items.ToList()) // This is line is needed for now to read objects from realm

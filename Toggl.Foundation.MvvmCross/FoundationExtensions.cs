@@ -56,7 +56,6 @@ namespace Toggl.Foundation.MvvmCross
                 Mvx.RegisterSingleton(api);
                 Mvx.RegisterSingleton(syncManager);
                 Mvx.ConstructAndRegisterSingleton<IInteractorFactory, InteractorFactory>();
-                Mvx.ConstructAndRegisterSingleton<IAutocompleteProvider, AutocompleteProvider>();
 
                 foundation.SyncErrorHandlingService.HandleErrorsOf(syncManager);
 

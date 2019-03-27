@@ -39,7 +39,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
         protected ISuggestionProviderContainer SuggestionProviderContainer { get; } =
             Substitute.For<ISuggestionProviderContainer>();
-        protected IAutocompleteProvider AutocompleteProvider { get; } = Substitute.For<IAutocompleteProvider>();
         protected IAccessRestrictionStorage AccessRestrictionStorage { get; } = Substitute.For<IAccessRestrictionStorage>();
         protected IStopwatchProvider StopwatchProvider { get; } = Substitute.For<IStopwatchProvider>();
 

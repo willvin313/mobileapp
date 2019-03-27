@@ -2,6 +2,7 @@
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using Toggl.Foundation.Analytics;
+using Toggl.Multivac;
 
 namespace Toggl.Foundation.Interactors
 {
@@ -16,6 +17,8 @@ namespace Toggl.Foundation.Interactors
 
         public TrackableInteractor(IAnalyticsService analyticsService)
         {
+            Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
+
             this.analyticsService = analyticsService;
         }
     }

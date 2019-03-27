@@ -44,6 +44,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public UIAction EditStartTime { get; }
         public UIAction EditStopTime { get; }
         public UIAction StopEditingTime { get; }
+        public UIAction StopTimeEntry { get; }
         public InputAction<DateTimeOffset> ChangeStartTime { get; }
         public InputAction<DateTimeOffset> ChangeStopTime { get; }
         public InputAction<DateTimeOffset> ChangeActiveTime { get; }
@@ -93,10 +94,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             EditStartTime = rxActionFactory.FromAction(editStartTime);
             EditStopTime = rxActionFactory.FromAction(editStopTime);
             StopEditingTime = rxActionFactory.FromAction(stopEditingTime);
-            ChangeStartTime = rxActionFactory.FromAction<DateTimeOffset>(startTime.OnNext);
-            ChangeStopTime = rxActionFactory.FromAction<DateTimeOffset>(stopTime.OnNext);
+            ChangeStartTime = rxActionFactory.FromAction<DateTimeOffset>(updateStartTime);
+            ChangeStopTime = rxActionFactory.FromAction<DateTimeOffset>(updateStopTime);
             ChangeActiveTime = rxActionFactory.FromAction<DateTimeOffset>(changeActiveTime);
             ChangeDuration = rxActionFactory.FromAction<TimeSpan>(changeDuration);
+            StopTimeEntry = rxActionFactory.FromAction(stopTimeEntry);
 
             var start = startTime.Where(v => v != default(DateTimeOffset));
             var stop = stopTime.Where(v => v != default(DateTimeOffset));
@@ -136,6 +138,16 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             MaximumStartTime = stopTime.AsDriver(schedulerProvider);
             MinimumStopTime = startTime.AsDriver(schedulerProvider);
             MaximumStopTime = startTime.Select(v => v.AddHours(MaxTimeEntryDurationInHours)).AsDriver(schedulerProvider);
+        }
+
+        private void updateStopTime(DateTimeOffset stopTime)
+        {
+            this.stopTime.OnNext(stopTime.RoundDownToMinute());
+        }
+
+        private void updateStartTime(DateTimeOffset startTime)
+        {
+            this.startTime.OnNext(startTime.RoundDownToMinute());
         }
 
         public override void Prepare(EditDurationParameters parameter)
@@ -188,6 +200,14 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             return navigationService.Close(this, result);
         }
 
+        private void stopTimeEntry()
+        {
+            runningTimeEntryDisposable?.Dispose();
+            stopTime.OnNext(timeService.CurrentDateTime);
+            isRunning.OnNext(false);
+            analyticsEvent = analyticsEvent.With(stoppedRunningEntry: true);
+        }
+
         private void editStartTime()
         {
             if (editMode.Value == EditMode.StartTime)
@@ -205,14 +225,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private void editStopTime()
         {
-            if (isRunning.Value)
-            {
-                runningTimeEntryDisposable?.Dispose();
-                stopTime.OnNext(timeService.CurrentDateTime);
-                isRunning.OnNext(false);
-                analyticsEvent = analyticsEvent.With(stoppedRunningEntry: true);
-            }
-
             if (editMode.Value == EditMode.EndTime)
             {
                 editMode.OnNext(EditMode.None);

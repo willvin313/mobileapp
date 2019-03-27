@@ -65,7 +65,8 @@ namespace Toggl.Foundation.Interactors
             => new DeleteTimeEntryInteractor(timeService, dataSource.TimeEntries, this, id);
 
         public IInteractor<IObservable<IThreadSafeTimeEntry>> GetTimeEntryById(long id)
-            => new GetByIdInteractor<IThreadSafeTimeEntry, IDatabaseTimeEntry>(dataSource.TimeEntries, id);
+            => new GetByIdInteractor<IThreadSafeTimeEntry, IDatabaseTimeEntry>(dataSource.TimeEntries, analyticsService, id)
+                .TrackException<Exception, IThreadSafeTimeEntry>("GetTimeEntryById");
 
         public IInteractor<IObservable<IEnumerable<IThreadSafeTimeEntry>>> GetAllTimeEntriesVisibleToTheUser()
             => new GetAllTimeEntriesVisibleToTheUserInteractor(dataSource.TimeEntries);

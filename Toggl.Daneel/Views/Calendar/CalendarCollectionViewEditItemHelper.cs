@@ -13,6 +13,7 @@ using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Helper;
 using Toggl.Multivac;
 using UIKit;
+using Toggl.Foundation.MvvmCross.Extensions;
 
 namespace Toggl.Daneel.Views.Calendar
 {
@@ -55,6 +56,8 @@ namespace Toggl.Daneel.Views.Calendar
         private readonly ISubject<CalendarItem> editCalendarItemSuject = new Subject<CalendarItem>();
         private readonly ISubject<CalendarItem> longPressCalendarEventSubject = new Subject<CalendarItem>();
 
+        private IDisposable scalingEndedSubscription;
+
         public IObservable<CalendarItem> EditCalendarItem => editCalendarItemSuject.AsObservable();
         public IObservable<CalendarItem> LongPressCalendarEvent => longPressCalendarEventSubject.AsObservable();
 
@@ -79,10 +82,19 @@ namespace Toggl.Daneel.Views.Calendar
 
             tapGestureRecognizer = new UITapGestureRecognizer(onTap);
             tapGestureRecognizer.Delegate = this;
+
+            scalingEndedSubscription = Layout.ScalingEnded.Subscribe(onLayoutScalingEnded);
         }
 
         public CalendarCollectionViewEditItemHelper(IntPtr handle) : base(handle)
         {
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (!disposing) return;
+            scalingEndedSubscription.Dispose();
         }
 
         [Export("gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:")]
@@ -150,12 +162,7 @@ namespace Toggl.Daneel.Views.Calendar
 
         private void onTap(UITapGestureRecognizer gesture)
         {
-            var point = gesture.LocationInView(CollectionView);
-
-            resignActive();
-            dataSource.StopEditing();
-            editCalendarItemSuject.OnNext(calendarItem);
-
+            stopEditingCurrentCell();
             impactFeedback.ImpactOccurred();
         }
 
@@ -228,6 +235,11 @@ namespace Toggl.Daneel.Views.Calendar
             previousEndTime = calendarItem.EndTime;
 
             var cell = CollectionView.CellForItem(itemIndexPath) as CalendarItemView;
+            if (cell == null)
+            {
+                stopEditingCurrentCell();
+                return;
+            }
             var topDragRect = CollectionView.ConvertRectFromView(cell.TopDragTouchArea, cell);
             var bottomDragRect = CollectionView.ConvertRectFromView(cell.BottomDragTouchArea, cell);
 
@@ -259,6 +271,15 @@ namespace Toggl.Daneel.Views.Calendar
                     break;
             }
             previousPoint = point;
+        }
+
+        private void panEnded()
+        {
+            previousStartTime = previousEndTime = null;
+
+            onCurrentPointChanged(null);
+            StopAutoScroll();
+            stopEditingCurrentCellIfNotVisible();
         }
 
         private void changeOffset(CGPoint point)
@@ -373,14 +394,6 @@ namespace Toggl.Daneel.Views.Calendar
                 StopAutoScroll();
         }
 
-        private void panEnded()
-        {
-            previousStartTime = previousEndTime = null;
-
-            onCurrentPointChanged(null);
-            StopAutoScroll();
-        }
-
         private void becomeActive()
         {
             isActive = true;
@@ -415,6 +428,29 @@ namespace Toggl.Daneel.Views.Calendar
             {
                 didDragUp = true;
                 didDragDown = false;
+            }
+        }
+
+        private void onLayoutScalingEnded()
+        {
+            if (!isActive) return;
+
+            stopEditingCurrentCellIfNotVisible();
+        }
+
+        private void stopEditingCurrentCell()
+        {
+            resignActive();
+            dataSource.StopEditing();
+            editCalendarItemSuject.OnNext(calendarItem);
+        }
+
+        private void stopEditingCurrentCellIfNotVisible()
+        {
+            var cellNotVisible = CollectionView.CellForItem(itemIndexPath) == null;
+            if (cellNotVisible)
+            {
+                stopEditingCurrentCell();
             }
         }
     }

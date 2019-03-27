@@ -36,6 +36,21 @@ namespace Toggl.Daneel
             }
         }
 
+        public override string AccessibilityLabel
+        {
+            get
+            {
+                var accessibilityLabel = "Suggestion, ";
+                if (!string.IsNullOrEmpty(suggestion.Description))
+                    accessibilityLabel += $"Description: {suggestion.Description}, ";
+                if (suggestion.HasProject)
+                    accessibilityLabel += $"Project: {suggestion.ProjectName }, ";
+                accessibilityLabel += "tap to start a time entry";
+                return accessibilityLabel;
+            }
+            set => base.AccessibilityLabel = value;
+        }
+
         private void onSuggestionChanged()
         {
             if (Suggestion == null) return;
@@ -67,6 +82,8 @@ namespace Toggl.Daneel
         public override void AwakeFromNib()
         {
             base.AwakeFromNib();
+
+            IsAccessibilityElement = true;
 
             ProjectDot.Image = ProjectDot
                 .Image

@@ -17,7 +17,7 @@ namespace Toggl.Giskard.ViewHelpers
 
         public void OnTimeSet(TimePicker view, int hourOfDay, int minute)
         {
-            var pickedTime = new DateTimeOffset(currentTime.Year, currentTime.Month, currentTime.Day, hourOfDay, minute, currentTime.Minute, currentTime.Millisecond, currentTime.Offset);
+            var pickedTime = new DateTimeOffset(currentTime.Year, currentTime.Month, currentTime.Day, hourOfDay, minute, 0, 0, currentTime.Offset);
             onTimePicked(pickedTime);
         }
     }

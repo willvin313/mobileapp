@@ -1,26 +1,28 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
+using Toggl.Foundation.Autocomplete;
 using Toggl.Foundation.Autocomplete.Suggestions;
 using Toggl.Foundation.Extensions;
-using Toggl.Foundation.Interactors;
 using Toggl.Multivac;
 
-namespace Toggl.Foundation.Autocomplete
+namespace Toggl.Foundation.Interactors.AutocompleteSuggestions
 {
-    [Preserve(AllMembers = true)]
-    public sealed class AutocompleteProvider : IAutocompleteProvider
+    public class GetAutocompleteSuggestions : IInteractor<IObservable<IEnumerable<AutocompleteSuggestion>>>
     {
         private readonly IInteractorFactory interactorFactory;
+        private readonly QueryInfo queryInfo;
 
-        public AutocompleteProvider(IInteractorFactory interactorFactory)
+        public GetAutocompleteSuggestions(IInteractorFactory interactorFactory, QueryInfo queryInfo)
         {
             Ensure.Argument.IsNotNull(interactorFactory, nameof(interactorFactory));
+            Ensure.Argument.IsNotNull(queryInfo, nameof(queryInfo));
 
             this.interactorFactory = interactorFactory;
+            this.queryInfo = queryInfo;
         }
 
-        public IObservable<IEnumerable<AutocompleteSuggestion>> Query(QueryInfo queryInfo)
+        public IObservable<IEnumerable<AutocompleteSuggestion>> Execute()
         {
             var wordsToQuery = queryInfo.Text.SplitToQueryWords();
             switch (queryInfo.SuggestionType)

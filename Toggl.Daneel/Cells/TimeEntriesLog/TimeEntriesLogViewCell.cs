@@ -40,6 +40,20 @@ namespace Toggl.Daneel.Views
         {
         }
 
+        public override string AccessibilityLabel
+        {
+            get
+            {
+                var accessibilityLabel = "Time entry, ";
+                if (Item.HasDescription)
+                    accessibilityLabel += $"Description: {Item.Description}, ";
+                if (Item.HasProject)
+                    accessibilityLabel += $"Project: {Item.ProjectName }";
+                return accessibilityLabel;
+            }
+            set => base.AccessibilityLabel = value;
+        }
+
         public override void AwakeFromNib()
         {
             base.AwakeFromNib();

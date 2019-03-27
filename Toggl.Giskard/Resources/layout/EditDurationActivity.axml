@@ -113,11 +113,8 @@
             android:fontFamily="sans-serif-medium"
             android:textColor="@android:color/black"
             local:layout_constraintRight_toRightOf="parent"
-            local:layout_constraintTop_toBottomOf="@id/Toolbar"
-            local:layout_constraintVertical_chainStyle="packed"
             local:layout_constraintLeft_toRightOf="@id/StopIcon"
-            local:layout_constraintBottom_toTopOf="@+id/StopDateText"
-            android:layout_marginTop="16dp"
+            local:layout_constraintBaseline_toBaselineOf="@id/StartLabel"
             android:layout_marginLeft="4dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
@@ -146,7 +143,7 @@
             android:paddingBottom="12dp"
             android:fontFamily="sans-serif-medium"
             local:layout_constraintHorizontal_chainStyle="packed"
-            local:layout_constraintTop_toBottomOf="@id/StopLabel"
+            local:layout_constraintBaseline_toBaselineOf="@id/StartTimeText"
             local:layout_constraintLeft_toLeftOf="@id/CenterGuideline"
             local:layout_constraintRight_toLeftOf="@+id/StopDotSeparator"
             android:layout_marginTop="8dp"
@@ -173,12 +170,9 @@
             android:paddingBottom="12dp"
             android:fontFamily="sans-serif"
             local:layout_constraintRight_toRightOf="parent"
-            local:layout_constraintBottom_toTopOf="@+id/Wheel"
-            local:layout_constraintTop_toBottomOf="@id/StopLabel"
+            local:layout_constraintBaseline_toBaselineOf="@id/StopTimeText"
             local:layout_constraintLeft_toRightOf="@id/StopDotSeparator"
-            android:layout_marginTop="8dp"
             android:layout_marginRight="16dp"
-            android:layout_marginBottom="16dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <FrameLayout
@@ -186,7 +180,7 @@
             local:layout_constraintLeft_toLeftOf="parent"
             local:layout_constraintRight_toRightOf="parent"
             local:layout_constraintBottom_toBottomOf="parent"
-            local:layout_constraintTop_toBottomOf="@id/StopTimerLabel"
+            local:layout_constraintTop_toBottomOf="@id/StartTimeText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <toggl.giskard.views.WheelBackgroundView

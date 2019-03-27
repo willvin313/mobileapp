@@ -8,6 +8,7 @@ namespace Toggl.Foundation.Interactors
     public sealed partial class InteractorFactory : IInteractorFactory
     {
         public IInteractor<IObservable<IThreadSafeTask>> GetTaskById(long id)
-            => new GetByIdInteractor<IThreadSafeTask, IDatabaseTask>(dataSource.Tasks, id);
+            => new GetByIdInteractor<IThreadSafeTask, IDatabaseTask>(dataSource.Tasks, analyticsService, id)
+                .TrackException<Exception, IThreadSafeTask>("GetTaskById");
     }
 }
