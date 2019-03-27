@@ -60,8 +60,8 @@ namespace Toggl.Foundation
         private readonly Lazy<ISuggestionProviderContainer> suggestionProviderContainer;
         
         // Non lazy
+        public virtual IUserAccessManager UserAccessManager { get; }
         public ApiEnvironment ApiEnvironment { get; }
-        public UserAccessManager UserAccessManager { get; }
 
         public ISyncManager SyncManager => syncManager.Value;
         public IInteractorFactory InteractorFactory => interactorFactory.Value;
@@ -100,10 +100,10 @@ namespace Toggl.Foundation
 
             ApiEnvironment = apiEnvironment;
 
-            syncManager = new Lazy<ISyncManager>(unusableDependency<ISyncManager>);
 
             database = new Lazy<ITogglDatabase>(CreateDatabase);
             apiFactory = new Lazy<IApiFactory>(CreateApiFactory);
+            syncManager = new Lazy<ISyncManager>(CreateSyncManager);
             timeService = new Lazy<ITimeService>(CreateTimeService);
             dataSource = new Lazy<ITogglDataSource>(CreateDataSource);
             platformInfo = new Lazy<IPlatformInfo>(CreatePlatformInfo);
@@ -193,6 +193,25 @@ namespace Toggl.Foundation
         protected virtual IApiFactory CreateApiFactory()
             => new ApiFactory(ApiEnvironment, userAgent);
 
+        protected virtual ISyncManager CreateSyncManager()
+        {
+            var syncManager = TogglSyncManager.CreateSyncManager(
+                Database,
+                api.Value,
+                DataSource,
+                TimeService,
+                AnalyticsService,
+                LastTimeUsageStorage,
+                SchedulerProvider.DefaultScheduler,
+                StopwatchProvider,
+                AutomaticSyncingService
+            );
+            SyncErrorHandlingService.HandleErrorsOf(syncManager);
+
+            syncManager.ForceFullSync().GetAwaiter().GetResult();
+            return syncManager;
+        }
+
         protected virtual IInteractorFactory CreateInteractorFactory() => new InteractorFactory(
             api.Value,
             UserAccessManager,
@@ -217,35 +236,16 @@ namespace Toggl.Foundation
         {
             this.api = new Lazy<ITogglApi>(() => api);
 
+            syncManager = new Lazy<ISyncManager>(CreateSyncManager);
             interactorFactory = new Lazy<IInteractorFactory>(CreateInteractorFactory);
-            syncManager = new Lazy<ISyncManager>(() =>
-            {
-                var syncManager = TogglSyncManager.CreateSyncManager(
-                    Database,
-                    api,
-                    DataSource,
-                    TimeService,
-                    AnalyticsService,
-                    LastTimeUsageStorage,
-                    SchedulerProvider.DefaultScheduler,
-                    StopwatchProvider,
-                    AutomaticSyncingService
-                );
-                SyncErrorHandlingService.HandleErrorsOf(syncManager);
-
-                syncManager.ForceFullSync().GetAwaiter().GetResult();
-                return syncManager;
-            });
         }
 
         private void recreateLazyDependenciesForLogout()
         {
             api = apiFactory.Select(factory => factory.CreateApiWith(Credentials.None));
-            syncManager = new Lazy<ISyncManager>(unusableDependency<ISyncManager>);
+
+            syncManager = new Lazy<ISyncManager>(CreateSyncManager);
             interactorFactory = new Lazy<IInteractorFactory>(CreateInteractorFactory);
         }
-
-        private T unusableDependency<T>()
-            => throw new InvalidOperationException("You can't use the this dependency before logging in");
     }
 }

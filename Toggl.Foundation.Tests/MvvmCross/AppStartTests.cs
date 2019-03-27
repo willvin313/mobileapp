@@ -8,10 +8,11 @@ using Toggl.Foundation.Login;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.Services;
 using Toggl.Foundation.Sync;
+using Toggl.Multivac;
 using Toggl.PrimeRadiant.Settings;
 using Toggl.Ultrawave;
-using Toggl.Ultrawave.Network;
 using Xunit;
 
 namespace Toggl.Foundation.Tests.MvvmCross
@@ -22,7 +23,6 @@ namespace Toggl.Foundation.Tests.MvvmCross
         {
             protected AppStart<OnboardingViewModel> AppStart { get; }
             protected IMvxApplication App { get; } = Substitute.For<IMvxApplication>();
-            protected ISyncManager SyncManager { get; } = Substitute.For<ISyncManager>();
             protected IUserAccessManager UserAccessManager { get; } = Substitute.For<IUserAccessManager>();
             protected IOnboardingStorage OnboardingStorage { get; } = Substitute.For<IOnboardingStorage>();
             protected IAccessRestrictionStorage AccessRestrictionStorage { get; } =
@@ -30,15 +30,23 @@ namespace Toggl.Foundation.Tests.MvvmCross
 
             protected AppStartTest()
             {
-                var dependencyContainer = Substitute.ForPartsOf<UiDependencyContainer>(ApiEnvironment.Staging, new UserAgent("Giskard", "99.999"));
-                dependencyContainer.SyncManager.Returns(SyncManager);
-                dependencyContainer.NavigationService.Returns(NavigationService);
-                dependencyContainer.OnboardingStorage.Returns(OnboardingStorage);
-                dependencyContainer.UserAccessManager.Returns(UserAccessManager);
-                dependencyContainer.AccessRestrictionStorage.Returns(AccessRestrictionStorage);
+                var api = Substitute.For<ITogglApi>();
+                UserAccessManager.UserLoggedIn.Returns(Observable.Return(api));
+
+                var dependencyContainer = new TestDependencyContainer
+                {
+                    MockTimeService = TimeService,
+                    MockUserAccessManager = UserAccessManager,
+                    MockNavigationService = NavigationService,
+                    MockOnboardingStorage = OnboardingStorage,
+                    MockAccessRestrictionStorage = AccessRestrictionStorage,
+                    MockSyncManager = Substitute.For<ISyncManager>(),
+                    MockInteractorFactory = Substitute.For<IInteractorFactory>(),
+                    MockBackgroundSyncService = Substitute.For<IBackgroundSyncService>()
+                };
+                UserAccessManager.CheckIfLoggedIn().Returns(true);
 
                 AppStart = new AppStart<OnboardingViewModel>(App, dependencyContainer);
-                UserAccessManager.CheckIfLoggedIn().Returns(true);
             }
         }
 
@@ -73,7 +81,6 @@ namespace Toggl.Foundation.Tests.MvvmCross
 
                 AppStart.Start();
 
-                await SyncManager.DidNotReceive().ForceFullSync();
                 await NavigationService.Received().Navigate<TokenResetViewModel>();
             }
 
@@ -141,6 +148,7 @@ namespace Toggl.Foundation.Tests.MvvmCross
             [Fact, LogIfTooSlow]
             public void SetsFirstOpenedTime()
             {
+
                 TimeService.CurrentDateTime.Returns(new DateTimeOffset(2020, 1, 2, 3, 4, 5, TimeSpan.Zero));
 
                 AppStart.Start();
