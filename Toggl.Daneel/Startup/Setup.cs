@@ -23,14 +23,13 @@ namespace Toggl.Daneel
             System.Net.ServicePointManager.ServerCertificateValidationCallback
                   += (sender, certificate, chain, sslPolicyErrors) => true;
             #endif
-            var version = NSBundle.MainBundle.InfoDictionary["CFBundleShortVersionString"].ToString();
-            IosDependencyContainer.Instance = new IosDependencyContainer(Presenter as TogglPresenter, version);
         }
 
         protected override IMvxApplication CreateApp()
         {
-            var app = new App<OnboardingViewModel>(IosDependencyContainer.Instance);
-            return app;
+            var version = NSBundle.MainBundle.InfoDictionary["CFBundleShortVersionString"].ToString();
+            IosDependencyContainer.Instance = new IosDependencyContainer(Presenter as TogglPresenter, version);
+            return new App<OnboardingViewModel>(IosDependencyContainer.Instance);
         }
 
         protected override IMvxIosViewPresenter CreateViewPresenter()
