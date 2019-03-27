@@ -1,4 +1,5 @@
-﻿using MvvmCross.ViewModels;
+﻿using MvvmCross.Navigation;
+using MvvmCross.ViewModels;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.Services;
 using Toggl.Multivac;
@@ -20,17 +21,18 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public UIAction ViewPrivacyPolicy { get; }
         public InputAction<bool> Close { get; }
 
-        public TermsOfServiceViewModel(IBrowserService browserService, IRxActionFactory rxActionFactory)
+        public TermsOfServiceViewModel(IBrowserService browserService, IRxActionFactory rxActionFactory, IMvxNavigationService navigationService)
         {
             Ensure.Argument.IsNotNull(browserService, nameof(browserService));
             Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
+            Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
 
             this.browserService = browserService;
             this.rxActionFactory = rxActionFactory;
 
             ViewPrivacyPolicy = rxActionFactory.FromAction(() => openUrl(privacyPolicyUrl));
             ViewTermsOfService = rxActionFactory.FromAction(() => openUrl(termsOfServiceUrl));
-            Close = rxActionFactory.FromAsync<bool>(result => NavigationService.Close(this, result));
+            Close = rxActionFactory.FromAsync<bool>(result => navigationService.Close(this, result));
         }
 
         private void openUrl(string url)

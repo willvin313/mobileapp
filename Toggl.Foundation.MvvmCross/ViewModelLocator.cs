@@ -293,7 +293,8 @@ namespace Toggl.Foundation.MvvmCross
             if (viewModelType == typeof(TermsOfServiceViewModel))
                 return new TermsOfServiceViewModel(
                     dependencyContainer.BrowserService,
-                    dependencyContainer.RxActionFactory);
+                    dependencyContainer.RxActionFactory,
+                    dependencyContainer.NavigationService);
 
             if (viewModelType == typeof(TokenResetViewModel))
                 return new TokenResetViewModel(
