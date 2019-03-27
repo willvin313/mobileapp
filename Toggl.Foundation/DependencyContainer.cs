@@ -48,7 +48,6 @@ namespace Toggl.Foundation
         private readonly Lazy<IStopwatchProvider> stopwatchProvider;
         private readonly Lazy<INotificationService> notificationService;
         private readonly Lazy<IRemoteConfigService> remoteConfigService;
-        private readonly Lazy<IAutocompleteProvider> autocompleteProvider;
         private readonly Lazy<IErrorHandlingService> errorHandlingService;
         private readonly Lazy<ILastTimeUsageStorage> lastTimeUsageStorage;
         private readonly Lazy<IApplicationShortcutCreator> shortcutCreator;
@@ -84,7 +83,6 @@ namespace Toggl.Foundation
         public IApplicationShortcutCreator ShortcutCreator => shortcutCreator.Value;
         public INotificationService NotificationService => notificationService.Value;
         public IRemoteConfigService RemoteConfigService => remoteConfigService.Value;
-        public IAutocompleteProvider AutocompleteProvider => autocompleteProvider.Value;
         public IErrorHandlingService ErrorHandlingService => errorHandlingService.Value;
         public ILastTimeUsageStorage LastTimeUsageStorage => lastTimeUsageStorage.Value;
         public IBackgroundSyncService BackgroundSyncService => backgroundSyncService.Value;
@@ -121,7 +119,6 @@ namespace Toggl.Foundation
             shortcutCreator = new Lazy<IApplicationShortcutCreator>(CreateShortcutCreator);
             notificationService = new Lazy<INotificationService>(CreateNotificationService);
             remoteConfigService = new Lazy<IRemoteConfigService>(CreateRemoteConfigService);
-            autocompleteProvider = new Lazy<IAutocompleteProvider>(CreateAutocompleteProvider);
             errorHandlingService = new Lazy<IErrorHandlingService>(CreateErrorHandlingService);
             lastTimeUsageStorage = new Lazy<ILastTimeUsageStorage>(CreateLastTimeUsageStorage);
             backgroundSyncService = new Lazy<IBackgroundSyncService>(CreateBackgroundSyncService);
@@ -180,9 +177,6 @@ namespace Toggl.Foundation
 
         protected virtual ISyncErrorHandlingService CreateSyncErrorHandlingService()
             => new SyncErrorHandlingService(ErrorHandlingService);
-
-        protected virtual IAutocompleteProvider CreateAutocompleteProvider()
-            => new AutocompleteProvider(InteractorFactory);
 
         protected virtual ITogglDataSource CreateDataSource()
             => new TogglDataSource(Database, TimeService, AnalyticsService);

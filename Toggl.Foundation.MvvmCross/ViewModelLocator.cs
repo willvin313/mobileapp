@@ -271,7 +271,6 @@ namespace Toggl.Foundation.MvvmCross
                     dependencyContainer.InteractorFactory,
                     dependencyContainer.NavigationService,
                     dependencyContainer.AnalyticsService,
-                    dependencyContainer.AutocompleteProvider,
                     dependencyContainer.SchedulerProvider,
                     dependencyContainer.IntentDonationService,
                     dependencyContainer.StopwatchProvider,
