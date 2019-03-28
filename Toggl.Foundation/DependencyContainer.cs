@@ -16,7 +16,6 @@ using Toggl.PrimeRadiant;
 using Toggl.Ultrawave;
 using Toggl.Ultrawave.Network;
 using Toggl.PrimeRadiant.Settings;
-using Toggl.Foundation.Autocomplete;
 
 namespace Toggl.Foundation
 {
@@ -70,9 +69,7 @@ namespace Toggl.Foundation
         public ITimeService TimeService => timeService.Value;
         public IPlatformInfo PlatformInfo => platformInfo.Value;
         public ITogglDataSource DataSource => dataSource.Value;
-        public IGoogleService GoogleService => googleService.Value;
         public IRatingService RatingService => ratingService.Value;
-        public ICalendarService CalendarService => calendarService.Value;
         public ILicenseProvider LicenseProvider => licenseProvider.Value;
         public IUserPreferences UserPreferences => userPreferences.Value;
         public IRxActionFactory RxActionFactory => rxActionFactory.Value;
@@ -80,8 +77,6 @@ namespace Toggl.Foundation
         public IStopwatchProvider StopwatchProvider => stopwatchProvider.Value;
         public IBackgroundService BackgroundService => backgroundService.Value;
         public ISchedulerProvider SchedulerProvider => schedulerProvider.Value;
-        public IApplicationShortcutCreator ShortcutCreator => shortcutCreator.Value;
-        public INotificationService NotificationService => notificationService.Value;
         public IRemoteConfigService RemoteConfigService => remoteConfigService.Value;
         public IErrorHandlingService ErrorHandlingService => errorHandlingService.Value;
         public ILastTimeUsageStorage LastTimeUsageStorage => lastTimeUsageStorage.Value;
