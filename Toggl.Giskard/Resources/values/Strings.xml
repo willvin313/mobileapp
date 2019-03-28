@@ -156,6 +156,7 @@ understand and agree to Toggl\'s</string>
     <string name="CalendarEvents">Calendar events</string>
     <string name="TimeEntries">Time entries</string>
     <string name="TotalEvents">%s events</string>
+    <string name="DarkTheme">Dark Theme</string>
     
     <string name="ReportsCalendarShortcutsTemplateSelector" translatable="false">Toggl.Giskard.TemplateSelectors.ReportsCalendarShortcutsTemplateSelector, Toggl.Giskard</string>
     <string name="ReportsCalendarTemplateSelector" translatable="false">Toggl.Giskard.TemplateSelectors.ReportsCalendarTemplateSelector, Toggl.Giskard</string>

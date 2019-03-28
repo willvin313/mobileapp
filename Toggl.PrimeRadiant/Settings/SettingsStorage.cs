@@ -24,6 +24,7 @@ namespace Toggl.PrimeRadiant.Settings
         private const string completedOnboardingKey = "CompletedOnboarding";
         private const string completedCalendarOnboardingKey = "CompletedCalendarOnboarding";
 
+        private const string useDarkThemeKey = "DarkTheme"; 
         private const string preferManualModeKey = "PreferManualMode";
         private const string runningTimerNotificationsKey = "RunningTimerNotifications";
         private const string stoppedTimerNotificationsKey = "StoppedTimerNotifications";
@@ -56,6 +57,7 @@ namespace Toggl.PrimeRadiant.Settings
         private readonly Version version;
         private readonly IKeyValueStorage keyValueStorage;
 
+        private readonly ISubject<bool> useDarkThemeSubject;
         private readonly ISubject<bool> userSignedUpUsingTheAppSubject;
         private readonly ISubject<bool> isNewUserSubject;
         private readonly ISubject<bool> projectOrTagWasAddedSubject;
@@ -83,6 +85,7 @@ namespace Toggl.PrimeRadiant.Settings
             this.keyValueStorage = keyValueStorage;
 
             (isNewUserSubject, IsNewUser) = prepareSubjectAndObservable(isNewUserKey, keyValueStorage.GetBool);
+            (useDarkThemeSubject, UseDarkTheme) = prepareSubjectAndObservable(useDarkThemeKey, keyValueStorage.GetBool);
             (enabledCalendarsSubject, EnabledCalendars) = prepareSubjectAndObservable(EnabledCalendarIds());
             (isManualModeEnabledSubject, IsManualModeEnabledObservable) = prepareSubjectAndObservable(preferManualModeKey, keyValueStorage.GetBool);
             (areRunningTimerNotificationsEnabledSubject, AreRunningTimerNotificationsEnabledObservable) = prepareSubjectAndObservable(runningTimerNotificationsKey, keyValueStorage.GetBool);
@@ -334,6 +337,7 @@ namespace Toggl.PrimeRadiant.Settings
 
         #region IUserPreferences
 
+        public IObservable<bool> UseDarkTheme { get; }
         public IObservable<bool> IsManualModeEnabledObservable { get; }
         public IObservable<bool> AreRunningTimerNotificationsEnabledObservable { get; }
         public IObservable<bool> AreStoppedTimerNotificationsEnabledObservable { get; }
@@ -352,6 +356,14 @@ namespace Toggl.PrimeRadiant.Settings
 
         public bool AreStoppedTimerNotificationsEnabled
             => keyValueStorage.GetBool(stoppedTimerNotificationsKey);
+
+        public void ToggleDarkTheme()
+        {
+            var isUsingDarkTheme = keyValueStorage.GetBool(useDarkThemeKey);
+
+            keyValueStorage.SetBool(useDarkThemeKey, !isUsingDarkTheme);
+            useDarkThemeSubject.OnNext(!isUsingDarkTheme);
+        }
 
         public void EnableManualMode()
         {

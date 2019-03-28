@@ -5,6 +5,8 @@ namespace Toggl.PrimeRadiant.Settings
 {
     public interface IUserPreferences
     {
+        IObservable<bool> UseDarkTheme { get; }
+
         IObservable<bool> IsManualModeEnabledObservable { get; }
 
         IObservable<List<string>> EnabledCalendars { get; }
@@ -34,6 +36,8 @@ namespace Toggl.PrimeRadiant.Settings
         void Reset();
 
         List<string> EnabledCalendarIds();
+
+        void ToggleDarkTheme();
 
         void SetEnabledCalendars(params string[] ids);
 

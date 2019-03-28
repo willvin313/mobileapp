@@ -76,6 +76,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public IObservable<bool> IsRunningSync { get; }
         public IObservable<string> WorkspaceName { get; }
         public IObservable<string> DurationFormat { get; }
+        public IObservable<bool> IsUsingDarkTheme { get; }
         public IObservable<string> BeginningOfWeek { get; }
         public IObservable<bool> IsManualModeEnabled { get; }
         public IObservable<bool> AreRunningTimerNotificationsEnabled { get; }
@@ -98,6 +99,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public UIAction PickDefaultWorkspace { get; }
         public UIAction SelectDurationFormat { get; }
         public UIAction SelectBeginningOfWeek { get; }
+        public UIAction ToggleDarkTheme { get; }
         public UIAction Close { get; }
 
         public InputAction<SelectableWorkspaceViewModel> SelectDefaultWorkspace { get; }
@@ -175,6 +177,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     .Select(user => user.Email.ToString())
                     .DistinctUntilChanged()
                     .AsDriver(schedulerProvider);
+
+            IsUsingDarkTheme = userPreferences.UseDarkTheme
+                .AsDriver(schedulerProvider);
 
             IsManualModeEnabled = userPreferences.IsManualModeEnabledObservable
                 .AsDriver(schedulerProvider);
@@ -273,6 +278,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             TryLogout = rxActionFactory.FromAsync(tryLogout);
             OpenAboutView = rxActionFactory.FromAsync(openAboutView);
             SubmitFeedback = rxActionFactory.FromAsync(submitFeedback);
+            ToggleDarkTheme = rxActionFactory.FromAction(toggleDarkTheme);
             SelectDateFormat = rxActionFactory.FromAsync(selectDateFormat);
             PickDefaultWorkspace = rxActionFactory.FromAsync(pickDefaultWorkspace);
             SelectDurationFormat = rxActionFactory.FromAsync(selectDurationFormat);
@@ -314,6 +320,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 : TimeFormat.TwentyFourHoursFormat;
 
             await updatePreferences(timeFormat: timeFormat);
+        }
+
+        private void toggleDarkTheme()
+        {
+            userPreferences.ToggleDarkTheme();
         }
 
         public void ToggleManualMode()

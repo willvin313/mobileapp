@@ -2,14 +2,18 @@
 using System;
 using System.Linq;
 using System.Reactive.Linq;
+using Android.Animation;
 using Android.Content;
 using Android.Graphics;
+using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Support.V7.App;
 using Android.Support.V7.Widget;
 using Android.Views;
 using Android.Widget;
+using MvvmCross.Plugin.Color.Platforms.Android;
 using Toggl.Foundation.MvvmCross.Extensions;
+using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Giskard.Adapters;
 using Toggl.Giskard.Extensions;
@@ -56,6 +60,10 @@ namespace Toggl.Giskard.Fragments
 
             ViewModel.IsManualModeEnabled
                 .Subscribe(manualModeSwitch.Rx().Checked())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.IsUsingDarkTheme
+                .Subscribe(darkThemeSwitch.Rx().Checked())
                 .DisposedBy(DisposeBag);
 
             ViewModel.UseTwentyFourHourFormat
@@ -129,6 +137,10 @@ namespace Toggl.Giskard.Fragments
 
             manualModeView.Rx().Tap()
                 .Subscribe(ViewModel.ToggleManualMode)
+                .DisposedBy(DisposeBag);
+
+            darkThemeView.Rx()
+                .BindAction(ViewModel.ToggleDarkTheme)
                 .DisposedBy(DisposeBag);
 
             is24hoursModeView.Rx()
