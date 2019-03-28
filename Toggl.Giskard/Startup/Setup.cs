@@ -44,11 +44,11 @@ namespace Toggl.Giskard
             Mvx.RegisterSingleton(loader);
 
             var container = AndroidDependencyContainer.Instance;
-            container.ForkingNavigationService =
+            container.MvxNavigationService =
                 new NavigationService(null, loader, container.AnalyticsService, Platform.Giskard);
 
-            Mvx.RegisterSingleton<IMvxNavigationService>(container.ForkingNavigationService);
-            return container.ForkingNavigationService;
+            Mvx.RegisterSingleton<IMvxNavigationService>(container.MvxNavigationService);
+            return container.MvxNavigationService;
         }
 
         protected override IMvxApplication CreateApp()

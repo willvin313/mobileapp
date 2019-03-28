@@ -41,11 +41,11 @@ namespace Toggl.Daneel
             Mvx.RegisterSingleton(loader);
 
             var container = IosDependencyContainer.Instance;
-            container.ForkingNavigationService =
+            container.MvxNavigationService =
                 new NavigationService(null, loader, container.AnalyticsService, Platform.Daneel);
 
-            Mvx.RegisterSingleton<IMvxNavigationService>(container.ForkingNavigationService);
-            return container.ForkingNavigationService;
+            Mvx.RegisterSingleton<IMvxNavigationService>(container.MvxNavigationService);
+            return container.MvxNavigationService;
         }
 
         // Skip the sluggish and reflection-based manager and load our plugins by hand

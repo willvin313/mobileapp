@@ -36,7 +36,7 @@ namespace Toggl.Daneel
         
         private readonly Lazy<SettingsStorage> settingsStorage;
 
-        public IMvxNavigationService ForkingNavigationService { get; internal set; }
+        public IMvxNavigationService MvxNavigationService { get; internal set; }
 
         public TogglPresenter ViewPresenter { get; }
 
@@ -118,7 +118,7 @@ namespace Toggl.Daneel
             );
 
         protected override IMvxNavigationService CreateNavigationService()
-            => ForkingNavigationService;
+            => MvxNavigationService;
 
         protected override ILastTimeUsageStorage CreateLastTimeUsageStorage()
             => settingsStorage.Value;
