@@ -79,24 +79,16 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             ISchedulerProvider schedulerProvider,
             IRxActionFactory rxActionFactory)
         {
-            try
-            {
-                Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
-                Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
-                Ensure.Argument.IsNotNull(onboardingStorage, nameof(onboardingStorage));
-                Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
-                Ensure.Argument.IsNotNull(passwordManagerService, nameof(passwordManagerService));
-                Ensure.Argument.IsNotNull(errorHandlingService, nameof(errorHandlingService));
-                Ensure.Argument.IsNotNull(lastTimeUsageStorage, nameof(lastTimeUsageStorage));
-                Ensure.Argument.IsNotNull(timeService, nameof(timeService));
-                Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
-                Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                throw;
-            }
+            Ensure.Argument.IsNotNull(userAccessManager, nameof(userAccessManager));
+            Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
+            Ensure.Argument.IsNotNull(onboardingStorage, nameof(onboardingStorage));
+            Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
+            Ensure.Argument.IsNotNull(passwordManagerService, nameof(passwordManagerService));
+            Ensure.Argument.IsNotNull(errorHandlingService, nameof(errorHandlingService));
+            Ensure.Argument.IsNotNull(lastTimeUsageStorage, nameof(lastTimeUsageStorage));
+            Ensure.Argument.IsNotNull(timeService, nameof(timeService));
+            Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
+            Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
 
             this.timeService = timeService;
             this.userAccessManager = userAccessManager;
