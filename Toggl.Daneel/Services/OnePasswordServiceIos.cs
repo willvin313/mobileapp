@@ -20,7 +20,7 @@ namespace Toggl.Daneel.Services
         {
             return Observable.Create<PasswordManagerResult>(observer =>
             {
-                var presenter = Mvx.Resolve<IMvxIosViewPresenter>() as MvxIosViewPresenter;
+                var presenter = IosDependencyContainer.Instance.ViewPresenter;
 
                 OnePasswordExtension.SharedExtension.FindLoginForURLString(
                     "https://www.toggl.com", 
