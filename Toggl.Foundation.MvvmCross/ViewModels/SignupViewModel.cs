@@ -3,13 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using MvvmCross.Commands;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 using Toggl.Foundation.Analytics;
-using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Exceptions;
 using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Interactors;
@@ -17,7 +14,6 @@ using Toggl.Foundation.Interactors.Location;
 using Toggl.Foundation.Login;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Parameters;
-using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.Services;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
@@ -29,7 +25,6 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using Toggl.Foundation.Interactors.Timezones;
 using Toggl.Foundation.Serialization;
-using Toggl.Foundation.Sync;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels
 {
@@ -292,10 +287,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                             timezone)
                 )
                 .Track(analyticsService.SignUp, AuthenticationMethod.EmailAndPassword)
-                .Subscribe(onInteractorFactory, onError, onCompleted);
+                .Subscribe(_ => onAuthenticated(), onError, onCompleted);
         }
 
-        private async void onInteractorFactory(Unit syncManager)
+        private async void onAuthenticated()
         {
             successfulSignupSubject.OnNext(Unit.Default);
 
@@ -358,7 +353,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             signupDisposable = userAccessManager
                 .SignUpWithGoogle(termsOfServiceAccepted, (int)countryId.Value, timezone)
                 .Track(analyticsService.SignUp, AuthenticationMethod.Google)
-                .Subscribe(onInteractorFactory, onError, onCompleted);
+                .Subscribe(_ => onAuthenticated(), onError, onCompleted);
         }
 
         public void TogglePasswordVisibility()
