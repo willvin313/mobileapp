@@ -14,11 +14,15 @@ namespace Toggl.Foundation.MvvmCross.Helper
         private static readonly MvxColor azure = new MvxColor(6, 170, 245);
         private static readonly MvxColor macaroniAndCheese = new MvxColor(241, 195, 63);
         private static readonly MvxColor easterPurple = new MvxColor(197, 107, 255);
-        private static readonly MvxColor nearlyWhite = new MvxColor(250, 251, 252);
         private static readonly MvxColor silver = new MvxColor(181, 188, 192);
         private static readonly MvxColor brownishGrey = new MvxColor(94, 91, 91);
         private static readonly MvxColor whiteTwo = new MvxColor(244, 244, 244);
-        private static readonly MvxColor paleGreyTwo = nearlyWhite;
+        private static readonly MvxColor paleGreyTwo = NearlyWhite;
+        
+        public static MvxColor White { get; } = MvxColors.White;
+        public static MvxColor NearlyWhite { get; } = new MvxColor(250, 251, 252);
+        public static MvxColor Grey { get; } = new MvxColor(48, 48, 48);
+        public static MvxColor LighterGrey { get; } = new MvxColor(66, 66, 66);
 
         public static class Onboarding
         {
@@ -55,7 +59,7 @@ namespace Toggl.Foundation.MvvmCross.Helper
         public static class NavigationBar
         {
             public static readonly MvxColor BackButton = new MvxColor(94, 91, 91);
-            public static readonly MvxColor BackgroundColor = nearlyWhite;
+            public static readonly MvxColor BackgroundColor = NearlyWhite;
         }
 
         public static class TabBar
@@ -67,7 +71,7 @@ namespace Toggl.Foundation.MvvmCross.Helper
         {
             private static readonly MvxColor lightGrey = new MvxColor(181, 188, 192);
 
-            public static readonly MvxColor BackgroundColor = nearlyWhite;
+            public static readonly MvxColor BackgroundColor = NearlyWhite;
 
             public static readonly MvxColor SpiderNetColor = new MvxColor(0, 0, 0);
 
@@ -270,7 +274,7 @@ namespace Toggl.Foundation.MvvmCross.Helper
         public static class Settings
         {
             public static readonly MvxColor SyncStatusText = new MvxColor(144, 146, 147);
-            public static readonly MvxColor Background = nearlyWhite;
+            public static readonly MvxColor Background = NearlyWhite;
         }
 
         public static class Feedback

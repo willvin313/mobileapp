@@ -5,12 +5,14 @@ using Toggl.Foundation.Services;
 using Toggl.Ultrawave;
 using Toggl.Ultrawave.Network;
 using MvvmCross.Navigation;
+using Toggl.Foundation.MvvmCross.Themes;
 
 namespace Toggl.Foundation.MvvmCross
 {
     public abstract class UiDependencyContainer : DependencyContainer
     {
         private readonly Lazy<IDialogService> dialogService;
+        private readonly Lazy<IThemeProvider> themeProvider;
         private readonly Lazy<IBrowserService> browserService;
         private readonly Lazy<IKeyValueStorage> keyValueStorage;
         private readonly Lazy<IOnboardingStorage> onboardingStorage;
@@ -20,6 +22,7 @@ namespace Toggl.Foundation.MvvmCross
         private readonly Lazy<IAccessRestrictionStorage> accessRestrictionStorage;
 
         public IDialogService DialogService => dialogService.Value;
+        public IThemeProvider ThemeProvider => themeProvider.Value;
         public IBrowserService BrowserService => browserService.Value;
         public IKeyValueStorage KeyValueStorage => keyValueStorage.Value;
         public IOnboardingStorage OnboardingStorage => onboardingStorage.Value;
@@ -32,6 +35,7 @@ namespace Toggl.Foundation.MvvmCross
             : base(apiEnvironment, userAgent)
         {
             dialogService = new Lazy<IDialogService>(CreateDialogService);
+            themeProvider = new Lazy<IThemeProvider>(CreateThemeProvider);
             browserService = new Lazy<IBrowserService>(CreateBrowserService);
             keyValueStorage = new Lazy<IKeyValueStorage>(CreateKeyValueStorage);
             onboardingStorage = new Lazy<IOnboardingStorage>(CreateOnboardingStorage);
@@ -49,6 +53,9 @@ namespace Toggl.Foundation.MvvmCross
         protected abstract IMvxNavigationService CreateNavigationService();
         protected abstract IPasswordManagerService CreatePasswordManagerService();
         protected abstract IAccessRestrictionStorage CreateAccessRestrictionStorage();
+
+        protected virtual IThemeProvider CreateThemeProvider()
+            => new ThemeProvider(UserPreferences, SchedulerProvider);
 
         protected override IErrorHandlingService CreateErrorHandlingService()
             => new ErrorHandlingService(NavigationService, AccessRestrictionStorage);
