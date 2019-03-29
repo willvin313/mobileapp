@@ -28,7 +28,7 @@ namespace Toggl.Foundation.MvvmCross
 
         public override IMvxViewModel<TParameter> Load<TParameter>(Type viewModelType, TParameter param, IMvxBundle parameterValues, IMvxBundle savedState)
         {
-            var viewModel = findViewModel(viewModelType) as IMvxViewModel<TParameter>;
+            var viewModel = (IMvxViewModel<TParameter>)findViewModel(viewModelType);
 
             RunViewModelLifecycle(viewModel, param, parameterValues, savedState);
 
