@@ -93,7 +93,6 @@ namespace Toggl.Foundation
 
             ApiEnvironment = apiEnvironment;
 
-
             database = new Lazy<ITogglDatabase>(CreateDatabase);
             apiFactory = new Lazy<IApiFactory>(CreateApiFactory);
             syncManager = new Lazy<ISyncManager>(CreateSyncManager);
@@ -197,7 +196,6 @@ namespace Toggl.Foundation
             );
             SyncErrorHandlingService.HandleErrorsOf(syncManager);
 
-            syncManager.ForceFullSync().GetAwaiter().GetResult();
             return syncManager;
         }
 
