@@ -10,13 +10,13 @@ namespace Toggl.Foundation.MvvmCross
     public sealed class App<TFirstViewModelWhenNotLoggedIn> : MvxApplication
         where TFirstViewModelWhenNotLoggedIn : MvxViewModel
     {
-        private readonly UiDependencyContainer dependencyContainer;
+        private readonly UIDependencyContainer dependencyContainer;
 
         public App()
         {
         }
 
-        public App(UiDependencyContainer dependencyContainer)
+        public App(UIDependencyContainer dependencyContainer)
         {
             this.dependencyContainer = dependencyContainer;
         }
@@ -39,9 +39,9 @@ namespace Toggl.Foundation.MvvmCross
     public sealed class AppStart<TFirstViewModelWhenNotLoggedIn> : MvxAppStart
         where TFirstViewModelWhenNotLoggedIn : MvxViewModel
     {
-        private readonly UiDependencyContainer dependencyContainer;
+        private readonly UIDependencyContainer dependencyContainer;
 
-        public AppStart(IMvxApplication app, UiDependencyContainer dependencyContainer)
+        public AppStart(IMvxApplication app, UIDependencyContainer dependencyContainer)
             : base (app, dependencyContainer.NavigationService)
         {
             this.dependencyContainer = dependencyContainer;

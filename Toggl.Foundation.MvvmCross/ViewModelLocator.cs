@@ -9,9 +9,9 @@ namespace Toggl.Foundation.MvvmCross
 {
     public sealed class TogglViewModelLocator : MvxDefaultViewModelLocator
     {
-        private readonly UiDependencyContainer dependencyContainer;
+        private readonly UIDependencyContainer dependencyContainer;
 
-        public TogglViewModelLocator(UiDependencyContainer dependencyContainer)
+        public TogglViewModelLocator(UIDependencyContainer dependencyContainer)
             : base(dependencyContainer.NavigationService)
         {
             this.dependencyContainer = dependencyContainer;

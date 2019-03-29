@@ -299,7 +299,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             onboardingStorage.SetIsNewUser(true);
             onboardingStorage.SetUserSignedUp();
 
-            await UiDependencyContainer.Instance.SyncManager.ForceFullSync();
+            await UIDependencyContainer.Instance.SyncManager.ForceFullSync();
 
             await navigationService.Navigate<MainTabBarViewModel>();
         }

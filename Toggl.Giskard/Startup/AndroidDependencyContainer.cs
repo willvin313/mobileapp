@@ -21,7 +21,7 @@ using MvvmCross.Navigation;
 
 namespace Toggl.Giskard
 {
-    public sealed class AndroidDependencyContainer : UiDependencyContainer
+    public sealed class AndroidDependencyContainer : UIDependencyContainer
     {
         private const int numberOfSuggestions = 5;
 
@@ -37,7 +37,7 @@ namespace Toggl.Giskard
                 return;
 
             Instance = new AndroidDependencyContainer(environment, platform, version);
-            UiDependencyContainer.Instance = Instance;
+            UIDependencyContainer.Instance = Instance;
         }
 
         private AndroidDependencyContainer(ApiEnvironment environment, Platform platform, string version)

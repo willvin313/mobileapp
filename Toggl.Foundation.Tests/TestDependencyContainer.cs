@@ -17,7 +17,7 @@ using Toggl.Ultrawave.Network;
 
 namespace Toggl.Foundation.MvvmCross
 {
-    public class TestDependencyContainer : UiDependencyContainer
+    public class TestDependencyContainer : UIDependencyContainer
     {
         public TestDependencyContainer()
             : base(ApiEnvironment.Staging, new UserAgent("Giskard", "999.99"))

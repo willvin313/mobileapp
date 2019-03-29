@@ -8,7 +8,7 @@ using MvvmCross.Navigation;
 
 namespace Toggl.Foundation.MvvmCross
 {
-    public abstract class UiDependencyContainer : DependencyContainer
+    public abstract class UIDependencyContainer : DependencyContainer
     {
         private readonly Lazy<IDialogService> dialogService;
         private readonly Lazy<IBrowserService> browserService;
@@ -28,9 +28,9 @@ namespace Toggl.Foundation.MvvmCross
         public IPasswordManagerService PasswordManagerService => passwordManagerService.Value;
         public IAccessRestrictionStorage AccessRestrictionStorage => accessRestrictionStorage.Value;
 
-        public static UiDependencyContainer Instance { get; protected set; }
+        public static UIDependencyContainer Instance { get; protected set; }
 
-        protected UiDependencyContainer(ApiEnvironment apiEnvironment, UserAgent userAgent)
+        protected UIDependencyContainer(ApiEnvironment apiEnvironment, UserAgent userAgent)
             : base(apiEnvironment, userAgent)
         {
             dialogService = new Lazy<IDialogService>(CreateDialogService);

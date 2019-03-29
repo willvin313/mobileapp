@@ -22,7 +22,7 @@ using Toggl.Ultrawave.Network;
 
 namespace Toggl.Daneel
 {
-    public sealed class IosDependencyContainer : UiDependencyContainer
+    public sealed class IosDependencyContainer : UIDependencyContainer
     {
         private const int numberOfSuggestions = 3;
 
@@ -39,7 +39,7 @@ namespace Toggl.Daneel
                 return;
 
             Instance = new IosDependencyContainer(viewPresenter, environment, platform, version);
-            UiDependencyContainer.Instance = Instance;
+            UIDependencyContainer.Instance = Instance;
         }
 
         private IosDependencyContainer(TogglPresenter viewPresenter, ApiEnvironment environment, Platform platform, string version)
