@@ -16,6 +16,7 @@ using Toggl.Foundation.Services;
 using Toggl.Giskard.BroadcastReceivers;
 using Toggl.Giskard.Presenters;
 using Toggl.Giskard.Startup;
+using Toggl.Ultrawave;
 using ColorPlugin = MvvmCross.Plugin.Color.Platforms.Android.Plugin;
 using VisibilityPlugin = MvvmCross.Plugin.Visibility.Platforms.Android.Plugin;
 
@@ -23,6 +24,13 @@ namespace Toggl.Giskard
 {
     public sealed partial class Setup : MvxAppCompatSetup<App<LoginViewModel>>
     {
+        private const ApiEnvironment environment =
+            #if USE_PRODUCTION_API
+                        ApiEnvironment.Production;
+            #else
+                        ApiEnvironment.Staging;
+            #endif
+
         public Setup()
         {
             #if !USE_PRODUCTION_API
@@ -33,7 +41,7 @@ namespace Toggl.Giskard
             var applicationContext = Application.Context;
             var packageInfo = applicationContext.PackageManager.GetPackageInfo(applicationContext.PackageName, 0);
 
-            AndroidDependencyContainer.Initialize(packageInfo.VersionName);
+            AndroidDependencyContainer.EnsureInitialized(environment, Platform.Giskard, packageInfo.VersionName);
         }
 
         protected override MvxBindingBuilder CreateBindingBuilder() => new TogglBindingBuilder();
