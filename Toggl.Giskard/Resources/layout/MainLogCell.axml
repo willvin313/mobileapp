@@ -47,9 +47,33 @@
             local:layout_constraintTop_toTopOf="parent"
             local:layout_constraintLeft_toLeftOf="parent"
             local:layout_constraintRight_toRightOf="parent"
-            local:layout_constraintBottom_toTopOf="@+id/TimeEntriesLogCellDescription"
             android:layout_height="0dp"
             android:layout_width="wrap_content" />
+        <View android:id="@+id/MainLogGroupBackground"
+            android:background="@color/lightGray"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <TextView
+            android:id="@+id/TimeEntriesLogCellGroupCount"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            tools:text="5"
+            android:textColor="@color/BlueTextColor"
+            android:fontFamily="sans-serif-medium"
+            android:textSize="15sp"
+            android:gravity="center"
+            android:layout_marginLeft="16dp"
+            local:layout_constraintLeft_toLeftOf="parent"
+            local:layout_constraintTop_toTopOf="parent"
+            local:layout_constraintBottom_toBottomOf="parent"
+            />
+        <View
+            android:id="@+id/TimeEntriesLogCellToggleExpansionButton"
+            android:layout_width="60dp"
+            android:layout_marginRight="-10dp"
+            android:layout_height="match_parent"
+            local:layout_constraintLeft_toLeftOf="parent"
+            />
         <TextView
             android:id="@+id/TimeEntriesLogCellDescription"
             tools:visibility="visible"
@@ -59,12 +83,12 @@
             android:textSize="15sp"
             local:layout_goneMarginBottom="8dp"
             android:textColor="@android:color/black"
-            local:layout_constraintLeft_toLeftOf="parent"
             tools:text="Exporting assets to Zeplin and organizing"
             local:layout_constraintVertical_chainStyle="packed"
             local:layout_constraintTop_toBottomOf="@id/TopGuideline"
             local:layout_constraintBottom_toTopOf="@+id/AddDescriptionLabel"
             local:layout_constraintRight_toRightOf="@+id/TimeEntriesLogCellDurationGradient"
+            local:layout_constraintLeft_toRightOf="@id/TimeEntriesLogCellGroupCount"
             android:layout_width="0dp"
             android:layout_marginTop="8dp"
             android:layout_marginLeft="16dp"
@@ -79,7 +103,7 @@
             local:layout_goneMarginTop="8dp"
             local:layout_goneMarginBottom="8dp"
             android:textColor="@color/defaultText"
-            local:layout_constraintLeft_toLeftOf="parent"
+            local:layout_constraintLeft_toRightOf="@id/TimeEntriesLogCellGroupCount"
             local:layout_constraintTop_toBottomOf="@id/TimeEntriesLogCellDescription"
             local:layout_constraintBottom_toTopOf="@+id/TimeEntriesLogCellProjectLabel"
             local:layout_constraintRight_toRightOf="@+id/TimeEntriesLogCellDurationGradient"
@@ -96,16 +120,16 @@
             android:textSize="15sp"
             android:ellipsize="end"
             android:fontFamily="sans-serif-medium"
-            local:layout_constraintLeft_toLeftOf="parent"
             local:layout_constraintBottom_toBottomOf="parent"
             local:layout_constraintTop_toBottomOf="@id/AddDescriptionLabel"
+            local:layout_constraintLeft_toRightOf="@id/TimeEntriesLogCellGroupCount"
             local:layout_constraintRight_toRightOf="@+id/TimeEntriesLogCellDurationGradient"
             android:layout_width="0dp"
             android:layout_marginBottom="8dp"
             android:layout_marginStart="16dp"
             android:layout_height="wrap_content" />
         <View
-            android:id="@+id/TimeEntriesLogCellDurationWhiteArea"
+            android:id="@+id/TimeEntriesLogCellDurationPaddingArea"
             local:layout_constraintTop_toTopOf="parent"
             local:layout_constraintRight_toRightOf="parent"
             android:background="@android:color/transparent"
@@ -117,7 +141,7 @@
             local:layout_constraintTop_toTopOf="parent"
             local:layout_constraintBottom_toBottomOf="parent"
             android:background="@drawable/TransparentToWhiteGradient"
-            local:layout_constraintRight_toLeftOf="@id/TimeEntriesLogCellDurationWhiteArea"
+            local:layout_constraintRight_toLeftOf="@id/TimeEntriesLogCellDurationPaddingArea"
             android:layout_height="0dp"
             android:layout_width="48dp" />
         <TextView
@@ -187,6 +211,7 @@
         <Button
             android:id="@+id/TimeEntriesLogCellContinueButton"
             local:layout_constraintEnd_toEndOf="parent"
+            local:layout_constraintTop_toTopOf="parent"
             android:background="@android:color/transparent"
             android:layout_width="70dp"
             android:layout_height="70dp" />

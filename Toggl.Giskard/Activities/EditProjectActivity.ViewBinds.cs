@@ -6,7 +6,7 @@ namespace Toggl.Giskard.Activities
 {
     public sealed partial class EditProjectActivity
     {
-        private View errorText;
+        private TextView errorText;
         private View colorArrow;
         private View changeClientView;
         private View changeWorkspaceView;
@@ -23,7 +23,7 @@ namespace Toggl.Giskard.Activities
 
         protected override void InitializeViews()
         {
-            errorText = FindViewById(Resource.Id.ErrorText);
+            errorText = FindViewById<TextView>(Resource.Id.ErrorText);
             colorArrow = FindViewById(Resource.Id.ColorArrow);
             changeClientView = FindViewById(Resource.Id.ChangeClientView);
             colorCircle = FindViewById<CircleView>(Resource.Id.ColorCircle);

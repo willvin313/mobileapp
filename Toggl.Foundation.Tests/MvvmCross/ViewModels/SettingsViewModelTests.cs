@@ -518,6 +518,75 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
         }
 
+        public sealed class TheToggleTimeEntriesGroupingAction : SettingsViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public async Task UpdatesTheStoredPreferences()
+            {
+                var oldValue = false;
+                var newValue = true;
+                var preferences = new MockPreferences { CollapseTimeEntries = oldValue };
+                PreferencesSubject.OnNext(preferences);
+
+                ViewModel.ToggleTimeEntriesGrouping.Execute();
+                TestScheduler.Start();
+
+                await InteractorFactory
+                    .Received()
+                    .UpdatePreferences(Arg.Is<EditPreferencesDTO>(dto => dto.CollapseTimeEntries.Equals(New<bool>.Value(newValue))))
+                    .Execute();
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task UpdatesTheCollapseTimeEntriesProperty()
+            {
+                var oldValue = false;
+                var newValue = true;
+                var oldPreferences = new MockPreferences { CollapseTimeEntries = oldValue };
+                var newPreferences = new MockPreferences { CollapseTimeEntries = newValue };
+                PreferencesSubject.OnNext(oldPreferences);
+                InteractorFactory.UpdatePreferences(Arg.Any<EditPreferencesDTO>())
+                    .Execute()
+                    .Returns(Observable.Return(newPreferences));
+
+                ViewModel.ToggleTimeEntriesGrouping.Execute();
+                TestScheduler.Start();
+
+                await InteractorFactory
+                    .Received()
+                    .UpdatePreferences(Arg.Is<EditPreferencesDTO>(dto => dto.CollapseTimeEntries.ValueOr(oldValue) == newValue))
+                    .Execute();
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task InitiatesPushSync()
+            {
+                var oldValue = false;
+                var preferences = new MockPreferences { CollapseTimeEntries = oldValue };
+                PreferencesSubject.OnNext(preferences);
+
+                ViewModel.ToggleTimeEntriesGrouping.Execute();
+                TestScheduler.Start();
+
+                await SyncManager.Received().PushSync();
+            }
+
+            [Property, LogIfTooSlow]
+            public void TracksEventWhenToggled(bool initialState)
+            {
+                var analyticsEvent = Substitute.For<IAnalyticsEvent<bool>>();
+                AnalyticsService.GroupTimeEntriesSettingsChanged.Returns(analyticsEvent);
+                var preferences = new MockPreferences { CollapseTimeEntries = initialState };
+                var expectedState = !initialState;
+
+                PreferencesSubject.OnNext(preferences);
+                ViewModel.ToggleTimeEntriesGrouping.Execute();
+                TestScheduler.Start();
+
+                analyticsEvent.Received().Track(expectedState);
+            }
+        }
+
         public sealed class TheSelectDateFormatMethod : SettingsViewModelTest
         {
             [Fact, LogIfTooSlow]

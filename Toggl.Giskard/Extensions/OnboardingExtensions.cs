@@ -23,7 +23,7 @@ namespace Toggl.Giskard.Extensions
 
         public static IDisposable ManageDismissableTooltip(
             this IOnboardingStep step,
-            IObservable<bool> componentIsVisible,
+            IObservable<bool> componentIsVisible, 
             PopupWindow tooltip,
             View anchor,
             Func<PopupWindow, View, PopupOffsets> popupOffsetsGenerator,

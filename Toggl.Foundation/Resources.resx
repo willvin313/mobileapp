@@ -432,6 +432,15 @@ Start the timer and your most used time entries will appear here.</value>
   <data name="DeleteThisTimeEntry" xml:space="preserve">
     <value>Delete this time entry?</value>
   </data>
+  <data name="DeleteMultipleTimeEntries" xml:space="preserve">
+    <value>Permanently delete {0} time entries?</value>
+  </data>
+  <data name="DeleteThisEntry" xml:space="preserve">
+    <value>Delete this entry</value>
+  </data>
+  <data name="DeleteNTimeEntries" xml:space="preserve">
+    <value>Delete {0} time entries</value>
+  </data>
   <data name="DiscardThisTimeEntry" xml:space="preserve">
     <value>Discard this time entry?</value>
   </data>
@@ -531,6 +540,9 @@ Start the timer and your most used time entries will appear here.</value>
   <data name="EntryDeleted" xml:space="preserve">
     <value>Time entry was deleted</value>
   </data>
+  <data name="MultipleEntriesDeleted">
+    <value>{0} time entries deleted</value>
+  </data>
   <data name="UndoButtonTitle" xml:space="preserve">
     <value>UNDO</value>
   </data>
@@ -600,6 +612,9 @@ Start the timer and your most used time entries will appear here.</value>
   <data name="InaccessibleTimeEntryErrorMessage" xml:space="preserve">
     <value>This time entry belongs to a workspace that you don't have access to anymore and it can't be synced. Move it to a different workspace by changing the project or delete it.</value>
   </data>
+  <data name="TimeEntriesGroupSyncErrorMessage" xml:space="preserve">
+    <value>{0} out of {1} time entries in this group failed to sync. Open specific time entries for details.</value>
+  </data>
   <data name="Calendar" xml:space="preserve">
     <value>Calendar</value>
   </data>
@@ -654,8 +669,8 @@ Start the timer and your most used time entries will appear here.</value>
   <data name="StartAndStopTime" xml:space="preserve">
     <value>Start and stop times</value>
   </data>
-  <data name="NameTakenError" xml:space="preserve">
-    <value>Sorry, this name is already taken</value>
+  <data name="ProjectNameTakenError" xml:space="preserve">
+    <value>Sorry, this project already exists</value>
   </data>
   <data name="ProjectName" xml:space="preserve">
     <value>Project Name</value>
@@ -804,6 +819,18 @@ Use them to categorize your time.</value>
     <value>Your tags will show up here.
 Use them to add keywords to your time entries.</value>
   </data>
+  <data name="GroupTimeEntries" xml:space="preserve">
+    <value>Group similar time entries</value>
+  </data>
+  <data name="EditingTimeEntryGroup" xml:space="preserve">
+    <value>Editing {0} time entries</value>
+  </data>
+  <data name="NumberOfTasksPlural" xml:space="preserve">
+    <value>{0} Tasks</value>
+  </data>
+  <data name="NumberOfTasksSingular" xml:space="preserve">
+    <value>{0} Task</value>
+  </data>
   <data name="SelectCalendars" xml:space="preserve">
     <value>Select calendars</value>
   </data>
@@ -884,6 +911,9 @@ Use them to add keywords to your time entries.</value>
   </data>
   <data name="ContinueTimerInvocationPhrase" xml:space="preserve">
     <value>Continue tracking</value>
+  </data>
+  <data name="ContinueTimerInvocationPhrase">
+      <value>Continue timer</value>
   </data>
   <data name="NumberOfTasksPlural" xml:space="preserve">
     <value>{0} Tasks</value>

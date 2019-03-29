@@ -172,5 +172,8 @@ namespace Toggl.Multivac.Extensions
 
         public static IObservable<string> SelectToString<T>(this IObservable<T> observable)
             => observable.Select(item => item.ToString());
+
+        public static IObservable<TOther> SelectLatestFrom<TFirst, TOther>(this IObservable<TFirst> observable, IObservable<TOther> otherObservable)
+            => observable.WithLatestFrom(otherObservable, (first, other) => other);
     }
 }

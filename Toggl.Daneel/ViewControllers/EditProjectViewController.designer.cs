@@ -28,7 +28,7 @@ namespace Toggl.Daneel.ViewControllers
 		UIKit.UIButton DoneButton { get; set; }
 
 		[Outlet]
-		UIKit.UILabel NameTakenErrorLabel { get; set; }
+		UIKit.UILabel ErrorLabel { get; set; }
 
 		[Outlet]
 		UIKit.UITextField NameTextField { get; set; }
@@ -81,6 +81,11 @@ namespace Toggl.Daneel.ViewControllers
 				DoneButton = null;
 			}
 
+			if (ErrorLabel != null) {
+				ErrorLabel.Dispose ();
+				ErrorLabel = null;
+			}
+
 			if (NameTextField != null) {
 				NameTextField.Dispose ();
 				NameTextField = null;
@@ -119,11 +124,6 @@ namespace Toggl.Daneel.ViewControllers
 			if (WorkspaceLabel != null) {
 				WorkspaceLabel.Dispose ();
 				WorkspaceLabel = null;
-			}
-
-			if (NameTakenErrorLabel != null) {
-				NameTakenErrorLabel.Dispose ();
-				NameTakenErrorLabel = null;
 			}
 		}
 	}

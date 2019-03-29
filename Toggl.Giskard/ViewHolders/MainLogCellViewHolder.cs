@@ -8,9 +8,21 @@ using Android.Text;
 using Android.Views;
 using Android.Widget;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog;
 using Toggl.Giskard.Extensions;
 using Toggl.Giskard.ViewHelpers;
 using static Toggl.Giskard.Resource.Id;
+using MvvmCross.Plugin.Color.Platforms.Android;
+using Android.Graphics.Drawables;
+using GroupingColor = Toggl.Foundation.MvvmCross.Helper.Color.TimeEntriesLog.Grouping;
+using Android.Graphics;
+using System.Reactive;
+using Toggl.Giskard.Extensions.Reactive;
+using System.Reactive.Disposables;
+using Android.Support.V4.Content;
+using Toggl.Multivac.Extensions;
+using System.Reactive.Linq;
+using Toggl.Foundation.Analytics;
 
 namespace Toggl.Giskard.ViewHolders
 {
@@ -36,6 +48,7 @@ namespace Toggl.Giskard.ViewHolders
         private TextView addDescriptionLabel;
         private TextView timeEntriesLogCellProjectLabel;
         private TextView timeEntriesLogCellDuration;
+        private View groupItemBackground;
         private View timeEntriesLogCellContinueImage;
         private View errorImageView;
         private View errorNeedsSync;
@@ -44,21 +57,34 @@ namespace Toggl.Giskard.ViewHolders
         private View mainLogBackgroundDelete;
         private View billableIcon;
         private View hasTagsIcon;
-        private View whitePadding;
-
-        private SpannableFactory spannableFactory = new CopylessSpannableFactory();
-
+        private View durationPadding;
+        private View durationFadeGradient;
+        private TextView groupCountTextView;
+        private View groupExpansionButton;
+        
         private ObjectAnimator animator;
 
         public bool IsAnimating => animator?.IsRunning ?? false;
 
-        public bool CanSync => Item.TimeEntryViewModel.CanSync;
+        public bool CanSync => Item.ViewModel.CanContinue;
 
         public View MainLogContentView { get; private set; }
-        public Subject<TimeEntryViewModel> ContinueButtonTappedSubject { get; set; }
+        public Subject<(LogItemViewModel, ContinueTimeEntryMode)> ContinueButtonTappedSubject { get; set; }
+        public Subject<GroupId> ToggleGroupExpansionSubject { get; set; }
+
+        private GroupId groupId;
+
+        private Color whiteColor;
+        private Color grayColor;
 
         protected override void InitializeViews()
         {
+            whiteColor = new Color(ItemView.Context.GetColor(Resource.Color.mainLogCellPaddingWhite));
+            grayColor = new Color(ItemView.Context.GetColor(Resource.Color.mainLogCellPaddingLightGray));
+
+            groupItemBackground = ItemView.FindViewById<View>(MainLogGroupBackground);
+            groupCountTextView = ItemView.FindViewById<TextView>(TimeEntriesLogCellGroupCount);
+
             timeEntriesLogCellDescription = ItemView.FindViewById<TextView>(TimeEntriesLogCellDescription);
             addDescriptionLabel = ItemView.FindViewById<TextView>(AddDescriptionLabel);
             timeEntriesLogCellProjectLabel = ItemView.FindViewById<TextView>(TimeEntriesLogCellProjectLabel);
@@ -71,10 +97,18 @@ namespace Toggl.Giskard.ViewHolders
             mainLogBackgroundDelete = ItemView.FindViewById(MainLogBackgroundDelete);
             billableIcon = ItemView.FindViewById(TimeEntriesLogCellBillable);
             hasTagsIcon = ItemView.FindViewById(TimeEntriesLogCellTags);
-            whitePadding = ItemView.FindViewById(TimeEntriesLogCellDurationWhiteArea);
+            durationPadding = ItemView.FindViewById(TimeEntriesLogCellDurationPaddingArea);
+            durationFadeGradient = ItemView.FindViewById(TimeEntriesLogCellDurationGradient);
             MainLogContentView = ItemView.FindViewById(Resource.Id.MainLogContentView);
 
+            groupExpansionButton = ItemView.FindViewById(TimeEntriesLogCellToggleExpansionButton);
             timeEntriesLogCellContinueButton.Click += onContinueClick;
+            groupExpansionButton.Click += onExpansionClick;
+        }
+
+        private void onExpansionClick(object sender, EventArgs e)
+        {
+            ToggleGroupExpansionSubject.OnNext(groupId);
         }
 
         public void ShowSwipeToContinueBackground()
@@ -98,27 +132,23 @@ namespace Toggl.Giskard.ViewHolders
             mainLogBackgroundDelete.Visibility = ViewStates.Invisible;
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-
-            if (!disposing || timeEntriesLogCellContinueButton == null) return;
-            timeEntriesLogCellContinueButton.Click -= onContinueClick;
-        }
-
         private void onContinueClick(object sender, EventArgs e)
         {
-            ContinueButtonTappedSubject?.OnNext(Item.TimeEntryViewModel);
+            var continueMode = Item.ViewModel.IsTimeEntryGroupHeader
+                ? ContinueTimeEntryMode.TimeEntriesGroupContinueButton
+                : ContinueTimeEntryMode.SingleTimeEntryContinueButton;
+
+            ContinueButtonTappedSubject?.OnNext((Item.ViewModel, ContinueTimeEntryMode.SingleTimeEntryContinueButton));
         }
 
-        private ConstraintLayout.LayoutParams getWhitePaddingWidthDependentOnIcons()
+        private ConstraintLayout.LayoutParams getDurationPaddingWidthDependentOnIcons()
         {
             var whitePaddingWidth =
                 72
-                + (Item.TimeEntryViewModel.IsBillable ? 22 : 0)
-                + (Item.TimeEntryViewModel.HasTags ? 22 : 0);
+                + (Item.ViewModel.IsBillable ? 22 : 0)
+                + (Item.ViewModel.HasTags ? 22 : 0);
 
-            var layoutParameters = (ConstraintLayout.LayoutParams) whitePadding.LayoutParameters;
+            var layoutParameters = (ConstraintLayout.LayoutParams)durationPadding.LayoutParameters;
             layoutParameters.Width = whitePaddingWidth.DpToPixels(ItemView.Context);
             return layoutParameters;
         }
@@ -127,14 +157,16 @@ namespace Toggl.Giskard.ViewHolders
         {
             StopAnimating();
 
-            timeEntriesLogCellDescription.Text = Item.TimeEntryViewModel.Description;
+            groupId = Item.ViewModel.GroupId;
+
+            timeEntriesLogCellDescription.Text = Item.ViewModel.Description;
             timeEntriesLogCellDescription.Visibility = Item.DescriptionVisibility;
             addDescriptionLabel.Visibility = Item.AddDescriptionLabelVisibility;
 
             timeEntriesLogCellProjectLabel.TextFormatted = Item.ProjectTaskClientText;
             timeEntriesLogCellProjectLabel.Visibility = Item.ProjectTaskClientVisibility;
 
-            timeEntriesLogCellDuration.Text = Item.DurationText;
+            timeEntriesLogCellDuration.Text = Item.ViewModel.Duration;
 
             timeEntriesLogCellContinueImage.Visibility = Item.ContinueImageVisibility;
             errorImageView.Visibility = Item.ErrorImageViewVisibility;
@@ -143,7 +175,29 @@ namespace Toggl.Giskard.ViewHolders
             billableIcon.Visibility = Item.BillableIconVisibility;
             hasTagsIcon.Visibility = Item.HasTagsIconVisibility;
 
-            whitePadding.LayoutParameters = getWhitePaddingWidthDependentOnIcons();
+            durationPadding.LayoutParameters = getDurationPaddingWidthDependentOnIcons();
+
+            switch (Item.ViewModel.VisualizationIntent)
+            {
+                case LogItemVisualizationIntent.SingleItem:
+                    presentAsSingleTimeEntry();
+                    break;
+
+                case LogItemVisualizationIntent.GroupItem:
+                    presentAsTimeEntryInAGroup();
+                    break;
+
+                case LogItemVisualizationIntent.CollapsedGroupHeader:
+                    presentAsCollapsedGroupHeader(Item.ViewModel.RepresentedTimeEntriesIds.Length);
+                    break;
+
+                case LogItemVisualizationIntent.ExpandedGroupHeader:
+                    presentAsExpandedGroupHeader(Item.ViewModel.RepresentedTimeEntriesIds.Length);
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException($"Cannot visualize {Item.ViewModel.VisualizationIntent} in the time entries log table.");
+            }
         }
 
         public void StartAnimating(AnimationSide side)
@@ -188,6 +242,62 @@ namespace Toggl.Giskard.ViewHolders
                 default:
                     throw new ArgumentException("Unexpected side");
             }
+        }
+
+        private void presentAsCollapsedGroupHeader(int timeEntriesCount)
+        {
+            groupExpansionButton.Enabled = true;
+            groupCountTextView.Context.GetColor(Resource.Color.defaultEditText);
+            groupCountTextView.SetBackgroundResource(Resource.Drawable.GrayBorderRoundedRectangle);
+            groupCountTextView.Enabled = true;
+            groupCountTextView.Text = timeEntriesCount.ToString();
+            groupCountTextView.Visibility = ViewStates.Visible;
+            groupCountTextView.SetTextColor(GroupingColor.Collapsed.Text.ToNativeColor());
+            groupItemBackground.Visibility = ViewStates.Gone;
+            durationPadding.SetBackgroundColor(whiteColor);
+            durationFadeGradient.SetBackgroundResource(Resource.Drawable.TransparentToWhiteGradient);
+        }
+
+        private void presentAsExpandedGroupHeader(int timeEntriesCount)
+        {
+            groupExpansionButton.Enabled = true;
+            groupCountTextView.Context.GetColor(Resource.Color.buttonBlue);
+            groupCountTextView.SetBackgroundResource(Resource.Drawable.LightBlueRoundedRectangle);
+            groupCountTextView.Enabled = true;
+            groupCountTextView.Text = timeEntriesCount.ToString();
+            groupCountTextView.Visibility = ViewStates.Visible;
+            groupItemBackground.Visibility = ViewStates.Gone;
+            durationPadding.SetBackgroundColor(whiteColor);
+            durationFadeGradient.SetBackgroundResource(Resource.Drawable.TransparentToWhiteGradient);
+        }
+
+        private void presentAsSingleTimeEntry()
+        {
+            groupExpansionButton.Enabled = false;
+            groupCountTextView.Visibility = ViewStates.Gone;
+            groupItemBackground.Visibility = ViewStates.Gone;
+            durationPadding.SetBackgroundColor(whiteColor);
+            durationFadeGradient.SetBackgroundResource(Resource.Drawable.TransparentToWhiteGradient);
+        }
+
+        private void presentAsTimeEntryInAGroup()
+        {
+            groupExpansionButton.Enabled = false;
+            groupCountTextView.Visibility = ViewStates.Invisible;
+            groupItemBackground.Visibility = ViewStates.Visible;
+            durationPadding.SetBackgroundColor(grayColor);
+            durationFadeGradient.SetBackgroundResource(Resource.Drawable.TransparentToLightGrayGradient);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            if (!disposing)
+                return;
+
+            timeEntriesLogCellContinueButton.Click -= onContinueClick;
+            groupExpansionButton.Click -= onExpansionClick;
         }
     }
 }

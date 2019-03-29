@@ -6,7 +6,6 @@ using System.Reactive.Linq;
 using System.Threading;
 using CoreGraphics;
 using Foundation;
-using MvvmCross.Binding.BindingContext;
 using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Daneel.ExtensionKit;
 using Toggl.Daneel.Extensions;
@@ -17,10 +16,13 @@ using Toggl.Daneel.Views;
 using Toggl.Daneel.ViewSources;
 using Toggl.Foundation;
 using Toggl.Foundation.Analytics;
+using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Foundation.MvvmCross.Onboarding.MainView;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog;
+using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog.Identity;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Extensions;
 using Toggl.PrimeRadiant.Onboarding;
@@ -30,6 +32,8 @@ using static Toggl.Foundation.MvvmCross.Helper.Animation;
 
 namespace Toggl.Daneel.ViewControllers
 {
+    using MainLogSection = AnimatableSectionModel<DaySummaryViewModel, LogItemViewModel, IMainLogKey>;
+
     [TabPresentation]
     public partial class MainViewController : ReactiveViewController<MainViewModel>
     {
@@ -100,15 +104,21 @@ namespace Toggl.Daneel.ViewControllers
             prepareOnboarding();
             setupTableViewHeader();
 
-            // Table view
-            tableViewSource = new TimeEntriesLogViewSource(
-                ViewModel.TimeEntries,
-                TimeEntriesLogViewCell.Identifier,
-                ViewModel.TimeService,
-                ViewModel.SchedulerProvider);
-            TimeEntriesLogTableView
-                .Rx()
-                .Bind(tableViewSource)
+            tableViewSource = new TimeEntriesLogViewSource();
+
+            TimeEntriesLogTableView.Source = tableViewSource;
+
+            ViewModel.TimeEntries
+                .Subscribe(TimeEntriesLogTableView.Rx().AnimateSections<MainLogSection, DaySummaryViewModel, LogItemViewModel, IMainLogKey>(tableViewSource))
+                .DisposedBy(disposeBag);
+
+            ViewModel.ShouldReloadTimeEntryLog
+                .WithLatestFrom(ViewModel.TimeEntries, (_, timeEntries) => timeEntries)
+                .Subscribe(TimeEntriesLogTableView.Rx().ReloadSections(tableViewSource))
+                .DisposedBy(disposeBag);
+
+            tableViewSource.ToggleGroupExpansion
+                .Subscribe(ViewModel.TimeEntriesViewModel.ToggleGroupExpansion.Inputs)
                 .DisposedBy(disposeBag);
 
             tableViewSource.FirstCell
@@ -119,29 +129,31 @@ namespace Toggl.Daneel.ViewControllers
                 })
                 .DisposedBy(DisposeBag);
 
-            tableViewSource.ScrollOffset
+            tableViewSource.Rx().Scrolled()
                 .Subscribe(onTableScroll)
                 .DisposedBy(DisposeBag);
 
-            var continueTimeEntry = Observable.Merge(
-                tableViewSource.ContinueTap,
-                tableViewSource.SwipeToContinue
-            );
+            tableViewSource.ContinueTap
+                .Select(item => timeEntryContinuation(item, false))
+                .Subscribe(ViewModel.ContinueTimeEntry.Inputs)
+                .DisposedBy(DisposeBag);
 
-            continueTimeEntry
+            tableViewSource.SwipeToContinue
+                .Select(item => timeEntryContinuation(item, true))
                 .Subscribe(ViewModel.ContinueTimeEntry.Inputs)
                 .DisposedBy(DisposeBag);
 
             tableViewSource.SwipeToDelete
-                .Subscribe(ViewModel.TimeEntriesViewModel.DelayDeleteTimeEntry.Inputs)
+                .Select(logItem => logItem.RepresentedTimeEntriesIds)
+                .Subscribe(ViewModel.TimeEntriesViewModel.DelayDeleteTimeEntries.Inputs)
                 .DisposedBy(DisposeBag);
 
-            tableViewSource.ItemSelected
-                .Select(te => te.Id)
+            tableViewSource.Rx().ModelSelected()
+                .Select(editEventInfo)
                 .Subscribe(ViewModel.SelectTimeEntry.Inputs)
                 .DisposedBy(DisposeBag);
 
-            ViewModel.TimeEntriesViewModel.ShouldShowUndo
+            ViewModel.TimeEntriesViewModel.TimeEntriesPendingDeletion
                 .Subscribe(toggleUndoDeletion)
                 .DisposedBy(DisposeBag);
 
@@ -154,7 +166,10 @@ namespace Toggl.Daneel.ViewControllers
                 .DisposedBy(disposeBag);
 
             // Refresh Control
-            var refreshControl = new RefreshControl(ViewModel.SyncProgressState, tableViewSource);
+            var refreshControl = new RefreshControl(
+                ViewModel.SyncProgressState,
+                tableViewSource.Rx().Scrolled(),
+                tableViewSource.IsDragging);
             refreshControl.Refresh
                 .Subscribe(ViewModel.Refresh.Inputs)
                 .DisposedBy(DisposeBag);
@@ -171,7 +186,7 @@ namespace Toggl.Daneel.ViewControllers
             CurrentTimeEntryCard.Rx().Tap()
                 .WithLatestFrom(ViewModel.CurrentRunningTimeEntry, (_, te) => te)
                 .Where(te => te != null)
-                .Select(te => te.Id)
+                .Select(te => (new[] { te.Id }, EditTimeEntryOrigin.RunningTimeEntryCard))
                 .Subscribe(ViewModel.SelectTimeEntry.Inputs)
                 .DisposedBy(DisposeBag);
 
@@ -256,10 +271,6 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(suggestionsView.OnSuggestions)
                 .DisposedBy(DisposeBag);
 
-            ViewModel.ShouldReloadTimeEntryLog
-                .Subscribe(reload)
-                .DisposedBy(disposeBag);
-
             View.SetNeedsLayout();
             View.LayoutIfNeeded();
 
@@ -279,12 +290,43 @@ namespace Toggl.Daneel.ViewControllers
             suggestionsContaier.ConstrainToViewSides(tableHeader);
             ratingViewContainer.ConstrainToViewSides(tableHeader);
 
-            suggestionsContaier.TopAnchor.ConstraintEqualTo(tableHeader.TopAnchor).Active = true;
-            suggestionsContaier.BottomAnchor.ConstraintEqualTo(ratingViewContainer.TopAnchor).Active = true;
+            suggestionsContaier.TopAnchor.ConstraintEqualTo(tableHeader.TopAnchor, TimeEntriesLogViewSource.SpaceBetweenSections).Active = true;
+            suggestionsContaier.BottomAnchor.ConstraintEqualTo(ratingViewContainer.TopAnchor, TimeEntriesLogViewSource.SpaceBetweenSections).Active = true;
             ratingViewContainer.BottomAnchor.ConstraintEqualTo(tableHeader.BottomAnchor).Active = true;
 
             suggestionsContaier.AddSubview(suggestionsView);
             suggestionsView.ConstrainInView(suggestionsContaier);
+        }
+
+        private (long[], EditTimeEntryOrigin) editEventInfo(LogItemViewModel item)
+        {
+            var origin = item.IsTimeEntryGroupHeader
+                ? EditTimeEntryOrigin.GroupHeader
+                : item.BelongsToGroup
+                    ? EditTimeEntryOrigin.GroupTimeEntry
+                    : EditTimeEntryOrigin.SingleTimeEntry;
+
+            return (item.RepresentedTimeEntriesIds, origin);
+        }
+
+        private (long, ContinueTimeEntryMode) timeEntryContinuation(LogItemViewModel itemViewModel, bool isSwipe)
+        {
+            var continueMode = default(ContinueTimeEntryMode);
+
+            if (isSwipe)
+            {
+                continueMode = itemViewModel.IsTimeEntryGroupHeader
+                    ? ContinueTimeEntryMode.TimeEntriesGroupSwipe
+                    : ContinueTimeEntryMode.SingleTimeEntrySwipe;
+            }
+            else
+            {
+                continueMode = itemViewModel.IsTimeEntryGroupHeader
+                    ? ContinueTimeEntryMode.TimeEntriesGroupContinueButton
+                    : ContinueTimeEntryMode.SingleTimeEntryContinueButton;
+            }
+
+            return (itemViewModel.RepresentedTimeEntriesIds.First(), continueMode);
         }
 
         public override void ViewWillAppear(bool animated)
@@ -325,7 +367,7 @@ namespace Toggl.Daneel.ViewControllers
             trackSiriEvents();
         }
 
-        private void toggleUndoDeletion(bool show)
+        private void toggleUndoDeletion(int? numberOfTimeEntriesPendingDeletion)
         {
             if (snackBar != null)
             {
@@ -333,11 +375,16 @@ namespace Toggl.Daneel.ViewControllers
                 snackBar = null;
             }
 
-            if (!show)
+            if (!numberOfTimeEntriesPendingDeletion.HasValue)
                 return;
 
+            var undoText = numberOfTimeEntriesPendingDeletion > 1
+                ? String.Format(Resources.MultipleEntriesDeleted, numberOfTimeEntriesPendingDeletion)
+                : Resources.EntryDeleted;
+
             snackBar = SnackBar.Factory.CreateUndoSnackBar(
-                onUndo: () => ViewModel.TimeEntriesViewModel.CancelDeleteTimeEntry.Execute(Unit.Default));
+                onUndo: () => ViewModel.TimeEntriesViewModel.CancelDeleteTimeEntry.Execute(Unit.Default),
+                text: undoText);
 
             snackBar.SnackBottomAnchor = StartTimeEntryButton.TopAnchor;
             snackBar.Show(superView: View);
@@ -360,7 +407,9 @@ namespace Toggl.Daneel.ViewControllers
         {
             base.ViewDidLayoutSubviews();
 
-            TimeEntriesLogTableView.ContentInset = new UIEdgeInsets(0, 0, StartTimeEntryButton.Frame.Height - TimeEntriesLogViewSource.SpaceBetweenSections, 0);
+            TimeEntriesLogTableView.ContentInset = new UIEdgeInsets(-TimeEntriesLogViewSource.SpaceBetweenSections, 0,
+                StartTimeEntryButton.Frame.Height, 0);
+            TimeEntriesLogTableView.BringSubviewToFront(TimeEntriesLogTableView.TableHeaderView);
 
             if (TimeEntriesLogTableView.TableHeaderView != null)
             {
@@ -466,8 +515,11 @@ namespace Toggl.Daneel.ViewControllers
             var swipeUpRunningCardGesture = new UISwipeGestureRecognizer(async () =>
             {
                 var currentlyRunningTimeEntry = await ViewModel.CurrentRunningTimeEntry.FirstAsync();
-                if (currentlyRunningTimeEntry == null) return;
-                await ViewModel.SelectTimeEntry.ExecuteWithCompletion(currentlyRunningTimeEntry.Id);
+                if (currentlyRunningTimeEntry == null)
+                    return;
+
+                var selectTimeEntryData = (new[] { currentlyRunningTimeEntry.Id }, EditTimeEntryOrigin.RunningTimeEntryCard);
+                await ViewModel.SelectTimeEntry.ExecuteWithCompletion(selectTimeEntryData);
             });
             swipeUpRunningCardGesture.Direction = UISwipeGestureRecognizerDirection.Up;
             CurrentTimeEntryCard.AddGestureRecognizer(swipeUpRunningCardGesture);
@@ -533,7 +585,7 @@ namespace Toggl.Daneel.ViewControllers
             // the spider at any time.
             WelcomeBackView.RemoveFromSuperview();
             TimeEntriesLogTableView.AddSubview(WelcomeBackView);
-            NSLayoutConstraint.ActivateConstraints(new []
+            NSLayoutConstraint.ActivateConstraints(new[]
             {
                 WelcomeBackView.CenterXAnchor.ConstraintEqualTo(TimeEntriesLogTableView.CenterXAnchor),
                 WelcomeBackView.TopAnchor.ConstraintEqualTo(TimeEntriesLogTableView.TopAnchor, welcomeViewTopDistance),
@@ -694,13 +746,6 @@ namespace Toggl.Daneel.ViewControllers
             swipeRightAnimationDisposable = swipeRightStep.ManageSwipeActionAnimationOf(nextFirstTimeEntry, Direction.Right);
 
             swipeLeftGestureRecognizer = swipeLeftStep.DismissBySwiping(nextFirstTimeEntry, Direction.Left);
-        }
-
-        private void reload()
-        {
-            var range = new NSRange(0, TimeEntriesLogTableView.NumberOfSections());
-            var indexSet = NSIndexSet.FromNSRange(range);
-            TimeEntriesLogTableView.ReloadSections(indexSet, UITableViewRowAnimation.None);
         }
     }
 }

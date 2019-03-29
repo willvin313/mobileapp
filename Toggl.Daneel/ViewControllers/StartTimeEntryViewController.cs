@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -184,10 +185,9 @@ namespace Toggl.Daneel.ViewControllers
             };
         }
 
-        public Task<bool> Dismiss()
+        public async Task<bool> Dismiss()
         {
-            ViewModel.Close.Execute();
-            return Task.FromResult(true);
+            return await ViewModel.Close.ExecuteWithCompletion(Unit.Default);
         }
 
         private void onTextFieldInfo(TextFieldInfo textFieldInfo)

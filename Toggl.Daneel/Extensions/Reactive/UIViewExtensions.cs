@@ -19,18 +19,30 @@ namespace Toggl.Daneel.Extensions.Reactive
                 gestureRecognizer.ShouldRecognizeSimultaneously = (recognizer, otherRecognizer) => true;
                 reactive.Base.AddGestureRecognizer(gestureRecognizer);
 
-                return Disposable.Create(() => reactive.Base.RemoveGestureRecognizer(gestureRecognizer));
+                return Disposable.Create(() =>
+                {
+                    UIApplication.SharedApplication.InvokeOnMainThread(() =>
+                    {
+                        reactive.Base.RemoveGestureRecognizer(gestureRecognizer);
+                    });
+                });
             });
 
         public static IObservable<Unit> LongPress(this IReactive<UIView> reactive)
-           => Observable.Create<Unit>(observer =>
-           {
-               var gestureRecognizer = new UILongPressGestureRecognizer(() => observer.OnNext(Unit.Default));
-               gestureRecognizer.ShouldRecognizeSimultaneously = (recognizer, otherRecognizer) => true;
-               reactive.Base.AddGestureRecognizer(gestureRecognizer);
+            => Observable.Create<Unit>(observer =>
+            {
+                var gestureRecognizer = new UILongPressGestureRecognizer(() => observer.OnNext(Unit.Default));
+                gestureRecognizer.ShouldRecognizeSimultaneously = (recognizer, otherRecognizer) => true;
+                reactive.Base.AddGestureRecognizer(gestureRecognizer);
 
-               return Disposable.Create(() => reactive.Base.RemoveGestureRecognizer(gestureRecognizer));
-           });
+                return Disposable.Create(() =>
+                {
+                    UIApplication.SharedApplication.InvokeOnMainThread(() =>
+                    {
+                        reactive.Base.RemoveGestureRecognizer(gestureRecognizer);
+                    });
+               });
+            });
 
         public static Action<bool> IsVisible(this IReactive<UIView> reactive)
             => isVisible => reactive.Base.Hidden = !isVisible;

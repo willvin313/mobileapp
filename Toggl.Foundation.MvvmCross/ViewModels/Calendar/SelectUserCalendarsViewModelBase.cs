@@ -19,22 +19,24 @@ using Toggl.PrimeRadiant.Settings;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
 {
+    using CalendarSectionModel = SectionModel<UserCalendarSourceViewModel, SelectableUserCalendarViewModel>;
+    using ImmutableCalendarSectionModel = IImmutableList<SectionModel<UserCalendarSourceViewModel, SelectableUserCalendarViewModel>>;
+
     public abstract class SelectUserCalendarsViewModelBase : MvxViewModel<bool, string[]>
     {
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
 
         protected readonly IUserPreferences UserPreferences;
-        protected readonly IMvxNavigationService NavigationService;
+        protected new readonly IMvxNavigationService NavigationService;
         private readonly IInteractorFactory interactorFactory;
         private readonly IRxActionFactory rxActionFactory;
 
         private ISubject<bool> doneEnabledSubject = new BehaviorSubject<bool>(false);
 
-        private ISubject<IImmutableList<CollectionSection<UserCalendarSourceViewModel, SelectableUserCalendarViewModel>>> calendarsSubject =
-            new BehaviorSubject<IImmutableList<CollectionSection<UserCalendarSourceViewModel, SelectableUserCalendarViewModel>>>(
-                ImmutableList.Create<CollectionSection<UserCalendarSourceViewModel, SelectableUserCalendarViewModel>>());
+        private ISubject<ImmutableCalendarSectionModel> calendarsSubject =
+            new BehaviorSubject<ImmutableCalendarSectionModel>(ImmutableList.Create<CalendarSectionModel>());
 
-        public IObservable<IImmutableList<CollectionSection<UserCalendarSourceViewModel, SelectableUserCalendarViewModel>>> Calendars { get; }
+        public IObservable<ImmutableCalendarSectionModel> Calendars { get; }
 
         public InputAction<SelectableUserCalendarViewModel> SelectCalendar { get; }
         public UIAction Close { get; private set; }
@@ -48,25 +50,23 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
         protected SelectUserCalendarsViewModelBase(
             IUserPreferences userPreferences,
             IInteractorFactory interactorFactory,
-            IMvxNavigationService navigationService,
-            IRxActionFactory rxActionFactory)
+            IMvxNavigationService navigationService, IRxActionFactory rxActionFactory)
         {
             Ensure.Argument.IsNotNull(userPreferences, nameof(userPreferences));
             Ensure.Argument.IsNotNull(interactorFactory, nameof(interactorFactory));
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
             Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
 
-            this.UserPreferences = userPreferences;
-            this.NavigationService = navigationService;
+            UserPreferences = userPreferences;
+            NavigationService = navigationService;
             this.interactorFactory = interactorFactory;
             this.rxActionFactory = rxActionFactory;
 
             SelectCalendar = rxActionFactory.FromAction<SelectableUserCalendarViewModel>(toggleCalendarSelection);
-
-            Calendars = calendarsSubject.AsObservable().DistinctUntilChanged();
-
             Close = rxActionFactory.FromAsync(OnClose);
             Done = rxActionFactory.FromAsync(OnDone, doneEnabledSubject.AsObservable());
+
+            Calendars = calendarsSubject.AsObservable().DistinctUntilChanged();
         }
 
         public sealed override void Prepare(bool parameter)
@@ -103,12 +103,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
             calendarsSubject.OnNext(calendars);
         }
 
-        private IImmutableList<CollectionSection<UserCalendarSourceViewModel, SelectableUserCalendarViewModel>> group(IEnumerable<UserCalendar> calendars)
+        private ImmutableCalendarSectionModel group(IEnumerable<UserCalendar> calendars)
             => calendars
                 .Select(toSelectable)
                 .GroupBy(calendar => calendar.SourceName)
                 .Select(group =>
-                    new CollectionSection<UserCalendarSourceViewModel, SelectableUserCalendarViewModel>(
+                    new CalendarSectionModel(
                         new UserCalendarSourceViewModel(group.First().SourceName),
                         group.OrderBy(calendar => calendar.Name)
                     )

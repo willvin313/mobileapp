@@ -55,6 +55,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly IIntentDonationService intentDonationService;
         private readonly IStopwatchProvider stopwatchProvider;
         private readonly IRxActionFactory rxActionFactory;
+        private readonly ISchedulerProvider schedulerProvider;
         private readonly IPermissionsService permissionsService;
 
         private bool isSyncing;
@@ -78,6 +79,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public IObservable<string> DurationFormat { get; }
         public IObservable<string> BeginningOfWeek { get; }
         public IObservable<bool> IsManualModeEnabled { get; }
+        public IObservable<bool> IsGroupingTimeEntries { get; }
         public IObservable<bool> AreRunningTimerNotificationsEnabled { get; }
         public IObservable<bool> AreStoppedTimerNotificationsEnabled { get; }
         public IObservable<bool> UseTwentyFourHourFormat { get; }
@@ -97,6 +99,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public UIAction SelectDateFormat { get; }
         public UIAction PickDefaultWorkspace { get; }
         public UIAction SelectDurationFormat { get; }
+        public UIAction ToggleTimeEntriesGrouping { get; }
         public UIAction SelectBeginningOfWeek { get; }
         public UIAction Close { get; }
 
@@ -152,6 +155,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             this.intentDonationService = intentDonationService;
             this.privateSharedStorageService = privateSharedStorageService;
             this.rxActionFactory = rxActionFactory;
+            this.schedulerProvider = schedulerProvider;
             this.permissionsService = permissionsService;
 
             IsSynced =
@@ -193,20 +197,20 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                         .Execute()
                     )
                     .Select(workspace => workspace.Name)
-                    .AsDriver(schedulerProvider);;
+                    .AsDriver(schedulerProvider);
 
             BeginningOfWeek =
                 dataSource.User.Current
                     .Select(user => user.BeginningOfWeek)
                     .DistinctUntilChanged()
                     .Select(beginningOfWeek => beginningOfWeek.ToString())
-                    .AsDriver(schedulerProvider);;
+                    .AsDriver(schedulerProvider);
 
             DateFormat =
                 dataSource.Preferences.Current
                     .Select(preferences => preferences.DateFormat.Localized)
                     .DistinctUntilChanged()
-                    .AsDriver(schedulerProvider);;
+                    .AsDriver(schedulerProvider);
 
             DurationFormat =
                 dataSource.Preferences.Current
@@ -221,6 +225,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     .DistinctUntilChanged()
                     .AsDriver(schedulerProvider);
 
+            IsGroupingTimeEntries =
+                dataSource.Preferences.Current
+                    .Select(preferences => preferences.CollapseTimeEntries)
+                    .DistinctUntilChanged()
+                    .AsDriver(false, schedulerProvider);
+                    
             IsCalendarSmartRemindersVisible = calendarPermissionGranted.AsObservable()
                 .CombineLatest(userPreferences.EnabledCalendars.Select(ids => ids.Any()), CommonFunctions.And);
 
@@ -264,7 +274,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IsFeedbackSuccessViewShowing = isFeedbackSuccessViewShowing.AsObservable()
                 .AsDriver(schedulerProvider);
 
-            Close = rxActionFactory.FromAsync(close);
             OpenCalendarSettings = rxActionFactory.FromAsync(openCalendarSettings);
             OpenCalendarSmartReminders = rxActionFactory.FromAsync(openCalendarSmartReminders);
             OpenNotificationSettings = rxActionFactory.FromAsync(openNotificationSettings);
@@ -277,7 +286,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             PickDefaultWorkspace = rxActionFactory.FromAsync(pickDefaultWorkspace);
             SelectDurationFormat = rxActionFactory.FromAsync(selectDurationFormat);
             SelectBeginningOfWeek = rxActionFactory.FromAsync(selectBeginningOfWeek);
+            ToggleTimeEntriesGrouping = rxActionFactory.FromAsync(toggleTimeEntriesGrouping);
             SelectDefaultWorkspace = rxActionFactory.FromAsync<SelectableWorkspaceViewModel>(selectDefaultWorkspace);
+            Close = rxActionFactory.FromAsync(close);
         }
 
         public override async Task Initialize()
@@ -300,9 +311,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         {
             isFeedbackSuccessViewShowing.OnNext(false);
         }
-
-        private Task close()
-            => navigationService.Close(this);
 
         private Task selectDefaultWorkspace(SelectableWorkspaceViewModel workspace)
             => changeDefaultWorkspace(workspace.WorkspaceId);
@@ -376,13 +384,15 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private async Task updatePreferences(
             New<DurationFormat> durationFormat = default(New<DurationFormat>),
             New<DateFormat> dateFormat = default(New<DateFormat>),
-            New<TimeFormat> timeFormat = default(New<TimeFormat>))
+            New<TimeFormat> timeFormat = default(New<TimeFormat>),
+            New<bool> collapseTimeEntries = default(New<bool>))
         {
             var preferencesDto = new EditPreferencesDTO
             {
                 DurationFormat = durationFormat,
                 DateFormat = dateFormat,
-                TimeOfDayFormat = timeFormat
+                TimeOfDayFormat = timeFormat,
+                CollapseTimeEntries = collapseTimeEntries
             };
 
             await interactorFactory.UpdatePreferences(preferencesDto).Execute();
@@ -460,6 +470,13 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             await changeDefaultWorkspace(selectedWorkspaceId);
         }
 
+        private async Task toggleTimeEntriesGrouping()
+        {
+            var newValue = !currentPreferences.CollapseTimeEntries;
+            analyticsService.GroupTimeEntriesSettingsChanged.Track(newValue);
+            await updatePreferences(collapseTimeEntries: newValue);
+        }
+
         private async Task selectDurationFormat()
         {
             var newDurationFormat = await navigationService
@@ -489,5 +506,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             var authorized = await permissionsService.CalendarPermissionGranted;
             calendarPermissionGranted.OnNext(authorized);
         }
+        
+        private Task close() => navigationService.Close(this);
     }
 }

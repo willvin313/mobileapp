@@ -42,9 +42,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public bool UseGrouping { get; private set; }
 
-        private BehaviorSubject<IList<CollectionSection<string, AutocompleteSuggestion>>> suggestionsSubject
-            = new BehaviorSubject<IList<CollectionSection<string, AutocompleteSuggestion>>>(new CollectionSection<string, AutocompleteSuggestion>[0]);
-        public IObservable<IList<CollectionSection<string, AutocompleteSuggestion>>> Suggestions => suggestionsSubject.AsObservable();
+        private BehaviorSubject<IList<SectionModel<string, AutocompleteSuggestion>>> suggestionsSubject
+            = new BehaviorSubject<IList<SectionModel<string, AutocompleteSuggestion>>>(new SectionModel<string, AutocompleteSuggestion>[0]);
+        public IObservable<IList<SectionModel<string, AutocompleteSuggestion>>> Suggestions => suggestionsSubject.AsObservable();
 
         public ISubject<string> FilterText { get; } = new BehaviorSubject<string>(string.Empty);
 
@@ -141,7 +141,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 if (shouldSuggestCreation(text))
                 {
                     var createEntitySuggestion = new CreateEntitySuggestion(Resources.CreateProject, text);
-                    var section = new CollectionSection<string, AutocompleteSuggestion>(null, new[] { createEntitySuggestion });
+                    var section = new SectionModel<string, AutocompleteSuggestion>(null, new[] { createEntitySuggestion });
                     collectionSections.Insert(0, section);
                 }
 
@@ -150,7 +150,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                     var workspace = await interactorFactory.GetWorkspaceById(workspaceId).Execute();
                     var noProjectSuggestion = ProjectSuggestion.NoProject(workspace.Id, workspace.Name);
                     collectionSections.Add(
-                        new CollectionSection<string, AutocompleteSuggestion>(null, new[] { noProjectSuggestion })
+                        new SectionModel<string, AutocompleteSuggestion>(null, new[] { noProjectSuggestion })
                     );
                 }
 
@@ -165,7 +165,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             navigationFromEditTimeEntryViewModelStopwatch = null;
         }
 
-        private CollectionSection<string, AutocompleteSuggestion> collectionSection(IEnumerable<ProjectSuggestion> suggestions, bool prependNoProject)
+        private SectionModel<string, AutocompleteSuggestion> collectionSection(IEnumerable<ProjectSuggestion> suggestions, bool prependNoProject)
         {
             var workspaceName = suggestions.First().WorkspaceName;
             var sectionItems = suggestions.ToList();
@@ -177,7 +177,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 sectionItems.Insert(0, noProjectSuggestion);
             }
 
-            return new CollectionSection<string, AutocompleteSuggestion>(workspaceName, sectionItems);
+            return new SectionModel<string, AutocompleteSuggestion>(workspaceName, sectionItems);
         }
 
         private ProjectSuggestion setSelectedProject(ProjectSuggestion suggestion)
@@ -272,7 +272,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             if (indexOfSuggestion < 0) return;
             var newItemsInSection = targetSection.Items.InsertRange(indexOfSuggestion + 1, projectSuggestion.Tasks.OrderBy(task => task.Name));
 
-            var newSection = new CollectionSection<string, AutocompleteSuggestion>(targetSection.Header, newItemsInSection);
+            var newSection = new SectionModel<string, AutocompleteSuggestion>(targetSection.Header, newItemsInSection);
             var newSuggestions = suggestionsSubject.Value.ToList();
             newSuggestions[indexOfTargetSection] = newSection;
 
@@ -289,7 +289,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             foreach (var task in projectSuggestion.Tasks)
                 newItemsInSection.Remove(task);
 
-            var newSection = new CollectionSection<string, AutocompleteSuggestion>(targetSection.Header, newItemsInSection);
+            var newSection = new SectionModel<string, AutocompleteSuggestion>(targetSection.Header, newItemsInSection);
             var newSuggestions = suggestionsSubject.Value.ToList();
             newSuggestions[indexOfTargetSection] = newSection;
 

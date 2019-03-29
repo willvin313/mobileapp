@@ -439,7 +439,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task StartsWithAnEmptyList()
             {
-                var observer = TestScheduler.CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                var observer = TestScheduler.CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 await ViewModel.Initialize();
@@ -458,7 +458,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .GetProjectsAutocompleteSuggestions(Arg.Any<IList<string>>())
                     .Execute()
                     .Returns(suggestionsObservable);
-                var observer = TestScheduler.CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                var observer = TestScheduler.CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 await ViewModel.Initialize();
@@ -482,7 +482,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .GetProjectsAutocompleteSuggestions(Arg.Any<IList<string>>())
                     .Execute()
                     .Returns(suggestionsObservable);
-                var observer = TestScheduler.CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                var observer = TestScheduler.CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 await ViewModel.Initialize();
@@ -505,7 +505,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .GetProjectsAutocompleteSuggestions(Arg.Any<IList<string>>())
                     .Execute()
                     .Returns(suggestionsObservable);
-                var observer = TestScheduler.CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                var observer = TestScheduler.CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 await ViewModel.Initialize();
@@ -532,7 +532,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .GetProjectsAutocompleteSuggestions(Arg.Any<IList<string>>())
                     .Execute()
                     .Returns(suggestionsObservable);
-                var observer = TestScheduler.CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                var observer = TestScheduler.CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 await ViewModel.Initialize();
@@ -565,7 +565,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .GetProjectsAutocompleteSuggestions(Arg.Any<IList<string>>())
                     .Execute()
                     .Returns(suggestionsObservable);
-                var observer = TestScheduler.CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                var observer = TestScheduler.CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 await ViewModel.Initialize();
@@ -597,7 +597,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 InteractorFactory.GetProjectsAutocompleteSuggestions(Arg.Any<IList<string>>()).Execute()
                     .Returns(Observable.Return(suggestions));
-                var observer = TestScheduler.CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                var observer = TestScheduler.CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 await ViewModel.Initialize();
@@ -626,7 +626,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Execute()
                     .Returns(suggestionsObservable);
                 var parameter = SelectProjectParameter.WithIds(null, null, 0);
-                var observer = TestScheduler.CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                var observer = TestScheduler.CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 ViewModel.Prepare(parameter);
@@ -651,7 +651,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Returns(suggestionsObservable);
                 long selectedProjectId = 5;
                 var parameter = SelectProjectParameter.WithIds(selectedProjectId, null, 0);
-                var observer = TestScheduler.CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                var observer = TestScheduler.CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 ViewModel.Prepare(parameter);
@@ -682,7 +682,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .GetProjectsAutocompleteSuggestions(Arg.Any<IList<string>>())
                     .Execute()
                     .Returns(suggestionsObservable);
-                var observer = TestScheduler.CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                var observer = TestScheduler.CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 await ViewModel.Initialize();
@@ -703,7 +703,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .GetProjectsAutocompleteSuggestions(Arg.Any<IList<string>>())
                     .Execute()
                     .Returns(suggestionsObservable);
-                var observer = TestScheduler.CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                var observer = TestScheduler.CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 await ViewModel.Initialize();
@@ -725,7 +725,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .GetProjectsAutocompleteSuggestions(Arg.Any<IList<string>>())
                     .Execute()
                     .Returns(suggestionsObservable);
-                var observer = TestScheduler.CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                var observer = TestScheduler.CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 await ViewModel.Initialize();
@@ -747,7 +747,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .GetProjectsAutocompleteSuggestions(Arg.Any<IList<string>>())
                     .Execute()
                     .Returns(suggestionsObservable);
-                var observer = TestScheduler.CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                var observer = TestScheduler.CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 await ViewModel.Initialize();
@@ -769,7 +769,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .GetProjectsAutocompleteSuggestions(Arg.Any<IList<string>>())
                     .Execute()
                     .Returns(suggestionsObservable);
-                var observer = TestScheduler.CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                var observer = TestScheduler.CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 await ViewModel.Initialize();
@@ -797,7 +797,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .GetProjectsAutocompleteSuggestions(Arg.Any<IList<string>>())
                     .Execute()
                     .Returns(suggestionsObservable);
-                var observer = TestScheduler.CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                var observer = TestScheduler.CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 await ViewModel.Initialize();
