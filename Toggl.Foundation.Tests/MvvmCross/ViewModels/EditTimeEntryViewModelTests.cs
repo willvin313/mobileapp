@@ -586,6 +586,54 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 
                 observer.LastEmittedValue().Should().Be(isBillableAvailable);
             }
+
+            [Fact]
+            public async Task RemovesBillableFlagIfBillableIsNotAvailable()
+            {
+                var freeProjectParameter = new SelectProjectParameter { ProjectId = 123, WorkspaceId = 678 };
+                InteractorFactory.IsBillableAvailableForWorkspace(freeProjectParameter.WorkspaceId).Execute().Returns(Observable.Return(false));
+                NavigationService
+                    .Navigate<SelectProjectViewModel, SelectProjectParameter, SelectProjectParameter>(Arg.Any<SelectProjectParameter>())
+                    .Returns(Task.FromResult(freeProjectParameter));
+
+                AdjustTimeEntries(TimeEntriesIds, te =>
+                {
+                    te.Billable = true;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.IsBillable);
+
+                await ViewModel.Initialize();
+                var completion = ViewModel.SelectProject.ExecuteWithCompletion();
+                TestScheduler.Start();
+                await completion;
+
+                observer.LastEmittedValue().Should().Be(false);
+            }
+
+            [Fact]
+            public async Task KeepsBillableFlagIfBillableIsStillAvailableAfterProjectChange()
+            {
+                var freeProjectParameter = new SelectProjectParameter { ProjectId = 123, WorkspaceId = 678 };
+                InteractorFactory.IsBillableAvailableForWorkspace(freeProjectParameter.WorkspaceId).Execute().Returns(Observable.Return(true));
+                NavigationService
+                    .Navigate<SelectProjectViewModel, SelectProjectParameter, SelectProjectParameter>(Arg.Any<SelectProjectParameter>())
+                    .Returns(Task.FromResult(freeProjectParameter));
+
+                AdjustTimeEntries(TimeEntriesIds, te =>
+                {
+                    te.Billable = true;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.IsBillable);
+
+                await ViewModel.Initialize();
+                var completion = ViewModel.SelectProject.ExecuteWithCompletion();
+                TestScheduler.Start();
+                await completion;
+
+                observer.LastEmittedValue().Should().Be(true);
+            }
         }
 
         public sealed class TheIsBillableProperty : InitializableEditTimeEntryViewModelTest
