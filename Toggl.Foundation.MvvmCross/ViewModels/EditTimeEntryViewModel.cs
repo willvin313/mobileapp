@@ -159,16 +159,24 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             ProjectClientTask = projectClientTaskSubject
                 .AsDriver(ProjectClientTaskInfo.Empty, schedulerProvider);
 
-            IsBillableAvailable = workspaceIdSubject
-                .Where(id => id.HasValue)
-                .SelectMany(workspaceId => interactorFactory.IsBillableAvailableForWorkspace(workspaceId.Value).Execute())
-                .DistinctUntilChanged()
-                .AsDriver(false, schedulerProvider);
-
             isBillableSubject = new BehaviorSubject<bool>(false);
             IsBillable = isBillableSubject
                 .DistinctUntilChanged()
                 .AsDriver(false, schedulerProvider);
+
+            var isBillableAvailable =
+                workspaceIdSubject
+                    .Where(id => id.HasValue)
+                    .SelectMany(workspaceId => interactorFactory.IsBillableAvailableForWorkspace(workspaceId.Value).Execute())
+                    .DistinctUntilChanged();
+
+            isBillableAvailable
+                .Where(isAvailable => !isAvailable)
+                .SelectValue(false)
+                .Subscribe(isBillableSubject.OnNext)
+                .DisposedBy(disposeBag);
+
+            IsBillableAvailable = isBillableAvailable.AsDriver(false, schedulerProvider);
 
             startTimeSubject = new BehaviorSubject<DateTimeOffset>(DateTimeOffset.UtcNow);
             var startTimeObservable = startTimeSubject.DistinctUntilChanged();
