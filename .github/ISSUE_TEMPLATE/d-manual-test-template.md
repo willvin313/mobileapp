@@ -118,6 +118,8 @@ about: A manual testing checklist that can be assigned to a release to track the
 ## Testing Siri Integration
 - [ ] Start a time entry
 - [ ] Stop a time entry
+- [ ] Continue a time entry
+- [ ] Continue last entry
 
 ## Multiple Workspaces
 - [ ] Switch workspaces
