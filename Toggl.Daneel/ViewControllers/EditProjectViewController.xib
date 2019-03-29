@@ -16,7 +16,7 @@
                 <outlet property="ColorCircleView" destination="oGf-TO-JiY" id="JzO-Jt-Pal"/>
                 <outlet property="ColorPickerOpeningView" destination="LTL-AP-fd8" id="Zk8-vs-iE1"/>
                 <outlet property="DoneButton" destination="8A6-l5-Nhc" id="XA1-Gk-OHy"/>
-                <outlet property="NameTakenErrorLabel" destination="AJK-6q-awO" id="6op-hg-nFh"/>
+                <outlet property="ErrorLabel" destination="AJK-6q-awO" id="AcF-Jg-zu2"/>
                 <outlet property="NameTextField" destination="bpV-JK-V6T" id="SjM-c5-Mes"/>
                 <outlet property="PrivateProjectSwitch" destination="wwu-Nj-fWo" id="KQO-e9-Mlb"/>
                 <outlet property="PrivateProjectSwitchContainer" destination="nGK-A1-PiV" id="J8N-nM-H6L"/>
@@ -119,8 +119,8 @@
                                 <constraint firstAttribute="width" constant="11" id="xLe-fR-7Sz"/>
                             </constraints>
                         </imageView>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Sorry, this name is already taken" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AJK-6q-awO" userLabel="Text">
-                            <rect key="frame" x="31" y="1" width="183.5" height="14.5"/>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Save error" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AJK-6q-awO" userLabel="Text">
+                            <rect key="frame" x="31" y="0.5" width="58.5" height="15"/>
                             <fontDescription key="fontDescription" type="system" pointSize="12"/>
                             <color key="textColor" red="0.96862745098039216" green="0.25098039215686274" blue="0.28627450980392155" alpha="1" colorSpace="calibratedRGB"/>
                             <nil key="highlightedColor"/>
@@ -238,7 +238,7 @@
                 <constraint firstItem="N5n-qn-eUr" firstAttribute="bottom" secondItem="rQX-az-AjC" secondAttribute="bottom" id="z7I-8f-Mc7"/>
                 <constraint firstItem="HiK-yy-d1C" firstAttribute="top" secondItem="2" secondAttribute="top" id="zWy-rd-l3I"/>
             </constraints>
-            <point key="canvasLocation" x="24.5" y="51.5"/>
+            <point key="canvasLocation" x="364" y="50"/>
         </view>
     </objects>
     <resources>

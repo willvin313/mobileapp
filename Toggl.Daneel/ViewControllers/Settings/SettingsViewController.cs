@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive;
 using System.Reactive.Linq;
 using MvvmCross.Platforms.Ios.Presenters.Attributes;
 using MvvmCross.Plugin.Color.Platforms.Ios;
@@ -28,6 +29,7 @@ namespace Toggl.Daneel.ViewControllers
         {
             base.ViewDidLoad();
 
+            GroupSimilarTimeEntriesLabel.Text = Resources.GroupTimeEntries;
             YourProfileCellLabel.Text = Resources.YourProfile;
             WorkspaceCellLabel.Text = Resources.Workspace;
             FormatSettingsHeaderLabel.Text = Resources.FormatSettings;
@@ -130,6 +132,10 @@ namespace Toggl.Daneel.ViewControllers
                 .Subscribe(ViewModel.ToggleManualMode)
                 .DisposedBy(DisposeBag);
 
+            GroupSimilarTimeEntriesSwitch.Rx()
+                .BindAction(ViewModel.ToggleTimeEntriesGrouping)
+                .DisposedBy(DisposeBag);
+
             BeginningOfWeekView.Rx()
                 .BindAction(ViewModel.SelectBeginningOfWeek)
                 .DisposedBy(DisposeBag);
@@ -160,6 +166,11 @@ namespace Toggl.Daneel.ViewControllers
             ViewModel.IsManualModeEnabled
                 .FirstAsync()
                 .Subscribe(isEnabled => ManualModeSwitch.SetState(isEnabled, false))
+                .DisposedBy(DisposeBag);
+
+            ViewModel.IsGroupingTimeEntries
+                .FirstAsync()
+                .Subscribe(isGrouping => GroupSimilarTimeEntriesSwitch.SetState(isGrouping, false))
                 .DisposedBy(DisposeBag);
 
             ViewModel.UseTwentyFourHourFormat

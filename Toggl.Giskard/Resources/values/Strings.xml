@@ -20,13 +20,12 @@
     <string name="AddClientHint">Add/filter clients</string>
     <string name="AddProjectHint">Add/filter projects</string>
     <string name="AddProjectTask">Add project/task</string>
-    <string name="Billable">Billable</string>
     <string name="AddTagsHint">Add/filter tags</string>
     <string name="StartTime">Start time</string>
     <string name="EndTime">End time</string>
     <string name="Save">Save</string>
     <string name="Oops">Oops!</string>
-    <string name="NameTakenError">Sorry, this name is already taken.</string>
+    <string name="ProjectNameTakenError">Sorry, such project already exists</string>
     <string name="General">General</string>
     <string name="SubmitFeedback">Submit feedback</string>
     <string name="Help">Help</string>
@@ -129,12 +128,12 @@ understand and agree to Toggl\'s</string>
     <string name="Later">Later</string>
     <string name="PlusFiveMinutes">+5m</string>
     <string name="PlusTenMinutes">+10m</string>
+    <string name="PlusThirtyMinutes">30m</string>
     <string name="YourTokenWasReset">Your API token has been reset</string>
     <string name="SignOutOption">Or sign out</string>
-    <string name="PlusThirtyMinutes">30m</string>
-    <string name="PlusThirtyMinutes">30m</string>
-    <string name="PlusThirtyMinutes">30m</string>
     <string name="LoginBackRequest">Enter your password to log back in to your account:</string>
+    <string name="GroupTimeEntries">Group similar time entries</string>
+    <string name="Display">Display</string>
     <string name="Timer">Timer</string>
     <string name="Calendar">Calendar</string>
     <string name="Settings">Settings</string>
@@ -171,5 +170,4 @@ understand and agree to Toggl\'s</string>
     <string name="SettingsTemplateSelector" translatable="false">Toggl.Giskard.TemplateSelectors.SettingsTemplateSelector, Toggl.Giskard</string>
     <string name="StartTimeEntrySuggestionsTemplateSelector" translatable="false">Toggl.Giskard.TemplateSelectors.StartTimeEntrySuggestionsTemplateSelector, Toggl.Giskard</string>
     <string name="SuggestionsTemplateSelector" translatable="false">Toggl.Giskard.TemplateSelectors.SuggestionsTemplateSelector, Toggl.Giskard</string>
-    <string name="TagsListTemplateSelector" translatable="false">Toggl.Giskard.TemplateSelectors.TagsListTemplateSelector, Toggl.Giskard</string>
 </resources>

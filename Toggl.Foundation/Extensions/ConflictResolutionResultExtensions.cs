@@ -34,5 +34,12 @@ namespace Toggl.Foundation.Extensions
                     throw new ArgumentException($"Unknown conflict resolution result type {result.GetType().FullName}");
             }
         }
+
+        public static IObservable<IEnumerable<TThreadsafe>> UnwrapUpdatedThreadSafeEntities<TThreadsafe>(
+            this IObservable<IEnumerable<IConflictResolutionResult<TThreadsafe>>> resultsObservable)
+            where TThreadsafe : IThreadSafeModel
+            => resultsObservable.Select(results => results.Cast<UpdateResult<TThreadsafe>>().Select(result => result.Entity));
+
+
     }
 }

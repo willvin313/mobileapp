@@ -33,6 +33,9 @@ namespace Toggl.Daneel.Extensions.Reactive
             })
                 .StartWith((int)reactive.Base.SelectedRange.Location);
 
+        public static Action<NSAttributedString> AttributedTextObserver(this IReactive<UITextView> reactive)
+            => text => reactive.Base.AttributedText = text;
+
         public static Action<string> TextObserver(this IReactive<UITextView> reactive)
             => text => reactive.Base.Text = text;
     }

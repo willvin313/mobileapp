@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Reactive;
 using Toggl.Foundation.Analytics;
-using Toggl.Foundation.DataSources.Interfaces;
 using Toggl.Foundation.DTOs;
 using Toggl.Foundation.Interactors.Generic;
 using Toggl.Foundation.Models;
@@ -27,7 +26,7 @@ namespace Toggl.Foundation.Interactors
                 prototype.Duration,
                 origin);
 
-        public IInteractor<IObservable<IThreadSafeTimeEntry>> ContinueTimeEntry(ITimeEntryPrototype prototype)
+        public IInteractor<IObservable<IThreadSafeTimeEntry>> ContinueTimeEntry(ITimeEntryPrototype prototype, ContinueTimeEntryMode continueMode)
             => new CreateTimeEntryInteractor(
                 idProvider,
                 timeService,
@@ -38,7 +37,7 @@ namespace Toggl.Foundation.Interactors
                 syncManager,
                 timeService.CurrentDateTime,
                 null,
-                TimeEntryStartOrigin.Continue);
+                (TimeEntryStartOrigin)continueMode);
 
         public IInteractor<IObservable<IThreadSafeTimeEntry>> StartSuggestion(Suggestion suggestion)
             => new CreateTimeEntryInteractor(
@@ -64,18 +63,30 @@ namespace Toggl.Foundation.Interactors
         public IInteractor<IObservable<Unit>> DeleteTimeEntry(long id)
             => new DeleteTimeEntryInteractor(timeService, dataSource.TimeEntries, this, id);
 
+        public IInteractor<IObservable<Unit>> DeleteMultipleTimeEntries(long[] ids)
+             => new DeleteMultipleTimeEntriesInteractor(dataSource.TimeEntries, this, ids);
+
+        public IInteractor<IObservable<Unit>> SoftDeleteMultipleTimeEntries(long[] ids)
+            => new SoftDeleteMultipleTimeEntriesInteractor(dataSource.TimeEntries, syncManager, this, ids);
+
         public IInteractor<IObservable<IThreadSafeTimeEntry>> GetTimeEntryById(long id)
             => new GetByIdInteractor<IThreadSafeTimeEntry, IDatabaseTimeEntry>(dataSource.TimeEntries, analyticsService, id)
                 .TrackException<Exception, IThreadSafeTimeEntry>("GetTimeEntryById");
 
+        public IInteractor<IObservable<IEnumerable<IThreadSafeTimeEntry>>> GetMultipleTimeEntriesById(long[] ids)
+            => new GetMultipleByIdInteractor<IThreadSafeTimeEntry, IDatabaseTimeEntry>(dataSource.TimeEntries, ids);
+
         public IInteractor<IObservable<IEnumerable<IThreadSafeTimeEntry>>> GetAllTimeEntriesVisibleToTheUser()
             => new GetAllTimeEntriesVisibleToTheUserInteractor(dataSource.TimeEntries);
 
-        public IInteractor<IObservable<IEnumerable<IThreadSafeTimeEntry>>> ObserveTimeEntriesVisibleToTheUser()
-            => new ObserveTimeEntriesVisibleToTheUserInteractor(dataSource.TimeEntries);
+        public IInteractor<IObservable<IEnumerable<IThreadSafeTimeEntry>>> ObserveAllTimeEntriesVisibleToTheUser()
+            => new ObserveAllTimeEntriesVisibleToTheUserInteractor(dataSource.TimeEntries, dataSource.Workspaces);
 
         public IInteractor<IObservable<IThreadSafeTimeEntry>> UpdateTimeEntry(EditTimeEntryDto dto)
             => new UpdateTimeEntryInteractor(timeService, dataSource, this, syncManager, dto);
+
+        public IInteractor<IObservable<IEnumerable<IThreadSafeTimeEntry>>> UpdateMultipleTimeEntries(EditTimeEntryDto[] dtos)
+            => new UpdateMultipleTimeEntriesInteractor(timeService, dataSource, stopwatchProvider, this, syncManager, dtos);
 
         public IInteractor<IObservable<IThreadSafeTimeEntry>> StopTimeEntry(DateTimeOffset currentDateTime, TimeEntryStopOrigin origin)
             => new StopTimeEntryInteractor(timeService, dataSource.TimeEntries, currentDateTime, analyticsService, origin);

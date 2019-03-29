@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive;
 using System.Reactive.Linq;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.Sync;
@@ -40,5 +41,13 @@ namespace Toggl.Foundation.Extensions
         public static IObservable<ITransition> OnErrorReturnResult<T>(this IObservable<ITransition> observable, StateResult<T> errorResult)
             where T : Exception
             => observable.Catch((T exception) => Observable.Return(errorResult.Transition(exception)));
+
+        public static IObservable<T> ReemitWhen<T>(
+            this IObservable<T> observable,
+            IObservable<Unit> otherObservable)
+        {
+            var signal = otherObservable.StartWith(Unit.Default);
+            return observable.CombineLatest(signal, (t1, _) => t1);
+        }
     }
 }

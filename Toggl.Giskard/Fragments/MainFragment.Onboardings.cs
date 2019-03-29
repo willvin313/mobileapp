@@ -81,7 +81,7 @@ namespace Toggl.Giskard.Fragments
 
         private void setupMainLogObservables()
         {
-            var collectionChanges = ViewModel.TimeEntries.CollectionChange.SelectUnit();
+            var collectionChanges = ViewModel.TimeEntries.SelectUnit();
             mainRecyclerViewChangesObservable = mainRecyclerViewScrollChanges
                 .Merge(collectionChanges);
         }
@@ -205,7 +205,7 @@ namespace Toggl.Giskard.Fragments
                 }
             });
 
-            swipeToContinueWasUsedDisposable = mainRecyclerAdapter.ContinueTimeEntrySubject
+            swipeToContinueWasUsedDisposable = mainRecyclerAdapter.ContinueTimeEntry
                 .Subscribe(_ =>
                 {
                     swipeRightOnboardingStep.Dismiss();

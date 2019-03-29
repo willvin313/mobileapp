@@ -157,6 +157,29 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 observer.LastEmittedValue().Should().BeFalse();
             }
 
+            [Fact, LogIfTooSlow]
+            public void SetsErrorMessageToEmptyString()
+            {
+                ViewModel.Email.OnNext(ValidEmail);
+                UserAccessManager
+                    .ResetPassword(Arg.Any<Email>())
+                    .Returns(Observable.Throw<string>(new Exception()));
+                var observer = TestScheduler.CreateObserver<string>();
+                ViewModel.ErrorMessage.Subscribe(observer);
+                ViewModel.Reset.Execute();
+                TestScheduler.Start();
+
+                UserAccessManager
+                    .ResetPassword(Arg.Any<Email>())
+                    .Returns(Observable.Never<string>());
+
+                ViewModel.Reset.Execute();
+                TestScheduler.Start();
+
+                observer.Messages.Should().HaveCount(3);
+                observer.LastEmittedValue().Should().BeEmpty();
+            }
+
             public sealed class WhenPasswordResetSucceeds : ForgotPasswordViewModelTest
             {
                 [Fact, LogIfTooSlow]

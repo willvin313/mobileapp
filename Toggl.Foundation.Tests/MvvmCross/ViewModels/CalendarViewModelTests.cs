@@ -837,7 +837,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     ViewModel.OnItemTapped.Execute(CalendarItem);
                     TestScheduler.Start();
 
-                    await NavigationService.Received().Navigate<EditTimeEntryViewModel, long>(Arg.Is(TimeEntryId));
+                    await NavigationService.Received().Navigate<EditTimeEntryViewModel, long[]>(
+                        Arg.Is<long[]>(timeEntriesIds => timeEntriesIds.Length == 1 && timeEntriesIds[0] == TimeEntryId));
                 }
             }
         }
@@ -938,7 +939,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.OnDurationSelected.Execute(tuple);
                 TestScheduler.Start();
 
-                await NavigationService.Received().Navigate<EditTimeEntryViewModel, long>(Arg.Is(TimeEntryId));
+                await NavigationService.Received().Navigate<EditTimeEntryViewModel, long[]>(
+                    Arg.Is<long[]>(timeEntriesIds => timeEntriesIds.Length == 1 && timeEntriesIds[0] == TimeEntryId));
             }
         }
 

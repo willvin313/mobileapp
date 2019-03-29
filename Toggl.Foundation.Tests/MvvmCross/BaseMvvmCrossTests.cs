@@ -1,4 +1,5 @@
-﻿using MvvmCross.Navigation;
+﻿using Microsoft.Reactive.Testing;
+using MvvmCross.Navigation;
 using NSubstitute;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
@@ -12,7 +13,7 @@ using Toggl.PrimeRadiant.Settings;
 
 namespace Toggl.Foundation.Tests.MvvmCross
 {
-    public abstract class BaseMvvmCrossTests
+    public abstract class BaseMvvmCrossTests : ReactiveTest
     {
         protected IIdProvider IdProvider { get; } = Substitute.For<IIdProvider>();
         protected ITimeService TimeService { get; } = Substitute.For<ITimeService>();
