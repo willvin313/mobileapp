@@ -33,7 +33,7 @@ namespace Toggl.Giskard
             var applicationContext = Application.Context;
             var packageInfo = applicationContext.PackageManager.GetPackageInfo(applicationContext.PackageName, 0);
 
-            AndroidDependencyContainer.Instance = new AndroidDependencyContainer(packageInfo.VersionName);
+            AndroidDependencyContainer.Initialize(packageInfo.VersionName);
         }
 
         protected override MvxBindingBuilder CreateBindingBuilder() => new TogglBindingBuilder();

@@ -40,7 +40,17 @@ namespace Toggl.Daneel
 
         public TogglPresenter ViewPresenter { get; }
 
-        public IosDependencyContainer(TogglPresenter viewPresenter, string version)
+        public static IosDependencyContainer Instance { get; private set; }
+
+        public static void Initialize(TogglPresenter viewPresenter, string version)
+        {
+            if (Instance != null)
+                return;
+
+            Instance = new IosDependencyContainer(viewPresenter, version);
+        }
+
+        private IosDependencyContainer(TogglPresenter viewPresenter, string version)
             : base(environment, new UserAgent(clientName, version))
         {
             ViewPresenter = viewPresenter;
@@ -49,8 +59,6 @@ namespace Toggl.Daneel
             
             settingsStorage = new Lazy<SettingsStorage>(() => new SettingsStorage(appVersion, KeyValueStorage));
         }
-
-        public static IosDependencyContainer Instance { get; set; }
 
         protected override IAnalyticsService CreateAnalyticsService()
             => new AnalyticsServiceIos();

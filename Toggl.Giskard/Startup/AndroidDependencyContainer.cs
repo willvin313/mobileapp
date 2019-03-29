@@ -37,15 +37,23 @@ namespace Toggl.Giskard
 
         public IMvxNavigationService MvxNavigationService { get; internal set; }
 
-        public AndroidDependencyContainer(string version)
+        public static AndroidDependencyContainer Instance { get; private set; }
+
+        public static void Initialize(string version)
+        {
+            if (Instance != null)
+                return;
+
+            Instance = new AndroidDependencyContainer(version);
+        }
+
+        private AndroidDependencyContainer(string version)
             : base(environment, new UserAgent(clientName, version))
         {
             var appVersion = Version.Parse(version);
             
             settingsStorage = new Lazy<SettingsStorage>(() => new SettingsStorage(appVersion, KeyValueStorage));
         }
-
-        public static AndroidDependencyContainer Instance { get; set; }
 
         protected override IAnalyticsService CreateAnalyticsService()
             => new AnalyticsServiceAndroid();

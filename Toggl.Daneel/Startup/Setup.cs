@@ -28,7 +28,7 @@ namespace Toggl.Daneel
         protected override IMvxApplication CreateApp()
         {
             var version = NSBundle.MainBundle.InfoDictionary["CFBundleShortVersionString"].ToString();
-            IosDependencyContainer.Instance = new IosDependencyContainer(Presenter as TogglPresenter, version);
+            IosDependencyContainer.Initialize(Presenter as TogglPresenter, version);
             return new App<OnboardingViewModel>(IosDependencyContainer.Instance);
         }
 
