@@ -71,7 +71,9 @@ namespace Toggl.Foundation.MvvmCross
                     dependencyContainer.OnboardingStorage,
                     dependencyContainer.DialogService,
                     dependencyContainer.AnalyticsService,
-                    dependencyContainer.StopwatchProvider);
+                    dependencyContainer.StopwatchProvider,
+                    dependencyContainer.RxActionFactory,
+                    dependencyContainer.SchedulerProvider);
 
             if (viewModelType == typeof(ForgotPasswordViewModel))
                 return new ForgotPasswordViewModel(
