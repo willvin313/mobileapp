@@ -19,6 +19,11 @@ namespace Toggl.Foundation.MvvmCross
 {
     public class TestDependencyContainer : UIDependencyContainer
     {
+        public static void Initialize(TestDependencyContainer container)
+        {
+            Instance = container;
+        }
+
         public TestDependencyContainer()
             : base(ApiEnvironment.Staging, new UserAgent("Giskard", "999.99"))
         {

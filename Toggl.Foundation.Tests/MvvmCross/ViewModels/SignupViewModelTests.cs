@@ -12,6 +12,7 @@ using NUnit.Framework;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.Exceptions;
 using Toggl.Foundation.Interactors;
+using Toggl.Foundation.MvvmCross;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Tests.Generators;
@@ -60,6 +61,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 Api.Location.Get().Returns(Observable.Return(Location));
 
                 ApiFactory.CreateApiWith(Arg.Any<Credentials>()).Returns(Api);
+
+                var container = new TestDependencyContainer { MockSyncManager = SyncManager };
+                TestDependencyContainer.Initialize(container);
             }
         }
 
