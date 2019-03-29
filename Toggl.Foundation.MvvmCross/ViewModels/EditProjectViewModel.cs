@@ -36,6 +36,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly IInteractorFactory interactorFactory;
         private readonly IStopwatchProvider stopwatchProvider;
         private readonly IMvxNavigationService navigationService;
+        private readonly ITogglDataSource dataSource;
 
         private long initialWorkspaceId;
         private IStopwatch navigationFromStartTimeEntryViewModelStopwatch;
@@ -50,13 +51,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public IObservable<MvxColor> Color { get; }
         public IObservable<string> ClientName { get; }
         public IObservable<string> WorkspaceName { get; }
-        public IObservable<bool> NameIsAlreadyTaken { get; }
-
         public UIAction Save { get; }
         public UIAction Close { get; }
         public OutputAction<MvxColor> PickColor { get; }
         public OutputAction<IThreadSafeClient> PickClient { get; }
         public OutputAction<IThreadSafeWorkspace> PickWorkspace { get; }
+        public IObservable<string> Error { get; }
 
         public EditProjectViewModel(
             ITogglDataSource dataSource,
@@ -79,6 +79,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             this.navigationService = navigationService;
             this.stopwatchProvider = stopwatchProvider;
             this.interactorFactory = interactorFactory;
+            this.dataSource = dataSource;
 
             Name = new BehaviorRelay<string>("");
             IsPrivate = new BehaviorRelay<bool>(false, CommonFunctions.Invert);
@@ -109,9 +110,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .DistinctUntilChanged()
                 .AsDriver(schedulerProvider);
 
-            ClientName = currentClient
+            var clientName = currentClient
                 .Select(client => client?.Name ?? "")
-                .DistinctUntilChanged()
+                .DistinctUntilChanged();
+
+            ClientName = clientName
                 .AsDriver(schedulerProvider);
 
             Color = PickColor.Elements
@@ -124,19 +127,17 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .DistinctUntilChanged()
                 .AsDriver(schedulerProvider);
 
-            var nameIsAlreadyTaken = currentWorkspace
-                .SelectMany(workspace => dataSource.Projects.GetAll(project => project.WorkspaceId == workspace.Id))
-                .Select(existingProjectsDictionary)
-                .CombineLatest(currentClient, Name, checkNameIsTaken)
-                .DistinctUntilChanged();
+            var saveEnabledObservable = Name.Select(checkNameValidity);
 
-            NameIsAlreadyTaken = nameIsAlreadyTaken
-                .AsDriver(schedulerProvider);
-
-            var saveEnabledObservable = nameIsAlreadyTaken
-                .CombineLatest(Name, checkNameValidity);
+            var projectOrClientNameChanged = Observable
+                .Merge(clientName.SelectUnit(), Name.SelectUnit());
 
             Save = rxActionFactory.FromObservable(done, saveEnabledObservable);
+
+            Error = Save.Errors
+                .Select(e => e.Message)
+                .Merge(projectOrClientNameChanged.SelectValue(string.Empty))
+                .AsDriver(schedulerProvider);
 
             IObservable<IThreadSafeWorkspace> defaultWorkspaceOrWorkspaceEligibleForProjectCreation(IThreadSafeWorkspace defaultWorkspace)
                 => defaultWorkspace.IsEligibleForProjectCreation()
@@ -164,32 +165,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 return getRandomColor();
             }
 
-            Dictionary<long, HashSet<string>> existingProjectsDictionary(IEnumerable<IThreadSafeProject> projectsInWorkspace)
-                => projectsInWorkspace.Aggregate(new Dictionary<long, HashSet<string>>(), (dict, project) =>
-                {
-                    var key = project.ClientId ?? noClientId;
-                    if (dict.ContainsKey(key))
-                    {
-                        dict[key].Add(project.Name);
-                        return dict;
-                    }
-
-                    dict[key] = new HashSet<string> { project.Name };
-                    return dict;
-                });
-
-            bool checkNameIsTaken(Dictionary<long, HashSet<string>> projectNameDictionary, IThreadSafeClient client, string name)
-            {
-                var key = client?.Id ?? noClientId;
-                if (projectNameDictionary.TryGetValue(key, out var projectNames))
-                    return projectNames.Contains(name.Trim());
-
-                return false;
-            }
-
-            bool checkNameValidity(bool nameIsTaken, string name)
-                => !nameIsTaken
-                    && !string.IsNullOrWhiteSpace(name)
+            bool checkNameValidity(string name)
+                => !string.IsNullOrWhiteSpace(name)
                     && name.LengthInBytes() <= Constants.MaxProjectNameLengthInBytes;
         }
 
@@ -272,7 +249,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         private IObservable<Unit> done()
         {
-            return currentWorkspace.FirstAsync()
+            var nameIsAlreadyTaken = currentWorkspace
+                .SelectMany(workspace => dataSource.Projects.GetAll(project => project.WorkspaceId == workspace.Id))
+                .Select(existingProjectsDictionary)
+                .CombineLatest(currentClient, Name, checkNameIsTaken);
+
+            var projectCreation = currentWorkspace.FirstAsync()
                 .SelectMany(workspace => checkIfCanContinue(workspace)
                     .SelectMany(shouldContinue => !shouldContinue
                         ? Observable.Empty<Unit>()
@@ -281,8 +263,18 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                             .SelectMany(createdProject =>
                                 navigationService.Close(this, createdProject.Id).ToObservable())
                             .SelectUnit()
-                )
-            );
+                    )
+                );
+
+            return nameIsAlreadyTaken.SelectMany(taken =>
+            {
+                if (taken)
+                {
+                    throw new Exception(Resources.ProjectNameTakenError);
+                }
+
+                return projectCreation;
+            });
 
             IObservable<bool> checkIfCanContinue(IThreadSafeWorkspace workspace)
             {
@@ -314,6 +306,29 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                         WorkspaceId = workspace.Id
                     }
                 );
+
+            Dictionary<long, HashSet<string>> existingProjectsDictionary(IEnumerable<IThreadSafeProject> projectsInWorkspace)
+                => projectsInWorkspace.Aggregate(new Dictionary<long, HashSet<string>>(), (dict, project) =>
+                {
+                    var key = project.ClientId ?? noClientId;
+                    if (dict.ContainsKey(key))
+                    {
+                        dict[key].Add(project.Name);
+                        return dict;
+                    }
+
+                    dict[key] = new HashSet<string> { project.Name };
+                    return dict;
+                });
+
+            bool checkNameIsTaken(Dictionary<long, HashSet<string>> projectNameDictionary, IThreadSafeClient client, string name)
+            {
+                var key = client?.Id ?? noClientId;
+                if (projectNameDictionary.TryGetValue(key, out var projectNames))
+                    return projectNames.Contains(name.Trim());
+
+                return false;
+            }
         }
     }
 }

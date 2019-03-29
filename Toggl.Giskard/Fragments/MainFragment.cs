@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -15,8 +16,10 @@ using Android.Views;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.Models.Interfaces;
+using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog;
 using Toggl.Foundation.Sync;
 using Toggl.Giskard.Adapters;
 using Toggl.Giskard.Extensions;
@@ -62,7 +65,8 @@ namespace Toggl.Giskard.Fragments
             playButton.Rx().BindAction(ViewModel.StartTimeEntry, _ => false, ButtonEventType.LongPress).DisposedBy(DisposeBag);
 
             timeEntryCard.Rx().Tap()
-                .WithLatestFrom(ViewModel.CurrentRunningTimeEntry, (_, te) => te.Id)
+                .WithLatestFrom(ViewModel.CurrentRunningTimeEntry,
+                    (_, te) => (new[] { te.Id }, EditTimeEntryOrigin.RunningTimeEntryCard))
                 .Subscribe(ViewModel.SelectTimeEntry.Inputs)
                 .DisposedBy(DisposeBag);
 
@@ -87,7 +91,7 @@ namespace Toggl.Giskard.Fragments
                 .DisposedBy(DisposeBag);
 
             ViewModel.CurrentRunningTimeEntry
-                .Select(createProjectClientTaskLabel)
+                .Select(CreateProjectClientTaskLabel)
                 .Subscribe(timeEntryCardProjectClientTaskLabel.Rx().TextFormattedObserver())
                 .DisposedBy(DisposeBag);
 
@@ -126,7 +130,7 @@ namespace Toggl.Giskard.Fragments
                 .Subscribe(onSyncChanged)
                 .DisposedBy(DisposeBag);
 
-            mainRecyclerAdapter = new MainRecyclerAdapter(ViewModel.TimeEntries, ViewModel.TimeService)
+            mainRecyclerAdapter = new MainRecyclerAdapter(ViewModel.TimeService)
             {
                 SuggestionsViewModel = ViewModel.SuggestionsViewModel,
                 RatingViewModel = ViewModel.RatingViewModel,
@@ -134,20 +138,28 @@ namespace Toggl.Giskard.Fragments
             };
             mainRecyclerAdapter.SetupRatingViewVisibility(shouldShowRatingViewOnResume);
 
+            setupRecycler();
+
+            mainRecyclerAdapter.ToggleGroupExpansion
+                .Subscribe(ViewModel.TimeEntriesViewModel.ToggleGroupExpansion.Inputs)
+                .DisposedBy(DisposeBag);
+
             mainRecyclerAdapter.TimeEntryTaps
-                .Select(te => te.Id)
+                .Select(editEventInfo)
                 .Subscribe(ViewModel.SelectTimeEntry.Inputs)
                 .DisposedBy(DisposeBag);
 
-            mainRecyclerAdapter.ContinueTimeEntrySubject
+            mainRecyclerAdapter.ContinueTimeEntry
+                .Select(vm => (vm.LogItem.RepresentedTimeEntriesIds.First(), vm.ContinueMode))
                 .Subscribe(ViewModel.ContinueTimeEntry.Inputs)
                 .DisposedBy(DisposeBag);
 
             mainRecyclerAdapter.DeleteTimeEntrySubject
-                .Subscribe(ViewModel.TimeEntriesViewModel.DelayDeleteTimeEntry.Inputs)
+                .Select(vm => vm.RepresentedTimeEntriesIds)
+                .Subscribe(ViewModel.TimeEntriesViewModel.DelayDeleteTimeEntries.Inputs)
                 .DisposedBy(DisposeBag);
 
-            ViewModel.TimeEntriesViewModel.ShouldShowUndo
+            ViewModel.TimeEntriesViewModel.TimeEntriesPendingDeletion
                 .Subscribe(showUndoDeletion)
                 .DisposedBy(DisposeBag);
 
@@ -159,9 +171,7 @@ namespace Toggl.Giskard.Fragments
                  .Subscribe(ViewModel.Refresh.Inputs)
                  .DisposedBy(DisposeBag);
 
-            setupLayoutManager(mainRecyclerAdapter);
-
-            ViewModel.TimeEntries.CollectionChange
+            ViewModel.TimeEntries
                 .ObserveOn(SynchronizationContext.Current)
                 .Subscribe(mainRecyclerAdapter.UpdateCollection)
                 .DisposedBy(DisposeBag);
@@ -204,7 +214,7 @@ namespace Toggl.Giskard.Fragments
             return view;
         }
 
-        public ISpannable createProjectClientTaskLabel(IThreadSafeTimeEntry te)
+        public ISpannable CreateProjectClientTaskLabel(IThreadSafeTimeEntry te)
         {
             if (te == null)
                 return new SpannableString(string.Empty);
@@ -229,13 +239,13 @@ namespace Toggl.Giskard.Fragments
             mainRecyclerAdapter.NotifyDataSetChanged();
         }
 
-        private void setupLayoutManager(MainRecyclerAdapter mainAdapter)
+        private void setupRecycler()
         {
             layoutManager = new LinearLayoutManager(Context);
             layoutManager.ItemPrefetchEnabled = true;
             layoutManager.InitialPrefetchItemCount = 4;
             mainRecyclerView.SetLayoutManager(layoutManager);
-            mainRecyclerView.SetAdapter(mainAdapter);
+            mainRecyclerView.SetAdapter(mainRecyclerAdapter);
         }
 
         private void setupItemTouchHelper(MainRecyclerAdapter mainAdapter)
@@ -279,6 +289,17 @@ namespace Toggl.Giskard.Fragments
             {
                 ViewModel.Refresh.Execute();
             }
+        }
+
+        private (long[], EditTimeEntryOrigin) editEventInfo(LogItemViewModel item)
+        {
+            var origin = item.IsTimeEntryGroupHeader
+                ? EditTimeEntryOrigin.GroupHeader
+                : item.BelongsToGroup
+                    ? EditTimeEntryOrigin.GroupTimeEntry
+                    : EditTimeEntryOrigin.SingleTimeEntry;
+
+            return (item.RepresentedTimeEntriesIds, origin);
         }
 
         private void onTimeEntryCardVisibilityChanged(bool visible)
@@ -331,12 +352,16 @@ namespace Toggl.Giskard.Fragments
             }
         }
 
-        private void showUndoDeletion(bool show)
+        private void showUndoDeletion(int? numberOfTimeEntriesPendingDeletion)
         {
-            if (!show)
+            if (!numberOfTimeEntriesPendingDeletion.HasValue)
                 return;
 
-            Snackbar.Make(coordinatorLayout, FoundationResources.EntryDeleted, snackbarDuration)
+            var undoText = numberOfTimeEntriesPendingDeletion > 1
+                ? String.Format(FoundationResources.MultipleEntriesDeleted, numberOfTimeEntriesPendingDeletion)
+                : FoundationResources.EntryDeleted;
+
+            Snackbar.Make(coordinatorLayout, undoText, snackbarDuration)
                 .SetAction(FoundationResources.UndoButtonTitle, view => ViewModel.TimeEntriesViewModel.CancelDeleteTimeEntry.Execute())
                 .Show();
         }

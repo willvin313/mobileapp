@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Foundation;
-using MvvmCross.Binding.Bindings.SourceSteps;
-using MvvmCross.Binding.Combiners;
-using MvvmCross.UI;
-using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Daneel.Extensions;
 using Toggl.Multivac;
 using UIKit;
@@ -68,7 +62,7 @@ namespace Toggl.Daneel.Transformations
             var text = builder.ToString();
 
             var result = new NSMutableAttributedString(text);
-            var clientIndex = text.Length - client.Length;
+            var clientIndex = text.Length - (client?.Length ?? 0);
             if (shouldColorProject)
             {
                 var projectNameRange = new NSRange(0, clientIndex);

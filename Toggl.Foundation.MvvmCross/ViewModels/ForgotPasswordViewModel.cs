@@ -58,9 +58,16 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Reset = rxActionFactory.FromObservable(reset, Email.Select(email => email.IsValid));
             Close = rxActionFactory.FromAction(returnEmail, Reset.Executing.Invert());
 
+            var resetActionStartedObservable = Reset
+                .Executing
+                .Where(executing => executing)
+                .Select(_ => (Exception)null);
+
             ErrorMessage = Reset.Errors
+                .Merge(resetActionStartedObservable)
                 .Select(toErrorString)
-                .StartWith("");
+                .StartWith("")
+                .DistinctUntilChanged();
 
             PasswordResetSuccessful = Reset.Elements
                 .Select(_ => true)
@@ -102,6 +109,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
                 case ApiException apiException:
                     return apiException.LocalizedApiErrorMessage;
+
+                case null:
+                    return string.Empty;
 
                 default:
                     return Resources.PasswordResetGeneralError;

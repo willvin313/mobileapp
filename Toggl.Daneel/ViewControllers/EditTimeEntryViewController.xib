@@ -29,6 +29,7 @@
                 <outlet property="DescriptionTextView" destination="EBA-rV-Dfi" id="2NQ-aO-MK3"/>
                 <outlet property="DurationDescriptionLabel" destination="JUC-PY-YeK" id="AFg-DF-X3a"/>
                 <outlet property="DurationLabel" destination="EW6-cw-AXE" id="2Jc-0e-dzV"/>
+                <outlet property="DurationSeparator" destination="CRf-XK-sW1" id="kbg-qa-Mk1"/>
                 <outlet property="DurationView" destination="QGD-ja-9Fl" id="rzp-lM-zsV"/>
                 <outlet property="EndDescriptionLabel" destination="Jm3-o3-8kP" id="E3g-f4-8cB"/>
                 <outlet property="EndTimeLabel" destination="SJr-Ox-SV2" id="aEn-1G-9xo"/>
@@ -36,11 +37,14 @@
                 <outlet property="ErrorMessageLabel" destination="uu4-30-FWz" id="lTd-LA-s6J"/>
                 <outlet property="ErrorMessageTitleLabel" destination="20o-iH-vm8" id="zqr-a5-295"/>
                 <outlet property="ErrorView" destination="Mhn-ip-f09" id="yba-gj-HMU"/>
+                <outlet property="GroupDuration" destination="qah-wA-pc3" id="inV-q3-Cnn"/>
                 <outlet property="ProjectTaskClientLabel" destination="hhk-MD-ce8" id="K8D-9n-qvT"/>
                 <outlet property="ScrollView" destination="Pzm-Vp-XJF" id="name-outlet-Pzm-Vp-XJF"/>
                 <outlet property="ScrollViewContent" destination="ezG-FV-3G1" id="5ej-vl-dVu"/>
+                <outlet property="SelectProject" destination="dRq-VY-yJ5" id="hG1-WN-CJw"/>
                 <outlet property="StartDateDescriptionLabel" destination="60y-Zx-mBp" id="cP5-xF-qQ2"/>
                 <outlet property="StartDateLabel" destination="xIz-dZ-hk9" id="LbH-Ta-gLH"/>
+                <outlet property="StartDateSeparator" destination="t1X-29-FvJ" id="Arb-e1-YJx"/>
                 <outlet property="StartDateView" destination="lpv-ow-dGv" id="aMx-7B-ozR"/>
                 <outlet property="StartDescriptionLabel" destination="0lZ-m7-Epd" id="k7y-82-meE"/>
                 <outlet property="StartTimeLabel" destination="cSu-PO-AWN" id="lkE-7f-YxW"/>
@@ -49,6 +53,8 @@
                 <outlet property="TagsContainerView" destination="v6N-R9-g8f" id="iCP-y6-Tsf"/>
                 <outlet property="TagsSeparator" destination="3pA-bG-OvM" id="pux-Kc-p0S"/>
                 <outlet property="TagsTextView" destination="okG-ou-p4i" id="mLv-NG-ci7"/>
+                <outlet property="TimeEntryTimes" destination="883-lW-LBj" id="bkF-d7-two"/>
+                <outlet property="TimeEntryTimesSeparator" destination="pfz-ad-qTi" id="k8Q-hQ-z6F"/>
                 <outlet property="TitleLabel" destination="f5j-k9-aHB" id="dtB-1i-eeh"/>
                 <outlet property="view" destination="2" id="RRd-Eg-VrN"/>
             </connections>
@@ -62,6 +68,12 @@
                     <rect key="frame" x="147" y="12" width="26" height="17"/>
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                     <nil key="textColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="00:00:00" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qah-wA-pc3" userLabel="Group Duration Label">
+                    <rect key="frame" x="250.5" y="12" width="54.5" height="17"/>
+                    <fontDescription key="fontDescription" type="system" weight="medium" pointSize="12"/>
+                    <color key="textColor" red="0.70980392156862748" green="0.73725490196078436" blue="0.75294117647058822" alpha="1" colorSpace="calibratedRGB"/>
                     <nil key="highlightedColor"/>
                 </label>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iqc-QZ-Ds5">
@@ -602,7 +614,9 @@
             </subviews>
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
+                <constraint firstItem="qah-wA-pc3" firstAttribute="bottom" secondItem="f5j-k9-aHB" secondAttribute="bottom" id="0Bo-Yw-Lzr"/>
                 <constraint firstItem="f5j-k9-aHB" firstAttribute="centerX" secondItem="2" secondAttribute="centerX" id="3JN-mu-ET3"/>
+                <constraint firstItem="qah-wA-pc3" firstAttribute="top" secondItem="f5j-k9-aHB" secondAttribute="top" id="4sN-4D-Han"/>
                 <constraint firstItem="f5j-k9-aHB" firstAttribute="top" secondItem="2" secondAttribute="top" constant="12" id="Aui-tE-w3a"/>
                 <constraint firstItem="1PY-gD-iJQ" firstAttribute="width" secondItem="2" secondAttribute="width" multiplier="0.55" id="BXh-Zb-8oj"/>
                 <constraint firstItem="N60-Sb-obo" firstAttribute="bottom" secondItem="iqc-QZ-Ds5" secondAttribute="bottom" constant="16" id="BpP-xf-cUP"/>
@@ -612,6 +626,7 @@
                 <constraint firstAttribute="trailing" secondItem="1PY-gD-iJQ" secondAttribute="trailing" constant="16" id="SLG-df-vwx"/>
                 <constraint firstItem="Pzm-Vp-XJF" firstAttribute="leading" secondItem="2" secondAttribute="leading" id="SaL-Wu-jr8"/>
                 <constraint firstItem="Pzm-Vp-XJF" firstAttribute="top" secondItem="Pp0-YW-3Bg" secondAttribute="bottom" constant="8" id="UFx-Nu-Peo"/>
+                <constraint firstItem="N60-Sb-obo" firstAttribute="trailing" secondItem="qah-wA-pc3" secondAttribute="trailing" constant="15" id="Zad-YZ-C1W"/>
                 <constraint firstAttribute="trailing" secondItem="Pzm-Vp-XJF" secondAttribute="trailing" id="fBy-1b-t4k"/>
                 <constraint firstItem="Pp0-YW-3Bg" firstAttribute="top" secondItem="2" secondAttribute="top" id="ofz-ZG-sOg"/>
                 <constraint firstItem="iqc-QZ-Ds5" firstAttribute="top" secondItem="Pzm-Vp-XJF" secondAttribute="bottom" constant="16" id="vII-8w-w9Z"/>
@@ -620,7 +635,7 @@
             <nil key="simulatedStatusBarMetrics"/>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <viewLayoutGuide key="safeArea" id="N60-Sb-obo"/>
-            <point key="canvasLocation" x="130" y="-191"/>
+            <point key="canvasLocation" x="129.59999999999999" y="-191.6041979010495"/>
         </view>
     </objects>
     <resources>

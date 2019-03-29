@@ -79,6 +79,12 @@ namespace Toggl.Daneel.ViewControllers
 		UIKit.UILabel FormatSettingsTitle { get; set; }
 
 		[Outlet]
+		UIKit.UILabel GroupSimilarTimeEntriesLabel { get; set; }
+
+		[Outlet]
+		UIKit.UISwitch GroupSimilarTimeEntriesSwitch { get; set; }
+
+		[Outlet]
 		UIKit.UILabel HelpCellLabel { get; set; }
 
 		[Outlet]
@@ -183,6 +189,11 @@ namespace Toggl.Daneel.ViewControllers
 		
 		void ReleaseDesignerOutlets ()
 		{
+			if (AboutCellLabel != null) {
+				AboutCellLabel.Dispose ();
+				AboutCellLabel = null;
+			}
+
 			if (AboutView != null) {
 				AboutView.Dispose ();
 				AboutView = null;
@@ -203,6 +214,11 @@ namespace Toggl.Daneel.ViewControllers
 				CalendarSectionTopConstraint = null;
 			}
 
+			if (CalendarSettingsCellLabel != null) {
+				CalendarSettingsCellLabel.Dispose ();
+				CalendarSettingsCellLabel = null;
+			}
+
 			if (CalendarSettingsSection != null) {
 				CalendarSettingsSection.Dispose ();
 				CalendarSettingsSection = null;
@@ -213,6 +229,11 @@ namespace Toggl.Daneel.ViewControllers
 				CalendarSettingsView = null;
 			}
 
+			if (DateFormatCellLabel != null) {
+				DateFormatCellLabel.Dispose ();
+				DateFormatCellLabel = null;
+			}
+
 			if (DateFormatLabel != null) {
 				DateFormatLabel.Dispose ();
 				DateFormatLabel = null;
@@ -221,6 +242,11 @@ namespace Toggl.Daneel.ViewControllers
 			if (DateFormatView != null) {
 				DateFormatView.Dispose ();
 				DateFormatView = null;
+			}
+
+			if (DurationFormatCellLabel != null) {
+				DurationFormatCellLabel.Dispose ();
+				DurationFormatCellLabel = null;
 			}
 
 			if (DurationFormatLabel != null) {
@@ -243,14 +269,39 @@ namespace Toggl.Daneel.ViewControllers
 				EmailView = null;
 			}
 
+			if (FeedbackToastTextLabel != null) {
+				FeedbackToastTextLabel.Dispose ();
+				FeedbackToastTextLabel = null;
+			}
+
+			if (FeedbackToastTitleLabel != null) {
+				FeedbackToastTitleLabel.Dispose ();
+				FeedbackToastTitleLabel = null;
+			}
+
 			if (FeedbackView != null) {
 				FeedbackView.Dispose ();
 				FeedbackView = null;
 			}
 
+			if (FirstDayOfTheWeekCellLabel != null) {
+				FirstDayOfTheWeekCellLabel.Dispose ();
+				FirstDayOfTheWeekCellLabel = null;
+			}
+
+			if (FormatSettingsHeaderLabel != null) {
+				FormatSettingsHeaderLabel.Dispose ();
+				FormatSettingsHeaderLabel = null;
+			}
+
 			if (FormatSettingsTitle != null) {
 				FormatSettingsTitle.Dispose ();
 				FormatSettingsTitle = null;
+			}
+
+			if (HelpCellLabel != null) {
+				HelpCellLabel.Dispose ();
+				HelpCellLabel = null;
 			}
 
 			if (HelpView != null) {
@@ -293,6 +344,16 @@ namespace Toggl.Daneel.ViewControllers
 				LogoutVerticalOffsetConstraint = null;
 			}
 
+			if (ManualModeCellLabel != null) {
+				ManualModeCellLabel.Dispose ();
+				ManualModeCellLabel = null;
+			}
+
+			if (ManualModeDescriptionLabel != null) {
+				ManualModeDescriptionLabel.Dispose ();
+				ManualModeDescriptionLabel = null;
+			}
+
 			if (ManualModeSwitch != null) {
 				ManualModeSwitch.Dispose ();
 				ManualModeSwitch = null;
@@ -316,6 +377,16 @@ namespace Toggl.Daneel.ViewControllers
 			if (SendFeedbackSuccessView != null) {
 				SendFeedbackSuccessView.Dispose ();
 				SendFeedbackSuccessView = null;
+			}
+
+			if (SmartAlertCellLabel != null) {
+				SmartAlertCellLabel.Dispose ();
+				SmartAlertCellLabel = null;
+			}
+
+			if (SubmitFeedbackCellLabel != null) {
+				SubmitFeedbackCellLabel.Dispose ();
+				SubmitFeedbackCellLabel = null;
 			}
 
 			if (SyncedIcon != null) {
@@ -368,9 +439,19 @@ namespace Toggl.Daneel.ViewControllers
 				TwentyFourHourClockView = null;
 			}
 
+			if (Use24HourClockCellLabel != null) {
+				Use24HourClockCellLabel.Dispose ();
+				Use24HourClockCellLabel = null;
+			}
+
 			if (VersionLabel != null) {
 				VersionLabel.Dispose ();
 				VersionLabel = null;
+			}
+
+			if (WorkspaceCellLabel != null) {
+				WorkspaceCellLabel.Dispose ();
+				WorkspaceCellLabel = null;
 			}
 
 			if (WorkspaceLabel != null) {
@@ -388,79 +469,14 @@ namespace Toggl.Daneel.ViewControllers
 				YourProfileCellLabel = null;
 			}
 
-			if (WorkspaceCellLabel != null) {
-				WorkspaceCellLabel.Dispose ();
-				WorkspaceCellLabel = null;
+			if (GroupSimilarTimeEntriesLabel != null) {
+				GroupSimilarTimeEntriesLabel.Dispose ();
+				GroupSimilarTimeEntriesLabel = null;
 			}
 
-			if (FormatSettingsHeaderLabel != null) {
-				FormatSettingsHeaderLabel.Dispose ();
-				FormatSettingsHeaderLabel = null;
-			}
-
-			if (DateFormatCellLabel != null) {
-				DateFormatCellLabel.Dispose ();
-				DateFormatCellLabel = null;
-			}
-
-			if (Use24HourClockCellLabel != null) {
-				Use24HourClockCellLabel.Dispose ();
-				Use24HourClockCellLabel = null;
-			}
-
-			if (DurationFormatCellLabel != null) {
-				DurationFormatCellLabel.Dispose ();
-				DurationFormatCellLabel = null;
-			}
-
-			if (FirstDayOfTheWeekCellLabel != null) {
-				FirstDayOfTheWeekCellLabel.Dispose ();
-				FirstDayOfTheWeekCellLabel = null;
-			}
-
-			if (ManualModeCellLabel != null) {
-				ManualModeCellLabel.Dispose ();
-				ManualModeCellLabel = null;
-			}
-
-			if (ManualModeDescriptionLabel != null) {
-				ManualModeDescriptionLabel.Dispose ();
-				ManualModeDescriptionLabel = null;
-			}
-
-			if (CalendarSettingsCellLabel != null) {
-				CalendarSettingsCellLabel.Dispose ();
-				CalendarSettingsCellLabel = null;
-			}
-
-			if (SmartAlertCellLabel != null) {
-				SmartAlertCellLabel.Dispose ();
-				SmartAlertCellLabel = null;
-			}
-
-			if (SubmitFeedbackCellLabel != null) {
-				SubmitFeedbackCellLabel.Dispose ();
-				SubmitFeedbackCellLabel = null;
-			}
-
-			if (AboutCellLabel != null) {
-				AboutCellLabel.Dispose ();
-				AboutCellLabel = null;
-			}
-
-			if (HelpCellLabel != null) {
-				HelpCellLabel.Dispose ();
-				HelpCellLabel = null;
-			}
-
-			if (FeedbackToastTitleLabel != null) {
-				FeedbackToastTitleLabel.Dispose ();
-				FeedbackToastTitleLabel = null;
-			}
-
-			if (FeedbackToastTextLabel != null) {
-				FeedbackToastTextLabel.Dispose ();
-				FeedbackToastTextLabel = null;
+			if (GroupSimilarTimeEntriesSwitch != null) {
+				GroupSimilarTimeEntriesSwitch.Dispose ();
+				GroupSimilarTimeEntriesSwitch = null;
 			}
 		}
 	}

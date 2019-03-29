@@ -37,7 +37,7 @@ namespace Toggl.Foundation.MvvmCross.Combiners
             if (parameters.Length != 2)
             {
                 throw new ArgumentException(
-                    $"The {nameof(DateTimeOffsetTimeFormatValueCombiner)} must be used with 2 parameters: a DateTimeOffset and a TimeFormat. It was instead used with {parameters.Length} parameters.");
+                    $"The {GetType().Name} must be used with 2 parameters: a DateTimeOffset and a TimeFormat. It was instead used with {parameters.Length} parameters.");
             }
 
             first = parameters[0].GetValue() is T1 firstValue

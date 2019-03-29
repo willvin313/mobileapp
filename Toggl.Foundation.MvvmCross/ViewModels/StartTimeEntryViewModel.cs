@@ -98,7 +98,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
         public IOnboardingStorage OnboardingStorage { get; }
 
-        public UIAction Close { get; }
+        public OutputAction<bool> Close { get; }
         public UIAction Done { get; }
         public UIAction DurationTapped { get; }
         public UIAction ToggleBillable { get; }
@@ -111,8 +111,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         public InputAction<ProjectSuggestion> ToggleTasks { get; }
         public InputAction<IEnumerable<ISpan>> SetTextSpans { get; }
 
-        public IObservable<IList<CollectionSection<string, AutocompleteSuggestion>>>
-            Suggestions { get; }
+        public IObservable<IList<SectionModel<string, AutocompleteSuggestion>>> Suggestions { get; }
         public IObservable<string> DisplayedTime { get; }
 
         public StartTimeEntryViewModel(
@@ -165,7 +164,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .Select(time => time.ToFormattedString(DurationFormat.Improved))
                 .AsDriver(schedulerProvider);
 
-            Close = rxActionFactory.FromAsync(close);
+            Close = rxActionFactory.FromAsync(close); 
             Done = rxActionFactory.FromObservable(done);
             DurationTapped = rxActionFactory.FromAction(durationTapped);
             ToggleBillable = rxActionFactory.FromAction(toggleBillable);
@@ -301,16 +300,17 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             suggestionsRenderingStopwatch = null;
         }
 
-        private async Task close()
+        private async Task<bool> close()
         {
             if (isDirty)
             {
                 var shouldDiscard = await dialogService.ConfirmDestructiveAction(ActionType.DiscardNewTimeEntry);
                 if (!shouldDiscard)
-                    return;
+                    return false;
             }
 
             await navigationService.Close(this);
+            return true;
         }
 
         private void setTextSpans(IEnumerable<ISpan> spans)
@@ -614,7 +614,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 .GroupBy(suggestion => suggestion.WorkspaceId);
         }
 
-        private IEnumerable<CollectionSection<string, AutocompleteSuggestion>> toCollections(IEnumerable<IGrouping<long, AutocompleteSuggestion>> suggestions)
+        private IEnumerable<SectionModel<string, AutocompleteSuggestion>> toCollections(IEnumerable<IGrouping<long, AutocompleteSuggestion>> suggestions)
         {
             var sections = suggestions.Select(group =>
                 {
@@ -630,7 +630,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                             projectSuggestion.WorkspaceName));
                     }
 
-                    return new CollectionSection<string, AutocompleteSuggestion>(header, items);
+                    return new SectionModel<string, AutocompleteSuggestion>(header, items);
                 }
             );
 
@@ -671,10 +671,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             }
         }
 
-        private IList<CollectionSection<string, AutocompleteSuggestion>> addStaticElements(IEnumerable<CollectionSection<string, AutocompleteSuggestion>> sections)
+        private IList<SectionModel<string, AutocompleteSuggestion>> addStaticElements(IEnumerable<SectionModel<string, AutocompleteSuggestion>> sections)
         {
             var suggestions = sections.SelectMany(section => section.Items);
-            IEnumerable<CollectionSection<string, AutocompleteSuggestion>> collections = sections;
+            IEnumerable<SectionModel<string, AutocompleteSuggestion>> collections = sections;
 
             if (isSuggestingProjects.Value)
             {
@@ -682,15 +682,14 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 {
                     sections = sections
                         .Prepend(
-                            CollectionSection<string, AutocompleteSuggestion>.SingleElement(
-                                new CreateEntitySuggestion(Resources.CreateProject, currentQuery)
-                            )
+                            SectionModel<string, AutocompleteSuggestion>.SingleElement(
+                                new CreateEntitySuggestion(Resources.CreateProject, textFieldInfo.Value.Description))
                         );
                 }
 
                 if (!hasAnyProjects)
                 {
-                    sections = sections.Append(CollectionSection<string, AutocompleteSuggestion>.SingleElement(
+                    sections = sections.Append(SectionModel<string, AutocompleteSuggestion>.SingleElement(
                         NoEntityInfoMessage.CreateProject())
                     );
                 }
@@ -702,15 +701,15 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 {
                     sections = sections
                         .Prepend(
-                            CollectionSection<string, AutocompleteSuggestion>.SingleElement(
-                                new CreateEntitySuggestion(Resources.CreateTag, currentQuery)
+                            SectionModel<string, AutocompleteSuggestion>.SingleElement(
+                                new CreateEntitySuggestion(Resources.CreateTag, textFieldInfo.Value.Description)
                             )
                         );
                 }
 
                 if (!hasAnyTags)
                 {
-                    sections = sections.Append(CollectionSection<string, AutocompleteSuggestion>.SingleElement(
+                    sections = sections.Append(SectionModel<string, AutocompleteSuggestion>.SingleElement(
                         NoEntityInfoMessage.CreateTag())
                     );
                 }
@@ -721,10 +720,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             bool shouldAddProjectCreationSuggestion()
                 => canCreateProjectsInWorkspace && !textFieldInfo.Value.HasProject &&
                    currentQuery.LengthInBytes() <= MaxProjectNameLengthInBytes &&
-                   !string.IsNullOrEmpty(currentQuery) &&
-                   suggestions.None(item =>
-                       item is ProjectSuggestion projectSuggestion &&
-                       projectSuggestion.ProjectName.IsSameCaseInsensitiveTrimedTextAs(currentQuery));
+                   !string.IsNullOrEmpty(currentQuery);
 
             bool shouldAddTagCreationSuggestion()
                 => !string.IsNullOrEmpty(currentQuery) && currentQuery.IsAllowedTagByteSize() &&

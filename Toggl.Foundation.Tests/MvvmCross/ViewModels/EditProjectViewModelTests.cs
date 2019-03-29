@@ -26,31 +26,10 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         {
             protected const long DefaultWorkspaceId = 10;
             protected const string DefaultWorkspaceName = "Some workspace name";
-            protected IThreadSafeWorkspace Workspace { get; } = Substitute.For<IThreadSafeWorkspace>();
-
-            protected EditProjectViewModelTest()
-            {
-                ViewModel.Prepare("A valid name");
-            }
-
-            protected override EditProjectViewModel CreateViewModel()
-                => new EditProjectViewModel(
-                    DataSource,
-                    DialogService,
-                    RxActionFactory,
-                    InteractorFactory,
-                    SchedulerProvider,
-                    StopwatchProvider,
-                    NavigationService
-                );
-        }
-
-        public abstract class WorkspaceChangeAwareTests : EditProjectViewModelTest
-        {
             private const long otherWorkspaceId = DefaultWorkspaceId + 1;
             private const long projectId = 12345;
-
             protected string ProjectName { get; } = "A random project";
+            protected IThreadSafeWorkspace Workspace { get; } = Substitute.For<IThreadSafeWorkspace>();
 
             protected void SetupDataSourceToReturnExistingProjectsAndDefaultWorkspace(bool dataSourceProjectIsInSameWorkspace)
             {
@@ -74,11 +53,29 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Returns(Observable.Return(false));
 
                 DataSource.Projects
-                          .GetAll(Arg.Any<ProjectPredicate>())
-                          .Returns(callInfo => Observable.Return(new[] { project })
-                                                         .Select(projects => projects.Where<IThreadSafeProject>(callInfo.Arg<ProjectPredicate>())));
+                    .GetAll(Arg.Any<ProjectPredicate>())
+                    .Returns(callInfo => Observable.Return(new[] { project })
+                        .Select(projects => projects.Where<IThreadSafeProject>(callInfo.Arg<ProjectPredicate>())));
+            }
+            protected EditProjectViewModelTest()
+            {
+                ViewModel.Prepare("A valid name");
             }
 
+            protected override EditProjectViewModel CreateViewModel()
+                => new EditProjectViewModel(
+                    DataSource,
+                    DialogService,
+                    RxActionFactory,
+                    InteractorFactory,
+                    SchedulerProvider,
+                    StopwatchProvider,
+                    NavigationService
+                );
+        }
+
+        public abstract class WorkspaceChangeAwareTests : EditProjectViewModelTest
+        {
             protected void SetupDataSourceToReturnMultipleWorkspaces()
             {
                 List<IThreadSafeWorkspace> workspaces = new List<IThreadSafeWorkspace>();
@@ -174,50 +171,6 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             }
         }
 
-        public sealed class TheNameIsTakenProperty : WorkspaceChangeAwareTests
-        {
-            private ITestableObserver<bool> isNameTakenObserver;
-
-            public TheNameIsTakenProperty()
-            {
-                isNameTakenObserver = TestScheduler.CreateObserver<bool>();
-            }
-
-            [Theory, LogIfTooSlow]
-            [InlineData(true)]
-            [InlineData(false)]
-            public void ReflectsWhetherOrNotAProjectWithTheSameNameExistsInTheSameWorkspace(bool configureForSameWorkspace)
-            {
-                SetupDataSourceToReturnExistingProjectsAndDefaultWorkspace(dataSourceProjectIsInSameWorkspace: configureForSameWorkspace);
-                var viewModel = CreateViewModel();
-                viewModel.NameIsAlreadyTaken.Subscribe(isNameTakenObserver);
-
-                viewModel.Name.Accept(ProjectName);
-                TestScheduler.Start();
-
-                isNameTakenObserver.LastEmittedValue().Should().Be(configureForSameWorkspace);
-            }
-
-            [Theory, LogIfTooSlow]
-            [InlineData("NotUsedProject", false)]
-            [InlineData("Project-1-1", true)]
-            [InlineData("Project-0-2", false)]
-            [InlineData("Project", true)]
-            public void TakesIntoAccountWorkspaceChanges(string projectName, bool nameIsTakenInWorkspace)
-            {
-                SetupDataSourceToReturnMultipleWorkspaces();
-                var viewModel = CreateViewModel();
-                viewModel.NameIsAlreadyTaken.Subscribe(isNameTakenObserver);
-
-                viewModel.Name.Accept(projectName);
-                TestScheduler.Start();
-                viewModel.PickWorkspace.Execute();
-                TestScheduler.Start();
-
-                isNameTakenObserver.LastEmittedValue().Should().Be(nameIsTakenInWorkspace);
-            }
-        }
-
         public sealed class TheSaveEnabledProperty : WorkspaceChangeAwareTests
         {
             private ITestableObserver<bool> saveEnabledObserver;
@@ -259,10 +212,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 saveEnabledObserver.LastEmittedValue().Should().BeFalse();
             }
 
+
             [Theory, LogIfTooSlow]
             [InlineData(true)]
             [InlineData(false)]
-            public void ReflectsWhetherOrNotAProjectWithTheSameNameExistsInTheSameWorkspace(bool configureForSameWorkspace)
+            public void ShouldBeTrueRegardlessOfWhetherOrNotAProjectWithTheSameNameExistsInTheSameWorkspace(bool configureForSameWorkspace)
             {
                 saveEnabledObserver = TestScheduler.CreateObserver<bool>();
                 SetupDataSourceToReturnExistingProjectsAndDefaultWorkspace(dataSourceProjectIsInSameWorkspace: configureForSameWorkspace);
@@ -273,15 +227,15 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 viewModel.Name.Accept(ProjectName);
                 TestScheduler.Start();
 
-                saveEnabledObserver.LastEmittedValue().Should().Be(!configureForSameWorkspace);
+                saveEnabledObserver.LastEmittedValue().Should().Be(true);
             }
 
             [Theory, LogIfTooSlow]
-            [InlineData("NotUsedProject", true)]
-            [InlineData("Project-1-1", false)]
-            [InlineData("Project-0-2", true)]
-            [InlineData("Project", false)]
-            public void TakesIntoAccountWorkspaceChanges(string projectName, bool saveShouldBeEnabled)
+            [InlineData("NotUsedProject")]
+            [InlineData("Project-1-1")]
+            [InlineData("Project-0-2")]
+            [InlineData("Project")]
+            public void ShouldAlwaysReturnTrueEvenWhenWorkspaceChanges(string projectName)
             {
                 saveEnabledObserver = TestScheduler.CreateObserver<bool>();
                 SetupDataSourceToReturnMultipleWorkspaces();
@@ -294,7 +248,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 viewModel.PickWorkspace.Execute();
                 TestScheduler.Start();
 
-                saveEnabledObserver.LastEmittedValue().Should().Be(saveShouldBeEnabled);
+                saveEnabledObserver.LastEmittedValue().Should().Be(true);
             }
         }
 
@@ -509,6 +463,26 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Received()
                     .CreateProject(Arg.Is<CreateProjectDTO>(dto => dto.Name == trimmed))
                     .Execute();
+            }
+
+            [Fact, LogIfTooSlow]
+            public void ShowEmitErrorWhenThereIsExistingProject()
+            {
+                SetupDataSourceToReturnExistingProjectsAndDefaultWorkspace(true);
+
+                var viewModel = CreateViewModel();
+
+                var observer = TestScheduler.CreateObserver<Exception>();
+                viewModel.Save.Errors.Subscribe(observer);
+                TestScheduler.Start();
+
+                viewModel.Name.Accept(ProjectName);
+                viewModel.Save.Execute();
+                TestScheduler.Start();
+
+                var messages = observer.Messages;
+                messages.Should().HaveCount(1);
+                messages.Last().Value.Value.Message.Should().Be(Resources.ProjectNameTakenError);
             }
 
             public sealed class WhenCreatingProjectInAnotherWorkspace : EditProjectViewModelTest
@@ -784,6 +758,22 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 TestScheduler.Start();
 
                 clientObserver.LastEmittedValue().Should().BeNullOrEmpty();
+            }
+        }
+
+        public sealed class TheErrorProperty : EditProjectViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public void EmitsWhenNameChanged()
+            {
+                var observer = TestScheduler.CreateObserver<string>();
+                ViewModel.Error.Subscribe(observer);
+
+                TestScheduler.Start();
+
+                ViewModel.Name.Accept("new name");
+
+                observer.Messages.Last().Value.Value.Should().BeNullOrEmpty();
             }
         }
     }

@@ -10,6 +10,7 @@
         OpenSettingsView,
         EditTimeEntryFromCalendar,
         EditTimeEntryFromMainLog,
+        UpdateTimeEntriesGroup,
         OpenReportsViewForTheFirstTime,
         OpenCreateProjectViewFromStartTimeEntryView,
         OpenSelectProjectFromEditView,
@@ -22,6 +23,7 @@
         CreateMainLogSuggestionsViewHolder,
         MainActivityOnCreate,
         BackgroundSync,
-        Sync
+        Sync,
+        Diffing
     }
 }

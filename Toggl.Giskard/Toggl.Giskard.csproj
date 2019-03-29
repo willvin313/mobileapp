@@ -335,6 +335,7 @@
     <Compile Include="Activities\EditDurationActivity.ViewBinds.cs">
       <DependentUpon>EditDurationActivity.cs</DependentUpon>
     </Compile>
+    <Compile Include="Activities\EditTimeEntryActivity.Onboarding.cs" />
     <Compile Include="Activities\ForgotPasswordActivity.cs" />
     <Compile Include="Activities\ForgotPasswordActivity.ViewBinds.cs">
       <DependentUpon>ForgotPasswordActivity.cs</DependentUpon>
@@ -436,7 +437,6 @@
     <Compile Include="ViewHolders\CalendarEntryViewHolder.cs" />
     <Compile Include="ViewHolders\Client\ClientCreationSelectionViewHolder.cs" />
     <Compile Include="ViewHolders\Client\ClientSelectionViewHolder.cs" />
-    <Compile Include="ViewHelpers\TimeEntryCollectionViewModel.cs" />
     <Compile Include="ViewHelpers\TimeEntryViewData.cs" />
     <Compile Include="ViewHolders\ColorSelectionViewHolder.cs" />
     <Compile Include="ViewHolders\Country\CountrySelectionViewHolder.cs" />
@@ -451,6 +451,7 @@
     <Compile Include="ViewHolders\ReportsHeaderCellViewHolder.cs" />
     <Compile Include="ViewHolders\ReportsItemCellViewHolder.cs" />
     <Compile Include="ViewHolders\ReportsWorkspaceNameViewHolder.cs" />
+    <Compile Include="ViewHolders\StringViewHolder.cs" />
     <Compile Include="Views\BarChartView.cs" />
     <Compile Include="Views\CalendarRecyclerView.cs" />
     <Compile Include="Views\Calendar\CalendarLayoutManager.cs" />
@@ -557,8 +558,6 @@
     <Compile Include="Activities\TokenResetActivity.cs" />
     <Compile Include="Tiles\ReportsTileService.cs" />
     <Compile Include="Tiles\NewTimeEntryTileService.cs" />
-    <Compile Include="Views\TagsListRecyclerView.cs" />
-    <Compile Include="TemplateSelectors\TagsListTemplateSelector.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Bindings\ViewAlphaTargetBinding.cs" />
     <Compile Include="Bindings\ViewUpsideDownTargetBinding.cs" />
@@ -712,6 +711,8 @@
     <AndroidResource Include="Resources\layout\SelectBeginningOfWeekFragmentCell.axml" />
     <AndroidResource Include="Resources\layout\SelectDurationFormatFragment.axml" />
     <AndroidResource Include="Resources\layout\SelectDurationFormatFragmentCell.axml" />
+    <AndroidResource Include="Resources\layout\ReportsActivity.axml" />
+    <AndroidResource Include="Resources\layout\ReportsActivityHeader.axml" />
     <AndroidResource Include="Resources\drawable\RoundedRectangle.xml" />
     <AndroidResource Include="Resources\layout\ReportsFragment.axml" />
     <AndroidResource Include="Resources\layout\ReportsFragmentHeader.axml" />
@@ -1166,6 +1167,7 @@
     <AndroidResource Include="Resources\drawable\ic_stop.xml" />
   </ItemGroup>
   <ItemGroup>
+    <AndroidResource Include="Resources\drawable\GrayBorderRoundedRectangle.xml" />
     <AndroidResource Include="Resources\layout\CalendarFragment.axml" />
     <AndroidResource Include="Resources\drawable\CalendarEntryBackground.xml" />
     <AndroidResource Include="Resources\layout\CalendarEntryCell.axml" />

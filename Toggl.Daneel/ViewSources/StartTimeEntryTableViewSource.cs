@@ -10,6 +10,7 @@ using Toggl.Daneel.Views;
 using Toggl.Daneel.Views.EntityCreation;
 using Toggl.Daneel.Views.StartTimeEntry;
 using Toggl.Foundation.Autocomplete.Suggestions;
+using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Multivac.Extensions;
 using Toggl.Multivac.Extensions.Reactive;
@@ -17,7 +18,7 @@ using UIKit;
 
 namespace Toggl.Daneel.ViewSources
 {
-    public sealed class StartTimeEntryTableViewSource : BaseTableViewSource<string, AutocompleteSuggestion>
+    public sealed class StartTimeEntryTableViewSource : BaseTableViewSource<SectionModel<string, AutocompleteSuggestion>, string, AutocompleteSuggestion>
     {
         private const int defaultRowHeight = 48;
         private const int headerHeight = 40;

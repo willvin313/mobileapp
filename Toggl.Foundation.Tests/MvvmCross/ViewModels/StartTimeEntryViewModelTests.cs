@@ -34,7 +34,7 @@ using Xunit;
 using static Toggl.Foundation.Helper.Constants;
 using ITimeEntryPrototype = Toggl.Foundation.Models.ITimeEntryPrototype;
 using TextFieldInfo = Toggl.Foundation.Autocomplete.TextFieldInfo;
-using CollectionSections = System.Collections.Generic.IEnumerable<Toggl.Foundation.MvvmCross.Collections.CollectionSection<string, Toggl.Foundation.Autocomplete.Suggestions.AutocompleteSuggestion>>;
+using CollectionSections = System.Collections.Generic.IEnumerable<Toggl.Foundation.MvvmCross.Collections.SectionModel<string, Toggl.Foundation.Autocomplete.Suggestions.AutocompleteSuggestion>>;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 {
@@ -316,7 +316,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Aggregate(new StringBuilder(), (builder, _) => builder.Append('A'))
                     .ToString();
 
-            private bool hasCreateSuggestions(CollectionSection<string, AutocompleteSuggestion> collection)
+            private bool hasCreateSuggestions(SectionModel<string, AutocompleteSuggestion> collection)
             {
                 return collection.Items.Any(suggestion => suggestion is CreateEntitySuggestion);
 
@@ -721,7 +721,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task ClosesTheViewModelIfUserDoesNotChangeAnything()
             {
-                ViewModel.Close.Execute();
+                ViewModel.Close.Execute(Unit.Default);
 
                 TestScheduler.Start();
                 await NavigationService.Received().Close(ViewModel);
@@ -732,7 +732,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             {
                 makeDirty();
 
-                ViewModel.Close.Execute();
+                ViewModel.Close.Execute(Unit.Default);
 
                 TestScheduler.Start();
                 await DialogService.Received().ConfirmDestructiveAction(ActionType.DiscardNewTimeEntry);
@@ -745,7 +745,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 DialogService.ConfirmDestructiveAction(ActionType.DiscardNewTimeEntry)
                     .Returns(_ => Observable.Return(false));
 
-                ViewModel.Close.Execute();
+                ViewModel.Close.Execute(Unit.Default);
 
                 TestScheduler.Start();
                 await NavigationService.DidNotReceive().Close(ViewModel);
@@ -758,7 +758,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 DialogService.ConfirmDestructiveAction(ActionType.DiscardNewTimeEntry)
                     .Returns(_ => Observable.Return(true));
 
-                ViewModel.Close.Execute();
+                ViewModel.Close.Execute(Unit.Default);
 
                 TestScheduler.Start();
                 await NavigationService.Received().Close(ViewModel);
@@ -767,7 +767,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task DoesNotCallTheAnalyticsServiceSinceNoTimeEntryWasCreated()
             {
-                ViewModel.Close.Execute();
+                ViewModel.Close.Execute(Unit.Default);
 
                 TestScheduler.Start();
                 AnalyticsService.DidNotReceive().Track(Arg.Any<StartTimeEntryEvent>());
@@ -866,7 +866,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public void SetsTheIsSuggestingProjectsPropertyToTrueIfNotInProjectSuggestionMode()
             {
                 var isSuggestingObserver = TestScheduler.CreateObserver<bool>();
-                var suggestionObserver = TestScheduler.CreateObserver<IList<CollectionSection<string, AutocompleteSuggestion>>>();
+                var suggestionObserver = TestScheduler.CreateObserver<IList<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Prepare(DefaultParameter);
                 ViewModel.Suggestions.Subscribe(suggestionObserver);
                 ViewModel.IsSuggestingProjects.Subscribe(isSuggestingObserver);
@@ -892,7 +892,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 await ViewModel.Initialize();
                 ViewModel.OnTextFieldInfoFromView(new QueryTextSpan(Description, Description.Length));
                 var observer = TestScheduler
-                    .CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                    .CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 ViewModel.ToggleProjectSuggestions.ExecuteWithCompletion()
@@ -920,7 +920,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.OnTextFieldInfoFromView(new QueryTextSpan(Description, Description.Length));
 
                 var suggestionsObserver = TestScheduler
-                    .CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                    .CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(suggestionsObserver);
                 var isSuggestingProjectsObserver = TestScheduler.CreateObserver<bool>();
                 ViewModel.IsSuggestingProjects.Subscribe(isSuggestingProjectsObserver);
@@ -1863,7 +1863,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 ViewModel.Prepare();
 
                 var observer = TestScheduler
-                    .CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                    .CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 await ViewModel.Initialize();
@@ -1879,7 +1879,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async Task IsClearedWhenThereAreNoWordsToQuery()
             {
                 var observer = TestScheduler
-                    .CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                    .CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 ViewModel.OnTextFieldInfoFromView(new QueryTextSpan("", 0));
@@ -1904,7 +1904,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 timeEntryB.Project.Returns(projectB);
 
                 var observer = TestScheduler
-                    .CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                    .CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 var suggestions = Observable.Return(new AutocompleteSuggestion[]
@@ -1947,7 +1947,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Returns(suggestionsObservable);
 
                 var observer = TestScheduler
-                    .CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                    .CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 TestScheduler.Start();
@@ -1973,7 +1973,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .Returns(suggestionsObservable);
 
                 var observer = TestScheduler
-                    .CreateObserver<IEnumerable<CollectionSection<string, AutocompleteSuggestion>>>();
+                    .CreateObserver<IEnumerable<SectionModel<string, AutocompleteSuggestion>>>();
                 ViewModel.Suggestions.Subscribe(observer);
 
                 ViewModel.Prepare();

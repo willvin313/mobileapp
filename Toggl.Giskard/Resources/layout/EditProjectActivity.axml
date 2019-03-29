@@ -42,7 +42,7 @@
                 android:textSize="12sp"
                 android:lineSpacingExtra="4sp"
                 android:textColor="@color/errorText"
-                android:text="@string/NameTakenError"
+                android:text="@string/ProjectNameTakenError"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/ProjectNameTextView"

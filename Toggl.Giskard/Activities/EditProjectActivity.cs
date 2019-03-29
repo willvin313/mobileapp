@@ -33,6 +33,7 @@ namespace Toggl.Giskard.Activities
             InitializeViews();
             OverridePendingTransition(Resource.Animation.abc_slide_in_bottom, Resource.Animation.abc_fade_out);
             setupToolbar();
+            errorText.Visibility = ViewStates.Gone;
 
             // Name
             projectNameTextView.Rx()
@@ -59,17 +60,22 @@ namespace Toggl.Giskard.Activities
                 .DisposedBy(DisposeBag);
 
             // Error
-            ViewModel.NameIsAlreadyTaken
+            ViewModel.Error
+                .Subscribe(errorText.Rx().TextObserver())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.Error
+                .Select(e => !string.IsNullOrEmpty(e))
                 .Subscribe(errorText.Rx().IsVisible())
                 .DisposedBy(DisposeBag);
 
             var errorOffset = 8.DpToPixels(this);
             var noErrorOffset = 14.DpToPixels(this);
-            ViewModel.NameIsAlreadyTaken
-                .Select(editProjectErrorOffset)
+
+            ViewModel.Error
+                .Select(e => string.IsNullOrEmpty(e) ? noErrorOffset : errorOffset)
                 .Subscribe(projectNameTextView.LayoutParameters.Rx().MarginTop())
                 .DisposedBy(DisposeBag);
-
             // Workspace
             changeWorkspaceView.Rx()
                 .BindAction(ViewModel.PickWorkspace)
@@ -102,7 +108,7 @@ namespace Toggl.Giskard.Activities
                 .DisposedBy(DisposeBag);
 
             ViewModel.IsPrivate
-                .Subscribe(isPrivateSwitch.Rx().Checked())
+                .Subscribe(isPrivateSwitch.Rx().CheckedObserver())
                 .DisposedBy(DisposeBag);
 
             // Save
@@ -122,9 +128,6 @@ namespace Toggl.Giskard.Activities
 
             Color clientTextColor(string clientName)
                 => string.IsNullOrEmpty(clientName) ? noClientColor : Color.Black;
-
-            int editProjectErrorOffset(bool isNameTaken)
-                => isNameTaken ? errorOffset : noErrorOffset;
 
             Color createProjectTextColor(bool enabled)
                 => enabled ? enabledColor : disabledColor;

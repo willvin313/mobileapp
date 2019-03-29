@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Reactive.Linq;
-using Foundation;
+﻿using Foundation;
 using Toggl.Daneel.Cells;
 using Toggl.Daneel.Views.Tag;
+using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using UIKit;
 
 namespace Toggl.Daneel.ViewSources
 {
-    public sealed class SelectTagsTableViewSource : BaseTableViewSource<string, SelectableTagBaseViewModel>
+    using TagsSection = SectionModel<string, SelectableTagBaseViewModel>;
+
+    public sealed class SelectTagsTableViewSource : BaseTableViewSource<TagsSection, string, SelectableTagBaseViewModel>
     {
         private const int rowHeight = 48;
 

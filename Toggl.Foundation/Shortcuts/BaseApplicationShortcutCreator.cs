@@ -50,7 +50,7 @@ namespace Toggl.Foundation.Shortcuts
 
             useShortcutsWhichAreSupported(new[] { reportsShortcut, startTimeEntryShortcut, showCalendarShortcut });
 
-            var visibleTimeEntries = interactorFactory.ObserveTimeEntriesVisibleToTheUser().Execute();
+            var visibleTimeEntries = interactorFactory.ObserveAllTimeEntriesVisibleToTheUser().Execute();
 
             visibleTimeEntries
                 .Subscribe(timeEntries => noTimeEntries = timeEntries.None());

@@ -1,7 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
@@ -13,6 +12,9 @@ using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Extensions;
+using Toggl.Foundation.MvvmCross.Transformations;
+using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog;
+using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog.Identity;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Sync;
 using Toggl.Multivac;
@@ -20,38 +22,39 @@ using Toggl.Multivac.Extensions;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels
 {
+
     [Preserve(AllMembers = true)]
     public sealed class TimeEntriesViewModel
     {
-        private readonly ITogglDataSource dataSource;
         private readonly ISyncManager syncManager;
         private readonly IInteractorFactory interactorFactory;
         private readonly IAnalyticsService analyticsService;
         private readonly ISchedulerProvider schedulerProvider;
-        private readonly IRxActionFactory rxActionFactory;
 
-        private CompositeDisposable disposeBag = new CompositeDisposable();
-        private DurationFormat durationFormat;
+        private readonly TimeEntriesGroupsFlattening groupsFlatteningStrategy;
 
-        public ObservableGroupedOrderedCollection<TimeEntryViewModel> TimeEntries { get; }
-        public IObservable<bool> Empty => TimeEntries.Empty;
-        public IObservable<int> Count => TimeEntries.TotalCount;
-
-        private readonly Subject<bool> showUndoSubject = new Subject<bool>();
+        private readonly HashSet<long> hiddenTimeEntries = new HashSet<long>();
+        private Subject<int?> timeEntriesPendingDeletionSubject = new Subject<int?>();
         private IDisposable delayedDeletionDisposable;
-        private TimeEntryViewModel timeEntryToDelete;
+        private long[] timeEntriesToDelete;
 
-        public IObservable<bool> ShouldShowUndo { get; }
+        public IObservable<IEnumerable<AnimatableSectionModel<DaySummaryViewModel, LogItemViewModel, IMainLogKey>>> TimeEntries { get; }
+        public IObservable<bool> Empty { get; }
+        public IObservable<int> Count { get; }
+        public IObservable<int?> TimeEntriesPendingDeletion { get; }
 
-        public InputAction<TimeEntryViewModel> DelayDeleteTimeEntry { get; }
+        public InputAction<long[]> DelayDeleteTimeEntries { get; }
+        public InputAction<GroupId> ToggleGroupExpansion { get; }
         public UIAction CancelDeleteTimeEntry { get; }
 
-        public TimeEntriesViewModel (ITogglDataSource dataSource,
-                                     ISyncManager syncManager,
-                                     IInteractorFactory interactorFactory,
-                                     IAnalyticsService analyticsService,
-                                     ISchedulerProvider schedulerProvider,
-                                     IRxActionFactory rxActionFactory)
+        public TimeEntriesViewModel(
+            ITogglDataSource dataSource,
+            ISyncManager syncManager,
+            IInteractorFactory interactorFactory,
+            IAnalyticsService analyticsService,
+            ISchedulerProvider schedulerProvider,
+            IRxActionFactory rxActionFactory,
+            ITimeService timeService)
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
             Ensure.Argument.IsNotNull(syncManager, nameof(syncManager));
@@ -59,171 +62,115 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
             Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
+            Ensure.Argument.IsNotNull(timeService, nameof(timeService));
 
-            this.dataSource = dataSource;
             this.syncManager = syncManager;
             this.interactorFactory = interactorFactory;
             this.analyticsService = analyticsService;
             this.schedulerProvider = schedulerProvider;
-            this.rxActionFactory = rxActionFactory;
 
-            TimeEntries = new ObservableGroupedOrderedCollection<TimeEntryViewModel>(
-                indexKey: t => t.Id,
-                orderingKey: t => t.StartTime,
-                groupingKey: t => t.StartTime.LocalDateTime.Date,
-                descending: true
-            );
-
-            DelayDeleteTimeEntry = rxActionFactory.FromAction<TimeEntryViewModel>(delayDeleteTimeEntry);
+            DelayDeleteTimeEntries = rxActionFactory.FromAction<long[]>(delayDeleteTimeEntries);
+            ToggleGroupExpansion = rxActionFactory.FromAction<GroupId>(toggleGroupExpansion);
             CancelDeleteTimeEntry = rxActionFactory.FromAction(cancelDeleteTimeEntry);
 
-            ShouldShowUndo = showUndoSubject.AsObservable().AsDriver(schedulerProvider);
+            groupsFlatteningStrategy = new TimeEntriesGroupsFlattening(timeService);
+
+            var deletingOrPressingUndo = timeEntriesPendingDeletionSubject.SelectUnit();
+            var collapsingOrExpanding = ToggleGroupExpansion.Elements;
+
+            var visibleTimeEntries = interactorFactory.ObserveAllTimeEntriesVisibleToTheUser().Execute()
+                .Select(timeEntries => timeEntries.Where(isNotRunning))
+                .ReemitWhen(deletingOrPressingUndo)
+                .Select(timeEntries => timeEntries.Where(isNotDeleted))
+                .Select(group)
+                .ReemitWhen(collapsingOrExpanding);
+
+             TimeEntries = Observable.CombineLatest(visibleTimeEntries, dataSource.Preferences.Current, groupsFlatteningStrategy.Flatten)
+                    .AsDriver(schedulerProvider);
+
+            Empty = TimeEntries
+                .Select(groups => groups.None())
+                .AsDriver(schedulerProvider);
+
+            Count = TimeEntries
+                .Select(log => log.Sum(day => day.Items.Count))
+                .AsDriver(schedulerProvider);
+
+            TimeEntriesPendingDeletion = timeEntriesPendingDeletionSubject.AsObservable().AsDriver(schedulerProvider);
         }
 
-        public async Task Initialize()
+        public async Task FinalizeDelayDeleteTimeEntryIfNeeded()
         {
-            await fetchSectionedTimeEntries();
-
-            disposeBag = new CompositeDisposable();
-
-            dataSource.TimeEntries.Created
-                .Where(isNotRunning)
-                .Subscribe(onTimeEntryAdded)
-                .DisposedBy(disposeBag);
-
-            dataSource.TimeEntries.Deleted
-                .Subscribe(onTimeEntryRemoved)
-                .DisposedBy(disposeBag);
-
-            dataSource.TimeEntries.Updated
-                .Subscribe(onTimeEntryUpdated)
-                .DisposedBy(disposeBag);
-
-            dataSource.Preferences.Current
-                .Subscribe(onPreferencesChanged)
-                .DisposedBy(disposeBag);
-        }
-
-        public async Task ReloadData()
-        {
-            await fetchSectionedTimeEntries();
-        }
-
-        public async Task FinilizeDelayDeleteTimeEntryIfNeeded()
-        {
-            if (timeEntryToDelete == null)
+            if (timeEntriesToDelete == null)
             {
                 return;
             }
 
             delayedDeletionDisposable.Dispose();
-            await deleteTimeEntry(timeEntryToDelete);
-            timeEntryToDelete = null;
-            showUndoSubject.OnNext(false);
+            await deleteTimeEntries(timeEntriesToDelete);
+            timeEntriesToDelete = null;
+            timeEntriesPendingDeletionSubject.OnNext(null);
         }
 
-        private void delayDeleteTimeEntry(TimeEntryViewModel timeEntry)
-        {
-            timeEntryToDelete = timeEntry;
+        private IEnumerable<IGrouping<DateTime, IThreadSafeTimeEntry>> group(
+            IEnumerable<IThreadSafeTimeEntry> timeEntries)
+            => timeEntries
+                .OrderByDescending(te => te.Start)
+                .GroupBy(te => te.Start.LocalDateTime.Date);
 
-            onTimeEntryRemoved(timeEntry.Id);
-            showUndoSubject.OnNext(true);
+        private void toggleGroupExpansion(GroupId groupId)
+        {
+            groupsFlatteningStrategy.ToggleGroupExpansion(groupId);
+        }
+
+        private void delayDeleteTimeEntries(long[] timeEntries)
+        {
+            timeEntriesToDelete = timeEntries;
+            hiddenTimeEntries.AddRange(timeEntries);
+
+            timeEntriesPendingDeletionSubject.OnNext(timeEntries.Length);
 
             delayedDeletionDisposable = Observable.Merge( // If 5 seconds pass or we try to delete another TE
-                    Observable.Return(timeEntry).Delay(Constants.UndoTime, schedulerProvider.DefaultScheduler),
-                    showUndoSubject.Where(t => t).SelectValue(timeEntry)
+                    Observable.Return(timeEntries).Delay(Constants.UndoTime, schedulerProvider.DefaultScheduler),
+                    timeEntriesPendingDeletionSubject
+                        .Where(numberOfDeletedTimeEntries => numberOfDeletedTimeEntries != null)
+                        .SelectValue(timeEntries)
                 )
                 .Take(1)
-                .SelectMany(deleteTimeEntry)
-                .Do(te =>
+                .SelectMany(deleteTimeEntries)
+                .Do(deletedTimeEntries =>
                 {
-                    if (te == timeEntryToDelete) // Hide bar if there isn't other TE trying to be deleted
-                        showUndoSubject.OnNext(false);
+                    // Hide bar if there isn't other TE trying to be deleted
+                    if (deletedTimeEntries == timeEntriesToDelete)
+                    {
+                        hiddenTimeEntries.Clear();
+                        timeEntriesPendingDeletionSubject.OnNext(null);
+                    }
                 })
                 .Subscribe();
         }
 
         private void cancelDeleteTimeEntry()
         {
-            if (!TimeEntries.IndexOf(timeEntryToDelete.Id).HasValue)
-            {
-                TimeEntries.InsertItem(timeEntryToDelete);
-            }
-
-            timeEntryToDelete = null;
+            timeEntriesToDelete = null;
+            hiddenTimeEntries.Clear();
             delayedDeletionDisposable.Dispose();
-            showUndoSubject.OnNext(false);
+            timeEntriesPendingDeletionSubject.OnNext(null);
         }
 
-        private IObservable<TimeEntryViewModel> deleteTimeEntry(TimeEntryViewModel timeEntry)
+        private IObservable<long[]> deleteTimeEntries(long[] timeEntries)
         {
-            return interactorFactory
-                .DeleteTimeEntry(timeEntry.Id)
-                .Execute()
-                .Track(analyticsService.DeleteTimeEntry)
-                .Do(syncManager.InitiatePushSync)
-                .SelectValue(timeEntry);
-        }
+            var observables =
+                interactorFactory.SoftDeleteMultipleTimeEntries(timeEntries)
+                    .Execute()
+                    .Track(analyticsService.DeleteTimeEntry);
 
-        private async Task fetchSectionedTimeEntries()
-        {
-            var groupedEntries = await interactorFactory.GetAllTimeEntriesVisibleToTheUser().Execute()
-                .Select(entries => entries
-                    .Where(isNotRunning)
-                    .Where(timeEntry => timeEntry.Id != timeEntryToDelete?.Id)
-                    .Select(te => new TimeEntryViewModel(te, durationFormat))
-                );
-
-            TimeEntries.ReplaceWith(groupedEntries);
-        }
-
-        private void onTimeEntryUpdated(EntityUpdate<IThreadSafeTimeEntry> update)
-        {
-            var timeEntry = update.Entity;
-            if (timeEntry == null) return;
-
-            if (timeEntry.IsDeleted || timeEntry.IsRunning())
-            {
-                onTimeEntryRemoved(timeEntry.Id);
-            }
-            else
-            {
-                var timeEntryViewModel = new TimeEntryViewModel(timeEntry, durationFormat);
-                if (timeEntry.Id == timeEntryToDelete?.Id)
-                {
-                    // Ignore this update because the entity is hidden and might be deleted unless the user
-                    // undoes the action. In that case bring the time entry but with the updated data.
-                    timeEntryToDelete = timeEntryViewModel;
-                }
-                else
-                {
-                    TimeEntries.UpdateItem(update.Id, timeEntryViewModel);
-                }
-            }
-        }
-
-        private void onTimeEntryAdded(IThreadSafeTimeEntry timeEntry)
-        {
-            var timeEntryViewModel = new TimeEntryViewModel(timeEntry, durationFormat);
-            TimeEntries.InsertItem(timeEntryViewModel);
-        }
-
-        private void onTimeEntryRemoved(long id)
-        {
-            var index = TimeEntries.IndexOf(id);
-            if (index.HasValue)
-                TimeEntries.RemoveItemAt(index.Value.Section, index.Value.Row);
-        }
-
-        private void onPreferencesChanged(IThreadSafePreferences preferences)
-        {
-            if (durationFormat != preferences.DurationFormat)
-            {
-                durationFormat = preferences.DurationFormat;
-                var _ = fetchSectionedTimeEntries();
-            }
+            return observables.SelectValue(timeEntries);
         }
 
         private bool isNotRunning(IThreadSafeTimeEntry timeEntry) => !timeEntry.IsRunning();
+
+        private bool isNotDeleted(IThreadSafeTimeEntry timeEntry)
+            => !hiddenTimeEntries.Contains(timeEntry.Id);
     }
 }

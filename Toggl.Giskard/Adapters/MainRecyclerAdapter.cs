@@ -12,11 +12,15 @@ using Toggl.Giskard.Extensions;
 using Toggl.Giskard.ViewHolders;
 using Toggl.Multivac.Extensions;
 using Toggl.Foundation;
+using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog;
 using Toggl.Giskard.ViewHelpers;
+using System.Reactive.Disposables;
+using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog.Identity;
+using Toggl.Foundation.Analytics;
 
 namespace Toggl.Giskard.Adapters
 {
-    public class MainRecyclerAdapter : ReactiveSectionedRecyclerAdapter<TimeEntryViewModel, TimeEntryViewData, TimeEntryCollectionViewModel, MainLogCellViewHolder, MainLogSectionViewHolder>
+    public class MainRecyclerAdapter : ReactiveSectionedRecyclerAdapter<LogItemViewModel, TimeEntryViewData, DaySummaryViewModel, DaySummaryViewModel, MainLogCellViewHolder, MainLogSectionViewHolder, IMainLogKey>
     {
         public const int SuggestionViewType = 2;
         public const int UserFeedbackViewType = 3;
@@ -25,13 +29,16 @@ namespace Toggl.Giskard.Adapters
 
         private bool isRatingViewVisible = false;
 
-        public IObservable<TimeEntryViewModel> TimeEntryTaps
-            => timeEntryTappedSubject.Select(item => item.TimeEntryViewModel).AsObservable();
+        public IObservable<GroupId> ToggleGroupExpansion
+            => toggleGroupExpansionSubject.AsObservable();
 
-        public IObservable<TimeEntryViewModel> ContinueTimeEntrySubject
+        public IObservable<LogItemViewModel> TimeEntryTaps
+            => timeEntryTappedSubject.Select(item => item.ViewModel).AsObservable();
+
+        public IObservable<(LogItemViewModel LogItem, ContinueTimeEntryMode ContinueMode)> ContinueTimeEntry
             => continueTimeEntrySubject.AsObservable();
 
-        public IObservable<TimeEntryViewModel> DeleteTimeEntrySubject
+        public IObservable<LogItemViewModel> DeleteTimeEntrySubject
             => deleteTimeEntrySubject.AsObservable();
 
         public SuggestionsViewModel SuggestionsViewModel { get; set; }
@@ -39,32 +46,35 @@ namespace Toggl.Giskard.Adapters
 
         public IStopwatchProvider StopwatchProvider { get; set; }
 
-        private Subject<TimeEntryViewData> timeEntryTappedSubject = new Subject<TimeEntryViewData>();
-        private Subject<TimeEntryViewModel> continueTimeEntrySubject = new Subject<TimeEntryViewModel>();
-        private Subject<TimeEntryViewModel> deleteTimeEntrySubject = new Subject<TimeEntryViewModel>();
+        private readonly Subject<GroupId> toggleGroupExpansionSubject = new Subject<GroupId>();
+        private readonly Subject<TimeEntryViewData> timeEntryTappedSubject = new Subject<TimeEntryViewData>();
+        private readonly Subject<(LogItemViewModel, ContinueTimeEntryMode)> continueTimeEntrySubject = new Subject<(LogItemViewModel, ContinueTimeEntryMode)>();
+        private readonly Subject<LogItemViewModel> deleteTimeEntrySubject = new Subject<LogItemViewModel>();
 
-        public MainRecyclerAdapter(
-            ObservableGroupedOrderedCollection<TimeEntryViewModel> items,
-            ITimeService timeService)
-            : base(items)
+        public MainRecyclerAdapter(ITimeService timeService)
         {
             this.timeService = timeService;
         }
 
-        public void ContinueTimeEntry(int position)
+        public void ContinueTimeEntryBySwiping(int position)
         {
-            var continuedTimeEntry = getItemAt(position);
+            var continuedTimeEntry = GetItemAt(position);
             NotifyItemChanged(position);
-            continueTimeEntrySubject.OnNext(continuedTimeEntry);
+
+            var continueMode = continuedTimeEntry.IsTimeEntryGroupHeader
+                ? ContinueTimeEntryMode.TimeEntriesGroupSwipe
+                : ContinueTimeEntryMode.SingleTimeEntrySwipe;
+
+            continueTimeEntrySubject.OnNext((continuedTimeEntry, continueMode));
         }
 
         public void DeleteTimeEntry(int position)
         {
-            var deletedTimeEntry = getItemAt(position);
+            var deletedTimeEntry = GetItemAt(position);
             deleteTimeEntrySubject.OnNext(deletedTimeEntry);
         }
 
-        public override int HeaderOffset => isRatingViewVisible ? 2 : 1; 
+        public override int HeaderOffset => isRatingViewVisible ? 2 : 1;
 
         protected override bool TryBindCustomViewType(RecyclerView.ViewHolder holder, int position)
         {
@@ -158,34 +168,36 @@ namespace Toggl.Giskard.Adapters
             var mainLogCellViewHolder = new MainLogCellViewHolder(LayoutInflater.FromContext(parent.Context).Inflate(Resource.Layout.MainLogCell, parent, false))
             {
                 TappedSubject = timeEntryTappedSubject,
-                ContinueButtonTappedSubject = continueTimeEntrySubject
+                ContinueButtonTappedSubject = continueTimeEntrySubject,
+                ToggleGroupExpansionSubject = toggleGroupExpansionSubject
             };
+
             mainLogCellStopwatch.Stop();
             return mainLogCellViewHolder;
         }
 
-        protected override long IdFor(TimeEntryViewModel item)
-            => item.Id;
+        protected override IMainLogKey IdFor(LogItemViewModel item)
+            => item.Identity;
 
-        protected override long IdForSection(IReadOnlyList<TimeEntryViewModel> section)
-            => section.First().StartTime.Date.GetHashCode();
+        protected override IMainLogKey IdForSection(DaySummaryViewModel section)
+            => section.Identity;
 
-        protected override TimeEntryViewData Wrap(TimeEntryViewModel item)
+        protected override TimeEntryViewData Wrap(LogItemViewModel item)
             => new TimeEntryViewData(item);
 
-        protected override TimeEntryCollectionViewModel Wrap(IReadOnlyList<TimeEntryViewModel> section)
-            => new TimeEntryCollectionViewModel(section);
+        protected override DaySummaryViewModel Wrap(DaySummaryViewModel section)
+            => section;
 
-        protected override bool AreItemContentsTheSame(TimeEntryViewModel item1, TimeEntryViewModel item2)
+        protected override bool AreItemContentsTheSame(LogItemViewModel item1, LogItemViewModel item2)
             => item1 == item2;
 
-        protected override bool AreSectionsRepresentationsTheSame(IReadOnlyList<TimeEntryViewModel> one, IReadOnlyList<TimeEntryViewModel> other)
+        protected override bool AreSectionsRepresentationsTheSame(
+            DaySummaryViewModel oneHeader,
+            DaySummaryViewModel otherHeader,
+            IReadOnlyList<LogItemViewModel> one,
+            IReadOnlyList<LogItemViewModel> other)
         {
-            var oneFirst = one.FirstOrDefault()?.StartTime.Date;
-            var otherFirst = other.FirstOrDefault()?.StartTime.Date;
-            return (oneFirst != null || otherFirst != null)
-                   && oneFirst == otherFirst
-                   && one.ContainsExactlyAll(other);
+            return oneHeader.Title == otherHeader.Title && one.ContainsExactlyAll(other);
         }
     }
 }

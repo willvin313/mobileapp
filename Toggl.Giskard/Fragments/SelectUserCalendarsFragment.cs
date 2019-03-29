@@ -43,7 +43,7 @@ namespace Toggl.Giskard.Fragments
             ViewModel
                 .Calendars
                 .Select(calendars => calendars.ToList())
-                .Subscribe(userCalendarsAdapter.SetItems)
+                .Subscribe(userCalendarsAdapter.Rx().Items())
                 .DisposedBy(DisposeBag);
 
             userCalendarsAdapter

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using CoreGraphics;
@@ -8,75 +9,66 @@ using Toggl.Daneel.Views;
 using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Extensions;
-using Toggl.Foundation.MvvmCross.ViewModels;
-using Toggl.Multivac;
+using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog;
+using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog.Identity;
 using Toggl.Multivac.Extensions;
 using UIKit;
 
 namespace Toggl.Daneel.ViewSources
 {
-    public sealed class TimeEntriesLogViewSource : ReactiveSectionedListTableViewSource<TimeEntryViewModel, TimeEntriesLogViewCell>
+    using MainLogSection = AnimatableSectionModel<DaySummaryViewModel, LogItemViewModel, IMainLogKey>;
+
+    public sealed class TimeEntriesLogViewSource
+        : BaseTableViewSource<MainLogSection, DaySummaryViewModel, LogItemViewModel>
     {
+        public delegate IObservable<DaySummaryViewModel> ObservableHeaderForSection(int section);
+
         private const int rowHeight = 64;
         private const int headerHeight = 48;
 
-        private readonly ITimeService timeService;
-        private readonly ISchedulerProvider schedulerProvider;
+        private readonly Subject<LogItemViewModel> continueTapSubject = new Subject<LogItemViewModel>();
+        private readonly Subject<LogItemViewModel> swipeToContinueSubject = new Subject<LogItemViewModel>();
+        private readonly Subject<LogItemViewModel> swipeToDeleteSubject = new Subject<LogItemViewModel>();
+        private readonly Subject<GroupId> toggleGroupExpansionSubject = new Subject<GroupId>();
 
-        private readonly Subject<TimeEntryViewModel> continueTapSubject = new Subject<TimeEntryViewModel>();
-        private readonly Subject<TimeEntryViewModel> swipeToContinueSubject = new Subject<TimeEntryViewModel>();
-        private readonly Subject<TimeEntryViewModel> swipeToDeleteSubject = new Subject<TimeEntryViewModel>();
         private readonly ReplaySubject<TimeEntriesLogViewCell> firstCellSubject = new ReplaySubject<TimeEntriesLogViewCell>(1);
+        private readonly Subject<bool> isDraggingSubject = new Subject<bool>();
 
         //Using the old API so that delete action would work on pre iOS 11 devices
         private readonly UITableViewRowAction deleteTableViewRowAction;
 
         public const int SpaceBetweenSections = 20;
 
-        public bool IsEmptyState { get; set; }
-
-        public IObservable<TimeEntryViewModel> ContinueTap { get; }
-
-        public IObservable<TimeEntryViewModel> SwipeToContinue { get; }
-
-        public IObservable<TimeEntryViewModel> SwipeToDelete { get; }
+        public IObservable<LogItemViewModel> ContinueTap { get; }
+        public IObservable<LogItemViewModel> SwipeToContinue { get; }
+        public IObservable<LogItemViewModel> SwipeToDelete { get; }
+        public IObservable<GroupId> ToggleGroupExpansion { get; }
 
         public IObservable<TimeEntriesLogViewCell> FirstCell { get; }
+        public IObservable<bool> IsDragging { get; }
 
-        public TimeEntriesLogViewSource(
-            ObservableGroupedOrderedCollection<TimeEntryViewModel> collection,
-            string cellIdentifier,
-            ITimeService timeService,
-            ISchedulerProvider schedulerProvider)
-            : base(collection, cellIdentifier)
+        public TimeEntriesLogViewSource()
         {
-            Ensure.Argument.IsNotNull(timeService, nameof(timeService));
-            Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
-
-            this.timeService = timeService;
-            this.schedulerProvider = schedulerProvider;
+            if (!NSThread.Current.IsMainThread)
+            {
+                throw new InvalidOperationException($"{nameof(TimeEntriesLogViewSource)} must be created on the main thread");
+            }
 
             if (!UIDevice.CurrentDevice.CheckSystemVersion(11, 0))
             {
-                deleteTableViewRowAction = UITableViewRowAction.Create(
-                    UITableViewRowActionStyle.Destructive,
-                    Resources.Delete,
-                    handleDeleteTableViewRowAction);
-                deleteTableViewRowAction.BackgroundColor = Foundation.MvvmCross.Helper.Color.TimeEntriesLog.DeleteSwipeActionBackground.ToNativeColor();
+                deleteTableViewRowAction = createLegacySwipeDeleteAction();
             }
 
-            ContinueTap = continueTapSubject.AsDriver(schedulerProvider);
-            SwipeToContinue = swipeToContinueSubject.AsDriver(schedulerProvider);
-            SwipeToDelete = swipeToDeleteSubject.AsDriver(schedulerProvider);
-            FirstCell = firstCellSubject.AsDriver(schedulerProvider);
+            ContinueTap = continueTapSubject.AsObservable();
+            SwipeToContinue = swipeToContinueSubject.AsObservable();
+            SwipeToDelete = swipeToDeleteSubject.AsObservable();
+            ToggleGroupExpansion = toggleGroupExpansionSubject.AsObservable();
+
+            FirstCell = firstCellSubject.AsObservable();
+            IsDragging = isDraggingSubject.AsObservable();
         }
 
-        public override UIView GetViewForFooter(UITableView tableView, nint section)
-            => new UIView(new CGRect(0, 0, UIScreen.MainScreen.Bounds.Width, SpaceBetweenSections));
-
-        public override nfloat GetHeightForHeader(UITableView tableView, nint section) => headerHeight;
-
-        public override nfloat GetHeightForFooter(UITableView tableView, nint section) => SpaceBetweenSections;
+        public override nfloat GetHeightForHeader(UITableView tableView, nint section) => headerHeight + SpaceBetweenSections;
 
         public override nfloat GetHeightForRow(UITableView tableView, NSIndexPath indexPath) => rowHeight;
 
@@ -93,14 +85,22 @@ namespace Toggl.Daneel.ViewSources
 
         public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath)
         {
-            var cell = (TimeEntriesLogViewCell)base.GetCell(tableView, indexPath);
+            var cell = (TimeEntriesLogViewCell)tableView.DequeueReusableCell(TimeEntriesLogViewCell.Identifier);
+
+            var model = ModelAt(indexPath);
 
             cell.ContinueButtonTap
-                .Subscribe(() => continueTapSubject.OnNext(cell.Item))
+                .Subscribe(() => continueTapSubject.OnNext(model))
+                .DisposedBy(cell.DisposeBag);
+
+            cell.ToggleGroup
+                .Subscribe(() => toggleGroupExpansionSubject.OnNext(model.GroupId))
                 .DisposedBy(cell.DisposeBag);
 
             if (indexPath.Row == 0 && indexPath.Section == 0)
                 firstCellSubject.OnNext(cell);
+
+            cell.Item = model;
 
             return cell;
         }
@@ -108,66 +108,63 @@ namespace Toggl.Daneel.ViewSources
         public override UIView GetViewForHeader(UITableView tableView, nint section)
         {
             var header = (TimeEntriesLogHeaderView)tableView.DequeueReusableHeaderFooterView(TimeEntriesLogHeaderView.Identifier);
-            header.Items = DisplayedItems[(int)section];
-            header.Now = timeService.CurrentDateTime;
+            header.Item = HeaderOf((int) section);
             return header;
         }
 
-        public override void RefreshHeader(UITableView tableView, int section)
+        public override UISwipeActionsConfiguration GetLeadingSwipeActionsConfiguration(UITableView tableView, NSIndexPath indexPath)
+            => createSwipeActionConfiguration(continueSwipeActionFor, indexPath);
+
+        public override UISwipeActionsConfiguration GetTrailingSwipeActionsConfiguration(UITableView tableView, NSIndexPath indexPath)
+            => createSwipeActionConfiguration(deleteSwipeActionFor, indexPath);
+
+        public override void DraggingStarted(UIScrollView scrollView)
         {
-            if (tableView.GetHeaderView(section) is TimeEntriesLogHeaderView header)
-            {
-                header.Items = DisplayedItems[section];
-                header.Now = timeService.CurrentDateTime;
-            }
+            isDraggingSubject.OnNext(true);
+        }
+
+        public override void DraggingEnded(UIScrollView scrollView, bool willDecelerate)
+        {
+            isDraggingSubject.OnNext(false);
         }
 
         private void handleDeleteTableViewRowAction(UITableViewRowAction rowAction, NSIndexPath indexPath)
         {
-            var timeEntry = DisplayedItems[indexPath.Section][indexPath.Row];
-            swipeToDeleteSubject.OnNext(timeEntry);
+            var item = ModelAt(indexPath);
+            swipeToDeleteSubject.OnNext(item);
         }
 
-        public override UISwipeActionsConfiguration GetLeadingSwipeActionsConfiguration(UITableView tableView, NSIndexPath indexPath)
+        private UITableViewRowAction createLegacySwipeDeleteAction()
+        {
+            var deleteAction = UITableViewRowAction.Create(
+                UITableViewRowActionStyle.Destructive,
+                Resources.Delete,
+                handleDeleteTableViewRowAction);
+            deleteAction.BackgroundColor = Foundation.MvvmCross.Helper.Color.TimeEntriesLog.DeleteSwipeActionBackground.ToNativeColor();
+            return deleteAction;
+        }
+
+        private UISwipeActionsConfiguration createSwipeActionConfiguration(
+            Func<LogItemViewModel, UIContextualAction> factory, NSIndexPath indexPath)
         {
             if (!UIDevice.CurrentDevice.CheckSystemVersion(11, 0))
                 return null;
 
-            var item = DisplayedItems[indexPath.Section][indexPath.Row];
+            var item = ModelAt(indexPath);
             if (item == null)
                 return null;
 
-            return UISwipeActionsConfiguration
-                .FromActions(new[] { continueSwipeActionFor(item) });
+            return UISwipeActionsConfiguration.FromActions(new[] { factory(item) });
         }
 
-        public override UISwipeActionsConfiguration GetTrailingSwipeActionsConfiguration(UITableView tableView, NSIndexPath indexPath)
-        {
-            if (!UIDevice.CurrentDevice.CheckSystemVersion(11, 0))
-                return null;
-
-            var item = DisplayedItems[indexPath.Section][indexPath.Row];
-            if (item == null)
-                return null;
-
-            return UISwipeActionsConfiguration
-                .FromActions(new[] { deleteSwipeActionFor(item) });
-        }
-
-        public override void RowSelected(UITableView tableView, NSIndexPath indexPath)
-        {
-            base.RowSelected(tableView, indexPath);
-            tableView.DeselectRow(indexPath, true);
-        }
-
-        private UIContextualAction continueSwipeActionFor(TimeEntryViewModel timeEntry)
+        private UIContextualAction continueSwipeActionFor(LogItemViewModel viewModel)
         {
             var continueAction = UIContextualAction.FromContextualActionStyle(
                 UIContextualActionStyle.Normal,
                 Resources.Continue,
                 (action, sourceView, completionHandler) =>
                 {
-                    swipeToContinueSubject.OnNext(timeEntry);
+                    swipeToContinueSubject.OnNext(viewModel);
                     completionHandler.Invoke(finished: true);
                 }
             );
@@ -175,14 +172,14 @@ namespace Toggl.Daneel.ViewSources
             return continueAction;
         }
 
-        private UIContextualAction deleteSwipeActionFor(TimeEntryViewModel timeEntry)
+        private UIContextualAction deleteSwipeActionFor(LogItemViewModel viewModel)
         {
             var deleteAction = UIContextualAction.FromContextualActionStyle(
                 UIContextualActionStyle.Destructive,
                 Resources.Delete,
                 (action, sourceView, completionHandler) =>
                 {
-                    swipeToDeleteSubject.OnNext(timeEntry);
+                    swipeToDeleteSubject.OnNext(viewModel);
                     completionHandler.Invoke(finished: true);
                 }
             );

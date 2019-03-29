@@ -1330,7 +1330,6 @@
     <Compile Include="Analytics\SiriTrackingEventExtensions.cs" />
     <Compile Include="Binding\DatePickerDateTimeOffsetTargetBinding.cs" />
     <Compile Include="Cells\BaseCollectionViewCell.cs" />
-    <Compile Include="Extensions\Binders\ReactiveTableViewBinder.cs" />
     <Compile Include="Extensions\IntentPeriod.cs" />
     <Compile Include="Extensions\Reactive\DurationFieldExtensions.cs" />
     <Compile Include="Extensions\Reactive\HueSaturationPickerViewExtensions.cs" />
@@ -1374,8 +1373,6 @@
     <Compile Include="Binding\ViewAnimatedVisibilityTargetBinding.cs" />
     <Compile Include="ViewControllers\SyncFailuresViewController.cs" />
     <Compile Include="ViewSources\Generic\CollectionView\ReloadCollectionViewSource.cs" />
-    <Compile Include="ViewSources\Generic\ReactiveSectionedListTableViewSource.cs" />
-    <Compile Include="ViewSources\Generic\MutableSectionedListTableViewSource.cs" />
     <Compile Include="ViewSources\Generic\TableView\BaseTableViewSource.cs" />
     <Compile Include="Binding\TextFieldSecureTextEntryTargetBinding.cs" />
     <Compile Include="Binding\BarButtonAnimatedEnabledTargetBinding.cs" />
@@ -1850,6 +1847,7 @@
     <Compile Include="Cells\TimeEntriesLog\TimeEntriesLogViewCell.designer.cs">
       <DependentUpon>TimeEntriesLogViewCell.cs</DependentUpon>
     </Compile>
+    <Compile Include="Transformations\TagsListToAttributedString.cs" />
     <Compile Include="Views\EntityCreation\CreateEntityViewCell.cs" />
     <Compile Include="Views\EntityCreation\CreateEntityViewCell.designer.cs">
       <DependentUpon>CreateEntityViewCell.cs</DependentUpon>

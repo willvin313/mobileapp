@@ -52,17 +52,20 @@ namespace Toggl.Daneel.ViewSources
 
         private UIScrollView scrollView;
 
-        public RefreshControl(IObservable<SyncProgress> syncProgress, IObservableScroll observableScroll)
+        public RefreshControl(
+            IObservable<SyncProgress> syncProgress,
+            IObservable<CGPoint> scrollOffset,
+            IObservable<bool> isDragging)
         {
             syncProgress
                 .Subscribe(syncProgressChanged)
                 .DisposedBy(disposeBag);
 
-            observableScroll.ScrollOffset
+            scrollOffset
                 .Subscribe(didScroll)
                 .DisposedBy(disposeBag);
 
-            observableScroll.IsDragging
+            isDragging
                 .Subscribe(draggingChanged)
                 .DisposedBy(disposeBag);
         }

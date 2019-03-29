@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Foundation;
 using MvvmCross.Base;
 using MvvmCross.Core;
@@ -13,10 +15,13 @@ namespace Toggl.Daneel.Views
     {
         private readonly int defaultPlaceholderSize = 14;
         private readonly UIColor defaultPlaceholderColor = Color.Common.PlaceholderText.ToNativeColor();
+        private readonly ISubject<String> textSubject = new Subject<string>();
 
         private bool isFocused;
         private UIStringAttributes placeholderAttributes;
-        protected UIStringAttributes DefaultTextAttributes { get; private set; } 
+        protected UIStringAttributes DefaultTextAttributes { get; private set; }
+
+        public IObservable<string> TextObservable { get; }
 
         public event EventHandler TextChanged;
         public event EventHandler DidBecomeFirstResponder;
@@ -51,9 +56,10 @@ namespace Toggl.Daneel.Views
             {
                 if (text == value)
                     return;
-                
+
                 text = value;
                 updateAttributedText(value);
+                textSubject.OnNext(value);
                 TextChanged.Raise(this);
             }
         }
@@ -92,6 +98,7 @@ namespace Toggl.Daneel.Views
 
         public TextViewWithPlaceholder(IntPtr handle) : base(handle)
         {
+            TextObservable = textSubject.AsObservable();
         }
 
         private void updateAttributedText(string text)
