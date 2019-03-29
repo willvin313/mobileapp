@@ -25,38 +25,30 @@ namespace Toggl.Daneel
     public sealed class IosDependencyContainer : UiDependencyContainer
     {
         private const int numberOfSuggestions = 3;
-        private const string clientName = "Daneel";
-        private const string remoteConfigDefaultsFileName = "RemoteConfigDefaults";
-        private const ApiEnvironment environment =
-#if USE_PRODUCTION_API
-            ApiEnvironment.Production;
-#else
-            ApiEnvironment.Staging;
-#endif
-        
+
         private readonly Lazy<SettingsStorage> settingsStorage;
 
-        public IMvxNavigationService MvxNavigationService { get; internal set; }
-
         public TogglPresenter ViewPresenter { get; }
+        public IMvxNavigationService MvxNavigationService { get; internal set; }
+        
+        public new static IosDependencyContainer Instance { get; private set; }
 
-        public static IosDependencyContainer Instance { get; private set; }
-
-        public static void Initialize(TogglPresenter viewPresenter, string version)
+        public static void EnsureInitialized(TogglPresenter viewPresenter, ApiEnvironment environment, Platform platform, string version)
         {
             if (Instance != null)
                 return;
 
-            Instance = new IosDependencyContainer(viewPresenter, version);
+            Instance = new IosDependencyContainer(viewPresenter, environment, platform, version);
+            UiDependencyContainer.Instance = Instance;
         }
 
-        private IosDependencyContainer(TogglPresenter viewPresenter, string version)
-            : base(environment, new UserAgent(clientName, version))
+        private IosDependencyContainer(TogglPresenter viewPresenter, ApiEnvironment environment, Platform platform, string version)
+            : base(environment, new UserAgent(platform.ToString(), version))
         {
             ViewPresenter = viewPresenter;
-            
+
             var appVersion = Version.Parse(version);
-            
+
             settingsStorage = new Lazy<SettingsStorage>(() => new SettingsStorage(appVersion, KeyValueStorage));
         }
 
@@ -109,7 +101,7 @@ namespace Toggl.Daneel
             => new RatingServiceIos();
 
         protected override IRemoteConfigService CreateRemoteConfigService()
-            => new RemoteConfigServiceIos(remoteConfigDefaultsFileName);
+            => new RemoteConfigServiceIos();
 
         protected override ISchedulerProvider CreateSchedulerProvider()
             => new IOSSchedulerProvider();

@@ -28,6 +28,8 @@ namespace Toggl.Foundation.MvvmCross
         public IPasswordManagerService PasswordManagerService => passwordManagerService.Value;
         public IAccessRestrictionStorage AccessRestrictionStorage => accessRestrictionStorage.Value;
 
+        public static UiDependencyContainer Instance { get; protected set; }
+
         protected UiDependencyContainer(ApiEnvironment apiEnvironment, UserAgent userAgent)
             : base(apiEnvironment, userAgent)
         {

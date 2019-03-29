@@ -10,6 +10,7 @@ using Toggl.Daneel.Services;
 using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Ultrawave;
 using ColorPlugin = MvvmCross.Plugin.Color.Platforms.Ios.Plugin;
 using VisibilityPlugin = MvvmCross.Plugin.Visibility.Platforms.Ios.Plugin;
 
@@ -17,6 +18,13 @@ namespace Toggl.Daneel
 {
     public partial class Setup : MvxIosSetup<App<OnboardingViewModel>>
     {
+        private const ApiEnvironment environment =
+            #if USE_PRODUCTION_API
+                        ApiEnvironment.Production;
+            #else
+                        ApiEnvironment.Staging;
+            #endif
+
         public Setup()
         {
             #if !USE_PRODUCTION_API
@@ -28,7 +36,7 @@ namespace Toggl.Daneel
         protected override IMvxApplication CreateApp()
         {
             var version = NSBundle.MainBundle.InfoDictionary["CFBundleShortVersionString"].ToString();
-            IosDependencyContainer.Initialize(Presenter as TogglPresenter, version);
+            IosDependencyContainer.EnsureInitialized(Presenter as TogglPresenter, environment, Platform.Daneel, version);
             return new App<OnboardingViewModel>(IosDependencyContainer.Instance);
         }
 
