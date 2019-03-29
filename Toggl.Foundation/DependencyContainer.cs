@@ -38,11 +38,13 @@ namespace Toggl.Foundation
         private readonly Lazy<IGoogleService> googleService;
         private readonly Lazy<IRatingService> ratingService;
         private readonly Lazy<ICalendarService> calendarService;
+        private readonly Lazy<IKeyValueStorage> keyValueStorage;
         private readonly Lazy<ILicenseProvider> licenseProvider;
         private readonly Lazy<IUserPreferences> userPreferences;
         private readonly Lazy<IRxActionFactory> rxActionFactory;
         private readonly Lazy<IAnalyticsService> analyticsService;
         private readonly Lazy<IBackgroundService> backgroundService;
+        private readonly Lazy<IOnboardingStorage> onboardingStorage;
         private readonly Lazy<ISchedulerProvider> schedulerProvider;
         private readonly Lazy<IStopwatchProvider> stopwatchProvider;
         private readonly Lazy<INotificationService> notificationService;
@@ -53,6 +55,7 @@ namespace Toggl.Foundation
         private readonly Lazy<IBackgroundSyncService> backgroundSyncService;
         private readonly Lazy<IIntentDonationService> intentDonationService;
         private readonly Lazy<IAutomaticSyncingService> automaticSyncingService;
+        private readonly Lazy<IAccessRestrictionStorage> accessRestrictionStorage;
         private readonly Lazy<ISyncErrorHandlingService> syncErrorHandlingService;
         private readonly Lazy<IPrivateSharedStorageService> privateSharedStorageService;
         private readonly Lazy<ISuggestionProviderContainer> suggestionProviderContainer;
@@ -70,12 +73,14 @@ namespace Toggl.Foundation
         public IPlatformInfo PlatformInfo => platformInfo.Value;
         public ITogglDataSource DataSource => dataSource.Value;
         public IRatingService RatingService => ratingService.Value;
+        public IKeyValueStorage KeyValueStorage => keyValueStorage.Value;
         public ILicenseProvider LicenseProvider => licenseProvider.Value;
         public IUserPreferences UserPreferences => userPreferences.Value;
         public IRxActionFactory RxActionFactory => rxActionFactory.Value;
         public IAnalyticsService AnalyticsService => analyticsService.Value;
-        public IStopwatchProvider StopwatchProvider => stopwatchProvider.Value;
         public IBackgroundService BackgroundService => backgroundService.Value;
+        public IOnboardingStorage OnboardingStorage => onboardingStorage.Value;
+        public IStopwatchProvider StopwatchProvider => stopwatchProvider.Value;
         public ISchedulerProvider SchedulerProvider => schedulerProvider.Value;
         public IRemoteConfigService RemoteConfigService => remoteConfigService.Value;
         public IErrorHandlingService ErrorHandlingService => errorHandlingService.Value;
@@ -83,6 +88,7 @@ namespace Toggl.Foundation
         public IBackgroundSyncService BackgroundSyncService => backgroundSyncService.Value;
         public IIntentDonationService IntentDonationService => intentDonationService.Value;
         public IAutomaticSyncingService AutomaticSyncingService => automaticSyncingService.Value;
+        public IAccessRestrictionStorage AccessRestrictionStorage => accessRestrictionStorage.Value;
         public ISyncErrorHandlingService SyncErrorHandlingService => syncErrorHandlingService.Value;
         public IPrivateSharedStorageService PrivateSharedStorageService => privateSharedStorageService.Value;
         public ISuggestionProviderContainer SuggestionProviderContainer => suggestionProviderContainer.Value;
@@ -102,14 +108,16 @@ namespace Toggl.Foundation
             googleService = new Lazy<IGoogleService>(CreateGoogleService);
             ratingService = new Lazy<IRatingService>(CreateRatingService);
             calendarService = new Lazy<ICalendarService>(CreateCalendarService);
+            keyValueStorage = new Lazy<IKeyValueStorage>(CreateKeyValueStorage);
             licenseProvider = new Lazy<ILicenseProvider>(CreateLicenseProvider);
             rxActionFactory = new Lazy<IRxActionFactory>(CreateRxActionFactory);
             userPreferences = new Lazy<IUserPreferences>(CreateUserPreferences);
             analyticsService = new Lazy<IAnalyticsService>(CreateAnalyticsService);
-            interactorFactory = new Lazy<IInteractorFactory>(CreateInteractorFactory);
-            stopwatchProvider = new Lazy<IStopwatchProvider>(CreateStopwatchProvider);
             backgroundService = new Lazy<IBackgroundService>(CreateBackgroundService);
+            interactorFactory = new Lazy<IInteractorFactory>(CreateInteractorFactory);
+            onboardingStorage = new Lazy<IOnboardingStorage>(CreateOnboardingStorage);
             schedulerProvider = new Lazy<ISchedulerProvider>(CreateSchedulerProvider);
+            stopwatchProvider = new Lazy<IStopwatchProvider>(CreateStopwatchProvider);
             shortcutCreator = new Lazy<IApplicationShortcutCreator>(CreateShortcutCreator);
             notificationService = new Lazy<INotificationService>(CreateNotificationService);
             remoteConfigService = new Lazy<IRemoteConfigService>(CreateRemoteConfigService);
@@ -118,6 +126,7 @@ namespace Toggl.Foundation
             backgroundSyncService = new Lazy<IBackgroundSyncService>(CreateBackgroundSyncService);
             intentDonationService = new Lazy<IIntentDonationService>(CreateIntentDonationService);
             automaticSyncingService = new Lazy<IAutomaticSyncingService>(CreateAutomaticSyncingService);
+            accessRestrictionStorage = new Lazy<IAccessRestrictionStorage>(CreateAccessRestrictionStorage);
             syncErrorHandlingService = new Lazy<ISyncErrorHandlingService>(CreateSyncErrorHandlingService);
             privateSharedStorageService = new Lazy<IPrivateSharedStorageService>(CreatePrivateSharedStorageService);
             suggestionProviderContainer = new Lazy<ISuggestionProviderContainer>(CreateSuggestionProviderContainer);
@@ -145,9 +154,11 @@ namespace Toggl.Foundation
         protected abstract IGoogleService CreateGoogleService();
         protected abstract IRatingService CreateRatingService();
         protected abstract ICalendarService CreateCalendarService();
+        protected abstract IKeyValueStorage CreateKeyValueStorage();
         protected abstract ILicenseProvider CreateLicenseProvider();
         protected abstract IUserPreferences CreateUserPreferences();
         protected abstract IAnalyticsService CreateAnalyticsService();
+        protected abstract IOnboardingStorage CreateOnboardingStorage();
         protected abstract IStopwatchProvider CreateStopwatchProvider();
         protected abstract ISchedulerProvider CreateSchedulerProvider();
         protected abstract INotificationService CreateNotificationService();
@@ -157,6 +168,7 @@ namespace Toggl.Foundation
         protected abstract IApplicationShortcutCreator CreateShortcutCreator();
         protected abstract IBackgroundSyncService CreateBackgroundSyncService();
         protected abstract IIntentDonationService CreateIntentDonationService();
+        protected abstract IAccessRestrictionStorage CreateAccessRestrictionStorage();
         protected abstract IPrivateSharedStorageService CreatePrivateSharedStorageService();
         protected abstract ISuggestionProviderContainer CreateSuggestionProviderContainer();
 
