@@ -2,7 +2,7 @@
 
 namespace Toggl.Foundation.MvvmCross.Themes
 {
-    internal static class Colors
+    public static class Colors
     {
         public static Color Black { get; } = new Color(0, 0, 0);
         public static Color DarkerGrey { get; } = new Color(30, 30, 30);
@@ -14,5 +14,6 @@ namespace Toggl.Foundation.MvvmCross.Themes
         public static Color White { get; } = new Color(255, 255, 255);
         public static Color Red { get; } = new Color(226, 5, 5);
         public static Color SofterRed { get; } = new Color(255, 69, 58);
+        public static Color BrownishGrey { get; } = new Color(94, 91, 91);
     }
 }
