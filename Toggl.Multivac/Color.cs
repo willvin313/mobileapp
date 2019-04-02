@@ -27,7 +27,8 @@ namespace Toggl.Multivac
         /// <summary>
         /// Creates a Color from a hexadecimal string. Valid formats: aarrggbb, #aarrggbb, rrggbb, #rrggbb
         /// </summary>
-        public Color(string hex) : this(hexStringToInt(hex))
+        public Color(string hex)
+            : this(hexStringToInt(hex))
         {
         }
 
@@ -55,5 +56,11 @@ namespace Toggl.Multivac
 
         public override int GetHashCode()
             => HashCode.From(Alpha, Red, Green, Blue);
+    }
+
+    public static class ColorExtensions
+    {
+        public static Color WithAlpha(this Color color, byte alpha)
+            => new Color(color.Red, color.Green, color.Blue, alpha);
     }
 }

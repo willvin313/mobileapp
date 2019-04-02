@@ -21,6 +21,7 @@ namespace Toggl.Foundation.MvvmCross.Helper
         
         public static MvxColor White { get; } = MvxColors.White;
         public static MvxColor NearlyWhite { get; } = new MvxColor(250, 251, 252);
+        public static MvxColor DarkerGrey { get; } = new MvxColor(30, 30, 30);
         public static MvxColor Grey { get; } = new MvxColor(48, 48, 48);
         public static MvxColor LighterGrey { get; } = new MvxColor(66, 66, 66);
 
