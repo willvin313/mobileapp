@@ -32,6 +32,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly ReportsViewModel reportsViewModel;
         private readonly CalendarViewModel calendarViewModel;
         private readonly SettingsViewModel settingsViewModel;
+        private readonly PomodoroListingViewModel pomodoroViewModel;
 
         private bool hasOpenedReports = false;
 
@@ -48,6 +49,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IBackgroundService backgroundService,
             IInteractorFactory interactorFactory,
             IOnboardingStorage onboardingStorage,
+            IPomodoroStorage pomodoroStorage,
             ISchedulerProvider schedulerProvider,
             IPermissionsService permissionsService,
             IMvxNavigationService navigationService,
@@ -71,6 +73,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(backgroundService, nameof(backgroundService));
             Ensure.Argument.IsNotNull(interactorFactory, nameof(interactorFactory));
             Ensure.Argument.IsNotNull(onboardingStorage, nameof(onboardingStorage));
+            Ensure.Argument.IsNotNull(pomodoroStorage, nameof(pomodoroStorage));
             Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
             Ensure.Argument.IsNotNull(permissionsService, nameof(permissionsService));
@@ -152,6 +155,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
                 rxActionFactory,
                 permissionsService,
                 schedulerProvider);
+
+            pomodoroViewModel = new PomodoroListingViewModel(
+                navigationService,
+                pomodoroStorage,
+                schedulerProvider,
+                rxActionFactory);
         }
 
         public override async Task Initialize()
@@ -183,6 +192,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
 
             if (platformInfo.Platform == Platform.Giskard)
             {
+                yield return pomodoroViewModel;
                 yield return settingsViewModel;
             }
         }
