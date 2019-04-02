@@ -1,19 +1,21 @@
-﻿using CoreGraphics;
+﻿using System;
+using CoreGraphics;
 using Foundation;
-using MvvmCross.Binding.BindingContext;
-using MvvmCross.Platforms.Ios.Views;
 using Toggl.Daneel.Extensions;
+using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Multivac.Extensions;
 using UIKit;
 
 namespace Toggl.Daneel.ViewControllers
 {
     [ModalDialogPresentation]
-    public partial class SelectDateTimeViewController : MvxViewController<SelectDateTimeViewModel>
+    public partial class SelectDateTimeViewController : ReactiveViewController<SelectDateTimeViewModel>
     {
-        public SelectDateTimeViewController() : base(nameof(SelectDateTimeViewController), null)
+        public SelectDateTimeViewController() 
+            : base(nameof(SelectDateTimeViewController))
         {
         }
 
@@ -26,21 +28,24 @@ namespace Toggl.Daneel.ViewControllers
 
             prepareDatePicker();
 
-            var bindingSet = this.CreateBindingSet<SelectDateTimeViewController, SelectDateTimeViewModel>();
-
-            //Dates
             DatePicker.MinimumDate = ViewModel.MinDate.ToNSDate();
             DatePicker.MaximumDate = ViewModel.MaxDate.ToNSDate();
 
-            bindingSet.Bind(DatePicker)
-                      .For(v => v.BindDateTimeOffset())
-                      .To(vm => vm.CurrentDateTime);
+            DatePicker.Rx().Date()
+                .Subscribe(ViewModel.CurrentDateTime.Accept)
+                .DisposedBy(DisposeBag);
 
-            //Commands
-            bindingSet.Bind(CloseButton).To(vm => vm.CloseCommand);
-            bindingSet.Bind(SaveButton).To(vm => vm.SaveCommand);
-            
-            bindingSet.Apply();
+            ViewModel.CurrentDateTime
+                .Subscribe(DatePicker.Rx().DateTimeObserver())
+                .DisposedBy(DisposeBag);
+
+            SaveButton.Rx()
+                .BindAction(ViewModel.SaveCommand)
+                .DisposedBy(DisposeBag);
+
+            CloseButton.Rx()
+                .BindAction(ViewModel.CloseCommand)
+                .DisposedBy(DisposeBag);
         }
 
         private void prepareDatePicker()

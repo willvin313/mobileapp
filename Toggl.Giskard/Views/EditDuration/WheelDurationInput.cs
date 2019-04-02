@@ -86,6 +86,17 @@ namespace Toggl.Giskard.Views.EditDuration
             }
         }
 
+        public void ApplyDurationIfBeingEdited()
+        {
+            if (!isEditing)
+                return;
+
+            var actualDuration = input.IsEmpty ? originalDuration : input.ToTimeSpan();
+            Text = actualDuration.AsDurationString();
+            durationSubject.OnNext(actualDuration);
+            Focusable = false;
+        }
+
         public void SetDuration(TimeSpan duration)
         {
             this.duration = duration;
@@ -115,8 +126,6 @@ namespace Toggl.Giskard.Views.EditDuration
 
         protected override void OnFocusChanged(bool gainFocus, FocusSearchDirection direction, Android.Graphics.Rect previouslyFocusedRect)
         {
-            isEditing = gainFocus;
-
             if (gainFocus)
             {
                 originalDuration = duration;
@@ -126,11 +135,10 @@ namespace Toggl.Giskard.Views.EditDuration
             }
             else
             {
-                var actualDuration = input.IsEmpty ? originalDuration : input.ToTimeSpan();
-                Text = actualDuration.AsDurationString();
-                durationSubject.OnNext(actualDuration);
-                Focusable = false;
+                ApplyDurationIfBeingEdited();
             }
+
+            isEditing = gainFocus;
 
             base.OnFocusChanged(gainFocus, direction, previouslyFocusedRect);
         }

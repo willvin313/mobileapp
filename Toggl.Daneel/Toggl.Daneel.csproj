@@ -1316,19 +1316,10 @@
     <None Include="Entitlements.plist" />
     <None Include="packages.config" />
     <None Include="FodyWeavers.xml" />
-    <None Include="Startup\SetupTargetFactories.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>SetupTargetFactories.cs</LastGenOutput>
-    </None>
-    <None Include="Extensions\ViewBindingExtensions.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ViewBindingExtensions.cs</LastGenOutput>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analytics\SiriIntentErrorTrackingEvent.cs" />
     <Compile Include="Analytics\SiriTrackingEventExtensions.cs" />
-    <Compile Include="Binding\DatePickerDateTimeOffsetTargetBinding.cs" />
     <Compile Include="Cells\BaseCollectionViewCell.cs" />
     <Compile Include="Extensions\IntentPeriod.cs" />
     <Compile Include="Extensions\Reactive\DurationFieldExtensions.cs" />
@@ -1354,30 +1345,17 @@
     <Compile Include="Startup\IosDependencyContainer.cs" />
     <Compile Include="Startup\IOSSchedulerProvider.cs" />
     <Compile Include="Startup\Setup.cs" />
-    <Compile Include="Startup\SetupTargetFactories.cs">
-      <DependentUpon>SetupTargetFactories.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Extensions\ViewBindingExtensions.cs">
-      <DependentUpon>ViewBindingExtensions.tt</DependentUpon>
-    </Compile>
     <Compile Include="Extensions\AnimationExtensions.cs" />
-    <Compile Include="Binding\ScrollViewAnimatedCurrentPageTargetBinding.cs" />
     <Compile Include="Transformations\ProjectTaskClientToAttributedString.cs" />
     <Compile Include="ViewControllers\OnboardingViewController.cs" />
     <Compile Include="ViewControllers\OnboardingViewController.designer.cs">
       <DependentUpon>OnboardingViewController.cs</DependentUpon>
     </Compile>
-    <Compile Include="Binding\ViewAnimatedBackgroundTargetBinding.cs" />
     <Compile Include="Services\OnePasswordServiceIos.cs" />
     <Compile Include="ViewControllers\Navigation\OnboardingFlowNavigationController.cs" />
-    <Compile Include="Binding\BarButtonCommandTargetBinding.cs" />
-    <Compile Include="Binding\ViewAnimatedVisibilityTargetBinding.cs" />
     <Compile Include="ViewControllers\SyncFailuresViewController.cs" />
     <Compile Include="ViewSources\Generic\CollectionView\ReloadCollectionViewSource.cs" />
     <Compile Include="ViewSources\Generic\TableView\BaseTableViewSource.cs" />
-    <Compile Include="Binding\TextFieldSecureTextEntryTargetBinding.cs" />
-    <Compile Include="Binding\BarButtonAnimatedEnabledTargetBinding.cs" />
-    <Compile Include="Binding\TextFieldFocusTargetBinding.cs" />
     <Compile Include="Presentation\TogglPresenter.cs" />
     <Compile Include="ViewSources\TimeEntriesLogViewSource.cs" />
     <Compile Include="ViewControllers\MainViewController.cs" />
@@ -1408,7 +1386,6 @@
     <Compile Include="ViewControllers\EditDurationViewController.designer.cs">
       <DependentUpon>EditDurationViewController.cs</DependentUpon>
     </Compile>
-    <Compile Include="Converters\TimeSpanToViewHeightConverter.cs" />
     <Compile Include="ViewControllers\SelectDateTimeViewController.cs" />
     <Compile Include="ViewControllers\SelectDateTimeViewController.designer.cs">
       <DependentUpon>SelectDateTimeViewController.cs</DependentUpon>
@@ -1418,14 +1395,12 @@
     <Compile Include="ViewControllers\SelectProjectViewController.designer.cs">
       <DependentUpon>SelectProjectViewController.cs</DependentUpon>
     </Compile>
-    <Compile Include="Combiners\ProjectTaskClientValueCombiner.cs" />
     <Compile Include="Extensions\DateExtensions.cs" />
     <Compile Include="ViewControllers\SelectTagsViewController.cs" />
     <Compile Include="ViewControllers\SelectTagsViewController.designer.cs">
       <DependentUpon>SelectTagsViewController.cs</DependentUpon>
     </Compile>
     <Compile Include="ViewSources\SelectTagsTableViewSource.cs" />
-    <Compile Include="ViewSources\GroupedCollectionTableViewSource.cs" />
     <Compile Include="Views\Calendar\CalendarCollectionViewLayout.cs" />
     <Compile Include="Views\Client\ClientViewCell.cs" />
     <Compile Include="Views\Client\ClientViewCell.designer.cs">
@@ -1444,7 +1419,6 @@
     <Compile Include="Views\Log\RefreshControl.cs" />
     <Compile Include="Views\Log\TimeEntriesLogTableView.cs" />
     <Compile Include="Views\MarqueeView.cs" />
-    <Compile Include="Binding\SwitchAnimatedOnTargetBinding.cs" />
     <Compile Include="Views\Onboarding\TrackPage.cs" />
     <Compile Include="Views\Onboarding\TrackPage.designer.cs">
       <DependentUpon>TrackPage.cs</DependentUpon>
@@ -1460,15 +1434,12 @@
     <Compile Include="Services\DialogServiceIos.cs" />
     <Compile Include="Views\FadeView.cs" />
     <Compile Include="Views\Interfaces\IHeaderViewCellWithHideableTopSeparator.cs" />
-    <Compile Include="Binding\NavigationItemHidesBackButtonTargetBinding.cs" />
     <Compile Include="ViewControllers\BrowserViewController.cs" />
     <Compile Include="ViewControllers\EditProjectViewController.cs" />
     <Compile Include="ViewControllers\EditProjectViewController.designer.cs">
       <DependentUpon>EditProjectViewController.cs</DependentUpon>
     </Compile>
-    <Compile Include="Converters\AddNewAttributedStringConverter.cs" />
     <Compile Include="Extensions\ViewExtensions.cs" />
-    <Compile Include="Combiners\ProjectSelectedColorValueCombiner.cs" />
     <Compile Include="Extensions\TableViewExtensions.cs" />
     <Compile Include="ViewControllers\SelectColorViewController.cs" />
     <Compile Include="ViewControllers\SelectColorViewController.designer.cs">
@@ -1485,8 +1456,6 @@
       <DependentUpon>SelectClientViewController.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\TextViewWithPlaceholder.cs" />
-    <Compile Include="Binding\TextViewWithPlaceholderTextTargetBinding.cs" />
-    <Compile Include="Binding\TextFieldPlaceholderTargetBinding.cs" />
     <Compile Include="Startup\AppDelegate.cs" />
     <Compile Include="Startup\Main.cs" />
     <Compile Include="ViewControllers\OutdatedAppViewController.cs" />
@@ -1499,7 +1468,6 @@
     <Compile Include="ViewControllers\TokenResetViewController.designer.cs">
       <DependentUpon>TokenResetViewController.cs</DependentUpon>
     </Compile>
-    <Compile Include="Binding\TextViewTagListTargetBinding.cs" />
     <Compile Include="Extensions\LayoutConstraintExtensions.cs" />
     <Compile Include="ViewControllers\LoginViewController.cs" />
     <Compile Include="ViewControllers\LoginViewController.designer.cs">
@@ -1554,9 +1522,6 @@
     </Compile>
     <Compile Include="ViewSources\ReportsCalendarCollectionViewSource.cs" />
     <Compile Include="ReportsCalendarCollectionViewLayout.cs" />
-    <Compile Include="Binding\ScrollViewCurrentPageTargetBinding.cs" />
-    <Compile Include="Binding\LayoutConstraintAnimatedConstantTargetBinding.cs" />
-    <Compile Include="Converters\ReportsCalendarRowCountToCalendarHeightConverter.cs" />
     <Compile Include="Views\Reports\ReportsCalendarViewCell.cs" />
     <Compile Include="Views\Reports\ReportsCalendarViewCell.designer.cs">
       <DependentUpon>ReportsCalendarViewCell.cs</DependentUpon>
@@ -1567,10 +1532,7 @@
       <DependentUpon>ReportsCalendarQuickSelectViewCell.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\RoundedView.cs" />
-    <Compile Include="Combiners\ReportsCalendarCellTextColorValueCombiner.cs" />
     <Compile Include="Views\Reports\PieChartView.cs" />
-    <Compile Include="Converters\ReportTimeSpanLabelValueConverter.cs" />
-    <Compile Include="Converters\ReportPercentageLabelValueConverter.cs" />
     <Compile Include="Views\Reports\PercentageView.cs" />
     <Compile Include="Services\ITopViewControllerProvider.cs" />
     <Compile Include="Presentation\NestedPresentationInfo.cs" />
@@ -1592,7 +1554,6 @@
     <Compile Include="Views\EditDuration\WheelForegroundView.cs" />
     <Compile Include="Views\Reports\LoadingPieChartView.cs" />
     <Compile Include="Views\SpiderOnARopeView.cs" />
-    <Compile Include="Binding\SpiderOnARopeViewIsVisibleTargetBinding.cs" />
     <Compile Include="ApplicationShortcutCreator.cs" />
     <Compile Include="Extensions\PointExtensions.cs" />
     <Compile Include="Autocomplete\TokenTextAttachment.cs" />
@@ -1601,13 +1562,11 @@
     <Compile Include="Views\AutocompleteTextViewPlaceholder.cs" />
     <Compile Include="Views\EditDuration\DurationField.cs" />
     <Compile Include="Views\EditDuration\NumberKeyPressedEventArgs.cs" />
-    <Compile Include="Binding\ButtonImageTargetBinding.cs" />
     <Compile Include="Views\Suggestions\SuggestionsView.cs" />
     <Compile Include="Views\Suggestions\SuggestionView.cs" />
     <Compile Include="Views\Suggestions\SuggestionView.designer.cs">
       <DependentUpon>SuggestionView.cs</DependentUpon>
     </Compile>
-    <Compile Include="Binding\LayoutConstraintConstantTargetBinding.cs" />
     <Compile Include="Services\LicenseProviderIos.cs" />
     <Compile Include="Views\Settings\DateFormatViewCell.cs" />
     <Compile Include="Views\Settings\DateFormatViewCell.designer.cs">
@@ -1642,7 +1601,6 @@
       <DependentUpon>TimeEntryMockView.cs</DependentUpon>
     </Compile>
     <Compile Include="Extensions\OnboardingExtensions.cs" />
-    <Compile Include="Converters\TimeFormatToLocaleValueConverter.cs" />
     <Compile Include="Extensions\LabelExtensions.cs" />
     <Compile Include="ViewControllers\Settings\LicensesViewController.cs" />
     <Compile Include="ViewControllers\Settings\SettingsViewController.cs" />
@@ -1653,8 +1611,6 @@
     <Compile Include="ViewControllers\Settings\AboutViewController.designer.cs">
       <DependentUpon>AboutViewController.cs</DependentUpon>
     </Compile>
-    <Compile Include="Binding\ViewVisibilityWithFadeTargetBinding.cs" />
-    <Compile Include="Binding\ImageViewAnimatedImageTargetBinding.cs" />
     <Compile Include="Extensions\TimeEntriesLogViewCellExtensions.cs" />
     <Compile Include="ViewControllers\SelectCountryViewController.cs" />
     <Compile Include="ViewControllers\SelectCountryViewController.designer.cs">
@@ -1665,8 +1621,6 @@
       <DependentUpon>CountryViewCell.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\LoginTextField.cs" />
-    <Compile Include="Binding\ButtonAnimatedTitleTargetBinding.cs" />
-    <Compile Include="Binding\LoginTextFieldFirstResponderTargetBinding.cs" />
     <Compile Include="Views\Rating\RatingView.cs" />
     <Compile Include="Views\Rating\RatingView.designer.cs">
       <DependentUpon>RatingView.cs</DependentUpon>
@@ -1696,7 +1650,6 @@
       <DependentUpon>SyncFailureCell.cs</DependentUpon>
     </Compile>
     <Compile Include="Autocomplete\Constants.cs" />
-    <Compile Include="Binding\ViewLongPressCommandTargetBinding.cs" />
     <Compile Include="Cells\Settings\LicensesHeaderViewCell.cs" />
     <Compile Include="Cells\Settings\LicensesHeaderViewCell.designer.cs">
       <DependentUpon>LicensesHeaderViewCell.cs</DependentUpon>
@@ -1713,7 +1666,6 @@
     <Compile Include="ViewControllers\Settings\SendFeedbackViewController.designer.cs">
       <DependentUpon>SendFeedbackViewController.cs</DependentUpon>
     </Compile>
-    <Compile Include="Binding\TextViewWithPlaceholderDidBecomeFirstResponderTargetBinding.cs" />
     <Compile Include="Views\ReactiveCollectionViewCell.cs" />
     <Compile Include="ViewControllers\Calendar\CalendarViewController.cs" />
     <Compile Include="ViewControllers\Calendar\CalendarViewController.designer.cs">
@@ -1793,7 +1745,6 @@
     <Compile Include="Presentation\Attributes\TabPresentationAttribute.cs" />
     <Compile Include="Views\Calendar\CalendarCollectionViewAutoScrollHelper.cs" />
     <Compile Include="Extensions\Reactive\UIControlExtensions.cs" />
-    <Compile Include="Binding\LayoutConstraintActiveTargetBinding.cs" />
     <Compile Include="ViewControllers\IDismissableViewController.cs" />
     <Compile Include="Services\PrivateSharedStorageServiceIos.cs" />
     <Compile Include="Extensions\Reactive\FadeViewExtensions.cs" />

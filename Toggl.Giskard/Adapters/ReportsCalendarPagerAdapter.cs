@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading;
 using Android.Content;
 using Android.Runtime;
 using Android.Support.V4.View;
@@ -63,6 +64,7 @@ namespace Toggl.Giskard.Adapters
                 .DisposedBy(disposeBag);
 
             selectionChanges
+                .ObserveOn(SynchronizationContext.Current)
                 .Subscribe(adapter.UpdateDateRangeParameter)
                 .DisposedBy(disposeBag);
 

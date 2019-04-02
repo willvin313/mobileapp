@@ -2,20 +2,12 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Threading;
-using MvvmCross.Base;
-using MvvmCross.Binding.BindingContext;
-using MvvmCross.Platforms.Ios.Views;
 using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Daneel.ViewSources;
-using Toggl.Foundation.MvvmCross.Converters;
 using Toggl.Foundation.MvvmCross.Extensions;
-using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar;
 using Toggl.Multivac.Extensions;
@@ -24,15 +16,14 @@ using UIKit;
 namespace Toggl.Daneel.ViewControllers
 {
     [NestedPresentation]
-    public partial class ReportsCalendarViewController : MvxViewController<ReportsCalendarViewModel>, IUICollectionViewDelegate
+    public partial class ReportsCalendarViewController : ReactiveViewController<ReportsCalendarViewModel>, IUICollectionViewDelegate
     {
         private bool calendarInitialized;
-        private readonly CompositeDisposable disposeBag = new CompositeDisposable();
-        private ReportsCalendarCollectionViewSource calendarCollectionViewSource;
         private List<ReportsCalendarPageViewModel> pendingMonthsUpdate;
+        private ReportsCalendarCollectionViewSource calendarCollectionViewSource;
 
         public ReportsCalendarViewController()
-            : base(nameof(ReportsCalendarViewController), null)
+            : base(nameof(ReportsCalendarViewController))
         {
         }
 
@@ -51,42 +42,42 @@ namespace Toggl.Daneel.ViewControllers
 
             ViewModel.DayHeadersObservable
                 .Subscribe(setupDayHeaders)
-                .DisposedBy(disposeBag);
+                .DisposedBy(DisposeBag);
 
             ViewModel.MonthsObservable
                 .Subscribe(calendarCollectionViewSource.UpdateMonths)
-                .DisposedBy(disposeBag);
+                .DisposedBy(DisposeBag);
 
             calendarCollectionViewSource.DayTaps
                 .Subscribe(ViewModel.SelectDay.Inputs)
-                .DisposedBy(disposeBag);
+                .DisposedBy(DisposeBag);
 
             ViewModel.HighlightedDateRangeObservable
                 .Subscribe(calendarCollectionViewSource.UpdateSelection)
-                .DisposedBy(disposeBag);
+                .DisposedBy(DisposeBag);
 
             ViewModel.CurrentMonthObservable
                 .Select(month => month.Year.ToString())
                 .Subscribe(CurrentYearLabel.Rx().Text())
-                .DisposedBy(disposeBag);
+                .DisposedBy(DisposeBag);
 
             ViewModel.CurrentMonthObservable
                 .Select(month => month.Month)
                 .Select(CultureInfo.GetCultureInfo("en-US").DateTimeFormat.GetMonthName)
                 .Subscribe(CurrentMonthLabel.Rx().Text())
-                .DisposedBy(disposeBag);
+                .DisposedBy(DisposeBag);
 
             ViewModel.SelectedDateRangeObservable
                 .Subscribe(quickSelectCollectionViewSource.UpdateSelection)
-                .DisposedBy(disposeBag);
+                .DisposedBy(DisposeBag);
 
             quickSelectCollectionViewSource.ShortcutTaps
                 .Subscribe(ViewModel.SelectShortcut.Inputs)
-                .DisposedBy(disposeBag);
+                .DisposedBy(DisposeBag);
 
             ViewModel.QuickSelectShortcutsObservable
                 .Subscribe(quickSelectCollectionViewSource.UpdateShortcuts)
-                .DisposedBy(disposeBag);
+                .DisposedBy(DisposeBag);
         }
 
         public override void DidMoveToParentViewController(UIViewController parent)
@@ -106,7 +97,7 @@ namespace Toggl.Daneel.ViewControllers
             ViewModel.RowsInCurrentMonthObservable
                 .Select(rows => rows * rowHeight + additionalHeight)
                 .Subscribe(heightConstraint.Rx().ConstantAnimated())
-                .DisposedBy(disposeBag);
+                .DisposedBy(DisposeBag);
         }
 
         public override void ViewDidLayoutSubviews()
@@ -117,15 +108,15 @@ namespace Toggl.Daneel.ViewControllers
 
             calendarCollectionViewSource.CurrentPageNotScrollingObservable
                 .Subscribe(ViewModel.SetCurrentPage)
-                .DisposedBy(disposeBag);
+                .DisposedBy(DisposeBag);
 
             calendarCollectionViewSource.CurrentPageWhileScrollingObservable
                 .Subscribe(ViewModel.UpdateMonth)
-                .DisposedBy(disposeBag);
+                .DisposedBy(DisposeBag);
 
             ViewModel.CurrentPageObservable
                 .Subscribe(CalendarCollectionView.Rx().CurrentPageObserver())
-                .DisposedBy(disposeBag);
+                .DisposedBy(DisposeBag);
 
             calendarInitialized = true;
         }
@@ -146,7 +137,7 @@ namespace Toggl.Daneel.ViewControllers
             base.Dispose(disposing);
             if (!disposing)
             {
-                disposeBag.Dispose();
+                DisposeBag.Dispose();
             }
         }
     }

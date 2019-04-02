@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using PropertyChanged;
 using Toggl.Foundation.MvvmCross.Interfaces;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Multivac;
@@ -9,11 +6,8 @@ using Toggl.Multivac;
 namespace Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar
 {
     [Preserve(AllMembers = true)]
-    [AddINotifyPropertyChangedInterface]
     public sealed class ReportsCalendarDayViewModel : IDiffableByIdentifier<ReportsCalendarDayViewModel>
     {
-        private readonly DateTimeOffset dateTime;
-
         public int Day { get; }
 
         public CalendarMonth CalendarMonth { get; }
@@ -22,30 +16,30 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar
 
         public bool IsToday { get; }
 
-        public DateTimeOffset DateTimeOffset => dateTime;
+        public DateTimeOffset DateTimeOffset { get; }
 
         public ReportsCalendarDayViewModel(int day, CalendarMonth month, bool isInCurrentMonth, DateTimeOffset today)
         {
             Day = day;
             CalendarMonth = month;
             IsInCurrentMonth = isInCurrentMonth;
-            dateTime = new DateTimeOffset(month.Year, month.Month, Day, 0, 0, 0, TimeSpan.Zero);
-            IsToday = today.Date == dateTime.Date;
+            DateTimeOffset = new DateTimeOffset(month.Year, month.Month, Day, 0, 0, 0, TimeSpan.Zero);
+            IsToday = today.Date == DateTimeOffset.Date;
         }
 
         public bool IsSelected(ReportsDateRangeParameter selectedRange)
         {
-            return selectedRange != null && selectedRange.StartDate.Date <= dateTime.Date && selectedRange.EndDate.Date >= dateTime.Date;
+            return selectedRange != null && selectedRange.StartDate.Date <= DateTimeOffset.Date && selectedRange.EndDate.Date >= DateTimeOffset.Date;
         }
 
         public bool IsStartOfSelectedPeriod(ReportsDateRangeParameter selectedRange)
         {
-            return selectedRange != null && selectedRange.StartDate.Date == dateTime.Date;
+            return selectedRange != null && selectedRange.StartDate.Date == DateTimeOffset.Date;
         }
 
         public bool IsEndOfSelectedPeriod(ReportsDateRangeParameter selectedRange)
         {
-            return selectedRange != null && selectedRange.EndDate.Date == dateTime.Date;
+            return selectedRange != null && selectedRange.EndDate.Date == DateTimeOffset.Date;
         }
 
         public bool Equals(ReportsCalendarDayViewModel other)
@@ -53,13 +47,13 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar
             if (ReferenceEquals(this, other)) return true;
             if (ReferenceEquals(this, null)) return false;
             if (ReferenceEquals(other, null)) return false;
-            return dateTime.Equals(other.dateTime)
+            return DateTimeOffset.Equals(other.DateTimeOffset)
                    && Day == other.Day
                    && CalendarMonth.Equals(other.CalendarMonth)
                    && IsInCurrentMonth == other.IsInCurrentMonth
                    && IsToday == other.IsToday;
         }
 
-        public long Identifier => dateTime.Date.GetHashCode();
+        public long Identifier => DateTimeOffset.Date.GetHashCode();
     }
 }

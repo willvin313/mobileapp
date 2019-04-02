@@ -4,8 +4,6 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using CoreGraphics;
 using Foundation;
-using MvvmCross.Binding.Extensions;
-using MvvmCross.Platforms.Ios.Binding.Views;
 using Toggl.Daneel.Views.Reports;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar.QuickSelectShortcuts;
@@ -15,36 +13,32 @@ using UIKit;
 namespace Toggl.Daneel.ViewSources
 {
     public sealed class ReportsCalendarQuickSelectCollectionViewSource
-        : MvxCollectionViewSource, IUICollectionViewDelegateFlowLayout
+        : UICollectionViewSource, IUICollectionViewDelegateFlowLayout
     {
         private const int cellWidth = 96;
         private const int cellHeight = 32;
         private const string cellIdentifier = nameof(ReportsCalendarQuickSelectViewCell);
 
-        private List<ReportsCalendarBaseQuickSelectShortcut> shortcuts = new List<ReportsCalendarBaseQuickSelectShortcut>();
-
-        private ISubject<ReportsCalendarBaseQuickSelectShortcut> shortcutTaps = new Subject<ReportsCalendarBaseQuickSelectShortcut>();
-
-        public IObservable<ReportsCalendarBaseQuickSelectShortcut> ShortcutTaps;
+        private readonly UICollectionView collectionView;
+        private readonly ISubject<ReportsCalendarBaseQuickSelectShortcut> shortcutTaps = new Subject<ReportsCalendarBaseQuickSelectShortcut>();
 
         private ReportsDateRangeParameter currentDateRange;
-        private NSIndexPath selectedIndexPath;
-
-        public ReportsCalendarQuickSelectCollectionViewSource(
-            UICollectionView collectionView) : base(collectionView)
+        private IList<ReportsCalendarBaseQuickSelectShortcut> shortcuts = new List<ReportsCalendarBaseQuickSelectShortcut>();
+        
+        public IObservable<ReportsCalendarBaseQuickSelectShortcut> ShortcutTaps { get; }
+        
+        public ReportsCalendarQuickSelectCollectionViewSource(UICollectionView collectionView)
         {
             Ensure.Argument.IsNotNull(collectionView, nameof(collectionView));
             collectionView.RegisterNibForCell(ReportsCalendarQuickSelectViewCell.Nib, cellIdentifier);
             ShortcutTaps = shortcutTaps.AsObservable();
+            this.collectionView = collectionView;
         }
-
-        protected override UICollectionViewCell GetOrCreateCellFor(UICollectionView collectionView, NSIndexPath indexPath, object item)
-            => collectionView.DequeueReusableCell(cellIdentifier, indexPath) as UICollectionViewCell;
-
+        
         public override UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath)
         {
-            var item = GetItemAt(indexPath) as ReportsCalendarBaseQuickSelectShortcut;
-            var cell = GetOrCreateCellFor(collectionView, indexPath, item) as ReportsCalendarQuickSelectViewCell;
+            var item = shortcuts[indexPath.Row] as ReportsCalendarBaseQuickSelectShortcut;
+            var cell = collectionView.DequeueReusableCell(cellIdentifier, indexPath) as ReportsCalendarQuickSelectViewCell;
 
             cell.UpdateSelectedDateRange(currentDateRange);
             cell.Item = item;
@@ -54,11 +48,7 @@ namespace Toggl.Daneel.ViewSources
 
         public override nint NumberOfSections(UICollectionView collectionView) => 1;
 
-        public override nint GetItemsCount(UICollectionView collectionView, nint section)
-            => shortcuts.Count();
-
-        protected override object GetItemAt(NSIndexPath indexPath)
-            => shortcuts.ElementAt((int) indexPath.Item);
+        public override nint GetItemsCount(UICollectionView collectionView, nint section) => shortcuts.Count;
 
         [Export("collectionView:layout:sizeForItemAtIndexPath:")]
         public CGSize GetSizeForItem(UICollectionView collectionView, UICollectionViewLayout layout, NSIndexPath indexPath)
@@ -71,16 +61,16 @@ namespace Toggl.Daneel.ViewSources
             shortcutTaps.OnNext(shortcuts[indexPath.Row]);
         }
 
-        public void UpdateShortcuts(List<ReportsCalendarBaseQuickSelectShortcut> newShortcuts)
+        public void UpdateShortcuts(IList<ReportsCalendarBaseQuickSelectShortcut> newShortcuts)
         {
             shortcuts = newShortcuts;
-            ReloadData();
+            collectionView.ReloadData();
         }
 
         public void UpdateSelection(ReportsDateRangeParameter dateRange)
         {
             currentDateRange = dateRange;
-            ReloadData();
+            collectionView.ReloadData();
         }
     }
 }

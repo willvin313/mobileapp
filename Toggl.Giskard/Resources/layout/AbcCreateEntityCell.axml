@@ -16,7 +16,6 @@
         android:layout_gravity="center_vertical" />
   <TextView
         android:id="@+id/CreationLabel"
-        local:MvxBind="Text ."
         android:lines="1"
         android:textSize="15sp"
         android:singleLine="true"

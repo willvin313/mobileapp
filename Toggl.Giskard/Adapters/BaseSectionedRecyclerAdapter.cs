@@ -119,7 +119,7 @@ namespace Toggl.Giskard.Adapters
         {
             lock (updateLock)
             {
-                var flatNewItems = flattenItems(newItems).ToList();
+                var flatNewItems = flattenItems(newItems);
                 if (!isUpdateRunning)
                 {
                     isUpdateRunning = true;
@@ -132,21 +132,28 @@ namespace Toggl.Giskard.Adapters
             }
         }
 
-        private IEnumerable<Either<TSection, TItem>> flattenItems(IList<SectionModel<TSection, TItem>> newItems)
+        private IList<Either<TSection, TItem>> flattenItems(IList<SectionModel<TSection, TItem>> newItems)
         {
+            var flattenedItems = new List<Either<TSection, TItem>>();
+
+            if (newItems == null)
+                return flattenedItems;
+
             var hasMultipleSections = newItems.Count > 1;
 
             foreach (var section in newItems)
             {
                 var shouldIncludeHeader = hasMultipleSections && !(section.Header?.Equals(default(TSection)) ?? true);
                 if (shouldIncludeHeader)
-                    yield return Either<TSection, TItem>.WithLeft(section.Header);
+                    flattenedItems.Add(Either<TSection, TItem>.WithLeft(section.Header));
 
                 foreach (var item in section.Items)
                 {
-                    yield return Either<TSection, TItem>.WithRight(item);
+                    flattenedItems.Add(Either<TSection, TItem>.WithRight(item));
                 }
             }
+
+            return flattenedItems;
         }
 
         private void processUpdate(IList<Either<TSection, TItem>> newItems)

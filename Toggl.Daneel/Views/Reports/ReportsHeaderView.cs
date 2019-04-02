@@ -2,7 +2,6 @@
 using CoreGraphics;
 using Foundation;
 using MvvmCross.Plugin.Color.Platforms.Ios;
-using Toggl.Daneel.Converters;
 using Toggl.Daneel.Extensions;
 using Toggl.Foundation.MvvmCross.ViewModels.Reports;
 using UIKit;
@@ -20,16 +19,33 @@ using System.Reactive;
 using Toggl.Daneel.Cells;
 using Toggl.Foundation;
 using Toggl.Foundation.Extensions;
+using Color = Toggl.Foundation.MvvmCross.Helper.Color;
 
 namespace Toggl.Daneel.Views.Reports
 {
     public partial class ReportsHeaderView : BaseTableHeaderFooterView<ReportsViewModel>
     {
+        private const int fontSize = 24;
         private const float barChartSpacingProportion = 0.3f;
+
+        private static readonly UIColor normalColor = Color.Reports.PercentageActivated.ToNativeColor();
+        private static readonly UIColor disabledColor = Color.Reports.Disabled.ToNativeColor();
 
         public static readonly string Identifier = nameof(ReportsHeaderView);
         public static readonly NSString Key = new NSString(nameof(ReportsHeaderView));
         public static readonly UINib Nib;
+
+        private readonly UIStringAttributes normalAttributes = new UIStringAttributes
+        {
+            Font = UIFont.SystemFontOfSize(fontSize, UIFontWeight.Medium),
+            ForegroundColor = normalColor
+        };
+
+        private readonly UIStringAttributes disabledAttributes = new UIStringAttributes
+        {
+            Font = UIFont.SystemFontOfSize(fontSize, UIFontWeight.Medium),
+            ForegroundColor = disabledColor
+        };
 
         private readonly CompositeDisposable disposeBag = new CompositeDisposable();
         private readonly ISubject<Unit> updateLayout = new BehaviorSubject<Unit>(Unit.Default);
@@ -63,9 +79,8 @@ namespace Toggl.Daneel.Views.Reports
         protected override void UpdateView()
         {
             //Text
-            var reportPercentageConverter = new ReportPercentageLabelValueConverter();
             Item.BillablePercentageObservable
-                .Select(reportPercentageConverter.Convert)
+                .Select(billableFormattedString)
                 .Subscribe(BillablePercentageLabel.Rx().AttributedText())
                 .DisposedBy(disposeBag);
 
@@ -182,7 +197,19 @@ namespace Toggl.Daneel.Views.Reports
             Item.ShowEmptyStateObservable
                 .Subscribe(EmptyStateView.Rx().IsVisible())
                 .DisposedBy(disposeBag);
+
+            NSAttributedString billableFormattedString(float? value)
+            {
+                var isDisabled = value == null;
+                var actualValue = isDisabled ? 0 : value.Value;
+
+                var percentage = $"{actualValue.ToString("0.00")}%";
+
+                var attributes = isDisabled ? disabledAttributes : normalAttributes;
+                return new NSAttributedString(percentage, attributes);
+            }
         }
+
 
         public override void LayoutSubviews()
         {

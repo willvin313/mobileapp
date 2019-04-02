@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using MvvmCross.Binding.Bindings.Target;
 using Toggl.Multivac;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar

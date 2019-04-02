@@ -1,17 +1,13 @@
 using System;
-using System.Windows.Input;
 using Android.Runtime;
 using Android.Views;
-using Toggl.Foundation;
 using Toggl.Foundation.MvvmCross.ViewModels;
-using Toggl.Giskard.TemplateSelectors;
 using Toggl.Giskard.ViewHolders;
 
 namespace Toggl.Giskard.Adapters
 {
     public sealed class SelectTagsRecyclerAdapter : BaseRecyclerAdapter<SelectableTagBaseViewModel>
     {
-
         private const int selectableTagViewType = 1;
         private const int selectableTagCreationViewType = 2;
 

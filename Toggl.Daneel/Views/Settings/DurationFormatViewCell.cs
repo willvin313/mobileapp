@@ -1,10 +1,6 @@
 ﻿using System;
 using Foundation;
-using MvvmCross.Binding.BindingContext;
-using MvvmCross.Platforms.Ios.Binding;
-using MvvmCross.Platforms.Ios.Binding.Views;
 using Toggl.Daneel.Cells;
-using Toggl.Foundation.MvvmCross.Converters;
 using Toggl.Foundation.MvvmCross.Transformations;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using UIKit;

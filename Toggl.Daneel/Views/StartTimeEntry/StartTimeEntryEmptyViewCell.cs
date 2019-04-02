@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Globalization;
-using Accelerate;
 using Foundation;
-using MvvmCross.Binding.BindingContext;
-using MvvmCross.Platforms.Ios.Binding.Views;
-using MvvmCross.Converters;
 using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Daneel.Cells;
 using Toggl.Foundation.Autocomplete.Suggestions;

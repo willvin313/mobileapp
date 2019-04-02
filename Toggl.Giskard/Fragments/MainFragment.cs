@@ -5,6 +5,7 @@ using System.Reactive.Subjects;
 using System.Threading;
 using Android.App;
 using Android.Graphics;
+using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Support.Design.Widget;
 using Android.Support.V4.Content;
@@ -31,6 +32,7 @@ using Toggl.Multivac.Extensions;
 using static Android.Content.Context;
 using static Toggl.Foundation.Sync.SyncProgress;
 using static Toggl.Giskard.Extensions.CircularRevealAnimation.AnimationType;
+using static Toggl.Giskard.Extensions.FloatingActionButtonExtensions;
 using FoundationResources = Toggl.Foundation.Resources;
 
 namespace Toggl.Giskard.Fragments
@@ -46,6 +48,9 @@ namespace Toggl.Giskard.Fragments
         private bool shouldShowRatingViewOnResume;
         private ISubject<bool> visibilityChangedSubject = new BehaviorSubject<bool>(false);
         private IObservable<bool> visibilityChanged => visibilityChangedSubject.AsObservable();
+
+        private Drawable addDrawable;
+        private Drawable playDrawable;
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
@@ -114,12 +119,12 @@ namespace Toggl.Giskard.Fragments
                 .Subscribe(timeEntryCardDotView.Rx().DrawableColor())
                 .DisposedBy(DisposeBag);
 
-            var addDrawable = ContextCompat.GetDrawable(Context, Resource.Drawable.add_white);
-            var playDrawable = ContextCompat.GetDrawable(Context, Resource.Drawable.play_white);
+            addDrawable = ContextCompat.GetDrawable(Context, Resource.Drawable.add_white);
+            playDrawable = ContextCompat.GetDrawable(Context, Resource.Drawable.play_white);
 
             ViewModel.IsInManualMode
-                .Select(isInManualMode => isInManualMode ? addDrawable : playDrawable)
-                .Subscribe(playButton.SetImageDrawable)
+                .Select(isManualMode => isManualMode ? addDrawable : playDrawable)
+                .Subscribe(playButton.SetDrawableImageSafe)
                 .DisposedBy(DisposeBag);
 
             ViewModel.IsTimeEntryRunning
@@ -323,8 +328,7 @@ namespace Toggl.Giskard.Fragments
                     .SetBehaviour((x, y, w, h) => (x, y + h, 0, w))
                     .SetType(() => visible ? Appear : Disappear);
 
-            var fabListener = new FabVisibilityListener(onFabHidden);
-            buttonToHide.Hide(fabListener);
+            buttonToHide.Hide(((Action)onFabHidden).ToFabVisibilityListener());
 
             void onFabHidden()
             {
@@ -380,22 +384,6 @@ namespace Toggl.Giskard.Fragments
             else if (welcomeBackView != null)
             {
                 welcomeBackView.Visibility = ViewStates.Gone;
-            }
-        }
-
-        private sealed class FabVisibilityListener : FloatingActionButton.OnVisibilityChangedListener
-        {
-            private readonly Action onFabHidden;
-
-            public FabVisibilityListener(Action onFabHidden)
-            {
-                this.onFabHidden = onFabHidden;
-            }
-
-            public override void OnHidden(FloatingActionButton fab)
-            {
-                base.OnHidden(fab);
-                onFabHidden();
             }
         }
 
