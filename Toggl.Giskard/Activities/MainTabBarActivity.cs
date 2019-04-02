@@ -6,6 +6,7 @@ using Android.OS;
 using Android.Views;
 using MvvmCross.Platforms.Android.Core;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
+using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
 using Toggl.Foundation.MvvmCross.ViewModels.Reports;
@@ -55,6 +56,13 @@ namespace Toggl.Giskard.Activities
                 navigationView.SelectedItemId = Resource.Id.MainTabTimerItem;
                 activityResumedBefore = true;
             }
+        }
+
+        protected override void OnThemeChanged(ITheme theme)
+        {
+            base.OnThemeChanged(theme);
+
+            navigationView.SetBackgroundColor(theme.BottomBar.ToNativeColor());
         }
 
         private Fragment getCachedFragment(int itemId)

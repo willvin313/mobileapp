@@ -7,9 +7,11 @@ using Android.Support.Constraints;
 using Android.Text;
 using Android.Views;
 using Android.Widget;
+using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Giskard.Extensions;
 using Toggl.Giskard.ViewHelpers;
+using Toggl.Multivac;
 using static Toggl.Giskard.Resource.Id;
 
 namespace Toggl.Giskard.ViewHolders
@@ -31,7 +33,6 @@ namespace Toggl.Giskard.ViewHolders
         }
 
         private static readonly int animationDuration = 1000;
-
         private TextView timeEntriesLogCellDescription;
         private TextView addDescriptionLabel;
         private TextView timeEntriesLogCellProjectLabel;
@@ -45,7 +46,8 @@ namespace Toggl.Giskard.ViewHolders
         private View billableIcon;
         private View hasTagsIcon;
         private View whitePadding;
-
+        private View fadeView;
+        private View separator;
         private SpannableFactory spannableFactory = new CopylessSpannableFactory();
 
         private ObjectAnimator animator;
@@ -55,6 +57,7 @@ namespace Toggl.Giskard.ViewHolders
         public bool CanSync => Item.TimeEntryViewModel.CanSync;
 
         public View MainLogContentView { get; private set; }
+
         public Subject<TimeEntryViewModel> ContinueButtonTappedSubject { get; set; }
 
         protected override void InitializeViews()
@@ -72,8 +75,10 @@ namespace Toggl.Giskard.ViewHolders
             billableIcon = ItemView.FindViewById(TimeEntriesLogCellBillable);
             hasTagsIcon = ItemView.FindViewById(TimeEntriesLogCellTags);
             whitePadding = ItemView.FindViewById(TimeEntriesLogCellDurationWhiteArea);
+            fadeView = ItemView.FindViewById(TimeEntriesLogCellDurationGradient);
+            separator = ItemView.FindViewById(Separator);
             MainLogContentView = ItemView.FindViewById(Resource.Id.MainLogContentView);
-
+            
             timeEntriesLogCellContinueButton.Click += onContinueClick;
         }
 
@@ -121,6 +126,15 @@ namespace Toggl.Giskard.ViewHolders
             var layoutParameters = (ConstraintLayout.LayoutParams) whitePadding.LayoutParameters;
             layoutParameters.Width = whitePaddingWidth.DpToPixels(ItemView.Context);
             return layoutParameters;
+        }
+
+        protected override void UpdateTheme(ITheme theme)
+        {
+            separator.SetBackgroundColor(theme.Separator.ToNativeColor());
+            timeEntriesLogCellDescription.SetTextColor(theme.Text.ToNativeColor());
+            MainLogContentView.SetBackgroundColor(theme.CellBackground.ToNativeColor());
+;
+            fadeView.Background = theme.CellBackground.ToTransparentGradient();
         }
 
         protected override void UpdateView()

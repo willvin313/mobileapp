@@ -4,11 +4,13 @@ using System.Reactive.Subjects;
 using Android.Runtime;
 using Android.Support.V7.Widget;
 using Android.Views;
+using Toggl.Foundation.MvvmCross.Themes;
 
 namespace Toggl.Giskard.ViewHolders
 {
     public abstract class BaseRecyclerViewHolder<T> : RecyclerView.ViewHolder
     {
+        private IDisposable themeDisposable;
         private bool viewsAreInitialized = false;
 
         public ISubject<T> TappedSubject { get; set; }
@@ -24,13 +26,17 @@ namespace Toggl.Giskard.ViewHolders
                 if (!viewsAreInitialized)
                 {
                     InitializeViews();
+
+                    themeDisposable = AndroidDependencyContainer.Instance
+                        .ThemeProvider.CurrentTheme
+                        .Subscribe(UpdateTheme);
                     viewsAreInitialized = true;
                 }
 
                 UpdateView();
             }
         }
-
+        
         protected BaseRecyclerViewHolder(View itemView)
             : base(itemView)
         {
@@ -44,6 +50,11 @@ namespace Toggl.Giskard.ViewHolders
 
         protected abstract void InitializeViews();
 
+        protected virtual void UpdateTheme(ITheme theme)
+        {
+
+        }
+        
         protected abstract void UpdateView();
 
         protected override void Dispose(bool disposing)

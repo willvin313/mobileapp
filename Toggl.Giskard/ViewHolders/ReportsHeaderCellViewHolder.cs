@@ -11,6 +11,7 @@ using Android.Views;
 using Android.Widget;
 using MvvmCross.Plugin.Color.Platforms.Android;
 using Toggl.Foundation.Extensions;
+using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Giskard.Extensions;
 using Toggl.Giskard.ViewHelpers;
 using Toggl.Giskard.Views;
@@ -22,7 +23,6 @@ namespace Toggl.Giskard.ViewHolders
 {
     public class ReportsHeaderCellViewHolder : BaseRecyclerViewHolder<ReportsSummaryData>
     {
-
         private static readonly Color disabledColor = Disabled.ToNativeColor();
         private static readonly Color timeSpanNormalColor = TotalTimeActivated.ToNativeColor();
         private static readonly Color percentageNormalColor = PercentageActivated.ToNativeColor();
@@ -32,11 +32,14 @@ namespace Toggl.Giskard.ViewHolders
         private ImageView reportsTotalChartImageView;
         private TextView reportsSummaryBillable;
         private View billablePercentageView;
-
+        private CardView barChartCard;
         private CardView pieChartCard;
         private PieChartView pieChartView;
         private LinearLayout emptyStateView;
-
+        private TextView emptyStateText;
+        private TextView clockedHous;
+        private TextView billableText;
+        private TextView nonBillableText;
         private Drawable reportsTotalChartImageDrawable;
 
         public ISubject<Unit> SummaryCardClicksSubject { get; set; }
@@ -58,11 +61,30 @@ namespace Toggl.Giskard.ViewHolders
             reportsTotalChartImageDrawable = reportsTotalChartImageView.Drawable;
             reportsSummaryBillable = ItemView.FindViewById<TextView>(Resource.Id.ReportsSummaryBillable);
             billablePercentageView = ItemView.FindViewById(Resource.Id.BillablePercentageView);
+            barChartCard = ItemView.FindViewById<CardView>(Resource.Id.BarChartCard);
             pieChartCard = ItemView.FindViewById<CardView>(Resource.Id.PieChartCard);
             pieChartView = ItemView.FindViewById<PieChartView>(Resource.Id.PieChartView);
             emptyStateView = ItemView.FindViewById<LinearLayout>(Resource.Id.EmptyStateView);
+            emptyStateText = ItemView.FindViewById<TextView>(Resource.Id.EmptyStateText);
+            clockedHous = ItemView.FindViewById<TextView>(Resource.Id.ClockedHours);
+            billableText = ItemView.FindViewById<TextView>(Resource.Id.BillableText);
+            nonBillableText = ItemView.FindViewById<TextView>(Resource.Id.NonBillableText);
 
             summaryCard.Click += hideCalendar;
+        }
+
+        protected override void UpdateTheme(ITheme theme)
+        {
+            var cardColor = theme.Card.ToNativeColor().ToArgb();
+            summaryCard.SetCardBackgroundColor(cardColor);
+            barChartCard.SetCardBackgroundColor(cardColor);
+            pieChartCard.SetCardBackgroundColor(cardColor);
+
+            var textColor = theme.Text.ToNativeColor();
+            emptyStateText.SetTextColor(textColor);
+            clockedHous.SetTextColor(textColor);
+            billableText.SetTextColor(textColor);
+            nonBillableText.SetTextColor(textColor);
         }
 
         protected override void UpdateView()

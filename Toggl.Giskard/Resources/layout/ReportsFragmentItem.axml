@@ -6,6 +6,7 @@
     android:layout_marginTop="-2dp"
     android:layout_width="match_parent">
     <android.support.v7.widget.CardView
+        android:id="@+id/CardView"
         android:elevation="2dp"
         local:cardCornerRadius="2dp"
         local:cardBackgroundColor="@android:color/white"
@@ -17,6 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <View
+                android:id="@+id/Separator"
                 android:background="@color/separator"
                 android:layout_height="0.5dp"
                 android:layout_width="match_parent" />
@@ -44,7 +46,7 @@
                 android:layout_centerVertical="true"
                 android:layout_toRightOf="@+id/ReportsFragmentItemProjectName" />
             <View
-                android:id="@+id/ReportsFragmentItemFade"
+                android:id="@+id/FadeView"
                 android:background="@drawable/TransparentToWhiteGradient"
                 android:layout_width="30dp"
                 android:layout_marginTop="1dp"
@@ -52,7 +54,7 @@
                 android:layout_height="match_parent"
                 android:layout_toLeftOf="@+id/ReportsFragmentItemPercentage" />
             <View
-                android:background="@android:color/white"
+                android:background="@android:color/transparent"
                 android:layout_marginTop="1dp"
                 android:layout_marginBottom="1dp"
                 android:layout_width="match_parent"

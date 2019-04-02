@@ -25,6 +25,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true" />
         <View
+            android:id="@+id/FadeView"
             android:background="@drawable/TransparentToWhiteGradient"
             android:layout_width="68dp"
             android:layout_height="match_parent"

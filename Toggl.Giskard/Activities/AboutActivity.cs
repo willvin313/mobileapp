@@ -3,7 +3,9 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Support.V7.Widget;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
+using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Giskard.Extensions;
 using Toggl.Giskard.Extensions.Reactive;
 using Toggl.Multivac.Extensions;
 
@@ -42,6 +44,19 @@ namespace Toggl.Giskard.Activities
         {
             base.Finish();
             OverridePendingTransition(Resource.Animation.abc_fade_in, Resource.Animation.abc_slide_out_right);
+        }
+
+        protected override void OnThemeChanged(ITheme theme)
+        {
+            var separatorColor = theme.Separator.ToNativeColor();
+            licensesSeparator.SetBackgroundColor(separatorColor);
+            privacyPolicySeparator.SetBackgroundColor(separatorColor);
+            termsOfServiceSeparator.SetBackgroundColor(separatorColor);
+
+            var textColor = theme.Text.ToNativeColor();
+            licensesButton.SetTextColor(textColor);
+            privacyPolicyButton.SetTextColor(textColor);
+            termsOfServiceButton.SetTextColor(textColor);
         }
 
         private void setupToolbar()

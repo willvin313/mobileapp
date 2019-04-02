@@ -16,13 +16,13 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|left" />
     <View
+        android:id="@+id/FadeView"
         android:background="@drawable/TransparentToLightGrayGradient"
         android:layout_width="48dp"
         android:layout_marginRight="24dp"
         android:layout_height="match_parent"
         android:layout_gravity="center_vertical|right" />
     <View
-        android:background="@color/lightGray"
         android:layout_width="24dp"
         android:layout_height="match_parent"
         android:layout_gravity="center_vertical|right" />
@@ -34,6 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|right" />
     <View
+        android:id="@+id/Separator"
         android:foregroundTint="#328fff"
         android:background="@color/separator"
         android:layout_height="0.5dp"

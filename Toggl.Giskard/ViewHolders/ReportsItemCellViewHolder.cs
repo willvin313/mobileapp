@@ -1,10 +1,13 @@
 using System;
 using Android.Graphics;
 using Android.Runtime;
+using Android.Support.V7.Widget;
 using Android.Views;
 using Android.Widget;
+using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Foundation.MvvmCross.Transformations;
 using Toggl.Foundation.Reports;
+using Toggl.Giskard.Extensions;
 
 namespace Toggl.Giskard.ViewHolders
 {
@@ -13,6 +16,9 @@ namespace Toggl.Giskard.ViewHolders
         private readonly int lastContainerHeight;
         private readonly int normalContainerHeight;
 
+        private View fadeView;
+        private View separator;
+        private CardView cardView;
         private TextView projectName;
         private TextView clientName;
         private TextView duration;
@@ -38,12 +44,24 @@ namespace Toggl.Giskard.ViewHolders
             ItemView.LayoutParameters = layoutParameters;
         }
 
+        protected override void UpdateTheme(ITheme theme)
+        {
+            var cardColor = theme.Card.ToNativeColor();
+            separator.SetBackgroundColor(cardColor);
+            duration.SetTextColor(theme.Text.ToNativeColor());
+            cardView.SetCardBackgroundColor(cardColor.ToArgb());
+            fadeView.Background = theme.Card.ToTransparentGradient();
+        }
+
         protected override void InitializeViews()
         {
             projectName = ItemView.FindViewById<TextView>(Resource.Id.ReportsFragmentItemProjectName);
             clientName = ItemView.FindViewById<TextView>(Resource.Id.ReportsFragmentItemClientName);
             duration = ItemView.FindViewById<TextView>(Resource.Id.ReportsFragmentItemDuration);
             percentage = ItemView.FindViewById<TextView>(Resource.Id.ReportsFragmentItemPercentage);
+            cardView = ItemView.FindViewById<CardView>(Resource.Id.CardView);
+            separator = ItemView.FindViewById(Resource.Id.Separator);
+            fadeView = ItemView.FindViewById(Resource.Id.FadeView);
         }
 
         protected override void UpdateView()

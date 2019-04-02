@@ -2,10 +2,8 @@
 using System;
 using System.Linq;
 using System.Reactive.Linq;
-using Android.Animation;
 using Android.Content;
 using Android.Graphics;
-using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Support.V7.App;
 using Android.Support.V7.Widget;
@@ -176,6 +174,24 @@ namespace Toggl.Giskard.Fragments
                 .DisposedBy(DisposeBag);
 
             return view;
+        }
+
+        protected override void OnThemeChanged(ITheme currentTheme)
+        {
+            logoutView.SetTextColor(currentTheme.Error.ToNativeColor());
+            View.SetBackgroundColor(currentTheme.Background.ToNativeColor());
+
+            var textColor = currentTheme.Text.ToNativeColor();
+            var separatorColor = currentTheme.Separator.ToNativeColor();
+            foreach (var textView in themeableTextViews)
+            {
+                textView.SetTextColor(textColor);
+            }
+
+            foreach (var separator in separators)
+            {
+                separator.SetBackgroundColor(separatorColor);
+            }
         }
 
         private void showFeedbackSuccessToast(bool succeeeded)

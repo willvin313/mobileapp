@@ -9,6 +9,8 @@ using MvvmCross.Platforms.Android.Binding.BindingContext;
 using MvvmCross.Platforms.Android.Views;
 using MvvmCross.ViewModels;
 using MvvmCross.Views;
+using Toggl.Foundation.MvvmCross.Themes;
+using Toggl.Giskard.Extensions;
 using static Toggl.Giskard.Services.PermissionsServiceAndroid;
 
 namespace Toggl.Giskard.Activities
@@ -16,6 +18,8 @@ namespace Toggl.Giskard.Activities
     public abstract class ReactiveActivity<TViewModel> : MvxEventSourceAppCompatActivity, IMvxAndroidView, IPermissionAskingActivity
         where TViewModel : class, IMvxViewModel
     {
+        private IDisposable themeDisposable;
+
         public CompositeDisposable DisposeBag { get; private set; } = new CompositeDisposable();
 
         protected abstract void InitializeViews();
@@ -70,18 +74,29 @@ namespace Toggl.Giskard.Activities
         {
             base.OnResume();
             ViewModel?.ViewAppeared();
+
+            themeDisposable = AndroidDependencyContainer.Instance
+                .ThemeProvider
+                .CurrentTheme
+                .Subscribe(OnThemeChanged);
         }
 
         protected override void OnPause()
         {
             base.OnPause();
             ViewModel?.ViewDisappearing();
+            themeDisposable?.Dispose();
         }
 
         protected override void OnStop()
         {
             base.OnStop();
             ViewModel?.ViewDisappeared();
+        }
+
+        protected virtual void OnThemeChanged(ITheme theme)
+        {
+            Window.DecorView.RootView.SetBackgroundColor(theme.Background.ToNativeColor());
         }
 
         public void MvxInternalStartActivityForResult(Intent intent, int requestCode)

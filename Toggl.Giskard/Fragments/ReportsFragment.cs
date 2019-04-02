@@ -4,13 +4,15 @@ using Android.OS;
 using Android.Support.V7.App;
 using Android.Support.V7.Widget;
 using Android.Views;
+using MvvmCross.Plugin.Color.Platforms.Android;
 using Toggl.Foundation.MvvmCross.Extensions;
+using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Foundation.MvvmCross.ViewModels.Reports;
 using Toggl.Giskard.Adapters;
+using Toggl.Giskard.Extensions;
 using Toggl.Giskard.Extensions.Reactive;
 using Toggl.Giskard.ViewHelpers;
 using Toggl.Multivac.Extensions;
-using Toolbar = Android.Support.V7.Widget.Toolbar;
 
 namespace Toggl.Giskard.Fragments
 {
@@ -71,6 +73,10 @@ namespace Toggl.Giskard.Fragments
                 .DisposedBy(DisposeBag);
 
             return view;
+        }
+
+        protected override void OnThemeChanged(ITheme currentTheme)
+        {
         }
 
         private void setupReportsRecyclerView()

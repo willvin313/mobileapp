@@ -108,7 +108,6 @@
             android:layout_height="wrap_content">
             <android.support.constraint.ConstraintLayout
                 tools:context=".MainActivity"
-                android:background="@android:color/white"
                 android:layout_height="286dp"
                 android:layout_width="match_parent">
                 <TextView
@@ -222,6 +221,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
             <TextView
+                android:id="@+id/EmptyStateText"
                 android:textSize="20sp"
                 android:textStyle="normal"
                 android:lineSpacingExtra="4sp"

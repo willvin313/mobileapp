@@ -3,6 +3,7 @@
     xmlns:local="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     local:cardUseCompatPadding="true"
+    android:id="@+id/CardView"
     android:layout_width="wrap_content"
     android:layout_height="64dp">
     <FrameLayout
@@ -52,6 +53,7 @@
                 android:layout_toRightOf="@id/TimeEntriesLogCellProjectLabel" />
         </RelativeLayout>
         <View
+            android:id="@+id/FadeView"
             android:layout_gravity="fill_vertical|right"
             android:background="@drawable/TransparentToWhiteGradient"
             android:layout_width="68dp"

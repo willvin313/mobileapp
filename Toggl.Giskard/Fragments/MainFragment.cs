@@ -3,7 +3,6 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using Android.App;
-using Android.Graphics;
 using Android.OS;
 using Android.Support.Design.Widget;
 using Android.Support.V4.Content;
@@ -16,6 +15,7 @@ using Toggl.Foundation.Analytics;
 using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Extensions;
+using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Sync;
 using Toggl.Giskard.Adapters;
@@ -24,11 +24,13 @@ using Toggl.Giskard.Extensions.Reactive;
 using Toggl.Giskard.Helper;
 using Toggl.Giskard.Services;
 using Toggl.Giskard.ViewHelpers;
+using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using static Android.Content.Context;
 using static Toggl.Foundation.Sync.SyncProgress;
 using static Toggl.Giskard.Extensions.CircularRevealAnimation.AnimationType;
 using FoundationResources = Toggl.Foundation.Resources;
+using Color = Android.Graphics.Color;
 
 namespace Toggl.Giskard.Fragments
 {
@@ -134,6 +136,7 @@ namespace Toggl.Giskard.Fragments
             };
             mainRecyclerAdapter.SetupRatingViewVisibility(shouldShowRatingViewOnResume);
 
+
             mainRecyclerAdapter.TimeEntryTaps
                 .Select(te => te.Id)
                 .Subscribe(ViewModel.SelectTimeEntry.Inputs)
@@ -202,6 +205,18 @@ namespace Toggl.Giskard.Fragments
             onCreateStopwatch.Stop();
 
             return view;
+        }
+
+        protected override void OnThemeChanged(ITheme currentTheme)
+        {
+            var cellBgColor = currentTheme.CellBackground.ToNativeColor();
+            runningEntryCardFrame.SetBackgroundColor(cellBgColor);
+            topSeparator.SetBackgroundColor(cellBgColor);
+            bottomSeparator.SetBackgroundColor(cellBgColor);
+
+            runningTimeEntryGradient.Background = currentTheme.CellBackground.ToTransparentGradient();
+
+            timeEntryCardDescriptionLabel.SetTextColor(currentTheme.Text.ToNativeColor());
         }
 
         public ISpannable createProjectClientTaskLabel(IThreadSafeTimeEntry te)

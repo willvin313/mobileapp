@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using Toggl.Foundation.Extensions;
-using Toggl.Foundation.MvvmCross.Transformations;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.MvvmCross.Themes;
+using Toggl.Giskard.Extensions;
 using Toggl.Giskard.ViewHelpers;
-using Toggl.Multivac.Extensions;
 
 namespace Toggl.Giskard.ViewHolders
 {
@@ -37,6 +33,12 @@ namespace Toggl.Giskard.ViewHolders
         {
             mainLogHeaderTitle.Text = Item.DurationText;
             mainLogHeaderDuration.Text = Item.HeaderDate(Now);
+        }
+
+        protected override void UpdateTheme(ITheme theme)
+        {
+            mainLogHeaderTitle.SetTextColor(theme.Text.ToNativeColor());
+            mainLogHeaderDuration.SetTextColor(theme.Text.ToNativeColor());
         }
     }
 }

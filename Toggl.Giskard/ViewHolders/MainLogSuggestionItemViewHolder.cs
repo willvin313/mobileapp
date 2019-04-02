@@ -1,13 +1,14 @@
 ﻿using System;
-using Android.Graphics;
 using Android.Runtime;
 using Android.Support.V7.Widget;
 using Android.Views;
 using Android.Widget;
 using MvvmCross.Commands;
+using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Foundation.Suggestions;
 using Toggl.Giskard.Extensions;
-using Toggl.Giskard.ViewHolders;
+using Toggl.Multivac;
+using Color = Android.Graphics.Color;
 
 namespace Toggl.Giskard.ViewHolders
 {
@@ -21,6 +22,8 @@ namespace Toggl.Giskard.ViewHolders
         public bool IsFirstItem { get; set; }
         public bool IsLastItem { get; set; }
 
+        private View fadeView;
+        private CardView cardView;
         private TextView timeEntriesLogCellDescriptionLabel;
         private TextView timeEntriesLogCellProjectLabel;
         private TextView timeEntriesLogCellClientLabel;
@@ -52,10 +55,20 @@ namespace Toggl.Giskard.ViewHolders
 
         protected override void InitializeViews()
         {
+            fadeView = ItemView.FindViewById(Resource.Id.FadeView);
+            cardView = ItemView.FindViewById<CardView>(Resource.Id.CardView);
             timeEntriesLogCellDescriptionLabel = ItemView.FindViewById<TextView>(Resource.Id.TimeEntriesLogCellDescriptionLabel);
             timeEntriesLogCellProjectLabel = ItemView.FindViewById<TextView>(Resource.Id.TimeEntriesLogCellProjectLabel);
             timeEntriesLogCellClientLabel = ItemView.FindViewById<TextView>(Resource.Id.TimeEntriesLogCellClientLabel);
             timeEntriesLogCellContinueImage = ItemView.FindViewById<ImageView>(Resource.Id.TimeEntriesLogCellContinueImage);
+        }
+
+        protected override void UpdateTheme(ITheme theme)
+        {
+            cardView.SetCardBackgroundColor(theme.Card.ToNativeColor().ToArgb());
+            timeEntriesLogCellDescriptionLabel.SetTextColor(theme.Text.ToNativeColor());
+
+            fadeView.Background = theme.Card.ToTransparentGradient();
         }
 
         protected override void UpdateView()

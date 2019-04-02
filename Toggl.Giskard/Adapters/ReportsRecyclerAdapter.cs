@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.ComponentModel;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -10,13 +7,11 @@ using Android.Runtime;
 using Android.Support.Constraints;
 using Android.Support.V7.Widget;
 using Android.Views;
-using MvvmCross.WeakSubscription;
-using Toggl.Foundation.MvvmCross.ViewModels.Reports;
-using Toggl.Foundation.Reports;
 using Toggl.Giskard.Views;
 using Toggl.Giskard.Extensions;
 using Toggl.Giskard.ViewHelpers;
 using Toggl.Giskard.ViewHolders;
+using Android.Graphics;
 
 namespace Toggl.Giskard.Adapters
 {
@@ -34,11 +29,12 @@ namespace Toggl.Giskard.Adapters
         private const int headerItemsCount = 2;
 
         private BarChartData? currentBarChartData;
-        private string currentWorkspaceName = String.Empty;
+        private string currentWorkspaceName = "";
 
         private readonly ISubject<Unit> summaryCardClicks = new Subject<Unit>();
 
         private ReportsSummaryData currentReportsSummaryData = ReportsSummaryData.Empty();
+
         public IObservable<Unit> SummaryCardClicks => summaryCardClicks.AsObservable();
 
         public ReportsRecyclerAdapter(Context context)

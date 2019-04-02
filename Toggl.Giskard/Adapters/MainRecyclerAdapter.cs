@@ -13,6 +13,7 @@ using Toggl.Giskard.ViewHolders;
 using Toggl.Multivac.Extensions;
 using Toggl.Foundation;
 using Toggl.Giskard.ViewHelpers;
+using Toggl.Foundation.MvvmCross.Themes;
 
 namespace Toggl.Giskard.Adapters
 {
@@ -42,6 +43,7 @@ namespace Toggl.Giskard.Adapters
         private Subject<TimeEntryViewData> timeEntryTappedSubject = new Subject<TimeEntryViewData>();
         private Subject<TimeEntryViewModel> continueTimeEntrySubject = new Subject<TimeEntryViewModel>();
         private Subject<TimeEntryViewModel> deleteTimeEntrySubject = new Subject<TimeEntryViewModel>();
+        private ITheme theme;
 
         public MainRecyclerAdapter(
             ObservableGroupedOrderedCollection<TimeEntryViewModel> items,
@@ -155,7 +157,8 @@ namespace Toggl.Giskard.Adapters
         {
             var mainLogCellStopwatch = StopwatchProvider.Create(MeasuredOperation.CreateMainLogItemViewHolder);
             mainLogCellStopwatch.Start();
-            var mainLogCellViewHolder = new MainLogCellViewHolder(LayoutInflater.FromContext(parent.Context).Inflate(Resource.Layout.MainLogCell, parent, false))
+            var view = LayoutInflater.FromContext(parent.Context).Inflate(Resource.Layout.MainLogCell, parent, false);
+            var mainLogCellViewHolder = new MainLogCellViewHolder(view)
             {
                 TappedSubject = timeEntryTappedSubject,
                 ContinueButtonTappedSubject = continueTimeEntrySubject

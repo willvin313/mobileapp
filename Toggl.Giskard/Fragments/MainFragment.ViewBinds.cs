@@ -27,6 +27,9 @@ namespace Toggl.Giskard.Fragments
         private ViewStub welcomeBackStub;
         private View welcomeBackView;
         private Toolbar toolbar;
+        private View runningTimeEntryGradient;
+        private View topSeparator;
+        private View bottomSeparator;
 
         protected override void InitializeViews(View fragmentView)
         {
@@ -46,6 +49,9 @@ namespace Toggl.Giskard.Fragments
             emptyStateViewStub = fragmentView.FindViewById<ViewStub>(Resource.Id.EmptyStateViewStub);
             welcomeBackStub = fragmentView.FindViewById<ViewStub>(Resource.Id.WelcomeBackViewStub);
             toolbar = fragmentView.FindViewById<Toolbar>(Resource.Id.Toolbar);
+            runningTimeEntryGradient = fragmentView.FindViewById(Resource.Id.RunningTimeEntryGradient);
+            topSeparator = fragmentView.FindViewById(Resource.Id.TopSeparator);
+            bottomSeparator = fragmentView.FindViewById(Resource.Id.BottomSeparator);
         }
     }
 }
