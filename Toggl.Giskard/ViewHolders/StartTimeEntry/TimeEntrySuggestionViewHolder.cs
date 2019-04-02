@@ -47,7 +47,7 @@ namespace Toggl.Giskard.ViewHolders
                 clientNameLabel.Text = Suggestion.ClientName;
                 clientNameLabel.Visibility = ViewStates.Visible;
             }
-            
+
             if (string.IsNullOrEmpty(Suggestion.ProjectName))
             {
                 projectLabel.Visibility = ViewStates.Gone;
@@ -59,10 +59,10 @@ namespace Toggl.Giskard.ViewHolders
             projectLabel.Text = Suggestion.ProjectName;
             projectLabel.SetTextColor(projectColor);
             projectLabel.Visibility = ViewStates.Visible;
-                
+
             if (string.IsNullOrEmpty(Suggestion.TaskName))
             {
-                projectLabel.Visibility = ViewStates.Invisible;
+                taskLabel.Visibility = ViewStates.Invisible;
                 return;
             }
 

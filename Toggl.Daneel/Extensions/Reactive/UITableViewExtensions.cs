@@ -53,7 +53,7 @@ namespace Toggl.Daneel.Extensions.Reactive
                     return;
                 }
 
-                var stopwatchProvider = Mvx.Resolve<IStopwatchProvider>();
+                var stopwatchProvider = IosDependencyContainer.Instance.StopwatchProvider;
                 var stopwatch = stopwatchProvider.Create(MeasuredOperation.Diffing);
                 stopwatch.Start();
 

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LinearLayout
-    xmlns:local="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -16,9 +15,7 @@
         android:layout_height="wrap_content" />
     <android.support.v7.widget.RecyclerView
         android:id="@+id/DaysListRecyclerView"
-        local:MvxBind="ItemsSource BeginningOfWeekCollection; ItemClick SelectBeginningOfWeekCommand"
         android:scrollbars="vertical"
-        local:MvxTemplateSelector="@string/SelectBeginningOfWeekTemplateSelector"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </LinearLayout>

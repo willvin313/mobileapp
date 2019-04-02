@@ -19,8 +19,6 @@
     <ProjectReference Include="..\Toggl.Ultrawave\Toggl.Ultrawave.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="PropertyChanged.Fody" Version="2.2.0" />
-    <PackageReference Include="Fody" Version="2.2.1" />
     <PackageReference Include="MvvmCross" Version="6.1.2" />
   </ItemGroup>
   <ItemGroup>

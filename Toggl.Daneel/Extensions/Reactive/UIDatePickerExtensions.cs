@@ -23,5 +23,8 @@ namespace Toggl.Daneel.Extensions.Reactive
                 .StartWith(reactive.Base.Date.ToDateTimeOffset())
                 .DistinctUntilChanged(d => d.TimeOfDay)
                 .Skip(1);
+
+        public static Action<DateTimeOffset> DateTimeObserver(this IReactive<UIDatePicker> reactive)
+            => dateTime => reactive.Base.SetDate(dateTime.ToNSDate(), true);
     }
 }

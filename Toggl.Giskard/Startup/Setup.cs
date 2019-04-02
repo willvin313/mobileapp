@@ -44,8 +44,6 @@ namespace Toggl.Giskard
             AndroidDependencyContainer.EnsureInitialized(environment, Platform.Giskard, packageInfo.VersionName);
         }
 
-        protected override MvxBindingBuilder CreateBindingBuilder() => new TogglBindingBuilder();
-
         protected override IMvxNavigationService InitializeNavigationService(IMvxViewModelLocatorCollection collection)
         {
             var loader = CreateViewModelLoader(collection);

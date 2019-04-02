@@ -1,20 +1,12 @@
 ﻿using System;
 using System.Reactive.Disposables;
 using Foundation;
-using MvvmCross.Binding.BindingContext;
-using MvvmCross.Commands;
-using MvvmCross.Platforms.Ios.Binding;
-using MvvmCross.Platforms.Ios.Binding.Views;
-using MvvmCross.Plugin.Color;
 using MvvmCross.Plugin.Color.Platforms.Ios;
-using MvvmCross.Plugin.Visibility;
 using MvvmCross.UI;
 using Toggl.Daneel.Cells;
-using Toggl.Daneel.Combiners;
 using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Foundation.Autocomplete.Suggestions;
-using Toggl.Foundation.MvvmCross.Converters;
 using Toggl.Multivac.Extensions;
 using UIKit;
 

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
-using MvvmCross.Commands;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 using Toggl.Foundation.MvvmCross.Parameters;
+using Toggl.Foundation.Services;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
+using Toggl.Multivac.Extensions.Reactive;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels
 {
@@ -13,44 +14,26 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
     public class SelectDateTimeViewModel : MvxViewModel<DateTimePickerParameters, DateTimeOffset>
     {
         private DateTimeOffset defaultResult;
-
         private readonly IMvxNavigationService navigationService;
 
-        private DateTimeOffset currentDateTime;
-        public DateTimeOffset CurrentDateTime
-        {
-            get => currentDateTime;
-            set
-            {
-                var newValue = createDateTimeBasedOnMode(value);
-                if (currentDateTime == newValue) return;
-
-                currentDateTime = newValue.Clamp(MinDate, MaxDate);
-
-                RaisePropertyChanged(nameof(CurrentDateTime));
-            }
-        }
-
-        public bool Is24HoursFormat { get; private set; } = true;
-
         public DateTimeOffset MinDate { get; private set; }
-
         public DateTimeOffset MaxDate { get; private set; }
-       
         public DateTimePickerMode Mode { get; private set; }
+        public bool Is24HoursFormat { get; private set; } = true;
+        public BehaviorRelay<DateTimeOffset> CurrentDateTime { get; private set; }
 
-        public IMvxAsyncCommand CloseCommand { get; }
+        public UIAction CloseCommand { get; }
+        public UIAction SaveCommand { get; }
 
-        public IMvxAsyncCommand SaveCommand { get; set; }
-
-        public SelectDateTimeViewModel(IMvxNavigationService navigationService)
+        public SelectDateTimeViewModel(IRxActionFactory rxActionFactory, IMvxNavigationService navigationService)
         {
+            Ensure.Argument.IsNotNull(rxActionFactory, nameof(rxActionFactory));
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
 
             this.navigationService = navigationService;
 
-            CloseCommand = new MvxAsyncCommand(close);
-            SaveCommand = new MvxAsyncCommand(save);
+            SaveCommand = rxActionFactory.FromAsync(save);
+            CloseCommand = rxActionFactory.FromAsync(close);
         }
 
         public override void Prepare(DateTimePickerParameters parameter)
@@ -58,29 +41,36 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Mode = parameter.Mode;
             MinDate = parameter.MinDate;
             MaxDate = parameter.MaxDate;
-            CurrentDateTime = defaultResult = parameter.CurrentDate;
+            CurrentDateTime = new BehaviorRelay<DateTimeOffset>(parameter.CurrentDate, sanitizeBasedOnMode);
         }
 
-        private DateTimeOffset createDateTimeBasedOnMode(DateTimeOffset dateTime)
+        private DateTimeOffset sanitizeBasedOnMode(DateTimeOffset dateTime)
         {
+            var result = DateTimeOffset.MinValue;
+
             switch (Mode)
             {
                 case DateTimePickerMode.Date:
-                    return defaultResult.ToUniversalTime().WithDate(dateTime.ToUniversalTime());
-                
+                    result = defaultResult.ToUniversalTime().WithDate(dateTime.ToUniversalTime());
+                    break;
+
                 case DateTimePickerMode.Time:
-                    return defaultResult.ToUniversalTime().WithTime(dateTime.ToUniversalTime());
+                    result = defaultResult.ToUniversalTime().WithTime(dateTime.ToUniversalTime());
+                    break;
 
                 case DateTimePickerMode.DateTime:
-                    return dateTime;
+                    result = dateTime;
+                    break;
                 
                 default:
                     throw new NotSupportedException("Invalid DateTimePicker mode");
             }
+
+            return result.Clamp(MinDate, MaxDate);
         }
 
         private Task close() => navigationService.Close(this, defaultResult);
 
-        private Task save() => navigationService.Close(this, CurrentDateTime);
+        private Task save() => navigationService.Close(this, CurrentDateTime.Value);
     }
 }

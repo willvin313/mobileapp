@@ -11,6 +11,7 @@ using NSubstitute;
 using NUnit.Framework;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.Exceptions;
+using Toggl.Foundation.MvvmCross;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.MvvmCross.ViewModels;
@@ -47,6 +48,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     TimeService,
                     SchedulerProvider,
                     RxActionFactory);
+
+            protected override void AdditionalSetup()
+            {
+                var container = new TestDependencyContainer { MockSyncManager = SyncManager };
+                TestDependencyContainer.Initialize(container);
+            }
         }
 
         public sealed class TheConstructor : LoginViewModelTest

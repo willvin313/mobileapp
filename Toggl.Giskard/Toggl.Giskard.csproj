@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\Xamarin.Build.Download.0.4.11\build\Xamarin.Build.Download.props" Condition="Exists('..\packages\Xamarin.Build.Download.0.4.11\build\Xamarin.Build.Download.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -366,16 +366,15 @@
     <Compile Include="Adapters\DiffingStrategies\IdentifierEqualityDiffingStrategy.cs" />
     <Compile Include="Adapters\DiffingStrategies\IDiffingStrategy.cs" />
     <Compile Include="Adapters\ReportsCalendarShortcutAdapter.cs" />
-    <Compile Include="Adapters\SelectCreatableEntityRecyclerAdapter.cs" />
     <Compile Include="Adapters\SelectDurationFormatRecyclerAdapter.cs" />
     <Compile Include="Adapters\SelectTagsRecyclerAdapter.cs" />
     <Compile Include="Activities\SelectProjectActivity.cs" />
     <Compile Include="Adapters\SelectProjectRecyclerAdapter.cs" />
     <Compile Include="Startup\AndroidDependencyContainer.cs" />
+    <Compile Include="Extensions\FloatingActionButtonExtensions.cs" />
     <Compile Include="ViewHolders\StartTimeEntry\SuggestionRecyclerViewHolder.cs" />
     <Compile Include="ViewHolders\StartTimeEntry\ProjectSuggestionViewHolder.cs" />
     <Compile Include="ViewHolders\StartTimeEntry\TimeEntrySuggestionViewHolder.cs" />
-    <Compile Include="Bindings\TextInputLayoutErrorTextTargetBinding.cs" />
     <Compile Include="BroadcastReceivers\SmartAlertCalendarEventBroadcastReceiver.cs" />
     <Compile Include="BroadcastReceivers\TimezoneChangedBroadcastReceiver.cs" />
     <Compile Include="Extensions\ContextExtensions.cs" />
@@ -423,7 +422,6 @@
     </Compile>
     <Compile Include="Services\SharedPreferencesStorageAndroid.cs" />
     <Compile Include="Startup\TogglApplication.cs" />
-    <Compile Include="TemplateSelectors\SelectTagsTemplateSelector.cs" />
     <Compile Include="ViewHelpers\BarChartData.cs" />
     <Compile Include="ViewHelpers\BarChartDayLabel.cs" />
     <Compile Include="ViewHelpers\CopyLessSpannableFactory.cs" />
@@ -444,7 +442,6 @@
     <Compile Include="ViewHolders\MainLogCellViewHolder.cs" />
     <Compile Include="ViewHolders\MainLogSuggestionItemViewHolder.cs" />
     <Compile Include="ViewHolders\MainLogSuggestionsListViewHolder.cs" />
-    <Compile Include="ViewHolders\GuardedMvxRecyclerViewHolder.cs" />
     <Compile Include="ViewHolders\SimpleTextViewHolder.cs" />
     <Compile Include="ViewHolders\SelectDurationFormatViewHolder.cs" />
     <Compile Include="ViewHolders\SelectWorkspaceViewHolder.cs" />
@@ -480,17 +477,8 @@
     <Compile Include="Views\EditDuration\WheelForegroundView.cs" />
     <Compile Include="Views\ReportsCalendarView.cs" />
     <Compile Include="Adapters\MainRecyclerAdapter.cs" />
-    <Compile Include="TemplateSelectors\SelectProjectTemplateSelector.cs" />
-    <Compile Include="Startup\SetupTargetFactories.cs">
-      <DependentUpon>SetupTargetFactories.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Bindings\ViewMarginTargetBinding.cs" />
     <Compile Include="Extensions\LayoutParamsExtensions.cs" />
     <Compile Include="Extensions\NumberExtensions.cs" />
-    <Compile Include="Converters\BoolToConstantOverrides.cs" />
-    <Compile Include="Bindings\DrawableColorTargetBinding.cs" />
-    <Compile Include="TemplateSelectors\SuggestionsTemplateSelector.cs" />
-    <Compile Include="Bindings\EditTextFocusTargetBinding.cs" />
     <Compile Include="Presenters\TogglPresenter.cs" />
     <Compile Include="Activities\StartTimeEntryActivity.cs" />
     <Compile Include="Extensions\VisibilityExtensions.cs" />
@@ -499,71 +487,48 @@
     <Compile Include="Activities\EditTimeEntryActivity.cs" />
     <Compile Include="ApplicationShortcutCreator.cs" />
     <Compile Include="Adapters\StartTimeEntryRecyclerAdapter.cs" />
-    <Compile Include="Adapters\SegmentedRecyclerAdapter.cs" />
     <Compile Include="Autocomplete\AutocompleteExtensions.cs" />
     <Compile Include="Autocomplete\TokenSpan.cs" />
     <Compile Include="Autocomplete\ProjectTokenSpan.cs" />
     <Compile Include="Autocomplete\TagsTokenSpan.cs" />
     <Compile Include="Services\AnalyticsServiceAndroid.cs" />
-    <Compile Include="Fragments\SelectDateTimeFragment.cs" />
-    <Compile Include="Bindings\FabVisibilityTargetBinding.cs" />
     <Compile Include="Extensions\ActivityExtensions.cs" />
     <Compile Include="Helper\ApiAvailability.cs" />
     <Compile Include="Activities\EditProjectActivity.cs" />
     <Compile Include="Activities\EditProjectActivity.ViewBinds.cs">
       <DependentUpon>EditProjectActivity.cs</DependentUpon>
     </Compile>
-    <Compile Include="Adapters\CreateSuggestionSegmentedRecyclerAdapter.cs" />
     <Compile Include="Views\CircleView.cs" />
     <Compile Include="Views\HueSaturationPickerView.cs" />
     <Compile Include="Fragments\SelectColorFragment.cs" />
     <Compile Include="Views\TextInputLayoutWithHelperText.cs" />
     <Compile Include="Views\ValueSlider.cs" />
-    <Compile Include="Converters\DecimalToPercentageValueConverter.cs" />
-    <Compile Include="Views\DurationEditText.cs" />
     <Compile Include="Activities\SelectClientActivity.cs" />
     <Compile Include="Adapters\SelectClientRecyclerAdapter.cs" />
     <Compile Include="Fragments\SelectWorkspaceFragment.cs" />
-    <Compile Include="Bindings\TextViewFontWeightTargetBinding.cs" />
     <Compile Include="Services\LicenseProviderAndroid.cs" />
-    <Compile Include="Views\SelectProjectWithExpandableTasksRecyclerViewHolder.cs" />
     <Compile Include="Fragments\SelectDateFormatFragment.cs" />
     <Compile Include="Fragments\SelectDateFormatFragment.ViewBinds.cs">
       <DependentUpon>SelectDateFormatFragment.cs</DependentUpon>
     </Compile>
     <Compile Include="Fragments\SelectBeginningOfWeekFragment.cs" />
-    <Compile Include="TemplateSelectors\SelectBeginningOfWeekTemplateSelector.cs" />
     <Compile Include="Fragments\SelectDurationFormatFragment.cs" />
     <Compile Include="Fragments\SelectDurationFormatFragment.ViewBinds.cs">
       <DependentUpon>SelectDurationFormatFragment.cs</DependentUpon>
     </Compile>
-    <Compile Include="Converters\TransparentColorValueConverter.cs" />
     <Compile Include="Adapters\ReportsRecyclerAdapter.cs" />
     <Compile Include="Extensions\ViewExtensions.cs" />
-    <Compile Include="TemplateSelectors\ReportsTemplateSelector.cs" />
-    <Compile Include="Converters\ReportPercentageLabelValueConverter.cs" />
-    <Compile Include="Converters\ReportTimeSpanLabelValueConverter.cs" />
-    <Compile Include="Bindings\ViewWidthPercentageTargetBinding.cs" />
     <Compile Include="Views\PieChartView.cs" />
-    <Compile Include="Views\ReportsRecyclerViewHolder.cs" />
-    <Compile Include="Startup\TogglBindingBuilder.cs" />
     <Compile Include="Views\ReportsLinearLayout.cs" />
     <Compile Include="Views\ReportsCalendarDayView.cs" />
     <Compile Include="Adapters\ReportsCalendarRecyclerAdapter.cs" />
     <Compile Include="Views\ReportsCalendarRecyclerView.cs" />
-    <Compile Include="TemplateSelectors\ReportsCalendarTemplateSelector.cs" />
     <Compile Include="Adapters\ReportsCalendarPagerAdapter.cs" />
-    <Compile Include="Bindings\ViewPagerCurrentPageTargetBinding.cs" />
-    <Compile Include="TemplateSelectors\ReportsCalendarShortcutsTemplateSelector.cs" />
     <Compile Include="Activities\OutdatedAppActivity.cs" />
     <Compile Include="Activities\TokenResetActivity.cs" />
     <Compile Include="Tiles\ReportsTileService.cs" />
     <Compile Include="Tiles\NewTimeEntryTileService.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
-    <Compile Include="Bindings\ViewAlphaTargetBinding.cs" />
-    <Compile Include="Bindings\ViewUpsideDownTargetBinding.cs" />
-    <Compile Include="Bindings\ViewHeightTargetBinding.cs" />
-    <Compile Include="Views\SelectCountryRecyclerView.cs" />
     <Compile Include="Activities\SelectCountryActivity.cs" />
     <Compile Include="Helper\VibratorExtensions.cs" />
     <Compile Include="Activities\SignUpActivity.cs" />
@@ -699,10 +664,6 @@
     <AndroidResource Include="Resources\layout\SelectProjectActivityProjectCell.axml" />
     <AndroidResource Include="Resources\layout\SelectProjectActivityTaskCell.axml" />
     <AndroidResource Include="Resources\layout\SelectProjectActivityWorkspaceHeader.axml" />
-    <None Include="Startup\SetupTargetFactories.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>SetupTargetFactories.cs</LastGenOutput>
-    </None>
     <AndroidResource Include="Resources\layout\SelectDateFormatFragment.axml" />
     <AndroidResource Include="Resources\layout\SelectDateFormatFragmentCell.axml" />
     <AndroidResource Include="Resources\layout\SettingsFragmentWorkspaceCell.axml" />

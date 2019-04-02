@@ -5,6 +5,7 @@ using FsCheck.Xunit;
 using NSubstitute;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.Tests.Generators;
 using Xunit;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
@@ -14,19 +15,25 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
         public class SelectDateTimeDialogViewModelTest : BaseViewModelTests<SelectDateTimeViewModel>
         {
             protected override SelectDateTimeViewModel CreateViewModel()
-                => new SelectDateTimeViewModel(NavigationService);
+                => new SelectDateTimeViewModel(RxActionFactory, NavigationService);
 
             protected DateTimePickerParameters GenerateParameterForTime(DateTimeOffset now)
                 => DateTimePickerParameters.WithDates(DateTimePickerMode.DateTime, now, now.AddHours(-1), now.AddHours(+1));
         }
 
-        public class TheConstructor
+        public class TheConstructor : SelectDateTimeDialogViewModelTest
         {
-            [Fact, LogIfTooSlow]
-            public void ThrowsIfTheArgumentIsNull()
+            [Theory, LogIfTooSlow]
+            [ConstructorData]
+            public void ThrowsIfAnyOfTheArgumentsIsNull(
+                bool useRxActionFactory,
+                bool useNavigationService)
             {
+                var rxActionFactory = useRxActionFactory ? RxActionFactory : null;
+                var navigationService = useNavigationService ? NavigationService : null;
+
                 Action tryingToConstructWithEmptyParameter
-                    = () => new SelectDateTimeViewModel(null);
+                    = () => new SelectDateTimeViewModel(rxActionFactory, navigationService);
 
                 tryingToConstructWithEmptyParameter.Should().Throw<ArgumentNullException>();
             }
@@ -43,9 +50,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var parameter = GenerateParameterForTime(now);
                 ViewModel.Prepare(parameter);
 
-                ViewModel.CurrentDateTime = parameter.MaxDate.AddMinutes(3);
+                ViewModel.CurrentDateTime.Accept(parameter.MaxDate.AddMinutes(3));
 
-                ViewModel.CurrentDateTime.Should().Be(parameter.MaxDate);
+                ViewModel.CurrentDateTime.Value.Should().Be(parameter.MaxDate);
             }
 
             [Property]
@@ -57,9 +64,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var parameter = GenerateParameterForTime(now);
                 ViewModel.Prepare(parameter);
 
-                ViewModel.CurrentDateTime = parameter.MinDate.AddMinutes(-3);
+                ViewModel.CurrentDateTime.Accept(parameter.MinDate.AddMinutes(-3));
 
-                ViewModel.CurrentDateTime.Should().Be(parameter.MinDate);
+                ViewModel.CurrentDateTime.Value.Should().Be(parameter.MinDate);
             }
         }
 
@@ -68,7 +75,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task ClosesTheViewModel()
             {
-                await ViewModel.CloseCommand.ExecuteAsync();
+                ViewModel.CloseCommand.Execute();
 
                 await NavigationService.Received().Close(Arg.Is(ViewModel), Arg.Any<DateTimeOffset>());
             }
@@ -82,7 +89,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var parameter = GenerateParameterForTime(now);
                 ViewModel.Prepare(parameter);
 
-                ViewModel.CloseCommand.ExecuteAsync().Wait();
+                ViewModel.CloseCommand.Execute();
 
                 NavigationService.Received().Close(Arg.Is(ViewModel), Arg.Is(now)).Wait();
             }
@@ -93,7 +100,7 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task ClosesTheViewModel()
             {
-                await ViewModel.CloseCommand.ExecuteAsync();
+                ViewModel.CloseCommand.Execute();
 
                 await NavigationService.Received().Close(Arg.Is(ViewModel), Arg.Any<DateTimeOffset>());
             }
@@ -107,9 +114,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var parameter = GenerateParameterForTime(dateTimeOffset);
                 parameter.CurrentDate = now;
                 ViewModel.Prepare(parameter);
-                ViewModel.CurrentDateTime = dateTimeOffset;
+                ViewModel.CurrentDateTime.Accept(dateTimeOffset);
 
-                ViewModel.SaveCommand.ExecuteAsync().Wait();
+                ViewModel.SaveCommand.Execute();
                 
                 NavigationService.Received()
                     .Close(Arg.Is(ViewModel), Arg.Is<DateTimeOffset>(p => p == dateTimeOffset))

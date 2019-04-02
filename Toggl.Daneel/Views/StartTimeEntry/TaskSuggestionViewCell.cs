@@ -1,7 +1,5 @@
 ﻿using System;
 using Foundation;
-using MvvmCross.Binding.BindingContext;
-using MvvmCross.Platforms.Ios.Binding.Views;
 using Toggl.Daneel.Cells;
 using Toggl.Foundation.Autocomplete.Suggestions;
 using UIKit;

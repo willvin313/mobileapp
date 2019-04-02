@@ -1,17 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Reactive.Subjects;
-using MvvmCross.Binding.BindingContext;
-using MvvmCross.Platforms.Ios.Binding;
-using MvvmCross.Platforms.Ios.Binding.Views;
+﻿using System.Reactive.Subjects;
 using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Foundation;
-using Toggl.Foundation.MvvmCross.Converters;
 using Toggl.Foundation.MvvmCross.Helper;
-using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Suggestions;
-using Toggl.Multivac.Extensions;
 using UIKit;
-using static Toggl.Daneel.Extensions.ViewBindingExtensions;
 
 namespace Toggl.Daneel.Suggestions
 {
