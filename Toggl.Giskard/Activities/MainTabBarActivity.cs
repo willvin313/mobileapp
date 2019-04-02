@@ -79,11 +79,17 @@ namespace Toggl.Giskard.Activities
                     calendarFragment.ViewModel = ViewModel.Tabs[2] as CalendarViewModel;
                     fragment = calendarFragment;
                     break;
+                case Resource.Id.MainTabPomodoroItem:
+                    var pomodoroFragment = new PomodoroListingFragment();
+                    pomodoroFragment.ViewModel = ViewModel.Tabs[3] as PomodoroListingViewModel;
+                    fragment = pomodoroFragment;
+                    break;
                 case Resource.Id.MainTabSettinsItem:
                     var settingsFragment = new SettingsFragment();
-                    settingsFragment.ViewModel = ViewModel.Tabs[3] as SettingsViewModel;
+                    settingsFragment.ViewModel = ViewModel.Tabs[4] as SettingsViewModel;
                     fragment = settingsFragment;
                     break;
+               
                 default:
                     throw new ArgumentException($"Unexpected item id {itemId}");
             }

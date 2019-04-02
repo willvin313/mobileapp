@@ -371,6 +371,10 @@
     <Compile Include="Activities\SelectProjectActivity.cs" />
     <Compile Include="Adapters\SelectProjectRecyclerAdapter.cs" />
     <Compile Include="Extensions\FloatingActionButtonExtensions.cs" />
+    <Compile Include="Fragments\Pomodoro\PomodoroListingFragment.cs" />
+    <Compile Include="Fragments\Pomodoro\PomodoroListingFragment.ViewBinds.cs">
+      <DependentUpon>PomodoroListingFragment.cs</DependentUpon>
+    </Compile>
     <Compile Include="ViewHolders\StartTimeEntry\SuggestionRecyclerViewHolder.cs" />
     <Compile Include="ViewHolders\StartTimeEntry\ProjectSuggestionViewHolder.cs" />
     <Compile Include="ViewHolders\StartTimeEntry\TimeEntrySuggestionViewHolder.cs" />
@@ -1132,6 +1136,12 @@
     <AndroidResource Include="Resources\layout\CalendarFragment.axml" />
     <AndroidResource Include="Resources\drawable\CalendarEntryBackground.xml" />
     <AndroidResource Include="Resources\layout\CalendarEntryCell.axml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\PomodoroListingFragment.axml">
+      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
+      <SubType>Designer</SubType>
+    </AndroidResource>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Import Project="..\packages\NETStandard.Library.2.0.0\build\netstandard2.0\NETStandard.Library.targets" Condition="Exists('..\packages\NETStandard.Library.2.0.0\build\netstandard2.0\NETStandard.Library.targets')" />

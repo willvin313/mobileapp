@@ -137,6 +137,7 @@ understand and agree to Toggl\'s</string>
     <string name="Timer">Timer</string>
     <string name="Calendar">Calendar</string>
     <string name="Settings">Settings</string>
+    <string name="Pomodoro">Pomodoro</string>
     <string name="CalendarOnboardingTitle">Get started with Calendar</string>
     <string name="CalendarOnboardingMessage">View your calendar events in Toggl and turn them into time entries with a tap</string>
     <string name="LinkYourCalendars">Link your calendars</string>

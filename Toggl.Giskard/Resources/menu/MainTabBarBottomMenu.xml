@@ -16,7 +16,12 @@
         android:title="@string/Calendar"
         android:icon="@drawable/calendar_light"/>
     
-    <item 
+    <item
+        android:id="@+id/MainTabPomodoroItem"
+        android:title="@string/Pomodoro"
+        android:icon="@drawable/settings_light"/>
+    
+    <item
         android:id="@+id/MainTabSettinsItem"
         android:title="@string/Settings"
         android:icon="@drawable/settings_light"/>
