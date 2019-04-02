@@ -83,6 +83,7 @@ namespace Toggl.Giskard
             var platformInfo = new PlatformInfoAndroid();
             var keyValueStorage = new SharedPreferencesStorageAndroid(sharedPreferences);
             var settingsStorage = new SettingsStorage(appVersion, keyValueStorage);
+            var pomodoroStorage = new PomodoroStorage(keyValueStorage);
             var schedulerProvider = new AndroidSchedulerProvider();
             var permissionsService = new PermissionsServiceAndroid();
             var calendarService = new CalendarServiceAndroid(permissionsService);
@@ -131,6 +132,7 @@ namespace Toggl.Giskard
                     .WithKeyValueStorage(keyValueStorage)
                     .WithUserPreferences(settingsStorage)
                     .WithOnboardingStorage(settingsStorage)
+                    .WithPomodoroStorage(pomodoroStorage)
                     .WithNavigationService(navigationService)
                     .WithPermissionsService(permissionsService)
                     .WithAccessRestrictionStorage(settingsStorage)
