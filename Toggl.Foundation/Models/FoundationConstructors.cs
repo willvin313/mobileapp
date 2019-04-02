@@ -168,7 +168,7 @@ namespace Toggl.Foundation.Models
             User = entity.User == null ? null : Models.User.From(entity.User);
             Project = entity.Project == null ? null : Models.Project.From(entity.Project);
             Workspace = entity.Workspace == null ? null : Models.Workspace.From(entity.Workspace);
-            Tags = entity.Tags == null ? null : entity.Tags.Select(Models.Tag.From);
+            Tags = entity.Tags == null ? null : entity.Tags.Select(Models.Tag.From).ToArray();
             SyncStatus = entity.SyncStatus;
             LastSyncErrorMessage = entity.LastSyncErrorMessage;
             IsDeleted = entity.IsDeleted;
@@ -342,7 +342,7 @@ namespace Toggl.Foundation.Models
             : this(entity as IWorkspaceFeatureCollection)
         {
             Workspace = entity.Workspace == null ? null : Models.Workspace.From(entity.Workspace);
-            DatabaseFeatures = entity.DatabaseFeatures == null ? null : entity.DatabaseFeatures.Select(Models.WorkspaceFeature.From);
+            DatabaseFeatures = entity.DatabaseFeatures == null ? null : entity.DatabaseFeatures.Select(Models.WorkspaceFeature.From).ToArray();
         }
 
         public static WorkspaceFeatureCollection From(IDatabaseWorkspaceFeatureCollection entity)

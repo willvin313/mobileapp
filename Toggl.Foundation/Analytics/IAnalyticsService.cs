@@ -154,6 +154,10 @@ namespace Toggl.Foundation.Analytics
 
         IAnalyticsEvent AppSentToBackground { get; }
 
+        IAnalyticsEvent<bool> GroupTimeEntriesSettingsChanged { get; }
+
+        IAnalyticsEvent<EditTimeEntryOrigin> EditViewOpened { get; }
+
         void Track(string eventName, Dictionary<string, string> parameters = null);
 
         void TrackAnonymized(Exception exception);

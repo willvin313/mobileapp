@@ -9,10 +9,12 @@ namespace Toggl.Daneel.Services
 {
     public sealed class RemoteConfigServiceIos : IRemoteConfigService
     {
-        public RemoteConfigServiceIos(string plistName)
+        private const string remoteConfigDefaultsFileName = "RemoteConfigDefaults";
+
+        public RemoteConfigServiceIos()
         {
             var remoteConfig = RemoteConfig.SharedInstance;
-            remoteConfig.SetDefaults(plistFileName: plistName);
+            remoteConfig.SetDefaults(plistFileName: remoteConfigDefaultsFileName);
         }
 
         public IObservable<RatingViewConfiguration> RatingViewConfiguration

@@ -9,11 +9,12 @@ using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Helper;
 using Toggl.Multivac.Extensions;
 using UIKit;
-using Toggl.Multivac.Extensions;
 
 namespace Toggl.Daneel.ViewSources
 {
-    public sealed class SelectProjectTableViewSource : BaseTableViewSource<string, AutocompleteSuggestion>
+    using ProjectSection = SectionModel<string, AutocompleteSuggestion>;
+
+    public sealed class SelectProjectTableViewSource : BaseTableViewSource<ProjectSection, string, AutocompleteSuggestion>
     {
         private const int headerHeight = 40;
 

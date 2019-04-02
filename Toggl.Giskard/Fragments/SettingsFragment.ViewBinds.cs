@@ -22,6 +22,7 @@ namespace Toggl.Giskard.Fragments
         private View smartRemindersView;
         private View darkThemeView;
         private View smartRemindersViewSeparator;
+        private View groupTimeEntriesView;
 
         private TextView helpView;
         private TextView aboutLabel;
@@ -48,6 +49,7 @@ namespace Toggl.Giskard.Fragments
         private Switch is24hoursModeSwitch;
         private Switch runningTimerNotificationsSwitch;
         private Switch stoppedTimerNotificationsSwitch;
+        private Switch groupTimeEntriesSwitch;
 
         private RecyclerView workspacesRecyclerView;
         private Toolbar toolbar;
@@ -69,6 +71,7 @@ namespace Toggl.Giskard.Fragments
             smartRemindersViewSeparator = fragmentView.FindViewById(Resource.Id.SmartReminderSeparator);
             runningTimerNotificationsView = fragmentView.FindViewById(Resource.Id.SettingsRunningTimerNotificationsView);
             stoppedTimerNotificationsView = fragmentView.FindViewById(Resource.Id.SettingsStoppedTimerNotificationsView);
+            groupTimeEntriesView = fragmentView.FindViewById(Resource.Id.GroupTimeEntriesView);
 
             helpView = fragmentView.FindViewById<TextView>(Resource.Id.SettingsHelpButton);
             logoutView = fragmentView.FindViewById<TextView>(Resource.Id.SettingsLogoutButton);
@@ -89,6 +92,7 @@ namespace Toggl.Giskard.Fragments
             is24hoursModeSwitch = fragmentView.FindViewById<Switch>(Resource.Id.SettingsIs24HourModeSwitch);
             runningTimerNotificationsSwitch = fragmentView.FindViewById<Switch>(Resource.Id.SettingsAreRunningTimerNotificationsEnabledSwitch);
             stoppedTimerNotificationsSwitch = fragmentView.FindViewById<Switch>(Resource.Id.SettingsAreStoppedTimerNotificationsEnabledSwitch);
+            groupTimeEntriesSwitch = fragmentView.FindViewById<Switch>(Resource.Id.GroupTimeEntriesSwitch);
 
             workspacesRecyclerView = fragmentView.FindViewById<RecyclerView>(Resource.Id.SettingsWorkspacesRecyclerView);
             toolbar = fragmentView.FindViewById<Toolbar>(Resource.Id.Toolbar);

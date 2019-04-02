@@ -106,7 +106,6 @@ namespace Toggl.Foundation.DataSources
         {
             switch (origin)
             {
-                case TimeEntryStartOrigin.Continue:
                 case TimeEntryStartOrigin.ContinueMostRecent:
                     timeEntryContinuedSubject.OnNext(timeEntry);
                     break;

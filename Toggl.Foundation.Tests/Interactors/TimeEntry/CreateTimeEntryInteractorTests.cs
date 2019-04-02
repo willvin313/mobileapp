@@ -181,7 +181,7 @@ namespace Toggl.Foundation.Tests.Interactors
         public sealed class TheContinueTimeEntryInteractor : BaseCreateTimeEntryInteractorTest
         {
             protected override IObservable<IDatabaseTimeEntry> CallInteractor(ITimeEntryPrototype prototype)
-                => InteractorFactory.ContinueTimeEntry(prototype).Execute();
+                => InteractorFactory.ContinueTimeEntry(prototype, ContinueTimeEntryMode.SingleTimeEntryContinueButton).Execute();
 
             public TheContinueTimeEntryInteractor()
             {
@@ -194,7 +194,7 @@ namespace Toggl.Foundation.Tests.Interactors
                 await CallInteractor(CreatePrototype(ValidTime, ValidDescription, true, ProjectId));
 
                 AnalyticsService.Received().Track(Arg.Is<StartTimeEntryEvent>(
-                        startTimeEntryEvent => startTimeEntryEvent.Origin == TimeEntryStartOrigin.Continue));
+                    startTimeEntryEvent => startTimeEntryEvent.Origin == TimeEntryStartOrigin.SingleTimeEntryContinueButton));
             }
 
             [Fact, LogIfTooSlow]
@@ -205,6 +205,21 @@ namespace Toggl.Foundation.Tests.Interactors
                 await DataSource.TimeEntries.Received().Create(Arg.Is<IThreadSafeTimeEntry>(
                     te => te.Start == TimeService.CurrentDateTime
                 ));
+            }
+
+            [Theory, LogIfTooSlow]
+            [InlineData(ContinueTimeEntryMode.SingleTimeEntryContinueButton)]
+            [InlineData(ContinueTimeEntryMode.SingleTimeEntrySwipe)]
+            [InlineData(ContinueTimeEntryMode.TimeEntriesGroupContinueButton)]
+            [InlineData(ContinueTimeEntryMode.TimeEntriesGroupSwipe)]
+            public async Task PropagatesCorrectTimeEntryStartOriginToAnalytics(ContinueTimeEntryMode continueMode)
+            {
+                var prototype = CreatePrototype(ValidTime, ValidDescription, true, ProjectId);
+
+                await InteractorFactory.ContinueTimeEntry(prototype, continueMode).Execute();
+
+                AnalyticsService.Received().Track(Arg.Is<StartTimeEntryEvent>(
+                    ev => (int)ev.Origin == (int)continueMode && ev.Origin.ToString() == continueMode.ToString()));
             }
         }
 

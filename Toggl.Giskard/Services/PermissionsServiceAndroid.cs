@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Android;
+using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.Provider;
@@ -76,25 +77,22 @@ namespace Toggl.Giskard.Services
             settingsIntent.AddFlags(ActivityFlags.NewTask);
             settingsIntent.AddFlags(ActivityFlags.NoHistory);
             settingsIntent.AddFlags(ActivityFlags.ExcludeFromRecents);
-
-            var appContext = Mvx.Resolve<IMvxAndroidGlobals>().ApplicationContext;
-            appContext.StartActivity(settingsIntent);
+            
+            Application.Context.StartActivity(settingsIntent);
         }
 
         private bool checkPermissions(params string[] permissionsToCheck)
         {
-            var appContext = Mvx.Resolve<IMvxAndroidGlobals>().ApplicationContext;
-
             foreach (var permission in permissionsToCheck)
             {
                 if (MarshmallowApis.AreAvailable)
                 {
-                    if (ContextCompat.CheckSelfPermission(appContext, permission) != Permission.Granted)
+                    if (ContextCompat.CheckSelfPermission(Application.Context, permission) != Permission.Granted)
                         return false;
                 }
                 else
                 {
-                    if (PermissionChecker.CheckSelfPermission(appContext, permission) != PermissionChecker.PermissionGranted)
+                    if (PermissionChecker.CheckSelfPermission(Application.Context, permission) != PermissionChecker.PermissionGranted)
                         return false;
                 }
             }

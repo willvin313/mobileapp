@@ -31,6 +31,13 @@ namespace Toggl.Giskard.Adapters
         private readonly Subject<TItem> itemTapSubject = new Subject<TItem>();
         private readonly Subject<TSection> headerTapSubject = new Subject<TSection>();
 
+        private IList<SectionModel<TSection, TItem>> items;
+        public IList<SectionModel<TSection, TItem>> Items
+        {
+            get => items;
+            set => setItems(value ?? new List<SectionModel<TSection, TItem>>());
+        }
+
         public IObservable<TItem> ItemTapObservable => itemTapSubject.AsObservable();
 
         protected virtual HashSet<int> ItemViewTypes { get; } = new HashSet<int> { ItemViewType };
@@ -108,7 +115,7 @@ namespace Toggl.Giskard.Adapters
             }
         }
 
-        public void SetItems(IList<CollectionSection<TSection, TItem>> newItems)
+        private void setItems(IList<SectionModel<TSection, TItem>> newItems)
         {
             lock (updateLock)
             {
@@ -125,7 +132,7 @@ namespace Toggl.Giskard.Adapters
             }
         }
 
-        private IEnumerable<Either<TSection, TItem>> flattenItems(IList<CollectionSection<TSection, TItem>> newItems)
+        private IEnumerable<Either<TSection, TItem>> flattenItems(IList<SectionModel<TSection, TItem>> newItems)
         {
             var hasMultipleSections = newItems.Count > 1;
 

@@ -8,6 +8,7 @@ using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Daneel.ViewSources;
 using Toggl.Daneel.ViewSources.Generic.TableView;
 using Toggl.Foundation;
+using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.MvvmCross.ViewModels.Selectable;
@@ -18,9 +19,12 @@ using UIKit;
 
 namespace Toggl.Daneel.ViewControllers.Settings
 {
+    using CalendarSectionModel = SectionModel<Unit, SelectableCalendarNotificationsOptionViewModel>;
+
     [ModalCardPresentation]
     public sealed partial class UpcomingEventsNotificationSettingsViewController : ReactiveViewController<UpcomingEventsNotificationSettingsViewModel>
     {
+
         private const int rowHeight = 44;
 
         public UpcomingEventsNotificationSettingsViewController() : base(nameof(UpcomingEventsNotificationSettingsViewController))
@@ -37,7 +41,7 @@ namespace Toggl.Daneel.ViewControllers.Settings
             TableView.RegisterNibForCellReuse(UpcomingEventsOptionCell.Nib, UpcomingEventsOptionCell.Identifier);
             TableView.RowHeight = rowHeight;
 
-            var source = new CustomTableViewSource<Unit, SelectableCalendarNotificationsOptionViewModel>(
+            var source = new CustomTableViewSource<CalendarSectionModel, Unit, SelectableCalendarNotificationsOptionViewModel>(
                 UpcomingEventsOptionCell.CellConfiguration(UpcomingEventsOptionCell.Identifier),
                 ViewModel.AvailableOptions
             );

@@ -328,7 +328,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
                     analyticsService.EditViewOpenedFromCalendar.Track();
                     var stopwatch = stopwatchProvider.CreateAndStore(MeasuredOperation.EditTimeEntryFromCalendar);
                     stopwatch.Start();
-                    await navigationService.Navigate<EditTimeEntryViewModel, long>(calendarItem.TimeEntryId.Value);
+                    await navigationService.Navigate<EditTimeEntryViewModel, long[]>(new[] { calendarItem.TimeEntryId.Value });
                     break;
 
                 case CalendarItemSource.Calendar:
@@ -382,7 +382,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
             var prototype = duration.AsTimeEntryPrototype(startTime, workspace.Id);
             var timeEntry = await interactorFactory.CreateTimeEntry(prototype, TimeEntryStartOrigin.CalendarTapAndDrag).Execute();
 
-            await navigationService.Navigate<EditTimeEntryViewModel, long>(timeEntry.Id);
+            await navigationService.Navigate<EditTimeEntryViewModel, long[]>(new[] { timeEntry.Id });
         }
 
         private async Task createTimeEntryAtOffset(DateTimeOffset startTime)

@@ -39,7 +39,7 @@ namespace Toggl.Giskard.Activities
                 .DisposedBy(DisposeBag);
 
             ViewModel.CalendarListVisible
-                .Subscribe(toggleCalendarsSwitch.Rx().Checked())
+                .Subscribe(toggleCalendarsSwitch.Rx().CheckedObserver())
                 .DisposedBy(DisposeBag);
 
             ViewModel.CalendarListVisible
@@ -49,7 +49,7 @@ namespace Toggl.Giskard.Activities
             ViewModel
                 .Calendars
                 .Select(calendars => calendars.ToList())
-                .Subscribe(userCalendarsAdapter.SetItems)
+                .Subscribe(userCalendarsAdapter.Rx().Items())
                 .DisposedBy(DisposeBag);
 
             userCalendarsAdapter

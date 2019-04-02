@@ -3,28 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Text;
 using FluentAssertions;
 using FsCheck;
 using FsCheck.Xunit;
 using NSubstitute;
-using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.DTOs;
-using Toggl.Foundation.Models;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Foundation.Tests.Generators;
-using Toggl.PrimeRadiant.Models;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Tests.Mocks;
 using Xunit;
-using static Toggl.Foundation.Helper.Constants;
-using static Toggl.Multivac.Extensions.StringExtensions;
 using Task = System.Threading.Tasks.Task;
-using Toggl.Foundation.Tests.Mocks;
+using Toggl.Foundation.Tests.TestExtensions;
+using Toggl.Multivac;
+using ProjectClientTaskInfo = Toggl.Foundation.MvvmCross.ViewModels.EditTimeEntryViewModel.ProjectClientTaskInfo;
+using Microsoft.Reactive.Testing;
+using Toggl.Multivac.Extensions;
+using Toggl.Foundation.Extensions;
+using static Toggl.Foundation.Helper.Constants;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 {
@@ -32,45 +32,246 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
     {
         public abstract class EditTimeEntryViewModelTest : BaseViewModelTests<EditTimeEntryViewModel>
         {
-            protected const long Id = 10;
+            protected static readonly string WorkspaceName = "The best workspace ever";
+            protected static readonly string ProjectName = "Very nice project";
+            protected static readonly string ProjectColor = "#000000";
+            protected static readonly string ClientName = "Bobby tables";
+            protected static readonly string TaskName = "It's compiling.";
+            protected static readonly long WorkspaceIdWithBillableAvailable = 100;
+            protected static readonly long WorkspaceIdWithoutBillableAvailable = 200;
+            protected static readonly string Description = "Sample description";
+            protected static readonly string StringSample = "Lorem ipsum.";
+            protected static readonly long[] EmptyArray = new long[] { };
+            protected static readonly long[] NullArray = null;
+            protected static readonly long[] TimeEntriesGroupIds = new long[] { 123, 456, 789 };
+            protected static long[] SingleTimeEntryId => TimeEntriesGroupIds.Take(1).ToArray();
+            protected static readonly DateTimeOffset Now = DateTimeOffset.Now;
+            protected static readonly TimeSpan OneHour = TimeSpan.FromHours(1);
+            protected static readonly int TagCount = 4;
 
-            protected readonly TimeSpan Duration = TimeSpan.FromHours(1);
+            protected static string TagNameFromId(long id) => $"Tag {id}";
+            protected static IThreadSafeTag TagFromId(long id, IThreadSafeWorkspace workspace)
+                => new MockTag(id, workspace) { Name = TagNameFromId(id) };
 
-            protected IThreadSafeTimeEntry TheTimeEntry;
+            protected static readonly MockWorkspace InaccessibleWorkspace
+                = new MockWorkspace(WorkspaceIdWithBillableAvailable, true);
 
-            protected void ConfigureEditedTimeEntry(DateTimeOffset now, bool isRunning = false)
+            protected static readonly MockWorkspace WorkspaceWithBillableAvailable
+                = new MockWorkspace(WorkspaceIdWithBillableAvailable);
+
+            protected static readonly MockWorkspace WorkspaceWithoutBillableAvailable
+                = new MockWorkspace(WorkspaceIdWithoutBillableAvailable);
+
+            protected override void AdditionalSetup()
             {
-                var workspace = new MockWorkspace { Id = 11 };
-                var user = new MockUser { Id = 12 };
-                var project = new MockProject { Id = 13 };
-                var task = new MockTask { Id = 14 };
+                var nowObservable = Observable.Return(Now);
+                TimeService.CurrentDateTime.Returns(Now);
+                TimeService.CurrentDateTimeObservable.Returns(nowObservable);
+            }
 
-                TheTimeEntry = new MockTimeEntry
+            protected override EditTimeEntryViewModel CreateViewModel()
+                => new EditTimeEntryViewModel(
+                    TimeService,
+                    DataSource,
+                    SyncManager,
+                    InteractorFactory,
+                    NavigationService,
+                    OnboardingStorage,
+                    DialogService,
+                    AnalyticsService,
+                    StopwatchProvider,
+                    RxActionFactory,
+                    SchedulerProvider);
+        }
+
+        public abstract class InitializableEditTimeEntryViewModelTest : EditTimeEntryViewModelTest
+        {
+            protected IEnumerable<MockTimeEntry> entries;
+            protected long[] TimeEntriesIds { get; set; }
+
+            public InitializableEditTimeEntryViewModelTest() : this(SingleTimeEntryId)
+            {
+            }
+
+            public InitializableEditTimeEntryViewModelTest(long[] ids)
+            {
+                TimeEntriesIds = ids;
+
+                AdjustTimeEntries(TimeEntriesIds, te => te);
+
+                SetupPreferences(
+                    false,
+                    DateFormat.FromLocalizedDateFormat("DD.MM.YYYY"),
+                    TimeFormat.TwelveHoursFormat,
+                    DurationFormat.Improved);
+
+                SetupBillableAvailabilityInteractors();
+
+                SetupDataSource();
+            }
+
+            protected virtual void AdjustTimeEntries(long[] ids, Func<MockTimeEntry, MockTimeEntry> timeEntryModifier)
+            {
+                ViewModel.Prepare(ids);
+                SetupTimeEntries(ids, (te, index) => timeEntryModifier(te));
+            }
+
+            protected virtual void SetupTimeEntries(long[] ids, Func<MockTimeEntry, int, MockTimeEntry> timeEntryModifier)
+            {
+                entries = ids
+                   .Select(id => CreateTimeEntry(Now, id, false))
+                   .Select(timeEntryModifier)
+                   .ToList();
+                var observable = Observable.Return(entries);
+
+                InteractorFactory
+                    .GetMultipleTimeEntriesById(Arg.Any<long[]>())
+                    .Execute()
+                    .Returns(observable);
+            }
+
+            protected virtual void SetupPreferences(bool collapse, DateFormat dateFormat, TimeFormat timeFormat, DurationFormat durationFormat)
+            {
+                var preferences = new MockPreferences
                 {
-                    Id = Id,
+                    Id = 1,
+                    CollapseTimeEntries = collapse,
+                    DateFormat = dateFormat,
+                    TimeOfDayFormat = timeFormat,
+                    DurationFormat = durationFormat
+                };
+
+                var observable = Observable.Return(preferences);
+
+                InteractorFactory
+                    .GetPreferences()
+                    .Execute()
+                    .Returns(observable);
+            }
+
+            protected virtual void SetupBillableAvailabilityInteractors()
+            {
+                var trueObservable = Observable.Return(true);
+                var falseObservable = Observable.Return(false);
+
+                InteractorFactory
+                    .IsBillableAvailableForWorkspace(Arg.Is(WorkspaceIdWithBillableAvailable))
+                    .Execute()
+                    .Returns(trueObservable);
+
+                InteractorFactory
+                    .IsBillableAvailableForWorkspace(Arg.Is(WorkspaceIdWithoutBillableAvailable))
+                    .Execute()
+                    .Returns(falseObservable);
+            }
+
+            protected virtual void SetupDataSource()
+            {
+            }
+
+            protected MockTimeEntry CreateTimeEntry(DateTimeOffset time, long id, bool isRunning)
+            {
+                var user = new MockUser { Id = 1 };
+
+                var workspace = new MockWorkspace(WorkspaceIdWithBillableAvailable)
+                {
+                    Name = WorkspaceName
+                };
+
+                var client = new MockClient(2, workspace)
+                {
+                    Name = ClientName
+                };
+
+                var project = new MockProject(3, workspace, client)
+                {
+                    Name = ProjectName,
+                    Color = ProjectColor,
+                    Active = true
+                };
+
+                var task = new MockTask(4, workspace, project)
+                {
+                    Name = TaskName
+                };
+
+                var tags = Enumerable.Range(0, TagCount)
+                    .Select(tagId => TagFromId(tagId, workspace))
+                    .ToArray();
+
+                return new MockTimeEntry
+                {
+                    Id = id,
                     Task = task,
                     TaskId = task.Id,
                     UserId = user.Id,
                     Project = project,
-                    TagIds = new long[0],
                     Workspace = workspace,
                     ProjectId = project.Id,
-                    At = now.AddHours(-2),
-                    Start = now.AddHours(-2),
-                    Description = "Something",
+                    At = time.AddHours(-2),
+                    Start = time.AddHours(-2),
+                    Description = Description,
                     WorkspaceId = workspace.Id,
-                    Duration = isRunning ? (long?)null : (long)Duration.TotalSeconds
+                    Tags = tags,
+                    TagIds = tags.Select(tag => tag.Id).ToArray(),
+                    Duration = isRunning ? (long?)null : (long)OneHour.TotalSeconds
                 };
-
-                var observable = Observable.Return(TheTimeEntry);
-
-                InteractorFactory.GetTimeEntryById(Arg.Is(Id)).Execute().Returns(observable);
-
-                TimeService.CurrentDateTime.Returns(now);
             }
 
-            protected override EditTimeEntryViewModel CreateViewModel()
-                => new EditTimeEntryViewModel(TimeService, DataSource, SyncManager, InteractorFactory, NavigationService, OnboardingStorage, DialogService, AnalyticsService, StopwatchProvider);
+            protected static EditTimeEntryDto CreateDtoFromTimeEntry(IThreadSafeTimeEntry timeEntry)
+            {
+                return new EditTimeEntryDto
+                {
+                    Id = timeEntry.Id,
+                    Description = timeEntry.Description,
+                    StartTime = timeEntry.Start,
+                    StopTime = CalculateStopTime(timeEntry.Start, timeEntry.TimeSpanDuration()),
+                    ProjectId = timeEntry.ProjectId,
+                    TaskId = timeEntry.TaskId,
+                    Billable = timeEntry.Billable,
+                    WorkspaceId = timeEntry.WorkspaceId,
+                    TagIds = timeEntry.TagIds
+                };
+            }
+
+            protected static bool DtosEqualTimeEntries(IEnumerable<EditTimeEntryDto> dtos, IEnumerable<IThreadSafeTimeEntry> timeEntries)
+            {
+                var orderedDtos = dtos.OrderBy(dto => dto.Id);
+                var orderedTimeEntries = timeEntries.OrderBy(te => te.Id);
+
+                var areEqual = Enumerable
+                    .Zip(orderedDtos, orderedTimeEntries, DtoEqualsTimeEntry)
+                    .Select(equal => !equal)
+                    .None(CommonFunctions.Identity);
+
+                return areEqual;
+            }
+
+            protected static bool DtoEqualsTimeEntry(EditTimeEntryDto dto, IThreadSafeTimeEntry timeEntry)
+                => dto.Equals(CreateDtoFromTimeEntry(timeEntry));
+
+            protected static DateTimeOffset? CalculateStopTime(DateTimeOffset start, TimeSpan? duration)
+                => duration.HasValue ? start + duration : null;
+
+            protected IInteractor<IObservable<IEnumerable<IThreadSafeTimeEntry>>> SetupUpdateInteractor(
+                IEnumerable<IThreadSafeTimeEntry> entries)
+            {
+                var timeEntryObservable = Observable.Return(entries);
+                var interactor = Substitute.For<IInteractor<IObservable<IEnumerable<IThreadSafeTimeEntry>>>>();
+                interactor
+                    .Execute()
+                    .Returns(timeEntryObservable);
+                InteractorFactory
+                     .UpdateMultipleTimeEntries(Arg.Any<EditTimeEntryDto[]>())
+                     .Returns(interactor);
+
+                return interactor;
+            }
+        }
+
+        public abstract class GroupedTimeEntriesEditTimeEntryViewModelTest : InitializableEditTimeEntryViewModelTest
+        {
+            public GroupedTimeEntriesEditTimeEntryViewModelTest() : base(TimeEntriesGroupIds) { }
         }
 
         public sealed class TheConstructor : EditTimeEntryViewModelTest
@@ -86,7 +287,9 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 bool useOnboardingStorage,
                 bool useDialogService,
                 bool useAnalyticsService,
-                bool useStopwatchProvider)
+                bool useStopwatchProvider,
+                bool useRxActionFactory,
+                bool useSchedulerProvider)
             {
                 var dataSource = useDataSource ? DataSource : null;
                 var syncManager = useSyncManager ? SyncManager : null;
@@ -97,28 +300,606 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var interactorFactory = useInteractorFactory ? InteractorFactory : null;
                 var analyticsService = useAnalyticsService ? AnalyticsService : null;
                 var stopwatchProvider = useStopwatchProvider ? StopwatchProvider : null;
+                var rxActionFactory = useRxActionFactory ? RxActionFactory : null;
+                var schedulerProvider = useSchedulerProvider ? SchedulerProvider : null;
 
                 Action tryingToConstructWithEmptyParameters =
-                    () => new EditTimeEntryViewModel(timeService, dataSource, syncManager, interactorFactory, navigationService, onboardingStorage, dialogService, analyticsService, stopwatchProvider);
+                    () => new EditTimeEntryViewModel(
+                        timeService,
+                        dataSource,
+                        syncManager,
+                        interactorFactory,
+                        navigationService,
+                        onboardingStorage,
+                        dialogService,
+                        analyticsService,
+                        stopwatchProvider,
+                        rxActionFactory,
+                        schedulerProvider);
 
                 tryingToConstructWithEmptyParameters.Should().Throw<ArgumentNullException>();
             }
         }
 
-        public sealed class TheCloseCommand : EditTimeEntryViewModelTest
+        public sealed class ThePrepareMethod : EditTimeEntryViewModelTest
         {
-            public TheCloseCommand()
+            [Fact, LogIfTooSlow]
+            public void ThrowsIfReceivedEmptyArray()
             {
-                ConfigureEditedTimeEntry(DateTimeOffset.Now, true);
+                Action work = () => ViewModel.Prepare(EmptyArray);
 
-                ViewModel.Prepare(Id);
-                ViewModel.Initialize().Wait();
+                work.Should().Throw<ArgumentException>();
             }
 
             [Fact, LogIfTooSlow]
+            public void ThrowsIfReceivedNullArray()
+            {
+                Action work = () => ViewModel.Prepare(NullArray);
+
+                work.Should().Throw<ArgumentException>();
+            }
+        }
+
+        public sealed class TheTimeEntryIdsProperty : EditTimeEntryViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public void ContainsCorrectIdsAfterPrepareStep()
+            {
+                ViewModel.Prepare(TimeEntriesGroupIds);
+
+                ViewModel.TimeEntryIds.Should().BeEquivalentTo(TimeEntriesGroupIds);
+            }
+        }
+
+        public sealed class TheTimeEntryIdProperty : EditTimeEntryViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public void ContainsCorrectIdAfterPrepareStep()
+            {
+                ViewModel.Prepare(TimeEntriesGroupIds);
+
+                ViewModel.TimeEntryId.Should().Be(TimeEntriesGroupIds.First());
+            }
+        }
+
+        public sealed class TheIsEditingGroupProperty : EditTimeEntryViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public void ReturnsTrueForTimeEntriesGroup()
+            {
+                ViewModel.Prepare(TimeEntriesGroupIds);
+
+                ViewModel.IsEditingGroup.Should().BeTrue();
+            }
+
+            [Fact, LogIfTooSlow]
+            public void ReturnsFalseForSingleTimeEntry()
+            {
+                ViewModel.Prepare(SingleTimeEntryId);
+
+                ViewModel.IsEditingGroup.Should().BeFalse();
+            }
+        }
+
+        public sealed class TheGroupCountProperty : EditTimeEntryViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public void ReturnsCorrectValueForTimeEntriesGroup()
+            {
+                ViewModel.Prepare(TimeEntriesGroupIds);
+
+                ViewModel.GroupCount.Should().Be(TimeEntriesGroupIds.Length);
+            }
+
+            [Fact, LogIfTooSlow]
+            public void ReturnsCorrectValueForSingleTimeEntry()
+            {
+                ViewModel.Prepare(SingleTimeEntryId);
+
+                ViewModel.GroupCount.Should().Be(SingleTimeEntryId.Length);
+            }
+        }
+
+        public sealed class TheGroupDurationProperty : InitializableEditTimeEntryViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public async Task ReturnsCorrectSumForTimeEntries()
+            {
+                var expectedDuration = OneHour * (TimeEntriesGroupIds.Length * (TimeEntriesGroupIds.Length + 1) / 2.0);
+
+                int i = 0;
+                AdjustTimeEntries(TimeEntriesGroupIds, te =>
+                {
+                    te.Duration = ++i * (long)OneHour.TotalSeconds;
+                    return te;
+                });
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                ViewModel.GroupDuration.Should().Be(expectedDuration);
+            }
+        }
+
+        public sealed class TheDescriptionProperty : InitializableEditTimeEntryViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public async Task ReturnsStringFromLoadedTimeEntry()
+            {
+                var observer = TestScheduler.CreateObserverFor(ViewModel.Description);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().Be(Description);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task EmitsChangesToRelay()
+            {
+                var observer = TestScheduler.CreateObserverFor(ViewModel.Description);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+                ViewModel.Description.Accept(StringSample);
+
+                observer.LastEmittedValue().Should().Be(StringSample);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task TrimsValueOnChange()
+            {
+                var dirtyString = $" \t{StringSample}  ";
+                var observer = TestScheduler.CreateObserverFor(ViewModel.Description);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+                ViewModel.Description.Accept(dirtyString);
+
+                observer.LastEmittedValue().Should().Be(StringSample);
+            }
+        }
+
+        public sealed class TheSyncErrorMessageProperty : InitializableEditTimeEntryViewModelTest
+        {
+            private const string lastSyncError = "This time entry been naughty!";
+
+            [Fact, LogIfTooSlow]
+            public async Task ReturnsLastSyncError()
+            {
+                AdjustTimeEntries(TimeEntriesIds, te =>
+                {
+                    te.LastSyncErrorMessage = lastSyncError;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.SyncErrorMessage);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().Be(lastSyncError);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task ReturnsCorrectMessageForInaccessibleTimeEntry()
+            {
+                AdjustTimeEntries(TimeEntriesIds, te =>
+                {
+                    te.Workspace = InaccessibleWorkspace;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.SyncErrorMessage);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().Be(Resources.InaccessibleTimeEntryErrorMessage);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task ReturnsCorrectMessageForGroupTimeEntries()
+            {
+                var expectedMessage = string.Format(Resources.TimeEntriesGroupSyncErrorMessage, 1, TimeEntriesGroupIds.Length);
+                ViewModel.Prepare(TimeEntriesGroupIds);
+                SetupTimeEntries(TimeEntriesGroupIds, (te, index) =>
+                {
+                    te.Workspace = index > 0 ? te.Workspace : InaccessibleWorkspace;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.SyncErrorMessage);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().Be(expectedMessage);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task ReturnsEmptyStringWhenTimeEntriesContainNoError()
+            {
+                var observer = TestScheduler.CreateObserverFor(ViewModel.SyncErrorMessage);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().Be(string.Empty);
+            }
+        }
+
+        public sealed class TheIsSyncErrorMessageVisibleProperty : InitializableEditTimeEntryViewModelTest
+        {
+            private const string lastSyncError = "This time entry been naughty!";
+
+            [Theory, LogIfTooSlow]
+            [InlineData(false, false, false, false)]
+            [InlineData(false, false, true, true)]
+            [InlineData(false, true, false, true)]
+            [InlineData(false, true, true, true)]
+            [InlineData(true, false, false, false)]
+            [InlineData(true, false, true, true)]
+            [InlineData(true, true, false, true)]
+            [InlineData(true, true, true, true)]
+            public async Task ReturnsExpectedIsSyncErrorMessageVisibleValue(bool isGrouped, bool hasError, bool isInaccessible, bool expectedValue)
+            {
+                var ids = isGrouped ? TimeEntriesGroupIds : SingleTimeEntryId;
+                ViewModel.Prepare(ids);
+                SetupTimeEntries(ids, (te, index) =>
+                {
+                    te.LastSyncErrorMessage = index == 0 && hasError
+                        ? lastSyncError
+                        : te.LastSyncErrorMessage;
+                    te.Workspace = index == 0 && isInaccessible
+                        ? InaccessibleWorkspace
+                        : te.Workspace;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.IsSyncErrorMessageVisible);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().Be(expectedValue);
+            }
+        }
+
+        public sealed class TheIsBillableAvailableProperty : InitializableEditTimeEntryViewModelTest
+        {
+            [Theory, LogIfTooSlow]
+            [InlineData(true)]
+            [InlineData(false)]
+            public async Task ReturnsExpectedIsBillableAvailableValue(bool isBillableAvailable)
+            {
+                AdjustTimeEntries(TimeEntriesIds, te =>
+                {
+                    te.WorkspaceId = isBillableAvailable
+                        ? WorkspaceIdWithBillableAvailable
+                        : WorkspaceIdWithoutBillableAvailable;
+                    te.Workspace = isBillableAvailable
+                        ? WorkspaceWithBillableAvailable
+                        : WorkspaceWithoutBillableAvailable;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.IsBillableAvailable);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().Be(isBillableAvailable);
+            }
+        }
+
+        public sealed class TheIsBillableProperty : InitializableEditTimeEntryViewModelTest
+        {
+            [Theory, LogIfTooSlow]
+            [InlineData(false)]
+            [InlineData(true)]
+            public async Task ReturnsExpectedValueAfterInitialization(bool isBillable)
+            {
+                AdjustTimeEntries(TimeEntriesIds, te =>
+                {
+                    te.Billable = isBillable;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.IsBillable);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().Be(isBillable);
+            }
+        }
+
+        public sealed class TheStartTimeProperty : InitializableEditTimeEntryViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public async Task ReturnsExpectedValueAfterInitialization()
+            {
+                var startTime = DateTimeOffset.Now;
+                AdjustTimeEntries(TimeEntriesIds, te =>
+                {
+                    te.Start = startTime;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.StartTime);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().Be(startTime);
+            }
+        }
+
+        public sealed class TheDurationProperty : InitializableEditTimeEntryViewModelTest
+        {
+            private readonly TimeSpan oneSecond = TimeSpan.FromSeconds(1);
+
+            protected override void AdditionalSetup()
+            {
+                base.AdditionalSetup();
+
+                TimeService.CurrentDateTimeObservable.Returns(
+                    Observable.Interval(TimeSpan.FromSeconds(1), TestScheduler).Select(n =>
+                    {
+                        var now = Now + (n + 1) * TimeSpan.FromSeconds(1);
+                        TimeService.CurrentDateTime.Returns(now);
+                        return now;
+                    }));
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task ReturnsValidDurationForRunningTimeEntryWithoutAnyDelay()
+            {
+                AdjustTimeEntries(TimeEntriesIds, te =>
+                {
+                    te.Start = Now - OneHour;
+                    te.Duration = null;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.Duration);
+
+                await ViewModel.Initialize();
+                TestScheduler.AdvanceBy(TimeSpan.FromSeconds(3).Ticks + 1);
+
+                observer.Messages.AssertEqual(
+                    OnNext(1, OneHour),
+                    OnNext(oneSecond.Ticks + 1, OneHour + oneSecond),
+                    OnNext(2 * oneSecond.Ticks + 1, OneHour + 2 * oneSecond),
+                    OnNext(3 * oneSecond.Ticks + 1, OneHour + 3 * oneSecond));
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task ReturnsValidDurationForStoppedTimeEntry()
+            {
+                var observer = TestScheduler.CreateObserverFor(ViewModel.Duration);
+
+                await ViewModel.Initialize();
+                TestScheduler.AdvanceBy(TimeSpan.FromSeconds(3).Ticks);
+
+                observer.Messages.AssertEqual(OnNext(1, OneHour));
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task StopsTickingWhenTheTimeEntryIsStopped()
+            {
+                AdjustTimeEntries(TimeEntriesIds, te =>
+                {
+                    te.Start = Now - OneHour;
+                    te.Duration = null;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.Duration);
+
+                await ViewModel.Initialize();
+                TestScheduler.AdvanceBy(TimeSpan.FromSeconds(3).Ticks);
+                ViewModel.StopTimeEntry.Execute();
+                TestScheduler.AdvanceBy(TimeSpan.FromSeconds(3).Ticks);
+
+                observer.Messages.AssertEqual(
+                    OnNext(1, OneHour),
+                    OnNext(oneSecond.Ticks + 1, OneHour + oneSecond),
+                    OnNext(2 * oneSecond.Ticks + 1, OneHour + 2 * oneSecond),
+                    OnNext(3 * oneSecond.Ticks + 1, OneHour + 3 * oneSecond));
+            }
+        }
+
+        public sealed class TheStopTimeProperty : InitializableEditTimeEntryViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public async Task ReturnsValidTimeForRunningTimeEntry()
+            {
+                AdjustTimeEntries(TimeEntriesIds, te =>
+                {
+                    te.Duration = null;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.StopTime);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().Be(null);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task ReturnsValidTimeForStoppedTimeEntry()
+            {
+                AdjustTimeEntries(TimeEntriesIds, te =>
+                {
+                    te.Start = Now - OneHour;
+                    te.Duration = (long)OneHour.TotalSeconds;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.StopTime);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().Be(Now);
+            }
+        }
+
+        public sealed class TheIsTimeEntryRunningProperty : InitializableEditTimeEntryViewModelTest
+        {
+            [Theory, LogIfTooSlow]
+            [InlineData(false)]
+            [InlineData(true)]
+            public async Task ReturnsTrueForRunningTimeEntry(bool isRunning)
+            {
+                AdjustTimeEntries(TimeEntriesIds, te =>
+                {
+                    te.Start = Now - OneHour;
+                    te.Duration = isRunning
+                        ? (long?)null
+                        : (long)OneHour.TotalSeconds;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.IsTimeEntryRunning);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().Be(isRunning);
+            }
+        }
+
+        public sealed class TheProjectClientTaskProperty : InitializableEditTimeEntryViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public async Task ReturnsExpectedValueAfterInitialization()
+            {
+                var expectedValue = new ProjectClientTaskInfo(ProjectName, ProjectColor, ClientName, TaskName);
+
+                var observer = TestScheduler.CreateObserverFor(ViewModel.ProjectClientTask);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().Be(expectedValue);
+            }
+
+            [Theory, LogIfTooSlow]
+            [InlineData(true)]
+            [InlineData(false)]
+            public async Task HasProjectHasCorrectValueDependingOnProjectBeingSet(bool isProjectSet)
+            {
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    if (!isProjectSet)
+                    {
+                        te.ProjectId = null;
+                        te.Project = null;
+                        te.Task = null;
+                        te.TaskId = null;
+                    }
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.ProjectClientTask);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().HasProject.Should().Be(isProjectSet);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task TaskIsNullWhenItIsNotSet()
+            {
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    te.Task = null;
+                    te.TaskId = null;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.ProjectClientTask);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Task.Should().BeNull();
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task ClientIsNullWhenItIsNotSet()
+            {
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    te.Project = new MockProject(te.Project.Id, te.Project.Workspace, client: null) { Active = true };
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.ProjectClientTask);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Client.Should().BeNull();
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task ReturnsEmptyProjectClientTaskInfoWhenProjectAndTaskAreNotSet()
+            {
+                var expectedValue = ProjectClientTaskInfo.Empty;
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    te.Project = new MockProject(te.Project.Id, te.Project.Workspace, client: null) { Active = true };
+                    te.Task = null;
+                    te.TaskId = null;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.ProjectClientTask);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().Be(expectedValue);
+            }
+        }
+
+        public sealed class TheTagsProperty : InitializableEditTimeEntryViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public async Task ReturnsExpectedValueAfterInitialization()
+            {
+                var tagNames = Enumerable.Range(0, TagCount)
+                    .Select(id => (long)id)
+                    .Select(TagNameFromId)
+                    .ToArray();
+                var observer = TestScheduler.CreateObserverFor(ViewModel.Tags);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().BeEquivalentTo(tagNames);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task ReturnsEllipsizedTagsAccordingToMaxValue()
+            {
+                var veryLongTagName = "This text is much more than just 30 characters.";
+                var expectedTagName = veryLongTagName.Substring(0, EditTimeEntryViewModel.MaxTagLength);
+                var expectedTagNames = new[] { $"{expectedTagName}..." };
+                AdjustTimeEntries(TimeEntriesIds, te =>
+                {
+                    var tag = new MockTag(1, te.Workspace) { Name = veryLongTagName };
+                    te.Tags = new[] { tag };
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.Tags);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().BeEquivalentTo(expectedTagNames);
+            }
+        }
+
+        public sealed class TheCloseAction : InitializableEditTimeEntryViewModelTest
+        {
+            [Fact, LogIfTooSlow]
             public async Task ClosesTheViewModelIfNothingChanged()
             {
-                await ViewModel.CloseCommand.ExecuteAsync();
+                await ViewModel.Initialize();
+                ViewModel.Close.Execute();
+                TestScheduler.Start();
 
                 await NavigationService.Received().Close(Arg.Is(ViewModel));
             }
@@ -126,9 +907,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task ShowsTheConfirmationDialogIfDescriptionChanges()
             {
-                ViewModel.Description = "Something Else";
+                await ViewModel.Initialize();
+                ViewModel.Description.Accept("Something Else");
 
-                await ViewModel.CloseCommand.ExecuteAsync();
+                ViewModel.Close.Execute();
+                TestScheduler.Start();
 
                 await DialogService.Received().ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
             }
@@ -136,14 +919,24 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task ShowsTheConfirmationDialogIfProjectChanges()
             {
-                var selectProjectParameter = SelectProjectParameter.WithIds(TheTimeEntry.ProjectId + 1, TheTimeEntry.TaskId, TheTimeEntry.WorkspaceId);
+                long? newProjectId = null, newTaskId = null;
+                long newWorkspaceId = -1;
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    newProjectId = te.ProjectId + 1;
+                    newTaskId = te.TaskId;
+                    newWorkspaceId = te.WorkspaceId;
+                    return te;
+                });
+                var selectProjectParameter = SelectProjectParameter.WithIds(newProjectId, newTaskId, newWorkspaceId);
                 NavigationService
-                    .Navigate<SelectProjectViewModel, SelectProjectParameter, SelectProjectParameter>(
-                        Arg.Any<SelectProjectParameter>())
+                    .Navigate<SelectProjectViewModel, SelectProjectParameter, SelectProjectParameter>(Arg.Any<SelectProjectParameter>())
                     .Returns(selectProjectParameter);
 
-                await ViewModel.SelectProjectCommand.ExecuteAsync();
-                await ViewModel.CloseCommand.ExecuteAsync();
+                await ViewModel.Initialize();
+                ViewModel.SelectProject.Execute();
+                ViewModel.Close.Execute();
+                TestScheduler.Start();
 
                 await DialogService.Received().ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
             }
@@ -151,14 +944,24 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task ShowsTheConfirmationDialogIfTaskChanges()
             {
-                var selectProjectParameter = SelectProjectParameter.WithIds(TheTimeEntry.ProjectId, TheTimeEntry.TaskId + 1, TheTimeEntry.WorkspaceId);
+                long? newProjectId = null, newTaskId = null;
+                long newWorkspaceId = -1;
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    newProjectId = te.ProjectId;
+                    newTaskId = te.TaskId + 1;
+                    newWorkspaceId = te.WorkspaceId;
+                    return te;
+                });
+                var selectProjectParameter = SelectProjectParameter.WithIds(newProjectId, newTaskId, newWorkspaceId);
                 NavigationService
-                    .Navigate<SelectProjectViewModel, SelectProjectParameter, SelectProjectParameter>(
-                        Arg.Any<SelectProjectParameter>())
+                    .Navigate<SelectProjectViewModel, SelectProjectParameter, SelectProjectParameter>(Arg.Any<SelectProjectParameter>())
                     .Returns(selectProjectParameter);
 
-                await ViewModel.SelectProjectCommand.ExecuteAsync();
-                await ViewModel.CloseCommand.ExecuteAsync();
+                await ViewModel.Initialize();
+                ViewModel.SelectProject.Execute();
+                ViewModel.Close.Execute();
+                TestScheduler.Start();
 
                 await DialogService.Received().ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
             }
@@ -166,50 +969,109 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task ShowsTheConfirmationDialogIfWorkspaceChanges()
             {
-                var selectProjectParameter = SelectProjectParameter.WithIds(TheTimeEntry.ProjectId, TheTimeEntry.TaskId, TheTimeEntry.WorkspaceId + 1);
+                long? newProjectId = null, newTaskId = null;
+                long newWorkspaceId = -1;
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    newProjectId = te.ProjectId;
+                    newTaskId = te.TaskId;
+                    newWorkspaceId = te.WorkspaceId + 1;
+                    return te;
+                });
+                var selectProjectParameter = SelectProjectParameter.WithIds(newProjectId, newTaskId, newWorkspaceId);
                 NavigationService
-                    .Navigate<SelectProjectViewModel, SelectProjectParameter, SelectProjectParameter>(
-                        Arg.Any<SelectProjectParameter>())
+                    .Navigate<SelectProjectViewModel, SelectProjectParameter, SelectProjectParameter>(Arg.Any<SelectProjectParameter>())
                     .Returns(selectProjectParameter);
 
-                await ViewModel.SelectProjectCommand.ExecuteAsync();
-                await ViewModel.CloseCommand.ExecuteAsync();
+                await ViewModel.Initialize();
+                ViewModel.SelectProject.Execute();
+                ViewModel.Close.Execute();
+                TestScheduler.Start();
 
                 await DialogService.Received().ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ShowsTheConfirmationDialogIfTheStartTimeChanges()
+            public async Task ShowsTheConfirmationDialogIfStartTimeChanges()
             {
-                var newStartTime = TheTimeEntry.Start.AddHours(1);
+                var newStartTime = default(DateTimeOffset);
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    newStartTime = te.Start - TimeSpan.FromHours(1);
+                    return te;
+                });
                 var newDurationParameter = DurationParameter.WithStartAndDuration(newStartTime, null);
                 NavigationService
-                    .Navigate<EditDurationViewModel, EditDurationParameters, DurationParameter>(
-                        Arg.Any<EditDurationParameters>())
+                    .Navigate<EditDurationViewModel, EditDurationParameters, DurationParameter>(Arg.Any<EditDurationParameters>())
                     .Returns(newDurationParameter);
 
-                await ViewModel.SelectStartTimeCommand.ExecuteAsync();
-                await ViewModel.CloseCommand.ExecuteAsync();
+                await ViewModel.Initialize();
+                ViewModel.EditTimes.Execute(EditViewTapSource.StartTime);
+                ViewModel.Close.Execute();
+                TestScheduler.Start();
 
                 await DialogService.Received().ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ShowsTheConfirmationDialogIfTheDurationChanges()
+            public async Task ShowsTheConfirmationDialogIfDurationChanges()
             {
-                ViewModel.StopCommand.Execute();
+                var newStartTime = default(DateTimeOffset);
+                var newDuration = default(TimeSpan?);
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    newStartTime = te.Start;
+                    newDuration = TimeSpan.FromSeconds(te.Duration.Value) + TimeSpan.FromHours(1);
+                    return te;
+                });
+                var newDurationParameter = DurationParameter.WithStartAndDuration(newStartTime, newDuration);
+                NavigationService
+                    .Navigate<EditDurationViewModel, EditDurationParameters, DurationParameter>(Arg.Any<EditDurationParameters>())
+                    .Returns(newDurationParameter);
 
-                await ViewModel.CloseCommand.ExecuteAsync();
+                await ViewModel.Initialize();
+                ViewModel.EditTimes.Execute(EditViewTapSource.Duration);
+                ViewModel.Close.Execute();
+                TestScheduler.Start();
 
                 await DialogService.Received().ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
             }
 
             [Fact, LogIfTooSlow]
-            public async Task ShowsTheConfirmationDialogIfTheBillableFlagChanges()
+            public async Task ShowsTheConfirmationDialogIfUserStopsTimeEntry()
             {
-                ViewModel.Billable = !ViewModel.Billable;
+                var newStartTime = default(DateTimeOffset);
+                var newDuration = default(TimeSpan?);
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    newStartTime = te.Start;
+                    newDuration = TimeSpan.FromSeconds(te.Duration.Value) + TimeSpan.FromHours(1);
+                    te.Duration = null;
+                    return te;
+                });
 
-                await ViewModel.CloseCommand.ExecuteAsync();
+                await ViewModel.Initialize();
+                ViewModel.StopTimeEntry.Execute();
+                ViewModel.Close.Execute();
+                TestScheduler.Start();
+
+                await DialogService.Received().ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task ShowsTheConfirmationDialogIfBillableChanges()
+            {
+                var newBillable = false;
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    newBillable = !te.Billable;
+                    return te;
+                });
+
+                await ViewModel.Initialize();
+                ViewModel.ToggleBillable.Execute();
+                ViewModel.Close.Execute();
+                TestScheduler.Start();
 
                 await DialogService.Received().ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
             }
@@ -217,14 +1079,21 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact, LogIfTooSlow]
             public async Task ShowsTheConfirmationDialogIfTagsChange()
             {
-                var newTags = new long[] { 1, 2, 3 };
+                var newTags = new long[0];
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    newTags = te.Tags.Select(tag => tag.Id + 1).ToArray();
+                    return te;
+                });
                 NavigationService
-                    .Navigate<SelectTagsViewModel, (long[], long), long[]>(
-                        Arg.Any<(long[], long)>())
+                    .Navigate<SelectTagsViewModel, (long[], long), long[]>(Arg.Any<(long[], long)>())
                     .Returns(newTags);
 
-                await ViewModel.SelectTagsCommand.ExecuteAsync();
-                await ViewModel.CloseCommand.ExecuteAsync();
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+                ViewModel.SelectTags.Execute();
+                ViewModel.Close.Execute();
+                TestScheduler.Start();
 
                 await DialogService.Received().ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
             }
@@ -236,8 +1105,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .ConfirmDestructiveAction(ActionType.DiscardEditingChanges)
                     .Returns(Observable.Return(true));
 
-                ViewModel.Billable = !ViewModel.Billable;
-                await ViewModel.CloseCommand.ExecuteAsync();
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+                ViewModel.Description.Accept("This changes the description.");
+                ViewModel.Close.Execute();
+                TestScheduler.Start();
 
                 await NavigationService.Received().Close(ViewModel);
             }
@@ -249,1014 +1121,540 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                     .ConfirmDestructiveAction(ActionType.DiscardEditingChanges)
                     .Returns(Observable.Return(false));
 
-                ViewModel.Billable = !ViewModel.Billable;
-                await ViewModel.CloseCommand.ExecuteAsync();
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+                ViewModel.Description.Accept("This changes the description.");
+                ViewModel.Close.Execute();
+                TestScheduler.Start();
 
                 await NavigationService.DidNotReceive().Close(ViewModel);
             }
         }
 
-        public class TheDeleteCommand : EditTimeEntryViewModelTest
-        {
-            protected void PrepareActionSheet(bool confirm)
-            {
-                DialogService.ConfirmDestructiveAction(ActionType.DeleteExistingTimeEntry)
-                    .Returns(Observable.Return(confirm));
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task ShowsConfirmationActionSheet()
-            {
-                await ViewModel.DeleteCommand.ExecuteAsync();
-
-                await DialogService.Received().ConfirmDestructiveAction(ActionType.DeleteExistingTimeEntry);
-            }
-
-            public sealed class WhenUserConfirms : TheDeleteCommand
-            {
-                public WhenUserConfirms()
-                {
-                    PrepareActionSheet(true);
-                }
-
-                [Fact, LogIfTooSlow]
-                public async Task ExecutesTheDeleteInteractor()
-                {
-                    await ViewModel.DeleteCommand.ExecuteAsync();
-
-                    InteractorFactory.Received().DeleteTimeEntry(Arg.Any<long>());
-                    await InteractorFactory.DeleteTimeEntry(Arg.Any<long>()).Received().Execute();
-                }
-
-                [Fact, LogIfTooSlow]
-                public async Task InitiatesPushSync()
-                {
-                    await ViewModel.DeleteCommand.ExecuteAsync();
-
-                    SyncManager.Received().PushSync();
-                }
-
-                [Fact, LogIfTooSlow]
-                public async Task DoesNotInitiatePushSyncWhenDeletingFails()
-                {
-                    var interactor = Substitute.For<IInteractor<IObservable<Unit>>>();
-                    interactor.Execute()
-                        .Returns(Observable.Throw<Unit>(new Exception()));
-                    InteractorFactory.DeleteTimeEntry(Arg.Any<long>())
-                        .Returns(interactor);
-
-                    await ViewModel.DeleteCommand.ExecuteAsync();
-
-                    SyncManager.DidNotReceive().PushSync();
-                }
-
-                [Fact]
-                public async Task TracksTheEventUsingTheAnaltyticsService()
-                {
-                    await ViewModel.DeleteCommand.ExecuteAsync();
-
-                    AnalyticsService.Received().DeleteTimeEntry.Track();
-                }
-            }
-
-            public sealed class WhenUserCancels : TheDeleteCommand
-            {
-                public WhenUserCancels()
-                {
-                    PrepareActionSheet(false);
-                }
-
-                [Fact, LogIfTooSlow]
-                public async Task DoesNotCallDeleteOnDataSource()
-                {
-                    await ViewModel.DeleteCommand.ExecuteAsync();
-
-                    await DataSource.TimeEntries.DidNotReceive().Delete(Arg.Is(ViewModel.Id));
-                }
-
-                [Fact, LogIfTooSlow]
-                public async Task DoesNotInitiatePushSync()
-                {
-                    await ViewModel.DeleteCommand.ExecuteAsync();
-
-                    SyncManager.DidNotReceive().PushSync();
-                }
-            }
-        }
-
-        public sealed class TheStopCommand : EditTimeEntryViewModelTest
+        public sealed class TheStopTimeEntryAction : InitializableEditTimeEntryViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public void CannotBeExecutedForAStoppedTimeEntry()
+            public async Task CannotBeExecutedForAStoppedTimeEntry()
             {
-                ConfigureEditedTimeEntry(DateTimeOffset.UtcNow, false);
-                ViewModel.Prepare(Id);
-                ViewModel.Initialize().Wait();
+                var observer = TestScheduler.CreateObserverFor(ViewModel.StopTimeEntry.Enabled);
 
-                var canExecute = ViewModel.StopCommand.CanExecute();
-
-                canExecute.Should().BeFalse();
-            }
-
-            [Fact, LogIfTooSlow]
-            public void CanBeExecutedForARunningTimeEntry()
-            {
-                ConfigureEditedTimeEntry(DateTimeOffset.UtcNow, true);
-                ViewModel.Prepare(Id);
-                ViewModel.Initialize().Wait();
-
-                var canExecute = ViewModel.StopCommand.CanExecute();
-
-                canExecute.Should().BeTrue();
-            }
-
-            [Property]
-            public void SetsTheCurrentTimeAsTheStopTime(DateTimeOffset now)
-            {
-                ConfigureEditedTimeEntry(now, true);
-                ViewModel.Prepare(Id);
-                ViewModel.Initialize().Wait();
-
-                ViewModel.StopCommand.Execute();
-
-                ViewModel.StopTime.Should().Be(now);
-            }
-
-            [Fact, LogIfTooSlow]
-            public void ClearsTheIsRunningFlag()
-            {
-                ConfigureEditedTimeEntry(DateTimeOffset.UtcNow, true);
-                ViewModel.Prepare(Id);
-                ViewModel.Initialize().Wait();
-
-                ViewModel.StopCommand.Execute();
-
-                ViewModel.IsTimeEntryRunning.Should().BeFalse();
-            }
-        }
-
-        public sealed class TheEditDurationCommand : EditTimeEntryViewModelTest
-        {
-            [Property]
-            public void SetsTheStartTimeToTheValueReturnedByTheSelectDateTimeDialogViewModelWhenEditingARunningTimeEntry(DateTimeOffset now)
-            {
-                var parameterToReturn = DurationParameter.WithStartAndDuration(now.AddHours(-3), null);
-                NavigationService
-                    .Navigate<EditDurationViewModel, EditDurationParameters, DurationParameter>(Arg.Any<EditDurationParameters>())
-                    .Returns(parameterToReturn);
-                ConfigureEditedTimeEntry(now);
-                ViewModel.Prepare(Id);
-
-                ViewModel.SelectDurationCommand.ExecuteAsync().Wait();
-
-                ViewModel.StartTime.Should().Be(parameterToReturn.Start);
-            }
-
-            [Property]
-            public void SetsTheStopTimeToTheValueReturnedByTheSelectDateTimeDialogViewModelWhenEditingACompletedTimeEntry(DateTimeOffset now)
-            {
-                var start = now.AddHours(-4);
-                var duration = TimeSpan.FromHours(1);
-                var parameterToReturn = DurationParameter.WithStartAndDuration(start, duration);
-                NavigationService
-                    .Navigate<EditDurationViewModel, EditDurationParameters, DurationParameter>(Arg.Any<EditDurationParameters>())
-                    .Returns(parameterToReturn);
-                ConfigureEditedTimeEntry(now);
-                ViewModel.Prepare(Id);
-
-                ViewModel.SelectDurationCommand.ExecuteAsync().Wait();
-
-                ViewModel.Duration.Should().Be(parameterToReturn.Duration.Value);
-            }
-
-            [Fact, LogIfTooSlow]
-            public void TracksDurationTap()
-            {
-                ConfigureEditedTimeEntry(DateTimeOffset.Now);
-                ViewModel.Prepare(Id);
-                ViewModel.Initialize().Wait();
-
-                var newStartTime = TheTimeEntry.Start.AddHours(1);
-                var newDurationParameter = DurationParameter.WithStartAndDuration(newStartTime, null);
-                NavigationService
-                    .Navigate<EditDurationViewModel, EditDurationParameters, DurationParameter>(
-                        Arg.Any<EditDurationParameters>())
-                    .Returns(newDurationParameter);
-
-                ViewModel.SelectDurationCommand.Execute();
-
-                AnalyticsService.Received()
-                                .EditViewTapped
-                                .Track(Arg.Is(EditViewTapSource.Duration));
-            }
-        }
-
-        public sealed class TheEditDurationAndShowNumpadCommand : EditTimeEntryViewModelTest
-        {
-            [Property]
-            public void SetsTheStartTimeToTheValueReturnedByTheSelectDateTimeDialogViewModelWhenEditingARunningTimeEntry(DateTimeOffset now)
-            {
-                var parameterToReturn = DurationParameter.WithStartAndDuration(now.AddHours(-3), null);
-                NavigationService
-                    .Navigate<EditDurationViewModel, EditDurationParameters, DurationParameter>(Arg.Any<EditDurationParameters>())
-                    .Returns(parameterToReturn);
-                ConfigureEditedTimeEntry(now);
-                ViewModel.Prepare(Id);
-
-                ViewModel.SelectDurationCommand.ExecuteAsync().Wait();
-
-                ViewModel.StartTime.Should().Be(parameterToReturn.Start);
-            }
-
-            [Property]
-            public void SetsTheStopTimeToTheValueReturnedByTheSelectDateTimeDialogViewModelWhenEditingACompletedTimeEntry(DateTimeOffset now)
-            {
-                var start = now.AddHours(-4);
-                var duration = TimeSpan.FromHours(1);
-                var parameterToReturn = DurationParameter.WithStartAndDuration(start, duration);
-                NavigationService
-                    .Navigate<EditDurationViewModel, EditDurationParameters, DurationParameter>(Arg.Any<EditDurationParameters>())
-                    .Returns(parameterToReturn);
-                ConfigureEditedTimeEntry(now);
-                ViewModel.Prepare(Id);
-
-                ViewModel.SelectDurationCommand.ExecuteAsync().Wait();
-
-                ViewModel.Duration.Should().Be(parameterToReturn.Duration.Value);
-            }
-        }
-
-        public sealed class TheSaveCommand : EditTimeEntryViewModelTest
-        {
-            [Fact, LogIfTooSlow]
-            public void SetsTheOnboardingStorageFlag()
-            {
-                ViewModel.SaveCommand.Execute();
-
-                OnboardingStorage.Received().EditedTimeEntry();
-            }
-
-            [Fact, LogIfTooSlow]
-            public void InitiatesPushSync()
-            {
-                ViewModel.SaveCommand.Execute();
-
-                SyncManager.Received().PushSync();
-            }
-
-            [Fact, LogIfTooSlow]
-            public void DoesNotInitiatePushSyncWhenSavingFails()
-            {
-                InteractorFactory.UpdateTimeEntry(Arg.Any<EditTimeEntryDto>())
-                    .Execute()
-                    .Returns(Observable.Throw<IThreadSafeTimeEntry>(new Exception()));
-
-                ViewModel.SaveCommand.Execute();
-
-                SyncManager.DidNotReceive().PushSync();
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task UpdatesWorkspaceIdIfProjectFromAnotherWorkspaceWasSelected()
-            {
-                var timeEntry = Substitute.For<IThreadSafeTimeEntry>();
-                timeEntry.Id.Returns(10);
-                timeEntry.WorkspaceId.Returns(11);
-                timeEntry.ProjectId.Returns(12);
-                InteractorFactory.GetTimeEntryById(Arg.Is(timeEntry.Id))
-                    .Execute()
-                    .Returns(Observable.Return(timeEntry));
-                var newProjectId = 20;
-                var project = Substitute.For<IThreadSafeProject>();
-                project.Id.Returns(newProjectId);
-                project.WorkspaceId.Returns(21);
-                InteractorFactory.GetProjectById(project.Id)
-                    .Execute()
-                    .Returns(Observable.Return(project));
-                ViewModel.Prepare(timeEntry.Id);
                 await ViewModel.Initialize();
-                var parameter = SelectProjectParameter.WithIds(newProjectId, null, project.WorkspaceId);
-                NavigationService.Navigate<SelectProjectViewModel, SelectProjectParameter, SelectProjectParameter>(
-                        Arg.Any<SelectProjectParameter>())
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().BeFalse();
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task CanBeExecutedForARunningTimeEntry()
+            {
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    te.Duration = null;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.StopTimeEntry.Enabled);
+
+                await ViewModel.Initialize();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().BeTrue();
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task SetsTheCurrentTimeAsTheStopTime()
+            {
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    te.Duration = null;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.StopTime);
+
+                await ViewModel.Initialize();
+                ViewModel.StopTimeEntry.Execute();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().Be(Now);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task ClearsTheIsRunningFlag()
+            {
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    te.Duration = null;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.IsTimeEntryRunning);
+
+                await ViewModel.Initialize();
+                ViewModel.StopTimeEntry.Execute();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().BeFalse();
+            }
+        }
+
+        public sealed class TheSelectProjectAction : InitializableEditTimeEntryViewModelTest
+        {
+            private static readonly long selectedProjectId = 1000;
+            private static readonly string selectedProjectName = "Project unlike any other";
+            private static readonly string selectedProjectColor = "#FF0000";
+            private static readonly long selectedClientId = 1001;
+            private static readonly string selectedClientName = "Unforgiving client";
+            private static readonly long selectedTaskId = 1002;
+            private static readonly string selectedTaskName = "Recursing recursions";
+            private static readonly long initialWorkspaceId = WorkspaceIdWithBillableAvailable;
+            private static readonly string initialWorkspaceName = WorkspaceWithBillableAvailable.Name;
+            private static readonly long changedWorkspaceId = initialWorkspaceId + 1;
+            private static readonly string changedWorkspaceName = $"Not {initialWorkspaceName}";
+
+            private void prepare(long? projectId = null, bool hasClient = false, long? taskId = null, bool workspaceChanged = false)
+            {
+                long workspaceId = workspaceChanged ? changedWorkspaceId : initialWorkspaceId;
+
+                var selectedWorkspace = new MockWorkspace(workspaceId)
+                {
+                    Name = workspaceChanged ? changedWorkspaceName : initialWorkspaceName
+                };
+
+                var selectedClient = new MockClient(selectedClientId, selectedWorkspace)
+                {
+                    Name = selectedClientName
+                };
+
+                var selectedProject = new MockProject(selectedProjectId, selectedWorkspace)
+                {
+                    Name = selectedProjectName,
+                    Color = selectedProjectColor,
+                    Client = hasClient ? selectedClient : null,
+                    ClientId = hasClient ? selectedClientId : (long?)null,
+                    Active = true
+                };
+
+                var selectedTask = new MockTask(selectedTaskId, selectedWorkspace, selectedProject)
+                {
+                    Name = selectedTaskName,
+                    Active = true
+                };
+
+                var parameter = SelectProjectParameter.WithIds(projectId, taskId, WorkspaceIdWithBillableAvailable);
+                NavigationService
+                    .Navigate<SelectProjectViewModel, SelectProjectParameter, SelectProjectParameter>(Arg.Any<SelectProjectParameter>())
                     .Returns(parameter);
-                await ViewModel.SelectProjectCommand.ExecuteAsync();
 
-                ViewModel.SaveCommand.Execute();
+                var selectedProjectObservable = projectId.HasValue ? Observable.Return(selectedProject) : null;
+                InteractorFactory
+                    .GetProjectById(selectedProjectId)
+                    .Execute()
+                    .Returns(selectedProjectObservable);
 
-                await InteractorFactory.Received()
-                    .UpdateTimeEntry(Arg.Is<EditTimeEntryDto>(dto => dto.WorkspaceId == project.WorkspaceId))
-                    .Execute();
+                var selectedTaskObservable = taskId.HasValue ? Observable.Return(selectedTask) : null;
+                InteractorFactory
+                    .GetTaskById(selectedTaskId)
+                    .Execute()
+                    .Returns(selectedTaskObservable);
             }
 
             [Fact, LogIfTooSlow]
-            public async Task DoesNotUpdateWorkspaceIdIfProjectFromTheSameWorkspaceIsSelected()
+            public async Task SetsTheOnboardingStorageFlag()
             {
-                var workspaceId = 11;
-                var timeEntry = Substitute.For<IThreadSafeTimeEntry>();
-                timeEntry.Id.Returns(10);
-                timeEntry.WorkspaceId.Returns(workspaceId);
-                timeEntry.ProjectId.Returns(12);
-                InteractorFactory.GetTimeEntryById(Arg.Is(timeEntry.Id))
-                    .Execute()
-                    .Returns(Observable.Return(timeEntry));
-                var newProjectId = 20;
-                var project = Substitute.For<IThreadSafeProject>();
-                project.Id.Returns(newProjectId);
-                project.WorkspaceId.Returns(workspaceId);
-                InteractorFactory.GetProjectById(project.Id)
-                    .Execute()
-                    .Returns(Observable.Return(project));
-                ViewModel.Prepare(timeEntry.Id);
                 await ViewModel.Initialize();
-                NavigationService.Navigate<SelectProjectViewModel, SelectProjectParameter, SelectProjectParameter>(
-                        Arg.Any<SelectProjectParameter>())
-                    .Returns(SelectProjectParameter.WithIds(newProjectId, null, workspaceId));
-                await ViewModel.SelectProjectCommand.ExecuteAsync();
+                ViewModel.SelectProject.Execute();
+                TestScheduler.Start();
 
-                ViewModel.SaveCommand.Execute();
-
-                await InteractorFactory
-                    .Received()
-                    .UpdateTimeEntry(Arg.Is<EditTimeEntryDto>(dto => dto.WorkspaceId == workspaceId))
-                    .Execute();
+                OnboardingStorage.Received().SelectsProject();
             }
 
             [Fact, LogIfTooSlow]
-            public async Task UpdatesWorkspaceIdIfNoProjectWasSelected()
+            public async Task SetsTheProjectNameAndColor()
             {
-                var oldWorkspaceId = 11;
-                var newWorkspaceId = 21;
-                var timeEntry = Substitute.For<IThreadSafeTimeEntry>();
-                timeEntry.Id.Returns(10);
-                timeEntry.WorkspaceId.Returns(oldWorkspaceId);
-                timeEntry.ProjectId.Returns(12);
-                InteractorFactory.GetTimeEntryById(Arg.Is(timeEntry.Id))
-                    .Execute()
-                    .Returns(Observable.Return(timeEntry));
-                ViewModel.Prepare(timeEntry.Id);
+                prepare(selectedProjectId);
+                var observer = TestScheduler.CreateObserverFor(ViewModel.ProjectClientTask);
+
                 await ViewModel.Initialize();
-                NavigationService.Navigate<SelectProjectViewModel, SelectProjectParameter, SelectProjectParameter>(
-                        Arg.Any<SelectProjectParameter>())
-                    .Returns(SelectProjectParameter.WithIds(null, null, newWorkspaceId));
-                await ViewModel.SelectProjectCommand.ExecuteAsync();
+                ViewModel.SelectProject.Execute();
+                TestScheduler.Start();
 
-                ViewModel.SaveCommand.Execute();
-
-                await InteractorFactory
-                    .Received()
-                    .UpdateTimeEntry(Arg.Is<EditTimeEntryDto>(dto => dto.WorkspaceId == newWorkspaceId))
-                    .Execute();
+                observer.LastEmittedValue().Project.Should().Be(selectedProjectName);
+                observer.LastEmittedValue().ProjectColor.Should().Be(selectedProjectColor);
             }
 
             [Fact, LogIfTooSlow]
-            public async Task InvertsTheFlagIfDescriptionWasBeingEdited()
+            public async Task SetsTheClient()
             {
-                var timeEntry = Substitute.For<IThreadSafeTimeEntry>();
-                timeEntry.Id.Returns(1);
-                InteractorFactory.GetTimeEntryById(Arg.Is(timeEntry.Id))
-                    .Execute()
-                    .Returns(Observable.Return(timeEntry));
-                ViewModel.Prepare(timeEntry.Id);
+                prepare(selectedProjectId, true);
+                var observer = TestScheduler.CreateObserverFor(ViewModel.ProjectClientTask);
+
                 await ViewModel.Initialize();
+                ViewModel.SelectProject.Execute();
+                TestScheduler.Start();
 
-                ViewModel.SaveCommand.Execute();
-
-                ViewModel.IsEditingDescription.Should().Be(false);
+                observer.LastEmittedValue().Client.Should().Be(selectedClientName);
             }
 
-            [Theory, LogIfTooSlow]
-            [InlineData(null)]
-            [InlineData(" ")]
-            [InlineData("\t")]
-            [InlineData("\n")]
-            [InlineData("               ")]
-            [InlineData("      \t  \n     ")]
-            public async Task ReducesDescriptionConsistingOfOnlyEmptyCharactersToAnEmptyString(string description)
+            [Fact, LogIfTooSlow]
+            public async Task SetsTheTask()
             {
-                ViewModel.Description = description;
+                prepare(selectedProjectId, false, selectedTaskId);
+                var observer = TestScheduler.CreateObserverFor(ViewModel.ProjectClientTask);
 
-                ViewModel.SaveCommand.Execute();
+                await ViewModel.Initialize();
+                ViewModel.SelectProject.Execute();
+                TestScheduler.Start();
 
-                await InteractorFactory
-                    .Received()
-                    .UpdateTimeEntry(Arg.Is<EditTimeEntryDto>(dto => dto.Description.Length == 0))
-                    .Execute();
+                observer.LastEmittedValue().Task.Should().Be(selectedTaskName);
             }
 
-            [Theory, LogIfTooSlow]
-            [InlineData(null, "")]
-            [InlineData("   abcde", "abcde")]
-            [InlineData("abcde     ", "abcde")]
-            [InlineData("  abcde ", "abcde")]
-            [InlineData("abcde  fgh", "abcde  fgh")]
-            [InlineData("      abcd\nefgh     ", "abcd\nefgh")]
-            public async Task TrimsDescriptionFromTheStartAndTheEndBeforeSaving(string description, string trimmed)
+            [Fact, LogIfTooSlow]
+            public async Task RemovesTheTaskIfNoTaskWasSelected()
             {
-                ViewModel.Description = description;
+                prepare(selectedProjectId);
+                var observer = TestScheduler.CreateObserverFor(ViewModel.ProjectClientTask);
 
-                ViewModel.SaveCommand.Execute();
+                await ViewModel.Initialize();
+                ViewModel.SelectProject.Execute();
+                TestScheduler.Start();
 
-                await InteractorFactory
-                    .Received()
-                    .UpdateTimeEntry(Arg.Is<EditTimeEntryDto>(dto => dto.Description == trimmed))
-                    .Execute();
+                observer.LastEmittedValue().Task.Should().BeNull();
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task RemovesTagsIfProjectFromAnotherWorkspaceWasSelected()
+            {
+                prepare(selectedProjectId, false, null, true);
+                var observer = TestScheduler.CreateObserverFor(ViewModel.Tags);
+
+                await ViewModel.Initialize();
+                ViewModel.SelectProject.Execute();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().HaveCount(0);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task TracksProjectSelectorOpens()
+            {
+                prepare(selectedProjectId);
+                var observer = TestScheduler.CreateObserverFor(ViewModel.Tags);
+
+                await ViewModel.Initialize();
+                ViewModel.SelectProject.Execute();
+                TestScheduler.Start();
+
+                AnalyticsService.Received().EditEntrySelectProject.Track();
+                AnalyticsService.Received().EditViewTapped.Track(Arg.Is(EditViewTapSource.Project));
             }
         }
 
-        public sealed class TheConfirmCommand : EditTimeEntryViewModelTest
+        public sealed class TheSelectTagsAction : InitializableEditTimeEntryViewModelTest
         {
-            [Fact, LogIfTooSlow]
-            public async Task DidNotCallUpdateIfDescriptionWasBeingEdited()
+            private void prepareInteractorAndNavigationResults(long[] tagsIds = null/*, long[] selectedTagsIds = null*/)
             {
-                var timeEntry = Substitute.For<IThreadSafeTimeEntry>();
-                timeEntry.Id.Returns(1);
-                InteractorFactory.GetTimeEntryById(Arg.Is(timeEntry.Id))
+                tagsIds = tagsIds ?? Enumerable.Range(0, TagCount).Select(id => (long)id).ToArray();
+
+                var tags = tagsIds
+                    .Select(id => TagFromId(id, WorkspaceWithBillableAvailable))
+                    .ToArray();
+
+                var tagsObservable = Observable.Return(tags);
+
+                InteractorFactory
+                    .GetMultipleTagsById(Arg.Any<long[]>())
                     .Execute()
-                    .Returns(Observable.Return(timeEntry));
-                ViewModel.Prepare(timeEntry.Id);
-                await ViewModel.Initialize();
+                    .Returns(tagsObservable);
 
-                ViewModel.IsEditingDescription = true;
-                ViewModel.ConfirmCommand.Execute();
-
-                ViewModel.IsEditingDescription.Should().Be(false);
-
-                await InteractorFactory
-                    .DidNotReceive()
-                    .UpdateTimeEntry(Arg.Any<EditTimeEntryDto>())
-                    .Execute();
+                NavigationService
+                    .Navigate<SelectTagsViewModel, (long[], long), long[]>(Arg.Any<(long[], long)>())
+                    .Returns(tagsIds);
             }
-        }
 
-        public sealed class TheToggleBillableCommand : EditTimeEntryViewModelTest
-        {
-            [Fact, LogIfTooSlow]
-            public void TracksBillableTap()
-            {
-                ViewModel.ToggleBillableCommand.Execute();
-
-                AnalyticsService.Received()
-                                .EditViewTapped
-                                .Track(Arg.Is(EditViewTapSource.Billable));
-            }
-        }
-
-        public sealed class TheStartEditingDescriptionCommand : EditTimeEntryViewModelTest
-        {
-            [Fact, LogIfTooSlow]
-            public void TracksDescriptionTap()
-            {
-                ViewModel.StartEditingDescriptionCommand.Execute();
-
-                AnalyticsService.Received()
-                     .EditViewTapped
-                     .Track(Arg.Is(EditViewTapSource.Description));
-            }
-        }
-
-        public sealed class TheSelectTagsCommand : EditTimeEntryViewModelTest
-        {
             [Property]
             public void NavigatesToTheSelectTagsViewModelPassingCurrentTagIds(NonNegativeInt[] nonNegativeInts)
             {
-                var tagIds = nonNegativeInts.Select(i => (long)i.Get)
-                    .Distinct();
-                long id = 13;
-                var timeEntry = Substitute.For<IThreadSafeTimeEntry>();
-                timeEntry.Id.Returns(id);
-                timeEntry.TagIds.Returns(tagIds);
-                InteractorFactory.GetTimeEntryById(Arg.Is(id))
-                    .Execute()
-                    .Returns(Observable.Return(timeEntry));
-                ViewModel.Prepare(id);
-                ViewModel.Initialize().Wait();
+                var tagIds = nonNegativeInts.Select(i => (long)i.Get).Distinct().ToArray();
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    te.TagIds = tagIds;
+                    te.Tags = tagIds.Select(tagId => TagFromId(tagId, te.Workspace));
+                    return te;
+                });
+                prepareInteractorAndNavigationResults(tagIds);
 
-                ViewModel.SelectTagsCommand.ExecuteAsync().Wait();
+                ViewModel.Initialize().Wait();
+                ViewModel.SelectTags.Execute();
+                TestScheduler.Start();
 
                 NavigationService
                     .Received()
                     .Navigate<SelectTagsViewModel, (long[] tagIds, long workspaceId), long[]>(
-                        Arg.Is<(long[] tagIds, long workspaceId)>(
-                            tuple => tuple.tagIds.SequenceEqual(tagIds)))
+                        Arg.Is<(long[] tagIds, long workspaceId)>(tuple => tuple.tagIds.SetEquals(tagIds, null)))
                     .Wait();
             }
 
             [Fact, LogIfTooSlow]
             public async Task NavigatesToTheSelectTagsViewModelPassingWorkspaceId()
             {
-                long workspaceId = 13;
-                var workspace = Substitute.For<IThreadSafeWorkspace>();
-                workspace.Id.Returns(workspaceId);
-                var timeEntry = Substitute.For<IThreadSafeTimeEntry>();
-                timeEntry.Id.Returns(14);
-                timeEntry.WorkspaceId.Returns(workspaceId);
-                InteractorFactory.GetTimeEntryById(Arg.Any<long>())
-                    .Execute()
-                    .Returns(Observable.Return(timeEntry));
-                ViewModel.Prepare(timeEntry.Id);
-                await ViewModel.Initialize();
+                var workspaceId = 0L;
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    workspaceId = te.WorkspaceId;
+                    return te;
+                });
+                prepareInteractorAndNavigationResults();
 
-                await ViewModel.SelectTagsCommand.ExecuteAsync();
+                await ViewModel.Initialize();
+                ViewModel.SelectTags.Execute();
+                TestScheduler.Start();
 
                 await NavigationService
                     .Received()
                     .Navigate<SelectTagsViewModel, (long[] tagIds, long workspaceId), long[]>(
-                        Arg.Is<(long[] tagIds, long workspaceId)>(tuple => tuple.workspaceId == workspaceId)
-                    );
+                        Arg.Is<(long[] tagIds, long workspaceId)>(tuple => tuple.workspaceId == workspaceId));
             }
 
-            [Property]
-            public void QueriesTheDataSourceForReturnedTagIds(
-                NonEmptyArray<NonNegativeInt> nonNegativeInts)
+            [Fact, LogIfTooSlow]
+            public async Task SetsTheReturnedTags()
             {
-                var tagIds = nonNegativeInts.Get
-                    .Select(i => (long)i.Get)
-                    .ToArray();
-                var tags = tagIds.Select(createTag);
-                DataSource.Tags.GetAll(Arg.Any<Func<IDatabaseTag, bool>>())
-                    .Returns(Observable.Return(tags));
-                NavigationService
-                    .Navigate<SelectTagsViewModel, (long[], long), long[]>(Arg.Any<(long[], long)>())
-                    .Returns(Task.FromResult(tagIds));
-                ViewModel.Initialize().Wait();
-
-                ViewModel.SelectTagsCommand.ExecuteAsync().Wait();
-
-                DataSource.Tags.Received()
-                    .GetAll(Arg.Is<Func<IDatabaseTag, bool>>(
-                        func => tags.All(func)))
-                    .Wait();
-            }
-
-            [Property]
-            public Property SetsTheReturnedTags()
-            {
-                return Prop.ForAll(Arb.Default.NonEmptyArray<NonNegativeInt>(), nonNegativeInts =>
+                var originalTags = new long[0];
+                var expectedTags = new string[0];
+                var expectedTagsIds = new long[0];
+                AdjustTimeEntries(SingleTimeEntryId, te =>
                 {
-                    var viewModel = CreateViewModel();
-
-                    var tagIds = nonNegativeInts.Get
-                        .Select(i => (long)i.Get)
-                        .ToArray();
-                    var tags = tagIds.Select(createTag);
-                    var tagNames = new HashSet<string>(tags.Select(tag => tag.Name));
-                    viewModel.Initialize().Wait();
-                    DataSource.Tags.GetAll(Arg.Any<Func<IDatabaseTag, bool>>())
-                        .Returns(Observable.Return(tags));
-                    NavigationService
-                        .Navigate<SelectTagsViewModel, (long[], long), long[]>(Arg.Any<(long[], long)>())
-                        .Returns(Task.FromResult(tagIds));
-
-                    viewModel.SelectTagsCommand.ExecuteAsync().Wait();
-
-                    viewModel.Tags.Should()
-                             .HaveCount(tags.Count()).And
-                             .OnlyContain(tag => tagNames.Contains(tag));
+                    originalTags = te.Tags.Select(tag => tag.Id).ToArray();
+                    expectedTags = te.Tags.Take(2).Select(tag => tag.Name).ToArray();
+                    expectedTagsIds = te.TagIds.Take(2).ToArray();
+                    return te;
                 });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.Tags);
+                prepareInteractorAndNavigationResults(expectedTagsIds);
+
+                await ViewModel.Initialize();
+                ViewModel.SelectTags.Execute();
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().BeEquivalentTo(expectedTags);
             }
 
             [Fact, LogIfTooSlow]
             public async Task TracksTagSelectorOpens()
             {
-                await ViewModel.SelectTagsCommand.ExecuteAsync();
+                prepareInteractorAndNavigationResults();
+
+                await ViewModel.Initialize();
+                ViewModel.SelectTags.Execute();
+                TestScheduler.Start();
 
                 AnalyticsService.Received().EditEntrySelectTag.Track();
-                AnalyticsService.Received()
-                                .EditViewTapped
-                                .Track(Arg.Is(EditViewTapSource.Tags));
+                AnalyticsService.Received().EditViewTapped.Track(Arg.Is(EditViewTapSource.Tags));
             }
 
-            private IThreadSafeTag createTag(long id)
+        }
+
+        public sealed class TheToggleBillableAction : InitializableEditTimeEntryViewModelTest
+        {
+            [Fact, LogIfTooSlow]
+            public async Task TracksBillableTap()
             {
-                var tag = Substitute.For<IThreadSafeTag>();
-                tag.Id.Returns(id);
-                tag.Name.Returns($"Tag{id}");
-                return tag;
+                await ViewModel.Initialize();
+                ViewModel.ToggleBillable.Execute();
+                TestScheduler.Start();
+
+                AnalyticsService.Received()
+                                .EditViewTapped
+                                .Track(Arg.Is(EditViewTapSource.Billable));
+            }
+
+            [Theory, LogIfTooSlow]
+            [InlineData(true)]
+            [InlineData(false)]
+            public async Task InvertsTheIsBillableProperty(bool initialValue)
+            {
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    te.Billable = initialValue;
+                    return te;
+                });
+                var observable = TestScheduler.CreateObserverFor(ViewModel.IsBillable);
+
+                await ViewModel.Initialize();
+                ViewModel.ToggleBillable.Execute();
+                TestScheduler.Start();
+
+                observable.LastEmittedValue().Should().Be(!initialValue);
             }
         }
 
-        public sealed class TheDismissSyncErrorMessageCommand : EditTimeEntryViewModelTest
+        public sealed class TheDismissSyncErrorMessageCommand : InitializableEditTimeEntryViewModelTest
         {
             [Theory, LogIfTooSlow]
             [InlineData(true)]
             [InlineData(false)]
-            public async Task SetsSyncErrorMessageVisiblePropertyToFalse(bool initialValue)
+            public async Task SetsIsSyncErrorMessageVisibleToFalse(bool hasError)
             {
-                var errorMessage = initialValue ? "Some error" : null;
-                var id = 13;
-                var timeEntry = Substitute.For<IThreadSafeTimeEntry>();
-                timeEntry.Id.Returns(id);
-                timeEntry.LastSyncErrorMessage.Returns(errorMessage);
-                InteractorFactory.GetTimeEntryById(Arg.Is<long>(id))
-                    .Execute()
-                    .Returns(Observable.Return(timeEntry));
-                ViewModel.Prepare(id);
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    te.LastSyncErrorMessage = hasError ? "Bad time entry" : null;
+                    return te;
+                });
+                var observer = TestScheduler.CreateObserverFor(ViewModel.IsSyncErrorMessageVisible);
+
                 await ViewModel.Initialize();
+                ViewModel.DismissSyncErrorMessage.Execute();
+                TestScheduler.Start();
 
-                ViewModel.DismissSyncErrorMessageCommand.Execute();
-
-                ViewModel.SyncErrorMessageVisible.Should().BeFalse();
+                observer.LastEmittedValue().Should().BeFalse();
             }
         }
 
-        public sealed class TheInitializeMethod : EditTimeEntryViewModelTest
+        public sealed class TheEditTimesAction : InitializableEditTimeEntryViewModelTest
         {
-            private readonly IThreadSafeTimeEntry timeEntry;
+            private DateTimeOffset selectedStartTime = Now - TimeSpan.FromDays(4);
+            private TimeSpan? selectedDuration = TimeSpan.FromMinutes(28);
 
-            public TheInitializeMethod()
+            private void setupNavigation(DateTimeOffset start, TimeSpan? duration)
             {
-                timeEntry = Substitute.For<IThreadSafeTimeEntry>();
-                timeEntry.Id.Returns(Id);
-                InteractorFactory.GetTimeEntryById(Arg.Is<long>(Id))
-                    .Execute()
-                    .Returns(Observable.Return(timeEntry));
-            }
-
-            [Property]
-            public void SetsTheSyncErrorMessageProperty(string errorMessage)
-            {
-                timeEntry.LastSyncErrorMessage.Returns(errorMessage);
-                ViewModel.Prepare(Id);
-
-                ViewModel.Initialize().Wait();
-
-                ViewModel.SyncErrorMessage.Should().Be(errorMessage);
-            }
-
-            [Fact, LogIfTooSlow]
-            public void SetsTheSyncErrorMessageWhenTheTimeEntryIsInaccessible()
-            {
-                timeEntry.IsInaccessible.Returns(true);
-                timeEntry.LastSyncErrorMessage.Returns("Some less important error message");
-
-                ViewModel.Prepare(Id);
-
-                ViewModel.Initialize().Wait();
-
-                ViewModel.SyncErrorMessage.Should().Be(Resources.InaccessibleTimeEntryErrorMessage);
+                var durationParameter = DurationParameter.WithStartAndDuration(start, duration);
+                NavigationService
+                    .Navigate<EditDurationViewModel, EditDurationParameters, DurationParameter>(Arg.Any<EditDurationParameters>())
+                    .Returns(durationParameter);
             }
 
             [Theory, LogIfTooSlow]
-            [InlineData("Some error", true)]
-            [InlineData("", false)]
-            [InlineData(null, false)]
-            public async Task SetsTheSyncErrorMessageVisibleProperty(
-                string errorMessage, bool expectedVisibility)
+            [InlineData(EditViewTapSource.StartTime)]
+            [InlineData(EditViewTapSource.StartDate)]
+            [InlineData(EditViewTapSource.StopTime)]
+            [InlineData(EditViewTapSource.Duration)]
+            public async Task TracksCorrectTapSource(EditViewTapSource tapSource)
             {
-                timeEntry.LastSyncErrorMessage.Returns(errorMessage);
-                ViewModel.Prepare(Id);
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    setupNavigation(te.Start, te.TimeSpanDuration());
+                    return te;
+                });
 
                 await ViewModel.Initialize();
+                ViewModel.EditTimes.Execute(tapSource);
+                TestScheduler.Start();
 
-                ViewModel.SyncErrorMessageVisible.Should().Be(expectedVisibility);
+                AnalyticsService.Received().EditViewTapped.Track(tapSource);
             }
 
-            [Property]
-            public void CopiesAllInformationFromTheEditedTimeEntrySoNothingIsLost(
-                long id,
-                long workspaceId,
-                long? projectId,
-                long? taskId,
-                bool billable,
-                DateTimeOffset start,
-                long? duration,
-                NonNull<string> description,
-                NonNull<long[]> tagIds)
+            [Fact, LogIfTooSlow]
+            public async Task NavigatesToEditDurationViewModel()
             {
-                var viewModel = CreateViewModel(); // view model must be created for each run of the property test
-                DataSource.TimeEntries.ClearReceivedCalls();
+                AdjustTimeEntries(SingleTimeEntryId, te =>
+                {
+                    setupNavigation(te.Start, te.TimeSpanDuration());
+                    return te;
+                });
 
-                var uniqueTagIds = tagIds.Get.Distinct().ToArray();
-                if (projectId == null)
-                    taskId = null;
-                var mockedTimeEntry = mockTimeEntry(id, workspaceId, projectId, taskId, billable, start, duration,
-                    description.Get, uniqueTagIds);
-                var observable = Observable.Return(mockedTimeEntry);
-                InteractorFactory.GetTimeEntryById(id)
-                    .Execute()
-                    .Returns(observable);
+                await ViewModel.Initialize();
+                ViewModel.EditTimes.Execute(EditViewTapSource.StartTime);
+                TestScheduler.Start();
 
-                viewModel.Prepare(id);
-                viewModel.Initialize().Wait();
-                viewModel.IsEditingDescription = false;
-                viewModel.ConfirmCommand.Execute();
-
-                InteractorFactory
+                await NavigationService
                     .Received()
-                    .UpdateTimeEntry(Arg.Is<EditTimeEntryDto>(
-                        dto => dto.Id == id
-                            && dto.WorkspaceId == workspaceId
-                            && dto.ProjectId == projectId
-                            && dto.TaskId == taskId
-                            && dto.Billable == billable
-                            && dto.StartTime == start
-                            && dto.StopTime == (duration.HasValue ? start + TimeSpan.FromSeconds(duration.Value) : (DateTimeOffset?)null)
-                            && dto.Description == description.Get.Trim()
-                            && dto.TagIds.Count() == uniqueTagIds.Count()
-                            && dto.TagIds.All(tagId => uniqueTagIds.Any(originalTagId => originalTagId == tagId))))
-                    .Execute()
-                    .Wait();
+                    .Navigate<EditDurationViewModel, EditDurationParameters, DurationParameter>(Arg.Any<EditDurationParameters>());
             }
 
-            private IThreadSafeTimeEntry mockTimeEntry(
-                long id,
-                long workspaceId,
-                long? projectId,
-                long? taskId,
-                bool billable,
-                DateTimeOffset start,
-                long? duration,
-                string description,
-                long[] tagIds)
+            [Fact, LogIfTooSlow]
+            public async Task SetsDurationToBeInitiallyFocusedIfDurationWasTapped()
             {
-                var databaseTimeEntry = Substitute.For<IThreadSafeTimeEntry>();
-
-                databaseTimeEntry.Id.Returns(id);
-                databaseTimeEntry.WorkspaceId.Returns(workspaceId);
-
-                IThreadSafeProject project = null;
-                if (projectId.HasValue)
+                AdjustTimeEntries(SingleTimeEntryId, te =>
                 {
-                    project = Substitute.For<IThreadSafeProject>();
-                    project.Id.Returns(projectId.Value);
-                }
-                databaseTimeEntry.Project.Returns(project);
+                    setupNavigation(te.Start, te.TimeSpanDuration());
+                    return te;
+                });
 
-                IThreadSafeTask task = null;
-                if (taskId.HasValue)
+                await ViewModel.Initialize();
+                ViewModel.EditTimes.Execute(EditViewTapSource.Duration);
+                TestScheduler.Start();
+
+                await NavigationService
+                    .Received()
+                    .Navigate<EditDurationViewModel, EditDurationParameters, DurationParameter>(
+                        Arg.Is<EditDurationParameters>(parameter => parameter.IsDurationInitiallyFocused));
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task PassesCorrectStartTimeAndDurationToViewModel()
+            {
+                var startTime = default(DateTimeOffset);
+                TimeSpan? duration = null;
+                AdjustTimeEntries(SingleTimeEntryId, te =>
                 {
-                    task = Substitute.For<IThreadSafeTask>();
-                    task.Id.Returns(taskId.Value);
-                }
-                databaseTimeEntry.Task.Returns(task);
+                    startTime = te.Start;
+                    duration = te.TimeSpanDuration();
+                    setupNavigation(te.Start, te.TimeSpanDuration());
+                    return te;
+                });
 
-                databaseTimeEntry.Billable.Returns(billable);
-                databaseTimeEntry.Start.Returns(start);
-                databaseTimeEntry.Duration.Returns(duration);
-                databaseTimeEntry.Description.Returns(description);
-                databaseTimeEntry.TagIds.Returns(tagIds);
+                await ViewModel.Initialize();
+                ViewModel.EditTimes.Execute(EditViewTapSource.Duration);
+                TestScheduler.Start();
 
-                return databaseTimeEntry;
+                await NavigationService
+                    .Received()
+                    .Navigate<EditDurationViewModel, EditDurationParameters, DurationParameter>(
+                        Arg.Is<EditDurationParameters>(parameter =>
+                            parameter.DurationParam.Start == startTime
+                            && parameter.DurationParam.Duration == duration));
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task UpdatesStartTimeAfterTimeSelection()
+            {
+                setupNavigation(selectedStartTime, selectedDuration);
+                var observer = TestScheduler.CreateObserverFor(ViewModel.StartTime);
+
+                await ViewModel.Initialize();
+                ViewModel.EditTimes.Execute(EditViewTapSource.Duration);
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().Be(selectedStartTime);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task UpdatesDurationAfterTimeSelection()
+            {
+                setupNavigation(selectedStartTime, selectedDuration);
+                var observer = TestScheduler.CreateObserverFor(ViewModel.Duration);
+
+                await ViewModel.Initialize();
+                ViewModel.EditTimes.Execute(EditViewTapSource.Duration);
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().Be(selectedDuration.Value);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task UpdatesStopTimeAfterTimeSelection()
+            {
+                var expectedStopTime = selectedStartTime + selectedDuration.Value;
+                setupNavigation(selectedStartTime, selectedDuration);
+                var observer = TestScheduler.CreateObserverFor(ViewModel.StopTime);
+
+                await ViewModel.Initialize();
+                ViewModel.EditTimes.Execute(EditViewTapSource.Duration);
+                TestScheduler.Start();
+
+                observer.LastEmittedValue().Should().Be(expectedStopTime);
             }
         }
 
-        public sealed class TheSelectProjectCommand : EditTimeEntryViewModelTest
+        public sealed class TheSelectStartDateAction : InitializableEditTimeEntryViewModelTest
         {
-            private async Task prepare(
-                long? projectId = null,
-                string projectName = null,
-                string projectColor = null,
-                string clientName = null,
-                long? taskId = null,
-                string taskName = null,
-                bool active = true)
-            {
-                long timeEntryId = 10;
-                prepareTimeEntry(timeEntryId);
+            private MockTimeEntry entry => entries.Single();
 
-                if (projectId.HasValue)
-                    prepareProject(projectId.Value, projectName, projectColor, clientName, 0);
-
-                if (taskId.HasValue)
-                    prepareTask(taskId.Value, taskName);
-
-                prepareNavigationService(projectId, taskId);
-
-                ViewModel.Prepare(timeEntryId);
-                await ViewModel.Initialize();
-            }
-
-            private IThreadSafeTimeEntry prepareTimeEntry(long id)
-            {
-                var timeEntry = Substitute.For<IThreadSafeTimeEntry>();
-                timeEntry.Id.Returns(id);
-                timeEntry.Description.Returns("Doing stuff");
-                timeEntry.Project.Name.Returns(Guid.NewGuid().ToString());
-                timeEntry.Project.Color.Returns(Guid.NewGuid().ToString());
-                timeEntry.Task.Name.Returns(Guid.NewGuid().ToString());
-                timeEntry.Project.Client.Name.Returns(Guid.NewGuid().ToString());
-                InteractorFactory.GetTimeEntryById(Arg.Is(id))
-                    .Execute()
-                    .Returns(Observable.Return(timeEntry));
-                return timeEntry;
-            }
-
-            private IThreadSafeProject prepareProject(
-                long projectId, string projectName, string projectColor, string clientName, long workspaceId, bool active = true)
-            {
-                var project = Substitute.For<IThreadSafeProject>();
-                project.Id.Returns(projectId);
-                project.Name.Returns(projectName);
-                project.Color.Returns(projectColor);
-                project.Client.Name.Returns(clientName);
-                project.WorkspaceId.Returns(workspaceId);
-                project.Active.Returns(active);
-                InteractorFactory.GetProjectById(Arg.Is(projectId))
-                    .Execute()
-                    .Returns(Observable.Return(project));
-                return project;
-            }
-
-            private void prepareTask(long taskId, string taskName)
-            {
-                var task = Substitute.For<IThreadSafeTask>();
-                task.Id.Returns(taskId);
-                task.Name.Returns(taskName);
-                InteractorFactory.GetTaskById(Arg.Is(task.Id))
-                    .Execute()
-                    .Returns(Observable.Return(task));
-            }
-
-            private void prepareNavigationService(long? projectId, long? taskId)
-                => NavigationService
-                    .Navigate<SelectProjectViewModel, SelectProjectParameter, SelectProjectParameter>(
-                           Arg.Any<SelectProjectParameter>())
-                       .Returns(SelectProjectParameter.WithIds(projectId, taskId, 0));
-
-            private List<IThreadSafeTag> createTags(int count)
-                => Enumerable.Range(10000, count)
-                    .Select(i =>
-                    {
-                        var tag = Substitute.For<IThreadSafeTag>();
-                        tag.Name.Returns($"Tag{i}");
-                        tag.Id.Returns(i);
-                        return tag;
-                    }).ToList();
-
-            [Fact, LogIfTooSlow]
-            public async Task SetsTheOnboardingStorageFlag()
-            {
-                var projectName = "Some other project";
-                await prepare(projectId: 11, projectName: projectName);
-
-                await ViewModel.SelectProjectCommand.ExecuteAsync();
-
-                OnboardingStorage.Received().SelectsProject();
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task SetsTheProject()
-            {
-                var projectName = "Some other project";
-                await prepare(projectId: 11, projectName: projectName);
-
-                await ViewModel.SelectProjectCommand.ExecuteAsync();
-
-                ViewModel.Project.Should().Be(projectName);
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task SetsTheTask()
-            {
-                var taskName = "Some task";
-                await prepare(
-                    projectId: 11,
-                    projectName: "Project",
-                    taskId: 12,
-                    taskName: taskName);
-
-                await ViewModel.SelectProjectCommand.ExecuteAsync();
-
-                ViewModel.Task.Should().Be(taskName);
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task SetsTheClient()
-            {
-                var clientName = "Some client";
-                await prepare(
-                    projectId: 11,
-                    projectName: "Project",
-                    clientName: clientName);
-
-                await ViewModel.SelectProjectCommand.ExecuteAsync();
-
-                ViewModel.Client.Should().Be(clientName);
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task SetsTheColor()
-            {
-                var projectColor = "123456";
-                await prepare(
-                    projectId: 11,
-                    projectName: "Project",
-                    projectColor: projectColor);
-
-                await ViewModel.SelectProjectCommand.ExecuteAsync();
-
-                ViewModel.ProjectColor.Should().Be(projectColor);
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task RemovesTheTaskIfNoTaskWasSelected()
-            {
-                await prepare(11, "Some project");
-
-                await ViewModel.SelectProjectCommand.ExecuteAsync();
-
-                ViewModel.Task.Should().BeEmpty();
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task RemovesTagsIfProjectFromAnotherWorkspaceWasSelected()
-            {
-                var initialTagCount = 10;
-                long timeEntryId = 10;
-                long initialProjectId = 11;
-                long newProjectId = 12;
-                prepareProject(initialProjectId, "Initial project", "#123456", "Some client", 13);
-                prepareProject(newProjectId, "New project", "AABBCC", "Some client", 14);
-                prepareNavigationService(newProjectId, null);
-                var timeEntry = prepareTimeEntry(timeEntryId);
-                var tags = createTags(initialTagCount);
-                timeEntry.Tags.Returns(tags);
-                ViewModel.Prepare(timeEntryId);
-                await ViewModel.Initialize();
-                ViewModel.Tags.Should().HaveCount(initialTagCount);
-
-                await ViewModel.SelectProjectCommand.ExecuteAsync();
-
-                ViewModel.Tags.Should().HaveCount(0);
-            }
-
-            [Fact, LogIfTooSlow]
-            public async Task TracksProjectSelectorOpens()
-            {
-                await prepare(11, "Some project");
-
-                await ViewModel.SelectProjectCommand.ExecuteAsync();
-
-                AnalyticsService.Received().EditEntrySelectProject.Track();
-                AnalyticsService.Received()
-                                .EditViewTapped
-                                .Track(Arg.Is(EditViewTapSource.Project));
-            }
-        }
-
-        public sealed class TheTagsProperty : EditTimeEntryViewModelTest
-        {
-            [Theory, LogIfTooSlow]
-            [InlineData(31, "a")]
-            [InlineData(31, "💵")]
-            [InlineData(50, "b")]
-            [InlineData(50, "🚕")]
-            public async Task CutsLongTagNames(int tagLength, string tagGrapheme)
-            {
-                await prepareTest(tagLength, tagGrapheme);
-
-                ViewModel.Tags.Should()
-                    .OnlyContain(tag => tag.LengthInGraphemes() == 33 && tag.EndsWith("..."));
-            }
-
-            [Theory, LogIfTooSlow]
-            [InlineData(30, "a")]
-            [InlineData(30, "🐕")]
-            [InlineData(29, "b")]
-            [InlineData(29, "🐛")]
-            [InlineData(10, "c")]
-            [InlineData(10, "❄️")]
-            public async Task DoesNotCutShortTagNames(int tagLength, string tagGrapheme)
-            {
-                await prepareTest(tagLength, tagGrapheme);
-
-                ViewModel.Tags.Should().OnlyContain(tag => tag.LengthInGraphemes() == tagLength);
-            }
-
-            private async Task prepareTest(int tagLength, string tagGrapheme)
-            {
-                var tag = Substitute.For<IThreadSafeTag>();
-                tag.Name.Returns(getLongTagName(tagLength, tagGrapheme));
-                var timeEntry = Substitute.For<IThreadSafeTimeEntry>();
-
-                timeEntry.Id.Returns(13);
-                timeEntry.Tags.Returns(new IThreadSafeTag[] { tag });
-
-                InteractorFactory.GetTimeEntryById(Arg.Is(timeEntry.Id))
-                    .Execute()
-                    .Returns(Observable.Return(timeEntry));
-
-                ViewModel.Prepare(timeEntry.Id);
-                await ViewModel.Initialize();
-            }
-
-            private string getLongTagName(int length, string tagGrapheme)
-                => Enumerable
-                    .Range(0, length)
-                    .Aggregate(new StringBuilder(), (builder, _) => builder.Append(tagGrapheme))
-                    .ToString();
-        }
-
-        public sealed class TheSelectStartDateCommand : EditTimeEntryViewModelTest
-        {
             [Fact]
             public async Task OpensTheSelectDateTimeViewModel()
             {
-                ConfigureEditedTimeEntry(DateTimeOffset.UtcNow, false);
-                ViewModel.Prepare(Id);
-                ViewModel.Initialize().Wait();
+                ViewModel.Prepare(SingleTimeEntryId);
+                await ViewModel.Initialize();
 
-                await ViewModel.SelectStartDateCommand.ExecuteAsync();
+                ViewModel.SelectStartDate.Execute();
+                TestScheduler.Start();
 
                 await NavigationService.Received()
                     .Navigate<SelectDateTimeViewModel, DateTimePickerParameters, DateTimeOffset>(
@@ -1266,27 +1664,27 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [Fact]
             public async Task OpensTheSelectDateTimeViewModelWithCorrectLimitsForARunningTimeEntry()
             {
-                var now = DateTimeOffset.UtcNow;
-                ConfigureEditedTimeEntry(now, true);
-                ViewModel.Prepare(Id);
-                ViewModel.Initialize().Wait();
+                entry.Duration = null;
 
-                await ViewModel.SelectStartDateCommand.ExecuteAsync();
+                ViewModel.Prepare(SingleTimeEntryId);
+                await ViewModel.Initialize();
+                ViewModel.SelectStartDate.Execute();
+                TestScheduler.Start();
 
                 await NavigationService.Received()
                     .Navigate<SelectDateTimeViewModel, DateTimePickerParameters, DateTimeOffset>(
-                        Arg.Is<DateTimePickerParameters>(param => param.MinDate == now - MaxTimeEntryDuration && param.MaxDate == now));
+                        Arg.Is<DateTimePickerParameters>(param => param.MinDate == Now - MaxTimeEntryDuration && param.MaxDate == Now));
             }
 
             [Fact]
             public async Task OpensTheSelectDateTimeViewModelWithCorrectLimitsForAStoppedTimeEntry()
             {
-                var now = DateTimeOffset.UtcNow;
-                ConfigureEditedTimeEntry(now, false);
-                ViewModel.Prepare(Id);
-                ViewModel.Initialize().Wait();
+                entry.Duration = 123;
 
-                await ViewModel.SelectStartDateCommand.ExecuteAsync();
+                ViewModel.Prepare(SingleTimeEntryId);
+                await ViewModel.Initialize();
+                ViewModel.SelectStartDate.Execute();
+                TestScheduler.Start();
 
                 await NavigationService.Received()
                     .Navigate<SelectDateTimeViewModel, DateTimePickerParameters, DateTimeOffset>(
@@ -1298,128 +1696,317 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             [InlineData(false)]
             public async Task ChangesTheStartTimeToTheSelectedStartDate(bool isRunning)
             {
-                var now = DateTimeOffset.UtcNow;
-                var startTime = now.AddMonths(-1);
-                ConfigureEditedTimeEntry(now, isRunning);
-                ViewModel.Prepare(Id);
-                ViewModel.Initialize().Wait();
+                var startTime = Now.AddMonths(-1);
+                entry.Duration = isRunning ? (long?)null : 2 * 60;
                 NavigationService
                     .Navigate<SelectDateTimeViewModel, DateTimePickerParameters, DateTimeOffset>(Arg.Any<DateTimePickerParameters>())
                     .Returns(startTime);
 
-                await ViewModel.SelectStartDateCommand.ExecuteAsync();
+                ViewModel.Prepare(SingleTimeEntryId);
+                await ViewModel.Initialize();
+                ViewModel.SelectStartDate.Execute();
+                TestScheduler.Start();
 
-                TheTimeEntry.Start.Should().NotBe(startTime);
+                entry.Start.Should().NotBe(startTime);
             }
 
             [Fact]
             public async Task DoesNotChangeDurationForAStoppedTimeEntry()
             {
-                var now = DateTimeOffset.UtcNow;
-                ConfigureEditedTimeEntry(now, false);
-                ViewModel.Prepare(Id);
-                ViewModel.Initialize().Wait();
-                var duration = Duration;
+                entry.Duration = 2 * 60;
+                NavigationService
+                    .Navigate<SelectDateTimeViewModel, DateTimePickerParameters, DateTimeOffset>(Arg.Any<DateTimePickerParameters>())
+                    .Returns(entry.Start - TimeSpan.FromDays(1));
 
-                await ViewModel.SelectStartDateCommand.ExecuteAsync();
+                ViewModel.Prepare(SingleTimeEntryId);
+                await ViewModel.Initialize();
+                var durationObserver = TestScheduler.CreateObserver<TimeSpan>();
+                ViewModel.Duration.Subscribe(durationObserver);
+                ViewModel.SelectStartDate.Execute();
+                TestScheduler.Start();
 
-                TheTimeEntry.Duration.Should().Be((long)duration.TotalSeconds);
+                durationObserver.LastEmittedValue().Should().Be(TimeSpan.FromSeconds(entry.Duration.Value));
             }
 
             [Fact, LogIfTooSlow]
             public async Task TracksStartDateTap()
             {
-                ConfigureEditedTimeEntry(DateTimeOffset.Now);
-                ViewModel.Prepare(Id);
-                ViewModel.Initialize().Wait();
-
-                var newStartTime = TheTimeEntry.Start.AddHours(1);
+                var newStartTime = entry.Start.AddHours(1);
                 NavigationService
                     .Navigate<SelectDateTimeViewModel, DateTimePickerParameters, DateTimeOffset>(
                         Arg.Any<DateTimePickerParameters>())
                     .Returns(newStartTime);
 
-                await ViewModel.SelectStartDateCommand.ExecuteAsync();
+                ViewModel.Prepare(SingleTimeEntryId);
+                ViewModel.Initialize().Wait();
+                ViewModel.SelectStartDate.Execute();
+                TestScheduler.Start();
 
                 AnalyticsService.Received()
-                                .EditViewTapped
-                                .Track(Arg.Is(EditViewTapSource.StartDate));
+                    .EditViewTapped
+                    .Track(Arg.Is(EditViewTapSource.StartDate));
             }
         }
 
-        public sealed class TheSelectStartTimeCommand : EditTimeEntryViewModelTest
+
+        public sealed class TheDeleteAction : InitializableEditTimeEntryViewModelTest
+        {
+            public TheDeleteAction()
+            {
+                var trueObservable = Observable.Return(true);
+                DialogService
+                    .ConfirmDestructiveAction(Arg.Any<ActionType>(), Arg.Any<object>())
+                    .Returns(trueObservable);
+
+                var unitObservable = Observable.Return(Unit.Default);
+                InteractorFactory
+                    .DeleteTimeEntry(Arg.Any<long>())
+                    .Execute()
+                    .Returns(unitObservable);
+
+                InteractorFactory
+                    .DeleteTimeEntry(Arg.Any<long>())
+                    .Execute()
+                    .Returns(unitObservable);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task AsksForDestructiveActionConfirmationForSingleTimeEntry()
+            {
+                await ViewModel.Initialize();
+                ViewModel.Delete.Execute();
+                TestScheduler.Start();
+
+                await DialogService.Received().ConfirmDestructiveAction(
+                    ActionType.DeleteExistingTimeEntry, 1);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task AsksForDestructiveActionConfirmationForTimeEntriesGroup()
+            {
+                AdjustTimeEntries(TimeEntriesGroupIds, te => te);
+
+                await ViewModel.Initialize();
+                ViewModel.Delete.Execute();
+                TestScheduler.Start();
+
+                await DialogService.Received().ConfirmDestructiveAction(
+                    ActionType.DeleteMultipleExistingTimeEntries, TimeEntriesGroupIds.Length);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task DoesNotDeleteIfCancelledSingleTimeEntry()
+            {
+                var falseObservable = Observable.Return(false);
+                DialogService
+                    .ConfirmDestructiveAction(Arg.Any<ActionType>(), Arg.Any<object>())
+                    .Returns(falseObservable);
+
+                await ViewModel.Initialize();
+                ViewModel.Delete.Execute();
+                TestScheduler.Start();
+
+                await InteractorFactory.DeleteTimeEntry(Arg.Any<long>()).DidNotReceive().Execute();
+                await InteractorFactory.DeleteMultipleTimeEntries(Arg.Any<long[]>()).DidNotReceive().Execute();
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task DoesNotDeleteIfCancelledTimeEntriesGroup()
+            {
+                var falseObservable = Observable.Return(false);
+                DialogService
+                    .ConfirmDestructiveAction(Arg.Any<ActionType>())
+                    .Returns(falseObservable);
+                AdjustTimeEntries(TimeEntriesGroupIds, te => te);
+
+                await ViewModel.Initialize();
+                ViewModel.Delete.Execute();
+                TestScheduler.Start();
+
+                await InteractorFactory.DeleteTimeEntry(Arg.Any<long>()).DidNotReceive().Execute();
+                await InteractorFactory.DeleteMultipleTimeEntries(Arg.Any<long[]>()).DidNotReceive().Execute();
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task InitiatesPushSyncOnDeleteConfirmationForSingleTimeEntry()
+            {
+                await ViewModel.Initialize();
+                ViewModel.Delete.Execute();
+                TestScheduler.Start();
+
+                SyncManager.Received().InitiatePushSync();
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task InitiatesPushSyncOnDeleteConfirmationForTimeEntriesGroup()
+            {
+                AdjustTimeEntries(TimeEntriesGroupIds, te => te);
+
+                await ViewModel.Initialize();
+                ViewModel.Delete.Execute();
+                TestScheduler.Start();
+
+                SyncManager.Received().InitiatePushSync();
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task ClosesViewModelAfterDeletionForSingleTimeEntry()
+            {
+                await ViewModel.Initialize();
+                ViewModel.Delete.Execute();
+                TestScheduler.Start();
+
+                await NavigationService.Received().Close(ViewModel);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task ClosesViewModelAfterDeletionForTimeEntriesGroup()
+            {
+                AdjustTimeEntries(TimeEntriesGroupIds, te => te);
+
+                await ViewModel.Initialize();
+                ViewModel.Delete.Execute();
+                TestScheduler.Start();
+
+                await NavigationService.Received().Close(ViewModel);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task TracksDeletionOfSingleTimeEntryUsingTheAnaltyticsService()
+            {
+                await ViewModel.Initialize();
+                ViewModel.Delete.Execute();
+                TestScheduler.Start();
+
+                AnalyticsService.DeleteTimeEntry.Received().Track();
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task TracksDeletionOfTimeEntriesGroupUsingTheAnaltyticsService()
+            {
+                AdjustTimeEntries(TimeEntriesGroupIds, te => te);
+
+                await ViewModel.Initialize();
+                ViewModel.Delete.Execute();
+                TestScheduler.Start();
+
+                AnalyticsService.DeleteTimeEntry.Received().Track();
+            }
+        }
+
+        public sealed class TheSaveActionForMultipleTimeEntries : InitializableEditTimeEntryViewModelTest
+        {
+            private static readonly long[] ids = { 1, 2, 3 };
+
+            public TheSaveActionForMultipleTimeEntries()
+                : base(ids)
+            {
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task PreservesStartAndEndTimesWhenEditingAGroupOfTimeEntries()
+            {
+                NavigationService
+                    .Navigate<EditDurationViewModel, EditDurationParameters, DurationParameter>(Arg.Any<EditDurationParameters>())
+                    .Returns(new DurationParameter { Start = new DateTimeOffset(), Duration = TimeSpan.FromDays(365) });
+                var interactor = SetupUpdateInteractor(entries);
+
+                await ViewModel.Initialize();
+                ViewModel.EditTimes.Execute(EditViewTapSource.StartDate);
+                ViewModel.Save.Execute();
+                TestScheduler.Start();
+
+                InteractorFactory
+                   .Received()
+                   .UpdateMultipleTimeEntries(Arg.Is<EditTimeEntryDto[]>(dtos => DtosEqualTimeEntries(dtos, entries)));
+                await interactor.Received().Execute();
+            }
+        }
+
+        public sealed class TheSaveAction : InitializableEditTimeEntryViewModelTest
         {
             [Fact, LogIfTooSlow]
-            public async Task TracksStartTimeTap()
+            public async Task SetsTheOnboardingStorageFlag()
             {
-                ConfigureEditedTimeEntry(DateTimeOffset.Now);
-                ViewModel.Prepare(Id);
-                ViewModel.Initialize().Wait();
+                await ViewModel.Initialize();
+                ViewModel.Save.Execute();
+                TestScheduler.Start();
 
-                var newStartTime = TheTimeEntry.Start.AddHours(1);
-                var newDurationParameter = DurationParameter.WithStartAndDuration(newStartTime, null);
-                NavigationService
-                    .Navigate<EditDurationViewModel, EditDurationParameters, DurationParameter>(
-                        Arg.Any<EditDurationParameters>())
-                    .Returns(newDurationParameter);
-
-                await ViewModel.SelectStartTimeCommand.ExecuteAsync();
-
-                AnalyticsService.Received()
-                                .EditViewTapped
-                                .Track(Arg.Is(EditViewTapSource.StartTime));
+                OnboardingStorage.Received().EditedTimeEntry();
             }
-        }
 
-        public sealed class TheSelectStopTimeCommand : EditTimeEntryViewModelTest
-        {
             [Fact, LogIfTooSlow]
-            public async Task TracksStopTimeTap()
+            public async Task CallsInteractorWithValidDtoForSingleTimeEntry()
             {
-                ConfigureEditedTimeEntry(DateTimeOffset.Now);
-                ViewModel.Prepare(Id);
-                ViewModel.Initialize().Wait();
+                var interactor = SetupUpdateInteractor(entries);
 
-                var newStartTime = TheTimeEntry.Start.AddHours(1);
-                var newDurationParameter = DurationParameter.WithStartAndDuration(newStartTime, null);
-                NavigationService
-                    .Navigate<EditDurationViewModel, EditDurationParameters, DurationParameter>(
-                        Arg.Any<EditDurationParameters>())
-                    .Returns(newDurationParameter);
+                await ViewModel.Initialize();
+                ViewModel.Save.Execute();
+                TestScheduler.Start();
 
-                await ViewModel.SelectStopTimeCommand.ExecuteAsync();
-
-                AnalyticsService.Received()
-                                .EditViewTapped
-                                .Track(Arg.Is(EditViewTapSource.StopTime));
-            }
-        }
-
-        public sealed class TheHasProjectProperty : EditTimeEntryViewModelTest
-        {
-            [Fact]
-            public void EmitsTrueWhenTimeEntryHasProject()
-            {
-                const string selectedProject = "Some random project";
-
-                bool actualHasProjectValue = false;
-                ViewModel.HasProject.Subscribe(hasProject => actualHasProjectValue = hasProject);
-                ViewModel.Project = selectedProject;
-
-                actualHasProjectValue.Should().BeTrue();
+                InteractorFactory
+                   .Received()
+                   .UpdateMultipleTimeEntries(Arg.Is<EditTimeEntryDto[]>(dtos => DtosEqualTimeEntries(dtos, entries)));
+                await interactor.Received().Execute();
             }
 
-            [Fact]
-            public void EmitsFalseWhenTimeEntryDoesNotHaveProject()
+            [Fact, LogIfTooSlow]
+            public async Task AllowsEditingStartAndEndTimesWhenEditingASingleTimeEntry()
             {
-                const string selectedProject = "Some random project";
+                var timeEntry = entries.Single();
+                var interactor = SetupUpdateInteractor(new[] { timeEntry });
 
-                ViewModel.Project = selectedProject;
-                bool actualHasProjectValue = true;
-                ViewModel.HasProject.Subscribe(hasProject => actualHasProjectValue = hasProject);
-                ViewModel.Project = null;
+                await ViewModel.Initialize();
+                ViewModel.StopTimeEntry.Execute();
+                ViewModel.Save.Execute();
+                TestScheduler.Start();
 
-                actualHasProjectValue.Should().BeFalse();
+                InteractorFactory
+                    .Received()
+                    .UpdateMultipleTimeEntries(Arg.Is<EditTimeEntryDto[]>(dtos => DtoEqualsTimeEntry(dtos.First(), timeEntry)));
+                await interactor.Received().Execute();
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task CallsInteractorWithValidDtoForTimeEntriesGroup()
+            {
+                AdjustTimeEntries(TimeEntriesGroupIds, te => te);
+                var interactor = SetupUpdateInteractor(entries);
+
+                await ViewModel.Initialize();
+                ViewModel.Save.Execute();
+                TestScheduler.Start();
+
+                InteractorFactory
+                   .Received()
+                   .UpdateMultipleTimeEntries(Arg.Is<EditTimeEntryDto[]>(dtos => DtosEqualTimeEntries(dtos, entries)));
+                await interactor.Received().Execute();
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task ClosesAfterSuccessfulSave()
+            {
+                SetupUpdateInteractor(entries);
+
+                await ViewModel.Initialize();
+                ViewModel.Save.Execute();
+                TestScheduler.Start();
+
+                await NavigationService.Received().Close(ViewModel);
+            }
+
+            [Fact, LogIfTooSlow]
+            public async Task ClosesEvenAfterFailedSave()
+            {
+                var interactor = SetupUpdateInteractor(entries);
+                interactor.Execute()
+                    .Returns(Observable.Throw<IEnumerable<IThreadSafeTimeEntry>>(new Exception()));
+
+                await ViewModel.Initialize();
+                ViewModel.Save.Execute();
+                TestScheduler.Start();
+
+                await NavigationService.Received().Close(ViewModel);
             }
         }
     }

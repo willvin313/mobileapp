@@ -4,11 +4,15 @@ using Android.Views;
 using Android.Widget;
 using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Giskard.Extensions;
+using Toggl.Foundation.Extensions;
+using Toggl.Foundation.MvvmCross.Transformations;
+using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog;
 using Toggl.Giskard.ViewHelpers;
 
 namespace Toggl.Giskard.ViewHolders
 {
-    public class MainLogSectionViewHolder : BaseRecyclerViewHolder<TimeEntryCollectionViewModel>
+    public class MainLogSectionViewHolder : BaseRecyclerViewHolder<DaySummaryViewModel>
     {
         private TextView mainLogHeaderTitle;
         private TextView mainLogHeaderDuration;
@@ -31,8 +35,8 @@ namespace Toggl.Giskard.ViewHolders
 
         protected override void UpdateView()
         {
-            mainLogHeaderTitle.Text = Item.DurationText;
-            mainLogHeaderDuration.Text = Item.HeaderDate(Now);
+            mainLogHeaderTitle.Text = Item.Title;
+            mainLogHeaderDuration.Text = Item.TotalTrackedTime;
         }
 
         protected override void UpdateTheme(ITheme theme)

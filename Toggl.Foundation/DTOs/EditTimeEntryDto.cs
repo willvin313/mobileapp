@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Toggl.Multivac;
+using Toggl.Multivac.Extensions;
 
 namespace Toggl.Foundation.DTOs
 {
-    public struct EditTimeEntryDto
+    public struct EditTimeEntryDto : IEquatable<EditTimeEntryDto>
     {
         public long Id { get; set; }
 
@@ -22,5 +25,18 @@ namespace Toggl.Foundation.DTOs
         public bool Billable { get; set; }
 
         public IEnumerable<long> TagIds { get; set; }
+
+        public bool Equals(EditTimeEntryDto other)
+        {
+            return Id == other.Id
+                && Description == other.Description
+                && StartTime == other.StartTime
+                && StopTime == other.StopTime
+                && ProjectId == other.ProjectId
+                && TaskId == other.TaskId
+                && WorkspaceId == other.WorkspaceId
+                && Billable == other.Billable
+                && TagIds.SetEquals(other.TagIds);
+        }
     }
 }

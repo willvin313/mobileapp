@@ -7,6 +7,7 @@ using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Foundation;
+using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Multivac.Extensions;
 using UIKit;
@@ -16,9 +17,9 @@ namespace Toggl.Daneel.ViewControllers
     [ModalCardPresentation]
     public sealed partial class EditProjectViewController : ReactiveViewController<EditProjectViewModel>, IDismissableViewController
     {
-        private static readonly nfloat nameAlreadyTakenHeight = 16;
+        private static readonly nfloat errorVisibleHeight = 16;
 
-        public EditProjectViewController() 
+        public EditProjectViewController()
             : base(nameof(EditProjectViewController))
         {
         }
@@ -35,8 +36,9 @@ namespace Toggl.Daneel.ViewControllers
 
             TitleLabel.Text = Resources.NewProject;
             NameTextField.Placeholder = Resources.ProjectName;
-            NameTakenErrorLabel.Text = Resources.NameTakenError;
+            ErrorLabel.Text = Resources.ProjectNameTakenError;
             DoneButton.SetTitle(Resources.Create, UIControlState.Normal);
+            ProjectNameUsedErrorTextHeight.Constant = 0;
 
             // Name
             NameTextField.Rx().Text()
@@ -58,8 +60,12 @@ namespace Toggl.Daneel.ViewControllers
                 .DisposedBy(DisposeBag);
 
             // Error
-            ViewModel.NameIsAlreadyTaken
-                .Select(nameIsTaken => nameIsTaken ? nameAlreadyTakenHeight : 0)
+            ViewModel.Error
+                .Subscribe(ErrorLabel.Rx().Text())
+                .DisposedBy(DisposeBag);
+
+            ViewModel.Error
+                .Select(e => string.IsNullOrEmpty(e) ? new nfloat(0) : errorVisibleHeight)
                 .Subscribe(ProjectNameUsedErrorTextHeight.Rx().Constant())
                 .DisposedBy(DisposeBag);
 

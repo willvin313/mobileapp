@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
-using MvvmCross.Commands;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
-using PropertyChanged;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Diagnostics;
@@ -19,168 +19,96 @@ using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.MvvmCross.Parameters;
 using Toggl.Foundation.MvvmCross.Services;
 using Toggl.Foundation.Sync;
+using Toggl.Foundation.Services;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
+using Toggl.Multivac.Extensions.Reactive;
 using Toggl.PrimeRadiant.Settings;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels
 {
     [Preserve(AllMembers = true)]
-    public sealed class EditTimeEntryViewModel : MvxViewModel<long>
+    public sealed class EditTimeEntryViewModel : MvxViewModel<long[]>
     {
-        private const int maxTagLength = 30;
+        internal static readonly int MaxTagLength = 30;
 
         private readonly ITimeService timeService;
         private readonly ITogglDataSource dataSource;
         private readonly IDialogService dialogService;
         private readonly IInteractorFactory interactorFactory;
         private readonly IMvxNavigationService navigationService;
-        private readonly IOnboardingStorage onboardingStorage;
         private readonly IAnalyticsService analyticsService;
         private readonly IStopwatchProvider stopwatchProvider;
         private readonly ISyncManager syncManager;
+        private readonly ISchedulerProvider schedulerProvider;
+        private readonly IRxActionFactory actionFactory;
+        public IOnboardingStorage OnboardingStorage { get; private set; }
 
-        private readonly HashSet<long> tagIds = new HashSet<long>();
-        private IDisposable tickingDisposable;
-        private IDisposable confirmDisposable;
-        private IDisposable preferencesDisposable;
-        private IDisposable userDisposable;
         private IStopwatch stopwatchFromCalendar;
         private IStopwatch stopwatchFromMainLog;
 
-        private IThreadSafeTimeEntry originalTimeEntry;
-
+        private long workspaceId;
         private long? projectId;
         private long? taskId;
-        private long workspaceId;
-        private DurationFormat durationFormat;
+        private IThreadSafeTimeEntry originalTimeEntry;
+        private BehaviorSubject<long?> workspaceIdSubject = new BehaviorSubject<long?>(null);
 
-        private BehaviorSubject<bool> hasProjectSubject = new BehaviorSubject<bool>(false);
-        private BehaviorSubject<Unit> projectTaskClientSubject = new BehaviorSubject<Unit>(Unit.Default);
+        public long[] TimeEntryIds { get; set; }
+        public long TimeEntryId => TimeEntryIds.First();
 
-        [Obsolete("This observable should be converted into separate observables for project, task and client as part of RXFactor.")]
-        public IObservable<Unit> ProjectTaskOrClientChanged { get; }
+        public bool IsEditingGroup => TimeEntryIds.Length > 1;
+        public int GroupCount => TimeEntryIds.Length;
 
-        public IObservable<bool> HasProject { get; }
+        private CompositeDisposable disposeBag = new CompositeDisposable();
 
-        private bool isDirty
-            => originalTimeEntry == null
-               || originalTimeEntry.Description != Description
-               || originalTimeEntry.WorkspaceId != workspaceId
-               || originalTimeEntry.ProjectId != projectId
-               || originalTimeEntry.TaskId != taskId
-               || originalTimeEntry.Start != StartTime
-               || originalTimeEntry.TagIds.SequenceEqual(tagIds) == false
-               || originalTimeEntry.Duration.HasValue != !IsTimeEntryRunning
-               || (originalTimeEntry.Duration.HasValue
-                   && originalTimeEntry.Duration != (long)Duration.TotalSeconds)
-               || originalTimeEntry.Billable != Billable;
+        private BehaviorSubject<bool> isEditingDescriptionSubject;
+        public BehaviorRelay<string> Description { get; private set; }
 
-        public IOnboardingStorage OnboardingStorage => onboardingStorage;
+        private BehaviorSubject<ProjectClientTaskInfo> projectClientTaskSubject;
+        public IObservable<ProjectClientTaskInfo> ProjectClientTask { get; private set; }
 
-        public long Id { get; set; }
+        public IObservable<bool> IsBillableAvailable { get; private set; }
 
-        public string Description { get; set; }
+        private BehaviorSubject<bool> isBillableSubject;
+        public IObservable<bool> IsBillable { get; private set; }
 
-        [DependsOn(nameof(IsEditingDescription))]
-        public string ConfirmButtonText => IsEditingDescription ? Resources.Done : Resources.Save;
+        private BehaviorSubject<DateTimeOffset> startTimeSubject;
+        public IObservable<DateTimeOffset> StartTime { get; private set; }
 
-        public bool IsEditingDescription { get; set; }
+        private ISubject<TimeSpan?> durationSubject;
+        public IObservable<TimeSpan> Duration { get; private set; }
 
-        public string Project { get; set; }
+        public IObservable<DateTimeOffset?> StopTime { get; private set; }
 
-        public string ProjectColor { get; set; }
+        private bool isRunning;
+        public IObservable<bool> IsTimeEntryRunning { get; private set; }
 
-        public string Client { get; set; }
+        public TimeSpan GroupDuration { get; private set; }
 
-        public string Task { get; set; }
+        private BehaviorSubject<IEnumerable<IThreadSafeTag>> tagsSubject;
+        public IObservable<IEnumerable<string>> Tags { get; set; }
+        private IEnumerable<long> tagIds
+            => tagsSubject.Value.Select(tag => tag.Id);
 
-        public bool IsBillableAvailable { get; private set; }
+        private BehaviorSubject<bool> isInaccessibleSubject;
+        public IObservable<bool> IsInaccessible { get; private set; }
 
-        [DependsOn(nameof(StartTime), nameof(StopTime))]
-        public TimeSpan Duration
-            => (StopTime ?? timeService.CurrentDateTime) - StartTime;
+        private BehaviorSubject<string> syncErrorMessageSubject;
+        public IObservable<string> SyncErrorMessage { get; private set; }
+        public IObservable<bool> IsSyncErrorMessageVisible { get; private set; }
 
-        [DependsOn(nameof(IsTimeEntryRunning))]
-        public DurationFormat DurationFormat => IsTimeEntryRunning ? DurationFormat.Improved : durationFormat;
+        public IObservable<IThreadSafePreferences> Preferences { get; private set; }
 
-        public DateFormat DateFormat { get; private set; }
-
-        public TimeFormat TimeFormat { get; private set; }
-
-        public BeginningOfWeek BeginningOfWeek { get; private set; }
-
-        public DateTimeOffset StartTime { get; set; }
-
-        [DependsOn(nameof(StopTime))]
-        public bool IsTimeEntryRunning => !StopTime.HasValue;
-
-        public DateTimeOffset StopTimeOrCurrent => StopTime ?? timeService.CurrentDateTime;
-
-        private DateTimeOffset? stopTime;
-        public DateTimeOffset? StopTime
-        {
-            get => stopTime;
-            set
-            {
-                if (stopTime == value) return;
-
-                stopTime = value;
-
-                if (IsTimeEntryRunning)
-                {
-                    subscribeToTimeServiceTicks();
-                }
-                else
-                {
-                    tickingDisposable?.Dispose();
-                    tickingDisposable = null;
-                }
-
-                RaisePropertyChanged(nameof(StopTime));
-            }
-        }
-
-        public MvxObservableCollection<string> Tags { get; private set; } = new MvxObservableCollection<string>();
-
-        [DependsOn(nameof(Tags))]
-        public bool HasTags => Tags?.Any() ?? false;
-
-        public bool Billable { get; set; }
-
-        public string SyncErrorMessage { get; private set; }
-
-        public bool SyncErrorMessageVisible { get; private set; }
-
-        public bool IsInaccessible { get; set; }
-
-        public IMvxCommand ConfirmCommand { get; }
-
-        public IMvxCommand SaveCommand { get; }
-
-        public IMvxCommand DismissSyncErrorMessageCommand { get; }
-
-        public IMvxCommand StopCommand { get; }
-
-        public IMvxAsyncCommand DeleteCommand { get; }
-
-        public IMvxAsyncCommand CloseCommand { get; }
-
-        public IMvxAsyncCommand SelectDurationCommand { get; }
-
-        public IMvxAsyncCommand SelectStartTimeCommand { get; }
-
-        public IMvxAsyncCommand SelectStopTimeCommand { get; }
-
-        public IMvxAsyncCommand SelectStartDateCommand { get; }
-
-        public IMvxAsyncCommand SelectProjectCommand { get; }
-
-        public IMvxAsyncCommand SelectTagsCommand { get; }
-
-        public IMvxCommand ToggleBillableCommand { get; }
-
-        public IMvxCommand StartEditingDescriptionCommand { get; }
+        public OutputAction<bool> Close { get; private set; }
+        public UIAction SelectProject { get; private set; }
+        public UIAction SelectTags { get; private set; }
+        public UIAction ToggleBillable { get; private set; }
+        public InputAction<EditViewTapSource> EditTimes { get; private set; }
+        public UIAction SelectStartDate { get; }
+        public UIAction StopTimeEntry { get; private set; }
+        public UIAction DismissSyncErrorMessage { get; private set; }
+        public UIAction Save { get; private set; }
+        public UIAction Delete { get; private set; }
 
         public EditTimeEntryViewModel(
             ITimeService timeService,
@@ -191,7 +119,9 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             IOnboardingStorage onboardingStorage,
             IDialogService dialogService,
             IAnalyticsService analyticsService,
-            IStopwatchProvider stopwatchProvider)
+            IStopwatchProvider stopwatchProvider,
+            IRxActionFactory actionFactory,
+            ISchedulerProvider schedulerProvider)
         {
             Ensure.Argument.IsNotNull(dataSource, nameof(dataSource));
             Ensure.Argument.IsNotNull(syncManager, nameof(syncManager));
@@ -202,6 +132,8 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             Ensure.Argument.IsNotNull(navigationService, nameof(navigationService));
             Ensure.Argument.IsNotNull(analyticsService, nameof(analyticsService));
             Ensure.Argument.IsNotNull(stopwatchProvider, nameof(stopwatchProvider));
+            Ensure.Argument.IsNotNull(schedulerProvider, nameof(schedulerProvider));
+            Ensure.Argument.IsNotNull(actionFactory, nameof(actionFactory));
 
             this.dataSource = dataSource;
             this.syncManager = syncManager;
@@ -209,40 +141,110 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             this.dialogService = dialogService;
             this.interactorFactory = interactorFactory;
             this.navigationService = navigationService;
-            this.onboardingStorage = onboardingStorage;
             this.analyticsService = analyticsService;
             this.stopwatchProvider = stopwatchProvider;
+            this.schedulerProvider = schedulerProvider;
+            this.actionFactory = actionFactory;
+            OnboardingStorage = onboardingStorage;
 
-            DeleteCommand = new MvxAsyncCommand(delete);
-            ConfirmCommand = new MvxCommand(confirm);
-            SaveCommand = new MvxCommand(save);
-            CloseCommand = new MvxAsyncCommand(CloseWithConfirmation);
+            workspaceIdSubject
+                .Where(id => id.HasValue)
+                .Subscribe(id => workspaceId = id.Value)
+                .DisposedBy(disposeBag);
 
-            StopCommand = new MvxCommand(stopTimeEntry, () => IsTimeEntryRunning);
+            isEditingDescriptionSubject = new BehaviorSubject<bool>(false);
+            Description = new BehaviorRelay<string>(string.Empty, CommonFunctions.Trim);
 
-            SelectStartTimeCommand = new MvxAsyncCommand(selectStartTime, canExecute);
-            SelectStopTimeCommand = new MvxAsyncCommand(selectStopTime, canExecute);
-            SelectStartDateCommand = new MvxAsyncCommand(selectStartDate, canExecute);
-            SelectDurationCommand = new MvxAsyncCommand(selectDuration, canExecute);
+            projectClientTaskSubject = new BehaviorSubject<ProjectClientTaskInfo>(ProjectClientTaskInfo.Empty);
+            ProjectClientTask = projectClientTaskSubject
+                .AsDriver(ProjectClientTaskInfo.Empty, schedulerProvider);
 
-            SelectProjectCommand = new MvxAsyncCommand(selectProject);
-            SelectTagsCommand = new MvxAsyncCommand(selectTags, canExecute);
-            DismissSyncErrorMessageCommand = new MvxCommand(dismissSyncErrorMessageCommand);
-            ToggleBillableCommand = new MvxCommand(toggleBillable, canExecute);
-            StartEditingDescriptionCommand = new MvxCommand(startEditingDescriptionCommand, canExecute);
+            IsBillableAvailable = workspaceIdSubject
+                .Where(id => id.HasValue)
+                .SelectMany(workspaceId => interactorFactory.IsBillableAvailableForWorkspace(workspaceId.Value).Execute())
+                .DistinctUntilChanged()
+                .AsDriver(false, schedulerProvider);
 
-            HasProject = hasProjectSubject.AsObservable();
+            isBillableSubject = new BehaviorSubject<bool>(false);
+            IsBillable = isBillableSubject
+                .DistinctUntilChanged()
+                .AsDriver(false, schedulerProvider);
 
-            ProjectTaskOrClientChanged = projectTaskClientSubject
-                .AsObservable();
+            startTimeSubject = new BehaviorSubject<DateTimeOffset>(DateTimeOffset.UtcNow);
+            var startTimeObservable = startTimeSubject.DistinctUntilChanged();
+            StartTime = startTimeObservable
+                .AsDriver(default(DateTimeOffset), schedulerProvider);
 
-            bool canExecute()
-                => !IsInaccessible;
+            var now = timeService.CurrentDateTimeObservable.StartWith(timeService.CurrentDateTime);
+            durationSubject = new ReplaySubject<TimeSpan?>(bufferSize: 1);
+            Duration =
+                durationSubject
+                    .Select(duration
+                        => duration.HasValue
+                            ? Observable.Return(duration.Value)
+                            : now.CombineLatest(
+                                startTimeObservable,
+                                (currentTime, startTime) => currentTime - startTime))
+                    .Switch()
+                    .DistinctUntilChanged()
+                    .AsDriver(TimeSpan.Zero, schedulerProvider);
+
+            var stopTimeObservable = Observable.CombineLatest(startTimeObservable, durationSubject, calculateStopTime)
+                .DistinctUntilChanged();
+            StopTime = stopTimeObservable
+                .AsDriver(null, schedulerProvider);
+
+            var isTimeEntryRunningObservable = stopTimeObservable
+                .Select(stopTime => !stopTime.HasValue)
+                .Do(value => isRunning = value)
+                .DistinctUntilChanged();
+
+            IsTimeEntryRunning = isTimeEntryRunningObservable
+                .AsDriver(false, schedulerProvider);
+
+            tagsSubject = new BehaviorSubject<IEnumerable<IThreadSafeTag>>(Enumerable.Empty<IThreadSafeTag>());
+            Tags = tagsSubject
+                .Select(tags => tags.Select(ellipsize).ToImmutableList())
+                .AsDriver(ImmutableList<string>.Empty, schedulerProvider);
+
+            isInaccessibleSubject = new BehaviorSubject<bool>(false);
+            IsInaccessible = isInaccessibleSubject
+                .DistinctUntilChanged()
+                .AsDriver(false, schedulerProvider);
+
+            syncErrorMessageSubject = new BehaviorSubject<string>(string.Empty);
+            SyncErrorMessage = syncErrorMessageSubject
+                .Select(error => error ?? string.Empty)
+                .DistinctUntilChanged()
+                .AsDriver(string.Empty, schedulerProvider);
+
+            IsSyncErrorMessageVisible = syncErrorMessageSubject
+                .Select(error => !string.IsNullOrEmpty(error))
+                .DistinctUntilChanged()
+                .AsDriver(false, schedulerProvider);
+
+            Preferences = interactorFactory.GetPreferences().Execute()
+                .AsDriver(null, schedulerProvider);
+
+            // Actions
+            Close = actionFactory.FromAsync(closeWithConfirmation);
+            SelectProject = actionFactory.FromAsync(selectProject);
+            SelectTags = actionFactory.FromAsync(selectTags);
+            ToggleBillable = actionFactory.FromAction(toggleBillable);
+            EditTimes = actionFactory.FromAsync<EditViewTapSource>(editTimes);
+            SelectStartDate = actionFactory.FromAsync(selectStartDate);
+            StopTimeEntry = actionFactory.FromAction(stopTimeEntry, isTimeEntryRunningObservable);
+            DismissSyncErrorMessage = actionFactory.FromAction(dismissSyncErrorMessage);
+            Save = actionFactory.FromAsync(save);
+            Delete = actionFactory.FromAsync(delete);
         }
 
-        public override void Prepare(long parameter)
+        public override void Prepare(long[] parameter)
         {
-            Id = parameter;
+            if (parameter == null || parameter.Length == 0)
+                throw new ArgumentException("Edit view has no Time Entries to edit.");
+
+            TimeEntryIds = parameter;
         }
 
         public override async Task Initialize()
@@ -252,169 +254,88 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             stopwatchFromMainLog = stopwatchProvider.Get(MeasuredOperation.EditTimeEntryFromMainLog);
             stopwatchProvider.Remove(MeasuredOperation.EditTimeEntryFromMainLog);
 
-            var timeEntry = await interactorFactory.GetTimeEntryById(Id).Execute();
+            var timeEntries = await interactorFactory.GetMultipleTimeEntriesById(TimeEntryIds).Execute();
+            var timeEntry = timeEntries.First();
             originalTimeEntry = timeEntry;
 
-            Description = timeEntry.Description;
-            StartTime = timeEntry.Start;
-            StopTime = timeEntry.IsRunning() ? (DateTimeOffset?)null : timeEntry.Start.AddSeconds(timeEntry.Duration.Value);
-            Billable = timeEntry.Billable;
-            Project = timeEntry.Project?.Name;
-            ProjectColor = timeEntry.Project?.Color;
-            Task = timeEntry.Task?.Name;
-            Client = timeEntry.Project?.Client?.Name;
             projectId = timeEntry.Project?.Id;
             taskId = timeEntry.Task?.Id;
-            workspaceId = timeEntry.WorkspaceId;
-            setErrorMessage(timeEntry);
-            IsInaccessible = timeEntry.IsInaccessible;
+            workspaceIdSubject.OnNext(timeEntry.WorkspaceId);
 
-            projectTaskClientSubject.OnNext(Unit.Default);
+            Description.Accept(timeEntry.Description);
 
-            onTags(timeEntry.Tags);
-            foreach (var tagId in timeEntry.TagIds)
-                tagIds.Add(tagId);
+            projectClientTaskSubject.OnNext(new ProjectClientTaskInfo(
+                timeEntry.Project?.DisplayName(),
+                timeEntry.Project?.DisplayColor(),
+                timeEntry.Project?.Client?.Name,
+                timeEntry.Task?.Name));
 
-            if (StopTime == null)
-                subscribeToTimeServiceTicks();
+            isBillableSubject.OnNext(timeEntry.Billable);
 
-            preferencesDisposable = dataSource.Preferences.Current
-                .Subscribe(onPreferencesChanged);
+            startTimeSubject.OnNext(timeEntry.Start);
 
-            userDisposable = dataSource.User.Current
-                .Subscribe(onUserChanged);
+            durationSubject.OnNext(timeEntry.TimeSpanDuration());
 
-            await updateFeaturesAvailability();
+            GroupDuration = timeEntries.Sum(entry => entry.TimeSpanDuration());
+
+            tagsSubject.OnNext(timeEntry.Tags?.ToImmutableList() ?? ImmutableList<IThreadSafeTag>.Empty);
+
+            isInaccessibleSubject.OnNext(timeEntry.IsInaccessible);
+
+            setupSyncError(timeEntries);
+        }
+
+        private void setupSyncError(IEnumerable<IThreadSafeTimeEntry> timeEntries)
+        {
+            var errorCount = timeEntries.Count(te => te.IsInaccessible || !string.IsNullOrEmpty(te.LastSyncErrorMessage));
+
+            if (errorCount == 0)
+                return;
+
+            if (IsEditingGroup)
+            {
+                var message = string.Format(Resources.TimeEntriesGroupSyncErrorMessage, errorCount, TimeEntryIds.Length);
+                syncErrorMessageSubject.OnNext(message);
+
+                return;
+            }
+
+            var timeEntry = timeEntries.First();
+
+            syncErrorMessageSubject.OnNext(
+                timeEntry.IsInaccessible
+                ? Resources.InaccessibleTimeEntryErrorMessage
+                : timeEntry.LastSyncErrorMessage);
         }
 
         public override void ViewAppeared()
         {
             base.ViewAppeared();
+
             stopwatchFromCalendar?.Stop();
             stopwatchFromCalendar = null;
+
             stopwatchFromMainLog?.Stop();
             stopwatchFromMainLog = null;
         }
 
-        private void subscribeToTimeServiceTicks()
+        public override void ViewDestroy(bool viewFinishing)
         {
-            tickingDisposable = timeService
-                .CurrentDateTimeObservable
-                .Subscribe((DateTimeOffset _) => RaisePropertyChanged(nameof(Duration)));
+            base.ViewDestroy(viewFinishing);
+
+            disposeBag?.Dispose();
         }
 
-        private async Task delete()
+        private DateTimeOffset? calculateStopTime(DateTimeOffset start, TimeSpan? duration)
+            => duration.HasValue ? start + duration : null;
+
+        private static string ellipsize(IThreadSafeTag tag)
         {
-            var shouldDelete = await dialogService.ConfirmDestructiveAction(ActionType.DeleteExistingTimeEntry);
-            if (!shouldDelete)
-                return;
+            var tagLength = tag.Name.LengthInGraphemes();
+            if (tagLength <= MaxTagLength)
+                return tag.Name;
 
-            try
-            {
-                await interactorFactory.DeleteTimeEntry(Id).Execute();
-
-                analyticsService.DeleteTimeEntry.Track();
-                syncManager.InitiatePushSync();
-                await close();
-            }
-            catch
-            {
-                // Intentionally left blank
-            }
-        }
-
-        private void confirm()
-        {
-            if (IsEditingDescription)
-            {
-                IsEditingDescription = false;
-                return;
-            }
-
-            save();
-        }
-
-        private void save()
-        {
-            onboardingStorage.EditedTimeEntry();
-
-            var dto = new EditTimeEntryDto
-            {
-                Id = Id,
-                Description = Description?.Trim() ?? "",
-                StartTime = StartTime,
-                StopTime = StopTime,
-                ProjectId = projectId,
-                TaskId = taskId,
-                Billable = Billable,
-                WorkspaceId = workspaceId,
-                TagIds = new List<long>(tagIds)
-            };
-
-            confirmDisposable = interactorFactory
-                .UpdateTimeEntry(dto)
-                .Execute()
-                .Do(syncManager.InitiatePushSync)
-                .SubscribeToErrorsAndCompletion((Exception ex) => close(), () => close());
-        }
-
-        public async Task<bool> CloseWithConfirmation()
-        {
-            if (isDirty)
-            {
-                var shouldDiscard = await dialogService.ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
-                if (!shouldDiscard)
-                    return false;
-            }
-
-            await close();
-            return true;
-        }
-
-        private Task close()
-            => navigationService.Close(this);
-
-        private async Task selectStartTime()
-        {
-            analyticsService.EditViewTapped.Track(EditViewTapSource.StartTime);
-            await editDuration();
-        }
-
-        private async Task selectStopTime()
-        {
-            analyticsService.EditViewTapped.Track(EditViewTapSource.StopTime);
-            await editDuration();
-        }
-
-        private async Task selectStartDate()
-        {
-            analyticsService.EditViewTapped.Track(EditViewTapSource.StartDate);
-
-            var parameters = IsTimeEntryRunning
-                ? DateTimePickerParameters.ForStartDateOfRunningTimeEntry(StartTime, timeService.CurrentDateTime)
-                : DateTimePickerParameters.ForStartDateOfStoppedTimeEntry(StartTime);
-
-            var duration = Duration;
-
-            StartTime = await navigationService
-                .Navigate<SelectDateTimeViewModel, DateTimePickerParameters, DateTimeOffset>(parameters)
-                .ConfigureAwait(false);
-
-            if (IsTimeEntryRunning == false)
-            {
-                StopTime = StartTime + duration;
-            }
-        }
-
-        private async Task selectDuration()
-        {
-            analyticsService.EditViewTapped.Track(EditViewTapSource.Duration);
-            await editDuration(true);
-        }
-
-        private void stopTimeEntry()
-        {
-            StopTime = timeService.CurrentDateTime;
+            return $"{tag.Name.UnicodeSafeSubstring(0, MaxTagLength)}...";
         }
 
         private async Task selectProject()
@@ -422,173 +343,263 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             analyticsService.EditEntrySelectProject.Track();
             analyticsService.EditViewTapped.Track(EditViewTapSource.Project);
 
-            onboardingStorage.SelectsProject();
+            OnboardingStorage.SelectsProject();
 
-            var selectProjectStopwatch = stopwatchProvider.CreateAndStore(MeasuredOperation.OpenSelectProjectFromEditView, true);
+            var selectProjectStopwatch = stopwatchProvider.CreateAndStore(
+                MeasuredOperation.OpenSelectProjectFromEditView, true);
+
             selectProjectStopwatch.Start();
 
-            var returnParameter = await navigationService
+            var chosenProject = await navigationService
                 .Navigate<SelectProjectViewModel, SelectProjectParameter, SelectProjectParameter>(
                     SelectProjectParameter.WithIds(projectId, taskId, workspaceId));
 
-            if (returnParameter.WorkspaceId == workspaceId
-                && returnParameter.ProjectId == projectId
-                && returnParameter.TaskId == taskId)
+            if (chosenProject.WorkspaceId == workspaceId
+                && chosenProject.ProjectId == projectId
+                && chosenProject.TaskId == taskId)
                 return;
 
-            projectId = returnParameter.ProjectId;
-            taskId = returnParameter.TaskId;
+            projectId = chosenProject.ProjectId;
+            taskId = chosenProject.TaskId;
 
             if (projectId == null)
             {
-                Project = Task = Client = ProjectColor = "";
-                projectTaskClientSubject.OnNext(Unit.Default);
-                clearTagsIfNeeded(workspaceId, returnParameter.WorkspaceId);
-                workspaceId = returnParameter.WorkspaceId;
-                await updateFeaturesAvailability();
+                projectClientTaskSubject.OnNext(ProjectClientTaskInfo.Empty);
+
+                clearTagsIfNeeded(workspaceId, chosenProject.WorkspaceId);
+                workspaceIdSubject.OnNext(chosenProject.WorkspaceId);
+
+                var workspace = await interactorFactory.GetWorkspaceById(chosenProject.WorkspaceId).Execute();
+                isInaccessibleSubject.OnNext(workspace.IsInaccessible);
+
                 return;
             }
 
             var project = await interactorFactory.GetProjectById(projectId.Value).Execute();
             clearTagsIfNeeded(workspaceId, project.WorkspaceId);
-            Project = project.DisplayName();
-            Client = project.Client?.Name;
-            ProjectColor = project.DisplayColor();
-            workspaceId = project.WorkspaceId;
 
-            Task = taskId.HasValue ? (await interactorFactory.GetTaskById(taskId.Value).Execute()).Name : "";
+            var taskName = chosenProject.TaskId.HasValue
+                ? (await interactorFactory.GetTaskById(taskId.Value).Execute())?.Name
+                : string.Empty;
 
-            projectTaskClientSubject.OnNext(Unit.Default);
+            projectClientTaskSubject.OnNext(new ProjectClientTaskInfo(
+                project.DisplayName(),
+                project.DisplayColor(),
+                project.Client?.Name,
+                taskName));
 
-            await updateFeaturesAvailability();
+            workspaceIdSubject.OnNext(chosenProject.WorkspaceId);
+
+            isInaccessibleSubject.OnNext(project.IsInaccessible);
         }
 
-        private async Task editDuration(bool isDurationInitiallyFocused = false)
+        private void clearTagsIfNeeded(long currentWorkspaceId, long newWorkspaceId)
         {
-            var duration = StopTime.HasValue ? Duration : (TimeSpan?)null;
-            var currentDuration = DurationParameter.WithStartAndDuration(StartTime, duration);
-            var editDurationParam = new EditDurationParameters(currentDuration, false, isDurationInitiallyFocused);
-            var selectedDuration = await navigationService
-                .Navigate<EditDurationViewModel, EditDurationParameters, DurationParameter>(editDurationParam)
-                .ConfigureAwait(false);
+            if (currentWorkspaceId == newWorkspaceId)
+                return;
 
-            StartTime = selectedDuration.Start;
-            if (selectedDuration.Duration.HasValue)
-            {
-                StopTime = selectedDuration.Start + selectedDuration.Duration.Value;
-            }
+            tagsSubject.OnNext(ImmutableList<IThreadSafeTag>.Empty);
         }
 
         private async Task selectTags()
         {
             analyticsService.EditEntrySelectTag.Track();
             analyticsService.EditViewTapped.Track(EditViewTapSource.Tags);
+            stopwatchProvider.CreateAndStore(MeasuredOperation.OpenSelectTagsView).Start();
 
-            var selectTagsStopwatch = stopwatchProvider.CreateAndStore(MeasuredOperation.OpenSelectTagsView);
-            selectTagsStopwatch.Start();
+            var currentTags = tagIds.OrderBy(CommonFunctions.Identity).ToArray();
 
-            var tagsToPass = tagIds.ToArray();
-            var returnedTags = await navigationService
-                .Navigate<SelectTagsViewModel, (long[], long), long[]>(
-                    (tagsToPass, workspaceId));
+            var chosenTags = await navigationService
+                .Navigate<SelectTagsViewModel, (long[], long), long[]>((currentTags, workspaceId));
 
-            if (returnedTags.SequenceEqual(tagsToPass))
+            if (chosenTags.OrderBy(CommonFunctions.Identity).SequenceEqual(currentTags))
                 return;
 
-            Tags.Clear();
-            tagIds.Clear();
+            var tags = await interactorFactory.GetMultipleTagsById(chosenTags).Execute();
 
-            foreach (var tagId in returnedTags)
-                tagIds.Add(tagId);
-
-            dataSource.Tags
-                .GetAll(tag => tagIds.Contains(tag.Id))
-                .Subscribe(onTags);
+            tagsSubject.OnNext(tags);
         }
-
-        private void onTags(IEnumerable<IThreadSafeTag> tags)
-        {
-            if (tags == null)
-                return;
-
-            tags.Select(tag => tag.Name)
-               .Select(trimTag)
-               .ForEach(Tags.Add);
-            RaisePropertyChanged(nameof(Tags));
-            RaisePropertyChanged(nameof(HasTags));
-        }
-
-        private void dismissSyncErrorMessageCommand()
-            => SyncErrorMessageVisible = false;
 
         private void toggleBillable()
         {
             analyticsService.EditViewTapped.Track(EditViewTapSource.Billable);
-            Billable = !Billable;
+
+            isBillableSubject.OnNext(!isBillableSubject.Value);
         }
 
-        private void startEditingDescriptionCommand()
+        private async Task editTimes(EditViewTapSource tapSource)
         {
-            analyticsService.EditViewTapped.Track(EditViewTapSource.Description);
-            IsEditingDescription = true;
+            analyticsService.EditViewTapped.Track(tapSource);
+
+            var isDurationInitiallyFocused = tapSource == EditViewTapSource.Duration;
+
+            var duration = await durationSubject.FirstAsync();
+            var startTime = startTimeSubject.Value;
+            var currentDuration = DurationParameter.WithStartAndDuration(startTime, duration);
+            var editDurationParam = new EditDurationParameters(currentDuration, false, isDurationInitiallyFocused);
+
+            var selectedDuration = await navigationService
+                .Navigate<EditDurationViewModel, EditDurationParameters, DurationParameter>(editDurationParam)
+                .ConfigureAwait(false);
+
+            startTimeSubject.OnNext(selectedDuration.Start);
+            if (selectedDuration.Duration.HasValue)
+                durationSubject.OnNext(selectedDuration.Duration);
         }
 
-        private void clearTagsIfNeeded(long currentWorkspaceId, long newWorkspaceId)
+        private async Task selectStartDate()
         {
-            if (currentWorkspaceId == newWorkspaceId) return;
+            analyticsService.EditViewTapped.Track(EditViewTapSource.StartDate);
 
-            Tags.Clear();
-            tagIds.Clear();
-            RaisePropertyChanged(nameof(Tags));
-            RaisePropertyChanged(nameof(HasTags));
+            var startTime = startTimeSubject.Value;
+            var parameters = isRunning
+                ? DateTimePickerParameters.ForStartDateOfRunningTimeEntry(startTime, timeService.CurrentDateTime)
+                : DateTimePickerParameters.ForStartDateOfStoppedTimeEntry(startTime);
+
+            var selectedStartTime = await navigationService
+                .Navigate<SelectDateTimeViewModel, DateTimePickerParameters, DateTimeOffset>(parameters)
+                .ConfigureAwait(false);
+
+            startTimeSubject.OnNext(selectedStartTime);
         }
 
-        private string trimTag(string tag)
+        private void stopTimeEntry()
         {
-            var tagLength = tag.LengthInGraphemes();
-            if (tagLength <= maxTagLength)
-                return tag;
-
-            return $"{tag.UnicodeSafeSubstring(0, maxTagLength)}...";
+            var duration = timeService.CurrentDateTime - startTimeSubject.Value;
+            durationSubject.OnNext(duration);
         }
 
-        private void onUserChanged(IThreadSafeUser user)
+        private void dismissSyncErrorMessage()
         {
-            BeginningOfWeek = user.BeginningOfWeek;
+            syncErrorMessageSubject.OnNext(null);
         }
 
-        private void onPreferencesChanged(IThreadSafePreferences preferences)
+        private async Task<bool> closeWithConfirmation()
         {
-            durationFormat = preferences.DurationFormat;
-            DateFormat = preferences.DateFormat;
-            TimeFormat = preferences.TimeOfDayFormat;
+            if (await isDirty())
+            {
+                var userConfirmedDiscardingChanges = await dialogService.ConfirmDestructiveAction(ActionType.DiscardEditingChanges);
 
-            RaisePropertyChanged(nameof(DurationFormat));
+                if (!userConfirmedDiscardingChanges)
+                    return false;
+            }
+
+            await navigationService.Close(this);
+            return true;
         }
 
-        private async Task updateFeaturesAvailability()
+        private async Task<bool> isDirty()
         {
-            IsBillableAvailable = await interactorFactory.IsBillableAvailableForWorkspace(workspaceId).Execute();
+            var duration = await durationSubject.FirstAsync();
+            return originalTimeEntry == null
+                || originalTimeEntry.Description != Description.Value
+                || originalTimeEntry.WorkspaceId != workspaceId
+                || originalTimeEntry.ProjectId != projectId
+                || originalTimeEntry.TaskId != taskId
+                || originalTimeEntry.Start != startTimeSubject.Value
+                || !originalTimeEntry.TagIds.SetEquals(tagIds)
+                || originalTimeEntry.Billable != isBillableSubject.Value
+                || originalTimeEntry.Duration != (long?)duration?.TotalSeconds;
         }
 
-        public override void ViewDestroy(bool viewFinishing)
+        private async Task save()
         {
-            base.ViewDestroy(viewFinishing);
-            confirmDisposable?.Dispose();
-            tickingDisposable?.Dispose();
-            preferencesDisposable?.Dispose();
-            userDisposable?.Dispose();
+            OnboardingStorage.EditedTimeEntry();
+
+            var timeEntries = await interactorFactory.GetMultipleTimeEntriesById(TimeEntryIds).Execute();
+
+            var duration = await durationSubject.FirstAsync();
+            var commonTimeEntryData = new EditTimeEntryDto
+            {
+                Id = TimeEntryIds.First(),
+                Description = Description.Value?.Trim() ?? string.Empty,
+                StartTime = startTimeSubject.Value,
+                StopTime = calculateStopTime(startTimeSubject.Value, duration),
+                ProjectId = projectId,
+                TaskId = taskId,
+                Billable = isBillableSubject.Value,
+                WorkspaceId = workspaceId,
+                TagIds = tagIds.ToArray()
+            };
+
+            var timeEntriesDtos = timeEntries
+                .Select(timeEntry => applyDataFromTimeEntry(commonTimeEntryData, timeEntry))
+                .ToArray();
+
+            interactorFactory
+                .UpdateMultipleTimeEntries(timeEntriesDtos)
+                .Execute()
+                .SubscribeToErrorsAndCompletion((Exception ex) => close(), () => close())
+                .DisposedBy(disposeBag);
         }
 
-        private void OnProjectChanged()
+        private EditTimeEntryDto applyDataFromTimeEntry(EditTimeEntryDto commonTimeEntryData, IThreadSafeTimeEntry timeEntry)
         {
-            hasProjectSubject.OnNext(!string.IsNullOrWhiteSpace(Project));
+            commonTimeEntryData.Id = timeEntry.Id;
+
+            if (IsEditingGroup)
+            {
+                // start and end times can't be changed when editing a group of time entries
+                commonTimeEntryData.StartTime = timeEntry.Start;
+                commonTimeEntryData.StopTime = calculateStopTime(timeEntry.Start, timeEntry.TimeSpanDuration());
+            }
+
+            return commonTimeEntryData;
         }
 
-        private void setErrorMessage(IThreadSafeTimeEntry timeEntry)
+        private async Task delete()
         {
-            SyncErrorMessage = timeEntry.IsInaccessible ? Resources.InaccessibleTimeEntryErrorMessage : timeEntry.LastSyncErrorMessage;
-            SyncErrorMessageVisible = timeEntry.IsInaccessible || !string.IsNullOrEmpty(SyncErrorMessage);
+            var actionType = IsEditingGroup
+                ? ActionType.DeleteMultipleExistingTimeEntries
+                : ActionType.DeleteExistingTimeEntry;
+
+            var interactor = IsEditingGroup
+                ? interactorFactory.DeleteMultipleTimeEntries(TimeEntryIds)
+                : interactorFactory.DeleteTimeEntry(TimeEntryId);
+
+            var isDeletionConfirmed = await delete(actionType, TimeEntryIds.Length, interactor);
+
+            if (isDeletionConfirmed)
+                await close();
+        }
+
+        private async Task<bool> delete(ActionType actionType, int entriesCount, IInteractor<IObservable<Unit>> deletionInteractor)
+        {
+            var isDeletionConfirmed = await dialogService.ConfirmDestructiveAction(actionType, entriesCount);
+
+            if (!isDeletionConfirmed)
+                return false;
+
+            await deletionInteractor.Execute();
+
+            syncManager.InitiatePushSync();
+            analyticsService.DeleteTimeEntry.Track();
+
+            return true;
+        }
+
+        private Task close()
+            => navigationService.Close(this);
+
+        public struct ProjectClientTaskInfo
+        {
+            public ProjectClientTaskInfo(string project, string projectColor, string client, string task)
+            {
+                Project = string.IsNullOrEmpty(project) ? null : project;
+                ProjectColor = string.IsNullOrEmpty(projectColor) ? null : projectColor;
+                Client = string.IsNullOrEmpty(client) ? null : client;
+                Task = string.IsNullOrEmpty(task) ? null : task;
+            }
+
+            public string Project { get; private set; }
+            public string ProjectColor { get; private set; }
+            public string Client { get; private set; }
+            public string Task { get; private set; }
+
+            public bool HasProject => !string.IsNullOrEmpty(Project);
+
+            public static ProjectClientTaskInfo Empty
+                => new ProjectClientTaskInfo(null, null, null, null);
         }
     }
 }

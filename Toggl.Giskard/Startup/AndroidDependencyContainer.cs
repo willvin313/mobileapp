@@ -21,31 +21,32 @@ using MvvmCross.Navigation;
 
 namespace Toggl.Giskard
 {
-    public sealed class AndroidDependencyContainer : UiDependencyContainer
+    public sealed class AndroidDependencyContainer : UIDependencyContainer
     {
         private const int numberOfSuggestions = 5;
-        private const string clientName = "Giskard";
-        private const string remoteConfigDefaultsFileName = "RemoteConfigDefaults";
-        private const ApiEnvironment environment =
-#if USE_PRODUCTION_API
-            ApiEnvironment.Production;
-#else
-            ApiEnvironment.Staging;
-#endif
 
         private readonly Lazy<SettingsStorage> settingsStorage;
 
-        public IMvxNavigationService ForkingNavigationService { get; internal set; }
+        public IMvxNavigationService MvxNavigationService { get; internal set; }
 
-        public AndroidDependencyContainer(string version)
-            : base(environment, new UserAgent(clientName, version))
+        public new static AndroidDependencyContainer Instance { get; private set; }
+
+        public static void EnsureInitialized(ApiEnvironment environment, Platform platform, string version)
+        {
+            if (Instance != null)
+                return;
+
+            Instance = new AndroidDependencyContainer(environment, platform, version);
+            UIDependencyContainer.Instance = Instance;
+        }
+
+        private AndroidDependencyContainer(ApiEnvironment environment, Platform platform, string version)
+            : base(environment, new UserAgent(platform.ToString(), version))
         {
             var appVersion = Version.Parse(version);
             
             settingsStorage = new Lazy<SettingsStorage>(() => new SettingsStorage(appVersion, KeyValueStorage));
         }
-
-        public static AndroidDependencyContainer Instance { get; set; }
 
         protected override IAnalyticsService CreateAnalyticsService()
             => new AnalyticsServiceAndroid();
@@ -73,7 +74,7 @@ namespace Toggl.Giskard
 
         protected override IKeyValueStorage CreateKeyValueStorage()
         {
-            var sharedPreferences = Application.Context.GetSharedPreferences(clientName, FileCreationMode.Private);
+            var sharedPreferences = Application.Context.GetSharedPreferences(Platform.Giskard.ToString(), FileCreationMode.Private);
             return new SharedPreferencesStorageAndroid(sharedPreferences);
         }
 
@@ -116,7 +117,7 @@ namespace Toggl.Giskard
             );
 
         protected override IMvxNavigationService CreateNavigationService()
-            => ForkingNavigationService;
+            => MvxNavigationService;
 
         protected override ILastTimeUsageStorage CreateLastTimeUsageStorage()
             => settingsStorage.Value;

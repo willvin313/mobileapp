@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
@@ -84,6 +85,15 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 var provider = Substitute.For<ISuggestionProvider>();
                 provider.GetSuggestions().Returns(Observable.Empty<Suggestion>());
                 SuggestionProviderContainer.Providers.Returns(new[] { provider }.ToList().AsReadOnly());
+
+                DataSource.Preferences.Current.Returns(Observable.Create<IThreadSafePreferences>(observer =>
+                {
+                    observer.OnNext(new MockPreferences
+                    {
+                        DateFormat = DateFormat.FromLocalizedDateFormat("dd/mm/YYYY")
+                    });
+                    return Disposable.Empty;
+                }));
             }
         }
 
@@ -638,12 +648,8 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
                 timeEntry.Id.Returns(123);
                 timeEntry.Start.Returns(DateTimeOffset.Now);
                 timeEntry.Duration.Returns(100);
-                InteractorFactory.GetAllTimeEntriesVisibleToTheUser().Execute()
+                InteractorFactory.ObserveAllTimeEntriesVisibleToTheUser().Execute()
                     .Returns(Observable.Return(new[] { timeEntry }));
-                DataSource
-                    .TimeEntries
-                    .Updated
-                    .Returns(Observable.Never<EntityUpdate<IThreadSafeTimeEntry>>());
             }
 
             protected void PrepareIsWelcome(bool isWelcome)
@@ -659,10 +665,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async ThreadingTask ReturnsTrueWhenThereAreNoSuggestionsAndNoTimeEntriesAndIsWelcome()
             {
                 PrepareIsWelcome(true);
-                await ViewModel.Initialize();
+                var viewModel = CreateViewModel();
+                await viewModel.Initialize();
                 var observer = TestScheduler.CreateObserver<bool>();
 
-                ViewModel.ShouldShowEmptyState.Subscribe(observer);
+                viewModel.ShouldShowEmptyState.Subscribe(observer);
 
                 TestScheduler.Start();
                 observer.LastEmittedValue().Should().BeTrue();
@@ -672,10 +679,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async ThreadingTask ReturnsFalseWhenThereAreSomeSuggestions()
             {
                 PrepareSuggestion();
-                await ViewModel.Initialize();
+                var viewModel = CreateViewModel();
+                await viewModel.Initialize();
+
                 var observer = TestScheduler.CreateObserver<bool>();
 
-                ViewModel.ShouldShowEmptyState.Subscribe(observer);
+                viewModel.ShouldShowEmptyState.Subscribe(observer);
 
                 TestScheduler.Start();
                 observer.LastEmittedValue().Should().BeFalse();
@@ -685,10 +694,12 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async ThreadingTask ReturnsFalseWhenThereAreSomeTimeEntries()
             {
                 PrepareTimeEntry();
-                await ViewModel.Initialize();
+                var viewModel = CreateViewModel();
+                await viewModel.Initialize();
+
                 var observer = TestScheduler.CreateObserver<bool>();
 
-                ViewModel.ShouldShowEmptyState.Subscribe(observer);
+                viewModel.ShouldShowEmptyState.Subscribe(observer);
 
                 TestScheduler.Start();
                 observer.LastEmittedValue().Should().BeFalse();
@@ -698,10 +709,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async ThreadingTask ReturnsFalseWhenIsNotWelcome()
             {
                 PrepareIsWelcome(false);
-                await ViewModel.Initialize();
+                var viewModel = CreateViewModel();
+                await viewModel.Initialize();
                 var observer = TestScheduler.CreateObserver<bool>();
 
-                ViewModel.ShouldShowEmptyState.Subscribe(observer);
+                viewModel.ShouldShowEmptyState.Subscribe(observer);
 
                 TestScheduler.Start();
 
@@ -715,15 +727,16 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async ThreadingTask ReturnsTrueWhenThereAreNoSuggestionsAndNoTimeEntriesAndIsNotWelcome()
             {
                 PrepareIsWelcome(false);
-                await ViewModel.Initialize();
+                var viewModel = CreateViewModel();
+                await viewModel.Initialize();
                 var observer = TestScheduler.CreateObserver<bool>();
 
-                ViewModel.ShouldShowWelcomeBack.Subscribe(observer);
+                viewModel.ShouldShowWelcomeBack.Subscribe(observer);
 
                 TestScheduler.Start();
                 observer.Messages.AssertEqual(
                     ReactiveTest.OnNext(1, false),
-                    ReactiveTest.OnNext(2, true)
+                    ReactiveTest.OnNext(3, true)
                 );
             }
 
@@ -731,10 +744,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async ThreadingTask ReturnsFalseWhenThereAreSomeSuggestions()
             {
                 PrepareSuggestion();
-                await ViewModel.Initialize();
+                var viewModel = CreateViewModel();
+                await viewModel.Initialize();
                 var observer = TestScheduler.CreateObserver<bool>();
 
-                ViewModel.ShouldShowWelcomeBack.Subscribe(observer);
+                viewModel.ShouldShowWelcomeBack.Subscribe(observer);
 
                 TestScheduler.Start();
                 observer.LastEmittedValue().Should().BeFalse();
@@ -744,10 +758,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async ThreadingTask ReturnsFalseWhenThereAreSomeTimeEntries()
             {
                 PrepareTimeEntry();
-                await ViewModel.Initialize();
+                var viewModel = CreateViewModel();
+                await viewModel.Initialize();
                 var observer = TestScheduler.CreateObserver<bool>();
 
-                ViewModel.ShouldShowWelcomeBack.Subscribe(observer);
+                viewModel.ShouldShowWelcomeBack.Subscribe(observer);
 
                 TestScheduler.Start();
                 observer.LastEmittedValue().Should().BeFalse();
@@ -757,10 +772,11 @@ namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
             public async ThreadingTask ReturnsFalseWhenIsWelcome()
             {
                 PrepareIsWelcome(true);
-                await ViewModel.Initialize();
+                var viewModel = CreateViewModel();
+                await viewModel.Initialize();
                 var observer = TestScheduler.CreateObserver<bool>();
 
-                ViewModel.ShouldShowWelcomeBack.Subscribe(observer);
+                viewModel.ShouldShowWelcomeBack.Subscribe(observer);
 
                 TestScheduler.Start();
                 observer.LastEmittedValue().Should().BeFalse();

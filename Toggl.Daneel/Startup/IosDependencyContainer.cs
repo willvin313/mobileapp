@@ -22,35 +22,35 @@ using Toggl.Ultrawave.Network;
 
 namespace Toggl.Daneel
 {
-    public sealed class IosDependencyContainer : UiDependencyContainer
+    public sealed class IosDependencyContainer : UIDependencyContainer
     {
         private const int numberOfSuggestions = 3;
-        private const string clientName = "Daneel";
-        private const string remoteConfigDefaultsFileName = "RemoteConfigDefaults";
-        private const ApiEnvironment environment =
-#if USE_PRODUCTION_API
-            ApiEnvironment.Production;
-#else
-            ApiEnvironment.Staging;
-#endif
-        
+
         private readonly Lazy<SettingsStorage> settingsStorage;
 
-        public IMvxNavigationService ForkingNavigationService { get; internal set; }
-
         public TogglPresenter ViewPresenter { get; }
+        public IMvxNavigationService MvxNavigationService { get; internal set; }
+        
+        public new static IosDependencyContainer Instance { get; private set; }
 
-        public IosDependencyContainer(TogglPresenter viewPresenter, string version)
-            : base(environment, new UserAgent(clientName, version))
+        public static void EnsureInitialized(TogglPresenter viewPresenter, ApiEnvironment environment, Platform platform, string version)
         {
-            ViewPresenter = viewPresenter;
-            
-            var appVersion = Version.Parse(version);
-            
-            settingsStorage = new Lazy<SettingsStorage>(() => new SettingsStorage(appVersion, KeyValueStorage));
+            if (Instance != null)
+                return;
+
+            Instance = new IosDependencyContainer(viewPresenter, environment, platform, version);
+            UIDependencyContainer.Instance = Instance;
         }
 
-        public static IosDependencyContainer Instance { get; set; }
+        private IosDependencyContainer(TogglPresenter viewPresenter, ApiEnvironment environment, Platform platform, string version)
+            : base(environment, new UserAgent(platform.ToString(), version))
+        {
+            ViewPresenter = viewPresenter;
+
+            var appVersion = Version.Parse(version);
+
+            settingsStorage = new Lazy<SettingsStorage>(() => new SettingsStorage(appVersion, KeyValueStorage));
+        }
 
         protected override IAnalyticsService CreateAnalyticsService()
             => new AnalyticsServiceIos();
@@ -101,7 +101,7 @@ namespace Toggl.Daneel
             => new RatingServiceIos();
 
         protected override IRemoteConfigService CreateRemoteConfigService()
-            => new RemoteConfigServiceIos(remoteConfigDefaultsFileName);
+            => new RemoteConfigServiceIos();
 
         protected override ISchedulerProvider CreateSchedulerProvider()
             => new IOSSchedulerProvider();
@@ -118,7 +118,7 @@ namespace Toggl.Daneel
             );
 
         protected override IMvxNavigationService CreateNavigationService()
-            => ForkingNavigationService;
+            => MvxNavigationService;
 
         protected override ILastTimeUsageStorage CreateLastTimeUsageStorage()
             => settingsStorage.Value;

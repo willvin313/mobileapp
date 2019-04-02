@@ -110,7 +110,7 @@ namespace Toggl.Foundation.Interactors.Settings
             {
                 [PhoneModel] = platformInfo.PhoneModel,
                 [OperatingSystem] = platformInfo.OperatingSystem,
-                [AppNameAndVersion] = $"{platformInfo.Platform.ToString()}/{platformInfo.Version}",
+                [AppNameAndVersion] = $"{platformInfo.Platform}/{platformInfo.Version}",
                 [NumberOfWorkspaces] = workspaces.ToString(),
                 [NumberOfTimeEntries] = timeEntries.ToString(),
                 [NumberOfUnsyncedTimeEntries] = unsyncedTimeEntries.ToString(),

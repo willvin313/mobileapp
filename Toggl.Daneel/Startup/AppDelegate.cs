@@ -6,7 +6,6 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Foundation;
 using Intents;
-using MvvmCross;
 using MvvmCross.Navigation;
 using MvvmCross.Platforms.Ios.Core;
 using MvvmCross.Plugin.Color.Platforms.Ios;
@@ -154,7 +153,7 @@ namespace Toggl.Daneel
             {
                 case ShortcutType.ContinueLastTimeEntry:
                     navigationService.Navigate<MainViewModel>();
-                    var interactorFactory = Mvx.Resolve<IInteractorFactory>();
+                    var interactorFactory = IosDependencyContainer.Instance.InteractorFactory;
                     if (interactorFactory == null) return;
                     IDisposable subscription = null;
                     subscription = interactorFactory
@@ -281,13 +280,20 @@ namespace Toggl.Daneel
             lastUpdateDateDisposable.Dispose();
             lastUpdateDateDisposable = new CompositeDisposable();
 
-            if (Mvx.TryResolve<IInteractorFactory>(out var interactorFactory) && Mvx.TryResolve<IPrivateSharedStorageService>(out var privateSharedStorage))
+            try
             {
+                var interactorFactory = IosDependencyContainer.Instance.InteractorFactory;
+                var privateSharedStorage = IosDependencyContainer.Instance.PrivateSharedStorageService;
+
                 interactorFactory.ObserveTimeEntriesChanges().Execute().StartWith(default(Unit))
                     .SelectMany(interactorFactory.GetAllTimeEntriesVisibleToTheUser().Execute())
                     .Select(timeEntries => timeEntries.OrderBy(te => te.At).Last().At)
                     .Subscribe(privateSharedStorage.SaveLastUpdateDate)
                     .DisposedBy(lastUpdateDateDisposable);
+            }
+            catch (Exception)
+            {
+                // Ignore errors when logged out
             }
         }
 
@@ -309,8 +315,8 @@ namespace Toggl.Daneel
 
         private void startTimeEntryInBackground(string eventId, Action completionHandler)
         {
-            var interactorFactory = Mvx.Resolve<IInteractorFactory>();
-            var timeService = Mvx.Resolve<ITimeService>();
+            var timeService = IosDependencyContainer.Instance.TimeService;
+            var interactorFactory = IosDependencyContainer.Instance.InteractorFactory;
 
             Task.Run(async () =>
             {
@@ -333,7 +339,7 @@ namespace Toggl.Daneel
 
         public override void PerformFetch(UIApplication application, Action<UIBackgroundFetchResult> completionHandler)
         {
-            var interactorFactory = Mvx.Resolve<IInteractorFactory>();
+            var interactorFactory = IosDependencyContainer.Instance.InteractorFactory;
             interactorFactory?.RunBackgroundSync()
                 .Execute()
                 .Select(mapToNativeOutcomes)

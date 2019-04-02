@@ -16,9 +16,11 @@ using Toggl.Giskard.ViewHolders;
 
 namespace Toggl.Giskard.Adapters
 {
-    public abstract class ReactiveSectionedRecyclerAdapter<TModel, TModelWrapper, TModelCollectionWrapper, TItemViewHolder, TSectionViewHolder> : RecyclerView.Adapter
+    public abstract class ReactiveSectionedRecyclerAdapter<TModel, TModelWrapper, TSectionHeaderModel, TSectionHeaderWrapper, TItemViewHolder, TSectionViewHolder, TKey> : RecyclerView.Adapter
+        where TKey : IEquatable<TKey>
         where TItemViewHolder : BaseRecyclerViewHolder<TModelWrapper>
-        where TSectionViewHolder : BaseRecyclerViewHolder<TModelCollectionWrapper>
+        where TSectionViewHolder : BaseRecyclerViewHolder<TSectionHeaderWrapper>
+        where TSectionHeaderModel : class
     {
         public const int SectionViewType = 0;
         public const int ItemViewType = 1;
@@ -27,13 +29,13 @@ namespace Toggl.Giskard.Adapters
         private bool isUpdateRunning;
         private bool hasPendingUpdate;
 
-        private readonly ObservableGroupedOrderedCollection<TModel> items;
+        private IImmutableList<ISectionModel<TSectionHeaderModel, TModel>> items;
         private IReadOnlyList<FlatItemInfo> currentItems;
 
-        public ReactiveSectionedRecyclerAdapter(ObservableGroupedOrderedCollection<TModel> items)
+        public ReactiveSectionedRecyclerAdapter()
         {
-            this.items = items;
-            currentItems = flattenItems(this.items);
+            items = ImmutableList<ISectionModel<TSectionHeaderModel, TModel>>.Empty;
+            currentItems = new FlatItemInfo[0];
         }
 
         public virtual int HeaderOffset { get; } = 0;
@@ -55,13 +57,15 @@ namespace Toggl.Giskard.Adapters
             return currentItems[position - HeaderOffset].ViewType;
         }
 
-        protected TModel getItemAt(int position)
+        protected TModel GetItemAt(int position)
         {
             return currentItems[position - HeaderOffset].Item;
         }
 
-        public void UpdateCollection(ICollectionChange change)
+        public void UpdateCollection(IEnumerable<ISectionModel<TSectionHeaderModel, TModel>> items)
         {
+            this.items = items.ToImmutableList();
+
             lock (collectionUpdateLock)
             {
                 if (isUpdateRunning)
@@ -145,13 +149,14 @@ namespace Toggl.Giskard.Adapters
 
         protected abstract TItemViewHolder CreateItemViewHolder(ViewGroup parent);
 
-        protected abstract long IdFor(TModel item);
+        protected abstract TKey IdFor(TModel item);
 
-        protected abstract long IdForSection(IReadOnlyList<TModel> section);
+        protected abstract TKey IdForSection(TSectionHeaderModel section);
 
         protected abstract TModelWrapper Wrap(TModel item);
 
-        protected abstract TModelCollectionWrapper Wrap(IReadOnlyList<TModel> section);
+        protected abstract TSectionHeaderWrapper Wrap(TSectionHeaderModel section);
+
 
         /*
          * The visual representation of the items are the same
@@ -161,7 +166,8 @@ namespace Toggl.Giskard.Adapters
         /*
          * The visual representation of the section label is the same
          */
-        protected abstract bool AreSectionsRepresentationsTheSame(IReadOnlyList<TModel> one, IReadOnlyList<TModel> other);
+        protected abstract bool AreSectionsRepresentationsTheSame(
+            TSectionHeaderModel oneHeader, TSectionHeaderModel otherHeader, IReadOnlyList<TModel> one, IReadOnlyList<TModel> other);
 
         private struct FlatItemInfo
         {
@@ -170,39 +176,41 @@ namespace Toggl.Giskard.Adapters
             public TModelWrapper WrappedItem { get; }
 
             public IReadOnlyList<TModel> Section { get; }
-            public TModelCollectionWrapper WrappedSection { get; }
-            public long Id { get; }
+            public TSectionHeaderModel SectionHeader { get; }
+            public TSectionHeaderWrapper WrappedSection { get; }
+            public TKey Id { get; }
 
-            public FlatItemInfo(TModel item, Func<TModel, long> idProvider, Func<TModel, TModelWrapper> wrapper)
+            public FlatItemInfo(TModel item, Func<TModel, TKey> idProvider, Func<TModel, TModelWrapper> wrapper)
             {
                 ViewType = ItemViewType;
                 Item = item;
                 Section = null;
+                SectionHeader = null;
                 Id = idProvider(item);
                 WrappedItem = wrapper(item);
-                WrappedSection = default(TModelCollectionWrapper);
+                WrappedSection = default(TSectionHeaderWrapper);
             }
 
-            public FlatItemInfo(IReadOnlyList<TModel> section, Func<IReadOnlyList<TModel>, long> idProvider, Func<IReadOnlyList<TModel>,TModelCollectionWrapper> wrapper)
+            public FlatItemInfo(IReadOnlyList<TModel> section, TSectionHeaderModel header, Func<TSectionHeaderModel, TKey> idProvider, Func<TSectionHeaderModel, TSectionHeaderWrapper> wrapper)
             {
                 ViewType = SectionViewType;
                 Item = default(TModel);
                 Section = section;
-                Id = idProvider(section);
+                SectionHeader = header;
+                Id = idProvider(header);
                 WrappedItem = default(TModelWrapper);
-                WrappedSection = wrapper(Section);
+                WrappedSection = wrapper(header);
             }
         }
 
-        private IReadOnlyList<FlatItemInfo> flattenItems(ObservableGroupedOrderedCollection<TModel> groupsSource)
+        private IReadOnlyList<FlatItemInfo> flattenItems(IEnumerable<ISectionModel<TSectionHeaderModel, TModel>> groups)
         {
-            var groups = new List<List<TModel>>(groupsSource.Select(list => new List<TModel>(list)));
             var flattenedTimeEntriesList = new List<FlatItemInfo>();
 
             foreach (var group in groups)
             {
-                flattenedTimeEntriesList.Add(new FlatItemInfo(group.ToImmutableList(), IdForSection, Wrap));
-                flattenedTimeEntriesList.AddRange(group.Select(item => new FlatItemInfo(item, IdFor, Wrap)).ToList());
+                flattenedTimeEntriesList.Add(new FlatItemInfo(group.Items, group.Header, IdForSection, Wrap));
+                flattenedTimeEntriesList.AddRange(group.Items.Select(item => new FlatItemInfo(item, IdFor, Wrap)).ToList());
             }
 
             return flattenedTimeEntriesList.ToImmutableList();
@@ -217,14 +225,14 @@ namespace Toggl.Giskard.Adapters
             private readonly IReadOnlyList<FlatItemInfo> oldItems;
             private readonly IReadOnlyList<FlatItemInfo> newItems;
             private readonly Func<TModel, TModel, bool> itemContentsAreTheSame;
-            private readonly Func<IReadOnlyList<TModel>, IReadOnlyList<TModel>, bool> sectionContentsAreTheSame;
+            private readonly Func<TSectionHeaderModel, TSectionHeaderModel, IReadOnlyList<TModel>, IReadOnlyList<TModel>, bool> sectionContentsAreTheSame;
             private readonly int headerOffset;
 
             public HeaderOffsetAwareDiffCallback(
                 IReadOnlyList<FlatItemInfo> oldItems,
                 IReadOnlyList<FlatItemInfo> newItems,
                 Func<TModel, TModel, bool> itemContentsAreTheSame,
-                Func<IReadOnlyList<TModel>, IReadOnlyList<TModel>, bool> sectionContentsAreTheSame,
+                Func<TSectionHeaderModel, TSectionHeaderModel, IReadOnlyList<TModel>, IReadOnlyList<TModel>, bool> sectionContentsAreTheSame,
                 int headerOffset)
             {
                 this.oldItems = oldItems;
@@ -252,6 +260,8 @@ namespace Toggl.Giskard.Adapters
                 }
 
                 return sectionContentsAreTheSame(
+                    oldItem.SectionHeader,
+                    newItem.SectionHeader,
                     oldItem.Section ?? ImmutableList<TModel>.Empty,
                     newItem.Section ?? ImmutableList<TModel>.Empty);
             }
@@ -267,7 +277,7 @@ namespace Toggl.Giskard.Adapters
                 var newItem = newItems[newItemPosition - headerOffset];
 
                 return oldItem.ViewType == newItem.ViewType
-                       && oldItem.Id == newItem.Id;
+                       && oldItem.Id.Equals(newItem.Id);
             }
 
             public override int NewListSize => newItems.Count + headerOffset;

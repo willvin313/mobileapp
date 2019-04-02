@@ -9,9 +9,9 @@ namespace Toggl.Foundation.MvvmCross
 {
     public sealed class TogglViewModelLocator : MvxDefaultViewModelLocator
     {
-        private readonly UiDependencyContainer dependencyContainer;
+        private readonly UIDependencyContainer dependencyContainer;
 
-        public TogglViewModelLocator(UiDependencyContainer dependencyContainer)
+        public TogglViewModelLocator(UIDependencyContainer dependencyContainer)
             : base(dependencyContainer.NavigationService)
         {
             this.dependencyContainer = dependencyContainer;
@@ -28,7 +28,7 @@ namespace Toggl.Foundation.MvvmCross
 
         public override IMvxViewModel<TParameter> Load<TParameter>(Type viewModelType, TParameter param, IMvxBundle parameterValues, IMvxBundle savedState)
         {
-            var viewModel = findViewModel(viewModelType) as IMvxViewModel<TParameter>;
+            var viewModel = (IMvxViewModel<TParameter>)findViewModel(viewModelType);
 
             RunViewModelLifecycle(viewModel, param, parameterValues, savedState);
 
@@ -71,7 +71,9 @@ namespace Toggl.Foundation.MvvmCross
                     dependencyContainer.OnboardingStorage,
                     dependencyContainer.DialogService,
                     dependencyContainer.AnalyticsService,
-                    dependencyContainer.StopwatchProvider);
+                    dependencyContainer.StopwatchProvider,
+                    dependencyContainer.RxActionFactory,
+                    dependencyContainer.SchedulerProvider);
 
             if (viewModelType == typeof(ForgotPasswordViewModel))
                 return new ForgotPasswordViewModel(

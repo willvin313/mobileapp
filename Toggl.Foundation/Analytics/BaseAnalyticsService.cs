@@ -236,6 +236,12 @@ namespace Toggl.Foundation.Analytics
         [AnalyticsEvent]
         public IAnalyticsEvent AppSentToBackground { get; protected set; }
 
+        [AnalyticsEvent("State")]
+        public IAnalyticsEvent<bool> GroupTimeEntriesSettingsChanged { get; protected set; }
+
+        [AnalyticsEvent("Origin")]
+        public IAnalyticsEvent<EditTimeEntryOrigin> EditViewOpened { get; protected set; }
+
         public void TrackAnonymized(Exception exception)
         {
             if (exception.IsAnonymized())

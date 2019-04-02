@@ -9,14 +9,13 @@ using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Daneel.Transformations;
 using Toggl.Foundation.MvvmCross.Helper;
-using Toggl.Foundation.MvvmCross.Transformations;
-using Toggl.Foundation.MvvmCross.ViewModels;
 using UIKit;
 using Toggl.Foundation;
+using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog;
 
 namespace Toggl.Daneel.Views
 {
-    public partial class TimeEntriesLogViewCell : BaseTableViewCell<TimeEntryViewModel>
+    public partial class TimeEntriesLogViewCell : BaseTableViewCell<LogItemViewModel>
     {
         public static readonly string Identifier = "timeEntryCell";
 
@@ -29,6 +28,9 @@ namespace Toggl.Daneel.Views
 
         public IObservable<Unit> ContinueButtonTap
             => ContinueButton.Rx().Tap();
+
+        public IObservable<Unit> ToggleGroup
+            => GroupSizeContainer.Rx().Tap();
 
         static TimeEntriesLogViewCell()
         {
@@ -74,6 +76,9 @@ namespace Toggl.Daneel.Views
             base.PrepareForReuse();
             DisposeBag.Dispose();
             DisposeBag = new CompositeDisposable();
+
+            BackgroundColor = UIColor.White;
+            GroupSizeBackground.Layer.CornerRadius = 14;
         }
 
         protected override void UpdateView()
@@ -82,9 +87,7 @@ namespace Toggl.Daneel.Views
             var projectColor = MvxColor.ParseHexString(Item.ProjectColor).ToNativeColor();
             DescriptionLabel.Text = Item.HasDescription ? Item.Description : Resources.AddDescription;
             ProjectTaskClientLabel.AttributedText = projectTaskClientToAttributedString.Convert(Item.ProjectName, Item.TaskName, Item.ClientName, projectColor);
-            TimeLabel.Text = Item.Duration.HasValue
-                ? DurationAndFormatToString.Convert(Item.Duration.Value, Item.DurationFormat)
-                : "";
+            TimeLabel.Text = Item.Duration;
 
             // Colors
             DescriptionLabel.TextColor = Item.HasDescription
@@ -100,17 +103,41 @@ namespace Toggl.Daneel.Views
             BillableIcon.Hidden = !Item.IsBillable;
             TagIcon.Hidden = !Item.HasTags;
 
-            // Grouping
-            BackgroundColor = UIColor.White;
-            GroupSizeBackground.Layer.CornerRadius = 14;
+            switch (Item.VisualizationIntent)
+            {
+                case LogItemVisualizationIntent.SingleItem:
+                    presentAsSingleTimeEntry();
+                    break;
 
-            GroupSizeLabel.Text = "1";
-            setupSingleEntity();
+                case LogItemVisualizationIntent.GroupItem:
+                    presentAsTimeEntryInAGroup();
+                    break;
+
+                case LogItemVisualizationIntent.CollapsedGroupHeader:
+                    presentAsCollapsedGroupHeader(Item.RepresentedTimeEntriesIds.Length);
+                    break;
+
+                case LogItemVisualizationIntent.ExpandedGroupHeader:
+                    presentAsExpandedGroupHeader(Item.RepresentedTimeEntriesIds.Length);
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException($"Cannot visualize {Item.VisualizationIntent} in the time entries log table.");
+            }
         }
 
-        private void setupCollapsedGroup()
+        protected override void Dispose(bool disposing)
         {
+            DisposeBag.Dispose();
+            base.Dispose(disposing);
+        }
+
+        private void presentAsCollapsedGroupHeader(int groupSize)
+        {
+            TimeEntryContentLeadingConstraint.Constant = 0;
+            GroupSizeLabel.Text = groupSize.ToString();
             GroupSizeContainer.Hidden = false;
+            GroupSizeContainer.UserInteractionEnabled = true;
             GroupSizeBackground.Hidden = false;
             GroupSizeBackground.Layer.BorderWidth = 1;
             GroupSizeBackground.Layer.BorderColor = Color.TimeEntriesLog.Grouping.Collapsed.Border.ToNativeColor().CGColor;
@@ -118,31 +145,31 @@ namespace Toggl.Daneel.Views
             GroupSizeLabel.TextColor = Color.TimeEntriesLog.Grouping.Collapsed.Text.ToNativeColor();
         }
 
-        private void setupExpandedGroup()
+        private void presentAsExpandedGroupHeader(int groupSize)
         {
+            TimeEntryContentLeadingConstraint.Constant = 0;
+            GroupSizeLabel.Text = groupSize.ToString();
             GroupSizeContainer.Hidden = false;
+            GroupSizeContainer.UserInteractionEnabled = true;
             GroupSizeBackground.Hidden = false;
             GroupSizeBackground.Layer.BorderWidth = 0;
             GroupSizeBackground.BackgroundColor = Color.TimeEntriesLog.Grouping.Expanded.Background.ToNativeColor();
             GroupSizeLabel.TextColor = Color.TimeEntriesLog.Grouping.Expanded.Text.ToNativeColor();
         }
 
-        private void setupSingleEntity()
+        private void presentAsSingleTimeEntry()
         {
             GroupSizeContainer.Hidden = true;
+            TimeEntryContentLeadingConstraint.Constant = 16;
         }
 
-        private void setupEntityInExpandedGroup()
+        private void presentAsTimeEntryInAGroup()
         {
+            TimeEntryContentLeadingConstraint.Constant = 0;
             GroupSizeContainer.Hidden = false;
+            GroupSizeContainer.UserInteractionEnabled = false;
             GroupSizeBackground.Hidden = true;
             BackgroundColor = Color.TimeEntriesLog.Grouping.GroupedTimeEntry.Background.ToNativeColor();
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            DisposeBag.Dispose();
-            base.Dispose(disposing);
         }
     }
 }
