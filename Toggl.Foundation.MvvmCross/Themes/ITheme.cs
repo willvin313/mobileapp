@@ -1,11 +1,21 @@
-﻿using MvvmCross.UI;
+﻿using Toggl.Multivac;
 
 namespace Toggl.Foundation.MvvmCross.Themes
 {
     public interface ITheme
     {
-        MvxColor CardColor { get; }
+        Color Card { get; }
 
-        MvxColor BackgroundColor { get; }
+        Color Background { get; }
+
+        Color CellBackground { get; }
+
+        Color Text { get; }
+
+        Color Separator { get; }
+
+        Color BottomBar { get; }
+
+        Color Error { get; }
     }
 }

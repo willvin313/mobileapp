@@ -1,12 +1,21 @@
-﻿using MvvmCross.UI;
-using Toggl.Foundation.MvvmCross.Helper;
+﻿using Toggl.Multivac;
 
 namespace Toggl.Foundation.MvvmCross.Themes
 {
     public class DarkTheme : ITheme
     {
-        public MvxColor CardColor { get; } = Color.LighterGrey;
+        public Color Card { get; } = Colors.LighterGrey;
 
-        public MvxColor BackgroundColor { get; } = Color.Grey;
+        public Color Background { get; } = Colors.Grey;
+
+        public Color CellBackground { get; } = Colors.DarkerGrey;
+
+        public Color Text { get; } = Colors.White.WithAlpha(204);
+
+        public Color Separator { get; } = Colors.LightestGrey;
+
+        public Color BottomBar { get; } = Colors.DarkerGrey;
+
+        public Color Error { get; } = Colors.SofterRed;
     }
 }
