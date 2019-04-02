@@ -50,6 +50,7 @@ namespace Toggl.Foundation.MvvmCross
         public IKeyValueStorage KeyValueStorage { get; }
         public IUserPreferences UserPreferences { get; }
         public IOnboardingStorage OnboardingStorage { get; }
+        public IPomodoroStorage PomodoroStorage { get; }
         public IMvxNavigationService NavigationService { get; }
         public IPasswordManagerService PasswordManagerService { get; }
         public IErrorHandlingService ErrorHandlingService { get; }
@@ -68,6 +69,7 @@ namespace Toggl.Foundation.MvvmCross
             KeyValueStorage = builder.KeyValueStorage;
             UserPreferences = builder.UserPreferences;
             OnboardingStorage = builder.OnboardingStorage;
+            PomodoroStorage = builder.PomodoroStorage;
             NavigationService = builder.NavigationService;
             PasswordManagerService = builder.PasswordManagerService;
             ErrorHandlingService = builder.ErrorHandlingService;
@@ -113,6 +115,7 @@ namespace Toggl.Foundation.MvvmCross
             public IKeyValueStorage KeyValueStorage { get; private set; }
             public IUserPreferences UserPreferences { get; private set; }
             public IOnboardingStorage OnboardingStorage { get; private set; }
+            public IPomodoroStorage PomodoroStorage { get; private set; }
             public IMvxNavigationService NavigationService { get; private set; }
             public IPasswordManagerService PasswordManagerService { get; private set; }
             public IErrorHandlingService ErrorHandlingService { get; private set; }
@@ -169,6 +172,12 @@ namespace Toggl.Foundation.MvvmCross
             public Builder WithOnboardingStorage(IOnboardingStorage onboardingStorage)
             {
                 OnboardingStorage = onboardingStorage;
+                return this;
+            }
+
+            public Builder WithPomodoroStorage(IPomodoroStorage pomodoroStorage)
+            {
+                PomodoroStorage = pomodoroStorage;
                 return this;
             }
 
@@ -237,6 +246,10 @@ namespace Toggl.Foundation.MvvmCross
             public Builder WithOnboardingStorage<TOnboardingStorage>()
                 where TOnboardingStorage : IOnboardingStorage, new()
                 => WithOnboardingStorage(new TOnboardingStorage());
+
+            public Builder WithPomodoroStorage<TPomodoroStorage>()
+                where TPomodoroStorage : IPomodoroStorage, new()
+                => WithPomodoroStorage(new TPomodoroStorage());
 
             public Builder WithNavigationService<TNavigationService>()
                 where TNavigationService : IMvxNavigationService, new()

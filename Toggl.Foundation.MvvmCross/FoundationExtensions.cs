@@ -104,6 +104,7 @@ namespace Toggl.Foundation.MvvmCross
             Mvx.RegisterSingleton(foundation.SuggestionProviderContainer);
             Mvx.RegisterSingleton(foundation.UserPreferences);
             Mvx.RegisterSingleton(foundation.OnboardingStorage);
+            Mvx.RegisterSingleton(foundation.PomodoroStorage);
             Mvx.RegisterSingleton(foundation.AccessRestrictionStorage);
             Mvx.RegisterSingleton(foundation.LastTimeUsageStorage);
             Mvx.RegisterSingleton(foundation.ErrorHandlingService);
