@@ -1896,6 +1896,11 @@
       <Project>{BC329A24-95D6-4D02-95B5-2AA699D8873A}</Project>
       <Name>Toggl.Daneel.SiriExtension.UI</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Toggl.Daneel.ShareExtension\Toggl.Daneel.ShareExtension.csproj">
+      <IsAppExtension>true</IsAppExtension>
+      <Project>{97B9882B-7FD2-4B83-A426-0F2AB68E2B46}</Project>
+      <Name>Toggl.Daneel.ShareExtension</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\Images.xcassets\line.imageset\" />
