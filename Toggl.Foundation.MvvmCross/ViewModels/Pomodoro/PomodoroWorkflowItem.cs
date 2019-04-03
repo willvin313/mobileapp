@@ -5,17 +5,16 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Pomodoro
     public class PomodoroWorkflowItem
     {
         public PomodoroWorkflowItemType Type { get; }
-        public TimeSpan Duration { get; }
+        public int Minutes { get; }
         public string WorkflowReference { get; }
 
-        public PomodoroWorkflowItem(PomodoroWorkflowItemType type, TimeSpan duration, string workflowReference = null)
-        {
-            Type = type;
-            Duration = duration;
-            WorkflowReference = workflowReference ?? string.Empty;
-        }
+        public TimeSpan Duration => TimeSpan.FromMinutes(Minutes);
 
         public PomodoroWorkflowItem(PomodoroWorkflowItemType type, int minutes, string workflowReference = null)
-            : this(type, TimeSpan.FromMinutes(minutes), workflowReference) { }
+        {
+            Type = type;
+            Minutes = minutes;
+            WorkflowReference = workflowReference ?? string.Empty;
+        }
     }
 }

@@ -88,8 +88,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Pomodoro
         {
             var type = xmlElement.Attribute(typeXmlAttribute).Value.ToEnumValue<PomodoroWorkflowItemType>();
 
-            var durationInMinutes = int.Parse(xmlElement.Attribute(durationXmlAttribute).Value);
-            var duration = TimeSpan.FromMinutes(durationInMinutes);
+            var duration = int.Parse(xmlElement.Attribute(durationXmlAttribute).Value);
             var workflowReference = xmlElement.Attribute(workflowReferenceAttribute)?.Value;
 
             return new PomodoroWorkflowItem(type, duration, workflowReference);
