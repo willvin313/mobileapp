@@ -78,16 +78,6 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             workflowsSubject.OnNext(pomodoroConfig.Workflows);
         }
 
-        public override async Task Initialize()
-        {
-            await base.Initialize();
-        }
-
-        public override void ViewAppeared()
-        {
-            base.ViewAppeared();
-        }
-
         private Task close() => navigationService.Close(this);
     }
 }
