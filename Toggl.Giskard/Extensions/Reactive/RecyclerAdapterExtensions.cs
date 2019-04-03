@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Toggl.Foundation.MvvmCross.Collections;
 using Toggl.Foundation.MvvmCross.Reactive;
 using Toggl.Giskard.Adapters;
@@ -10,6 +11,9 @@ namespace Toggl.Giskard.Extensions.Reactive
     {
         public static Action<IList<T>> Items<T>(this IReactive<BaseRecyclerAdapter<T>> reactive) where T : IEquatable<T>
             => collection => reactive.Base.Items = collection;
+
+        public static Action<IReadOnlyList<T>> ReadOnlyItems<T>(this IReactive<BaseRecyclerAdapter<T>> reactive) where T : IEquatable<T>
+            => collection => reactive.Base.Items = collection.ToList();
 
         public static Action<IList<SectionModel<TSection, TItem>>> Items<TSection, TItem>(this IReactive<BaseSectionedRecyclerAdapter<TSection, TItem>> reactive)
             where TSection : IEquatable<TSection>
