@@ -4,7 +4,38 @@
     xmlns:local="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:background="@color/defaultBackground"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-	
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/Toolbar"
+        android:minHeight="?attr/actionBarSize"
+        android:background="@color/toolbarBlack"
+        local:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:src="@drawable/logo"
+            android:layout_height="24dp"
+            android:layout_gravity="start"
+            android:layout_width="wrap_content" />
+    </android.support.v7.widget.Toolbar>
+    <TextView
+        android:id="@+id/WorkflowsTitleLabel"
+        android:textSize="12sp"
+        android:textAllCaps="true"
+        android:letterSpacing="0.04"
+        android:text="@string/Workflows"
+        android:textColor="@color/defaultText"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginBottom="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/WorkflowListView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </LinearLayout>
