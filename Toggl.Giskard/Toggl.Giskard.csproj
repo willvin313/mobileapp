@@ -370,11 +370,13 @@
     <Compile Include="Adapters\SelectTagsRecyclerAdapter.cs" />
     <Compile Include="Activities\SelectProjectActivity.cs" />
     <Compile Include="Adapters\SelectProjectRecyclerAdapter.cs" />
+    <Compile Include="Extensions\CanvasExtensions.cs" />
     <Compile Include="Extensions\FloatingActionButtonExtensions.cs" />
     <Compile Include="Fragments\PomodoroListingFragment.cs" />
     <Compile Include="Fragments\PomodoroListingFragment.ViewBinds.cs">
       <DependentUpon>PomodoroListingFragment.cs</DependentUpon>
     </Compile>
+    <Compile Include="ViewHolders\PomodoroListingWorkflowViewHolder.cs" />
     <Compile Include="ViewHolders\StartTimeEntry\SuggestionRecyclerViewHolder.cs" />
     <Compile Include="ViewHolders\StartTimeEntry\ProjectSuggestionViewHolder.cs" />
     <Compile Include="ViewHolders\StartTimeEntry\TimeEntrySuggestionViewHolder.cs" />
@@ -478,6 +480,7 @@
     <Compile Include="Views\EditDuration\Shapes\Wheel.cs" />
     <Compile Include="Views\EditDuration\WheelBackgroundView.cs" />
     <Compile Include="Views\EditDuration\WheelForegroundView.cs" />
+    <Compile Include="Views\Pomodoro\PomodoroWorkflowView.cs" />
     <Compile Include="Views\ReportsCalendarView.cs" />
     <Compile Include="Adapters\MainRecyclerAdapter.cs" />
     <Compile Include="Extensions\LayoutParamsExtensions.cs" />
@@ -1139,6 +1142,12 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\PomodoroListingFragment.axml">
+      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\PomodoroListingWorkflowCell.axml">
       <Generator>MSBuild:UpdateGeneratedFiles</Generator>
       <SubType>Designer</SubType>
     </AndroidResource>
