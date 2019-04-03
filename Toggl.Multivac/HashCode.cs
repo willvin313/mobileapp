@@ -2,8 +2,8 @@
 {
     public static class HashCode
     {
-        public static int seed = 17;
-        public static int hashMultiplier = 92821;
+        private static int seed = 17;
+        private static int hashMultiplier = 92821;
         
         public static int From<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(T0 item0, T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, T8 item8, T9 item9, T10 item10, T11 item11, T12 item12, T13 item13, T14 item14, T15 item15)
         {
