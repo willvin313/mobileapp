@@ -14,13 +14,15 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Pomodoro
         private const string nameXmlAttribute = "name";
         private const string idXmlAttribute = "id";
         private const string typeXmlAttribute = "type";
-        private const string itemsXmlName = "items";
         private const string itemXmlName = "item";
         private const string durationXmlAttribute = "duration";
         private const string workflowReferenceAttribute = "workflow";
 
-        private const string defaultWorkflowGuid = "6cc3cf0b-6db0-4f42-b012-b0d3bbd9984d";
-        private const string defaultWorkflowName = "Default Pomodoro";
+        private const string classicPomodoroWorkflowGuid = "6cc3cf0b-6db0-4f42-b012-b0d3bbd9984d";
+        private const string classicPomodoroWorkflowName = "Classic Pomodoro";
+
+        private const string simplifiedPomodoroWorkflowGuid = "b5fed447-9688-475f-932f-a5a3d3fbdfc7";
+        private const string simplifiedPomodoroWorkflowName = "Simplified Pomodoro";
 
         public IReadOnlyList<PomodoroWorkflow> Workflows { get; private set; }
 
@@ -66,7 +68,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Pomodoro
         {
             var itemXml = new XElement(itemXmlName,
                 new XAttribute(typeXmlAttribute, item.Type),
-                new XAttribute(durationXmlAttribute, (int)item.Duration.TotalSeconds));
+                new XAttribute(durationXmlAttribute, (int)item.Duration.TotalMinutes));
 
             if (!string.IsNullOrEmpty(item.WorkflowReference))
                 itemXml.Add(new XAttribute(workflowReferenceAttribute, item.WorkflowReference));
@@ -79,12 +81,12 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Pomodoro
             var id = xmlElement.Attribute(idXmlAttribute).Value;
             var type = xmlElement.Attribute(typeXmlAttribute).Value.ToEnumValue<PomodoroWorkflowType>();
             var name = xmlElement.Attribute(nameXmlAttribute).Value;
-            var elements = xmlElement.Elements(itemsXmlName).Select(convertToWorkflowEntry);
+            var elements = xmlElement.Elements(itemXmlName).Select(convertToWorkflowItem);
 
             return new PomodoroWorkflow(id, type, name, elements);
         }
 
-        private static PomodoroWorkflowItem convertToWorkflowEntry(XElement xmlElement)
+        private static PomodoroWorkflowItem convertToWorkflowItem(XElement xmlElement)
         {
             var type = xmlElement.Attribute(typeXmlAttribute).Value.ToEnumValue<PomodoroWorkflowItemType>();
 
@@ -98,7 +100,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Pomodoro
         {
             get
             {
-                var items = new PomodoroWorkflowItem[]
+                var classicPomodoroItems = new PomodoroWorkflowItem[]
                 {
                     new PomodoroWorkflowItem(Work, 25),
                     new PomodoroWorkflowItem(Rest, 5),
@@ -110,15 +112,31 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Pomodoro
                     new PomodoroWorkflowItem(Rest, 30)
                 };
 
-                var workflow = new PomodoroWorkflow(
-                    defaultWorkflowGuid,
+                var classicPomodoroWorkflow = new PomodoroWorkflow(
+                    classicPomodoroWorkflowGuid,
                     PomodoroWorkflowType.System,
-                    defaultWorkflowName,
-                    items);
+                    classicPomodoroWorkflowName,
+                    classicPomodoroItems);
+
+                var simplifiedPomodoroItems = new PomodoroWorkflowItem[]
+                {
+                    new PomodoroWorkflowItem(Work, 25),
+                    new PomodoroWorkflowItem(Rest, 5)
+                };
+
+                var simplifiedPomodoroWorkflow = new PomodoroWorkflow(
+                   simplifiedPomodoroWorkflowGuid,
+                   PomodoroWorkflowType.System,
+                   simplifiedPomodoroWorkflowName,
+                   simplifiedPomodoroItems);
 
                 return new PomodoroConfiguration()
                 {
-                    Workflows = new List<PomodoroWorkflow> { workflow }
+                    Workflows = new List<PomodoroWorkflow>
+                    {
+                        classicPomodoroWorkflow,
+                        simplifiedPomodoroWorkflow
+                    }
                 };
             }
         }
