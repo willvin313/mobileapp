@@ -1,25 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Disposables;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
-using Toggl.Foundation.Analytics;
-using Toggl.Foundation.DataSources;
-using Toggl.Foundation.Diagnostics;
-using Toggl.Foundation.Interactors;
-using Toggl.Foundation.Login;
-using Toggl.Foundation.MvvmCross.Services;
+using Toggl.Foundation.Models.Pomodoro;
+using Toggl.Foundation.MvvmCross.Extensions;
 using Toggl.Foundation.Services;
-using Toggl.Foundation.Sync;
 using Toggl.Multivac;
+using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
-using Toggl.Multivac.Extensions;
-using Toggl.Foundation.MvvmCross.ViewModels.Pomodoro;
-using System.Collections.Generic;
-using System.Reactive.Subjects;
-using System.Reactive.Linq;
-using Toggl.Foundation.MvvmCross.Extensions;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels
 {

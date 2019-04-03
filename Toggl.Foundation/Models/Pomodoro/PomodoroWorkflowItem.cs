@@ -1,7 +1,7 @@
 ﻿using System;
 using Toggl.Multivac;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels.Pomodoro
+namespace Toggl.Foundation.Models.Pomodoro
 {
     public class PomodoroWorkflowItem : IEquatable<PomodoroWorkflowItem>
     {

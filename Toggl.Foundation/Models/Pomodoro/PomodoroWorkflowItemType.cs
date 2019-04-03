@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Toggl.Foundation.MvvmCross.ViewModels.Pomodoro
+﻿namespace Toggl.Foundation.Models.Pomodoro
 {
     public enum PomodoroWorkflowItemType
     {

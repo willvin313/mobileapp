@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 using Toggl.Multivac.Extensions;
-using static Toggl.Foundation.MvvmCross.ViewModels.Pomodoro.PomodoroWorkflowItemType;
+using static Toggl.Foundation.Models.Pomodoro.PomodoroWorkflowItemType;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels.Pomodoro
+namespace Toggl.Foundation.Models.Pomodoro
 {
     public class PomodoroConfiguration
     {

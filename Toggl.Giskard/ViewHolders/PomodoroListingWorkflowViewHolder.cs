@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Linq;
-using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Subjects;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using Toggl.Foundation.MvvmCross.ViewModels.Pomodoro;
-using Toggl.Giskard.Extensions.Reactive;
-using Toggl.Multivac.Extensions.Reactive;
 using Toggl.Multivac.Extensions;
 using Toggl.Giskard.Views.EditDuration;
 using Toggl.Giskard.Views.Pomodoro;
+using Toggl.Foundation.Models.Pomodoro;
 
 namespace Toggl.Giskard.ViewHolders
 {

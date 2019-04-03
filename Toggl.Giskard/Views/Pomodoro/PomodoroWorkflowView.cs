@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Toggl.Foundation.MvvmCross.ViewModels.Pomodoro;
 using Android.App;
 using Android.Content;
 using Android.Graphics;
@@ -11,9 +10,10 @@ using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
-using static Toggl.Foundation.MvvmCross.ViewModels.Pomodoro.PomodoroWorkflowItemType;
+using static Toggl.Foundation.Models.Pomodoro.PomodoroWorkflowItemType;
 using Toggl.Multivac.Extensions;
 using Toggl.Giskard.Extensions;
+using Toggl.Foundation.Models.Pomodoro;
 
 namespace Toggl.Giskard.Views.Pomodoro
 {
