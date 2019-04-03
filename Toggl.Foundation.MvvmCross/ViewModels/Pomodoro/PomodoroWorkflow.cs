@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels.Pomodoro
+namespace Toggl.Foundation.MvvmCross.ViewModels.Pomodoro 
 {
-    public class PomodoroWorkflow
+    public class PomodoroWorkflow : IEquatable<PomodoroWorkflow>
     {
         public string Id { get; }
         public PomodoroWorkflowType Type { get; }
@@ -17,6 +17,14 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Pomodoro
             Type = type;
             Name = name;
             Items = items.ToList();
+        }
+
+        public bool Equals(PomodoroWorkflow other)
+        {
+            if (other == null)
+                return false;
+
+            return other == this || other.Id == Id;
         }
     }
 }
