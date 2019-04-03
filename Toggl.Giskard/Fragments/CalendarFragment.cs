@@ -15,6 +15,7 @@ using System.Linq;
 using Toggl.Foundation.Calendar;
 using System.Reactive;
 using Toggl.Multivac;
+using Toggl.Giskard.Extensions;
 
 namespace Toggl.Giskard.Fragments
 {
@@ -32,8 +33,7 @@ namespace Toggl.Giskard.Fragments
             var schedulerProvider = Mvx.Resolve<ISchedulerProvider>();
             calendarLayoutManager = new CalendarLayoutManager();
             calendarRecyclerView.SetLayoutManager(calendarLayoutManager);
-            var displayMetrics = new DisplayMetrics();
-            Activity.WindowManager.DefaultDisplay.GetMetrics(displayMetrics);
+            var displayMetrics = Activity.GetDisplayMetrics();
             var calendarAdapter = new CalendarAdapter(view.Context, timeService, displayMetrics.WidthPixels);
             calendarRecyclerView.SetTimeService(timeService);
             calendarRecyclerView.SetAdapter(calendarAdapter);

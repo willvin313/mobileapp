@@ -44,8 +44,7 @@ namespace Toggl.Giskard.Extensions
 
             context = context ?? activity.ApplicationContext;
 
-            var displayMetrics = new DisplayMetrics();
-            activity.WindowManager.DefaultDisplay.GetMetrics(displayMetrics);
+            var displayMetrics = activity.GetDisplayMetrics();
 
             var isLargeScreen = displayMetrics.WidthPixels > largeScreenThreshold.DpToPixels(context);
 
@@ -106,6 +105,26 @@ namespace Toggl.Giskard.Extensions
         {
             var notificationManager = context.GetSystemService(Context.NotificationService) as NotificationManager;
             notificationManager?.CancelAll();
+        }
+
+        public static Activity GetActivity(this Context context)
+        {
+            while (context is ContextWrapper contextWrapper)
+            {
+                if (context is Activity activity)
+                    return activity;
+
+                context = contextWrapper.BaseContext;
+            }
+
+            return null;
+        }
+
+        public static DisplayMetrics GetDisplayMetrics(this Activity activity)
+        {
+            var displayMetrics = new DisplayMetrics();
+            activity.WindowManager.DefaultDisplay.GetMetrics(displayMetrics);
+            return displayMetrics;
         }
     }
 }
