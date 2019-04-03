@@ -1,8 +1,9 @@
 ﻿using System;
+using Toggl.Multivac;
 
 namespace Toggl.Foundation.MvvmCross.ViewModels.Pomodoro
 {
-    public class PomodoroWorkflowItem
+    public class PomodoroWorkflowItem : IEquatable<PomodoroWorkflowItem>
     {
         public PomodoroWorkflowItemType Type { get; }
         public int Minutes { get; }
@@ -16,5 +17,19 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Pomodoro
             Minutes = minutes;
             WorkflowReference = workflowReference ?? string.Empty;
         }
+
+        public bool Equals(PomodoroWorkflowItem other)
+        {
+            if (other == null)
+                return false;
+
+            return Type == other.Type && Minutes == other.Minutes && WorkflowReference == other.WorkflowReference;
+        }
+
+        public override int GetHashCode()
+            => HashCode.From(Type, Minutes, WorkflowReference);
+
+        public override bool Equals(object obj)
+            => Equals(obj as PomodoroWorkflowItem);
     }
 }

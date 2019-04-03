@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Toggl.Multivac;
+using Toggl.Multivac.Extensions;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels.Pomodoro 
+namespace Toggl.Foundation.MvvmCross.ViewModels.Pomodoro
 {
     public class PomodoroWorkflow : IEquatable<PomodoroWorkflow>
     {
+        private static ItemsComparer itemsComparer = new ItemsComparer();
+
         public string Id { get; }
         public PomodoroWorkflowType Type { get; }
         public string Name { get; }
@@ -24,7 +28,20 @@ namespace Toggl.Foundation.MvvmCross.ViewModels.Pomodoro
             if (other == null)
                 return false;
 
-            return other == this || other.Id == Id;
+            return Id == other.Id
+                && Type == other.Type
+                && Name == other.Name
+                && Items.SequenceEqual(other.Items, itemsComparer);
+        }
+
+        private class ItemsComparer : IEqualityComparer<PomodoroWorkflowItem>
+        {
+            public bool Equals(PomodoroWorkflowItem itemA, PomodoroWorkflowItem itemB)
+                => itemA.Equals(itemB);
+
+            public int GetHashCode(PomodoroWorkflowItem item)
+                => item.GetHashCode();
         }
     }
+
 }
