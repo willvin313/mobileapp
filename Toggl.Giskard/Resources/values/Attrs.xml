@@ -8,5 +8,11 @@
     <declare-styleable name="WheelDurationInput">
         <attr name="fadedTextColor" format="color" />
     </declare-styleable>
-        
+    <declare-styleable name="PomodoroWorkflowView">
+        <attr name="selectionMode" format="enum">
+            <enum name="none" value="0"/>
+            <enum name="manual" value="1"/>
+            <enum name="userInteraction" value="2"/>
+        </attr>
+    </declare-styleable>
 </resources>

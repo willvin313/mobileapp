@@ -90,6 +90,7 @@
         android:layout_height="wrap_content" />
     <toggl.giskard.views.PomodoroWorkflowView
         android:id="@+id/WorkflowView"
+		local:selectionMode="userInteraction"
         local:layout_constraintLeft_toLeftOf="parent"
         local:layout_constraintTop_toBottomOf="@id/WorkflowsTitleLabel"
         android:layout_marginLeft="16dp"

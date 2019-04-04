@@ -20,9 +20,17 @@ namespace Toggl.Giskard.Views.Pomodoro
     [Register("toggl.giskard.views.PomodoroWorkflowView")]
     public class PomodoroWorkflowView : View
     {
+        private enum SelectionMode
+        {
+            None = 0,
+            Manual = 1,
+            UserInteraction = 2
+        }
+
         private int labelFontSize = 14;
         private int verticalOffset = 0;
         private int requiredTotalPadding = 8;
+        private SelectionMode selectionMode;
 
         private IReadOnlyList<PomodoroWorkflowItem> items;
 
@@ -39,17 +47,35 @@ namespace Toggl.Giskard.Views.Pomodoro
 
         public PomodoroWorkflowView(Context context, IAttributeSet attrs) : base(context, attrs)
         {
+            initializeAttributeSet(context, attrs);
             init(context);
         }
 
-        public PomodoroWorkflowView(Context context, IAttributeSet attrs, int defStyleAttr) : base(context, attrs, defStyleAttr)
+        public PomodoroWorkflowView(Context context, IAttributeSet attrs, int defStyleAttrs) : base(context, attrs, defStyleAttrs)
         {
+            initializeAttributeSet(context, attrs, 0, defStyleAttrs);
             init(context);
         }
 
-        public PomodoroWorkflowView(Context context, IAttributeSet attrs, int defStyleAttr, int defStyleRes) : base(context, attrs, defStyleAttr, defStyleRes)
+        public PomodoroWorkflowView(Context context, IAttributeSet attrs, int defStyleAttrs, int defStyleRes) : base(context, attrs, defStyleAttrs, defStyleRes)
         {
+            initializeAttributeSet(context, attrs, defStyleAttrs, defStyleRes);
             init(context);
+        }
+
+        private void initializeAttributeSet(Context context, IAttributeSet attrs, int defStyleAttrs = 0, int defStyleRes = 0)
+        {
+            var customsAttrs =
+                context.ObtainStyledAttributes(attrs, Resource.Styleable.PomodoroWorkflowView, defStyleAttrs, defStyleRes);
+
+            try
+            {
+                selectionMode = (SelectionMode)customsAttrs.GetInteger(Resource.Styleable.PomodoroWorkflowView_selectionMode, 0);
+            }
+            finally
+            {
+                customsAttrs.Recycle();
+            }
         }
 
         #endregion
