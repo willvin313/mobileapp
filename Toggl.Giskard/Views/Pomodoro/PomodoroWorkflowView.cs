@@ -14,6 +14,8 @@ using static Toggl.Foundation.Models.Pomodoro.PomodoroWorkflowItemType;
 using Toggl.Multivac.Extensions;
 using Toggl.Giskard.Extensions;
 using Toggl.Foundation.Models.Pomodoro;
+using System.Reactive.Subjects;
+using System.Reactive.Linq;
 
 namespace Toggl.Giskard.Views.Pomodoro
 {
@@ -30,9 +32,25 @@ namespace Toggl.Giskard.Views.Pomodoro
         private int labelFontSize = 14;
         private int verticalOffset = 0;
         private int requiredTotalPadding = 8;
+        private const double verticalNonSelectedFactor = 0.8;
+
         private SelectionMode selectionMode;
 
         private IReadOnlyList<PomodoroWorkflowItem> items;
+        private List<double> segmentEndCoordinates;
+        private List<int> segmentsWidths;
+        private List<Paint> segmentsPaints;
+        private int viewWidth;
+        private bool isViewWidthKnown;
+
+        private readonly Paint workPaint = new Paint() { Color = new Color(38, 156, 222) };
+        private readonly Paint restPaint = new Paint() { Color = new Color(83, 103, 108) };
+        private readonly Paint workflowPaint = new Paint() { Color = new Color(141, 76, 175) };
+        private Paint labelPaint;
+
+        private BehaviorSubject<int?> selectedSegmentIndexSubject = new BehaviorSubject<int?>(null);
+
+        public IObservable<PomodoroWorkflowItem> ItemTapped { get; private set; }
 
         #region Constructors
 
@@ -80,44 +98,59 @@ namespace Toggl.Giskard.Views.Pomodoro
 
         #endregion
 
-        private readonly Paint workPaint = new Paint() { Color = new Color(38, 156, 222) };
-        private readonly Paint restPaint = new Paint() { Color = new Color(83, 103, 108) };
-        private readonly Paint workflowPaint = new Paint() { Color = new Color(141, 76, 175) };
+        private void init(Context context)
+        {
+            labelFontSize = labelFontSize.SpToPixels(context);
+            verticalOffset = verticalOffset.DpToPixels(context);
+            requiredTotalPadding = requiredTotalPadding.DpToPixels(context);
 
-        private Paint labelPaint;
+            labelPaint = new Paint()
+            {
+                Color = new Color(255, 255, 255),
+                TextSize = labelFontSize,
+                TextAlign = Paint.Align.Center
+            };
+            labelPaint.SetTypeface(Typeface.Create(Typeface.Default, TypefaceStyle.Bold));
+
+            var indexChanges = selectedSegmentIndexSubject.DistinctUntilChanged();
+
+            ItemTapped = indexChanges
+                .Where(index => index != 0)
+                .Select(index => items[index.Value]);
+
+            indexChanges.Subscribe(_ => Invalidate());
+
+            items = new PomodoroWorkflowItem(Work, 30).Yield().ToList();
+
+            Update(items);
+        }
 
         protected override void OnDraw(Canvas canvas)
         {
             canvas.DrawColor(Color.White);
 
-            var totalDuration = (double)items.Sum(item => item.Minutes);
+            if (!isViewWidthKnown)
+                return;
 
-            var segmentsWidths = items
-                   .Select(item => item.Minutes / totalDuration)
-                   .Select(normalizedWidth => (int)(canvas.Width * normalizedWidth))
-                   .ToList();
-
-            var segmentsPaints = items
-                 .Select(item => item.Type)
-                 .Select(paintForItemType)
-                 .ToList();
-
-            var offsetX = 0;
-
-            for (int i = 0; i < items.Count; i++)
+            for (int i = 0, offsetX = 0; i < items.Count; i++)
             {
                 var text = items[i].Minutes.ToString();
                 var textBounds = labelPaint.GetTextBounds(text);
 
                 var width = segmentsWidths[i];
+                var height = selectionMode >= SelectionMode.Manual && selectedSegmentIndexSubject.Value != i
+                    ? (int)(canvas.Height * verticalNonSelectedFactor)
+                    : canvas.Height;
 
                 var xStart = offsetX;
-                var xEnd = i == items.LastIndex() ? canvas.Width : xStart + width;
+                var xEnd = i == items.LastIndex()
+                    ? viewWidth
+                    : xStart + width;
 
                 var midX = (xEnd + xStart) / 2;
-                var midY = canvas.Height / 2;
+                var midY = height / 2;
 
-                canvas.DrawRect(xStart, 0, xEnd, canvas.Height, segmentsPaints[i]);
+                canvas.DrawRect(xStart, 0, xEnd, height, segmentsPaints[i]);
 
                 if (textBounds.Width() + requiredTotalPadding <= width)
                 {
@@ -126,6 +159,75 @@ namespace Toggl.Giskard.Views.Pomodoro
 
                 offsetX = xEnd;
             }
+        }
+
+        public void Update(IReadOnlyList<PomodoroWorkflowItem> items)
+        {
+            this.items = items;
+
+            if (!isViewWidthKnown || items.Count == 0)
+                return;
+
+            var totalDuration = (double)items.Sum(item => item.Minutes);
+
+            segmentsWidths = items
+                .Select(item => item.Minutes / totalDuration)
+                .Select(normalizedWidth => (int)(viewWidth * normalizedWidth))
+                .ToList();
+
+            segmentEndCoordinates = new List<double>(segmentsWidths.Count);
+
+            var offset = 0.0;
+            foreach (var width in segmentsWidths)
+            {
+                offset += width;
+                segmentEndCoordinates.Add(offset);
+            }
+
+            // Fix precision errors so that values are really from 0 to width.
+            if (segmentEndCoordinates.Count > 0)
+                segmentEndCoordinates[segmentEndCoordinates.LastIndex()] = viewWidth;
+
+            segmentsPaints = items
+                 .Select(item => item.Type)
+                 .Select(paintForItemType)
+                 .ToList();
+
+            selectedSegmentIndexSubject.OnNext(0);
+
+            Invalidate();
+        }
+
+        private int? findTouchedItemIndex(double x)
+        {
+            if (items.Count == 0)
+                return null;
+
+            for (int index = 0; index < segmentEndCoordinates.Count; index++)
+            {
+                if (x < segmentEndCoordinates[index])
+                    return index;
+            }
+
+            throw new InvalidOperationException("The algorithm is incorrect. This exception should never happen.");
+        }
+
+        public override bool OnTouchEvent(MotionEvent e)
+        {
+            if (selectionMode < SelectionMode.UserInteraction)
+                return base.OnTouchEvent(e);
+
+            if (e.Action == MotionEventActions.Move || e.Action == MotionEventActions.Down)
+            {
+                var x = e.GetX();
+
+                var index = findTouchedItemIndex(x);
+                selectedSegmentIndexSubject.OnNext(index);
+
+                return true;
+            }
+
+            return base.OnTouchEvent(e);
         }
 
         private Paint paintForItemType(PomodoroWorkflowItemType type)
@@ -140,31 +242,14 @@ namespace Toggl.Giskard.Views.Pomodoro
             throw new ArgumentException("Invalid item type");
         }
 
-        private void init(Context context)
+        protected override void OnLayout(bool changed, int left, int top, int right, int bottom)
         {
-            items = new List<PomodoroWorkflowItem>()
-            {
-                new PomodoroWorkflowItem(Work, 30)
-            };
+            base.OnLayout(changed, left, top, right, bottom);
 
-            labelFontSize = labelFontSize.SpToPixels(context);
-            verticalOffset = verticalOffset.DpToPixels(context);
-            requiredTotalPadding = requiredTotalPadding.DpToPixels(context);
+            viewWidth = Width;
+            isViewWidthKnown = true;
 
-            labelPaint = new Paint()
-            {
-                Color = new Color(255, 255, 255),
-                TextSize = labelFontSize,
-                TextAlign = Paint.Align.Center
-            };
-
-            labelPaint.SetTypeface(Typeface.Create(Typeface.Default, TypefaceStyle.Bold));
-        }
-
-        public void Update(IReadOnlyList<PomodoroWorkflowItem> items)
-        {
-            this.items = items;
-            PostInvalidate();
+            Update(items);
         }
     }
 }
