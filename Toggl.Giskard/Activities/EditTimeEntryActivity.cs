@@ -15,6 +15,7 @@ using Android.Text;
 using Android.Support.V7.Widget;
 using System.Linq;
 using Toggl.Foundation.Analytics;
+using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Foundation.MvvmCross.Transformations;
 using Toggl.Giskard.ViewHolders;
 using TimeEntryExtensions = Toggl.Giskard.Extensions.TimeEntryExtensions;
@@ -60,6 +61,16 @@ namespace Toggl.Giskard.Activities
         {
             base.Finish();
             OverridePendingTransition(Resource.Animation.abc_fade_in, Resource.Animation.abc_slide_out_bottom);
+        }
+
+        protected override void OnThemeChanged(ITheme theme)
+        {
+            base.OnThemeChanged(theme);
+            billableLabel.SetTextColor(theme.Text.ToNativeColor());
+            startTimeTextView.SetTextColor(theme.Text.ToNativeColor());
+            stopTimeTextView.SetTextColor(theme.Text.ToNativeColor());
+            durationTextView.SetTextColor(theme.Text.ToNativeColor());
+            deleteLabel.SetTextColor(theme.Error.ToNativeColor());
         }
 
         public override bool OnKeyDown(Keycode keyCode, KeyEvent e)
@@ -278,7 +289,7 @@ namespace Toggl.Giskard.Activities
                 ViewModel.Save.Execute();
             }
         }
-        
+
         private ISpannable generateProjectTaskClientFormattedString(EditTimeEntryViewModel.ProjectClientTaskInfo projectClientTask)
             => TimeEntryExtensions.ToProjectTaskClient(
                     projectClientTask.HasProject,

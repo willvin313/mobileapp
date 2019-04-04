@@ -51,6 +51,8 @@ namespace Toggl.Giskard.Activities
         private TextView deleteLabel;
         private View deleteButton;
 
+        private TextView billableLabel;
+
         protected override void InitializeViews()
         {
             closeButton = FindViewById(CloseButton);
@@ -93,6 +95,8 @@ namespace Toggl.Giskard.Activities
 
             deleteLabel = FindViewById<TextView>(DeleteLabel);
             deleteButton = FindViewById(DeleteButton);
+
+            billableLabel = FindViewById<TextView>(BillableLabel);
         }
     }
 }
