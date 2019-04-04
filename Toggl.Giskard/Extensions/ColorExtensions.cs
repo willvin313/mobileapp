@@ -1,6 +1,8 @@
-﻿using AndroidColor = Android.Graphics.Color;
+﻿using Android.Content;
+using AndroidColor = Android.Graphics.Color;
 using Toggl.Multivac;
 using Android.Graphics.Drawables;
+using Android.Util;
 
 namespace Toggl.Giskard.Extensions
 {
@@ -17,6 +19,14 @@ namespace Toggl.Giskard.Extensions
             var gradientDrawable = new GradientDrawable(GradientDrawable.Orientation.LeftRight, colors);
             gradientDrawable.SetCornerRadius(0);
             return gradientDrawable;
+        }
+
+        public static Color GetThemedColor(this Context context, int attrId)
+        {
+            var theme = context.Theme;
+            var typedValue = new TypedValue();
+            theme.ResolveAttribute(attrId, typedValue, true);
+            return new Color((uint)typedValue.Data);
         }
     }
 }
