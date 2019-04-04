@@ -115,7 +115,7 @@ namespace Toggl.Giskard.Views.Pomodoro
             var indexChanges = selectedSegmentIndexSubject.DistinctUntilChanged();
 
             ItemTapped = indexChanges
-                .Where(index => index != 0)
+                .Where(index => index != null)
                 .Select(index => items[index.Value]);
 
             indexChanges.Subscribe(_ => Invalidate());
