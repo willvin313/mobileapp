@@ -107,5 +107,16 @@ namespace Toggl.Multivac.Extensions
 
             return hashSet.SetEquals(second);
         }
+
+        public static int LastIndex<T>(this IEnumerable<T> self)
+        {
+            if (self is ICollection<T> collection)
+                return collection.Count - 1;
+
+            if (self is IReadOnlyCollection<T> readonlyCollection)
+                return readonlyCollection.Count - 1;
+
+            return self.Count() - 1;
+        }
     }
 }
