@@ -19,6 +19,7 @@
         android:layout_gravity="bottom"
         android:layout_width="match_parent">
         <ImageView
+            android:id="@+id/TopShadow"
             android:src="@drawable/TopShadow"
             android:layout_height="8dp"
             android:layout_width="match_parent"

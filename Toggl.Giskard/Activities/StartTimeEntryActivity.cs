@@ -10,6 +10,7 @@ using Android.Widget;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
 using Toggl.Foundation.Autocomplete;
 using Toggl.Foundation.MvvmCross.Onboarding.StartTimeEntryView;
+using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Giskard.Adapters;
 using Toggl.Giskard.Extensions;
@@ -217,6 +218,18 @@ namespace Toggl.Giskard.Activities
 
             descriptionField.TextFormatted = formattedText;
             descriptionField.SetSelection(cursorPosition);
+        }
+
+        protected override void OnThemeChanged(ITheme theme)
+        {
+            base.OnThemeChanged(theme);
+            durationCard.SetBackgroundColor(theme.BottomBar.ToNativeColor());
+
+            var isDarkTheme = theme is DarkTheme;
+
+            topShadow.Visibility = isDarkTheme
+                ? ViewStates.Gone
+                : ViewStates.Visible;
         }
     }
 }
