@@ -3,7 +3,7 @@ using Toggl.Multivac;
 
 namespace Toggl.Foundation.Models.Pomodoro
 {
-    public class PomodoroWorkflowItem : IEquatable<PomodoroWorkflowItem>
+    public struct PomodoroWorkflowItem : IEquatable<PomodoroWorkflowItem>
     {
         public PomodoroWorkflowItemType Type { get; }
         public int Minutes { get; }
@@ -19,17 +19,14 @@ namespace Toggl.Foundation.Models.Pomodoro
         }
 
         public bool Equals(PomodoroWorkflowItem other)
-        {
-            if (other == null)
-                return false;
-
-            return Type == other.Type && Minutes == other.Minutes && WorkflowReference == other.WorkflowReference;
-        }
+            => Type == other.Type && Minutes == other.Minutes && WorkflowReference == other.WorkflowReference;
 
         public override int GetHashCode()
             => HashCode.From(Type, Minutes, WorkflowReference);
 
         public override bool Equals(object obj)
-            => Equals(obj as PomodoroWorkflowItem);
+            => obj is PomodoroWorkflowItem
+            ? Equals((PomodoroWorkflowItem)obj)
+            : false;
     }
 }
