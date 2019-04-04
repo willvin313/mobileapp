@@ -13,12 +13,15 @@ using Toggl.Multivac.Extensions;
 using System.Linq;
 using Toggl.Foundation.Calendar;
 using System.Reactive;
+using Toggl.Foundation.MvvmCross.Themes;
+using Toggl.Giskard.Extensions;
 
 namespace Toggl.Giskard.Fragments
 {
     public partial class CalendarFragment : ReactiveFragment<CalendarViewModel>
     {
         private CalendarLayoutManager calendarLayoutManager;
+        private ITheme currentTheme = new LightTheme();
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
@@ -94,6 +97,12 @@ namespace Toggl.Giskard.Fragments
             return view;
         }
 
+        public override void OnResume()
+        {
+            base.OnResume();
+            OnThemeChanged(currentTheme);
+        }
+
         private void onboardingVisibilityChanged(bool visible)
         {
             if (visible)
@@ -147,6 +156,18 @@ namespace Toggl.Giskard.Fragments
             var day = offset.Day.ToString();
             headerDayTextView.Text = day;
             headerWeekdayTextView.Text = offset.ToString("ddd");
+        }
+
+        protected override void OnThemeChanged(ITheme currentTheme)
+        {
+            base.OnThemeChanged(currentTheme);
+            this.currentTheme = currentTheme;
+            if (Activity == null || Activity.IsFinishing || View == null) return;
+            if (onboardingView == null) return;
+            var placeholderMainText = View.FindViewById<TextView>(Resource.Id.CalendarOnboardingTitle);
+
+            onboardingView.SetBackgroundColor(currentTheme.Background.ToNativeColor());
+            placeholderMainText.SetTextColor(currentTheme.Text.ToNativeColor());
         }
     }
 }
