@@ -153,6 +153,8 @@ understand and agree to Toggl\'s</string>
     <string name="SmartReminders">Smart reminders</string>
     <string name="LinkCalendars">Link calendars</string>
     <string name="Workflows">Workflows</string>
+    <string name="WorkflowDefinition">Workflow Definition</string>
+    <string name="WorkflowNameHint">Workflow name</string>
     <string name="LinkCalendarsMessage">View your calendar events in Toggl and log them  with a single tap</string>
     <string name="CalendarEvents">Calendar events</string>
     <string name="TimeEntries">Time entries</string>
