@@ -6,6 +6,7 @@
     android:id="@+id/MainRunningTimeEntryFrame"
     android:layout_height="108dp"
     android:layout_gravity="bottom"
+    android:background="?attr/appCellBackgroundColor"
     android:layout_width="match_parent">
     <android.support.constraint.Guideline
         android:id="@+id/guideline"
@@ -39,7 +40,7 @@
         android:textSize="15sp"
         android:singleLine="true"
         android:fontFamily="sans-serif"
-        android:textColor="@color/runningEntryDescription"
+        android:textColor="?attr/appTextColor"
         local:layout_constraintHorizontal_bias="0"
         local:layout_constraintBottom_toBottomOf="parent"
         local:layout_constraintHorizontal_chainStyle="packed"
@@ -54,7 +55,7 @@
         tools:text="A nice description"
         android:singleLine="true"
         android:fontFamily="sans-serif"
-        android:textColor="@color/runningEntryDescription"
+        android:textColor="?attr/appTextColor"
         local:layout_constraintLeft_toRightOf="@id/LeadingTextView"
         local:layout_constraintBaseline_toBaselineOf="@id/LeadingTextView"
         local:layout_constraintRight_toLeftOf="@+id/MainRunningTimeEntryAddDescriptionLabel"
@@ -121,7 +122,7 @@
         android:layout_height="8dp" />
     <View
         android:id="@+id/TopSeparator"
-        android:background="@color/separator"
+        android:background="?attr/appCellBackgroundColor"
         local:layout_constraintLeft_toLeftOf="parent"
         local:layout_constraintRight_toRightOf="parent"
         local:layout_constraintBottom_toTopOf="@id/guideline"
@@ -129,7 +130,7 @@
         android:layout_height="1dp" />
     <View
         android:id="@+id/BottomSeparator"
-        android:background="@color/separator"
+        android:background="?attr/appCellBackgroundColor"
         local:layout_constraintLeft_toLeftOf="parent"
         local:layout_constraintRight_toRightOf="parent"
         local:layout_constraintBottom_toBottomOf="parent"

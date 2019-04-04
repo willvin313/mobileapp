@@ -61,14 +61,7 @@ namespace Toggl.Giskard.ViewHolders
             timeEntriesLogCellProjectLabel = ItemView.FindViewById<TextView>(Resource.Id.TimeEntriesLogCellProjectLabel);
             timeEntriesLogCellClientLabel = ItemView.FindViewById<TextView>(Resource.Id.TimeEntriesLogCellClientLabel);
             timeEntriesLogCellContinueImage = ItemView.FindViewById<ImageView>(Resource.Id.TimeEntriesLogCellContinueImage);
-        }
-
-        protected override void UpdateTheme(ITheme theme)
-        {
-            cardView.SetCardBackgroundColor(theme.Card.ToNativeColor().ToArgb());
-            timeEntriesLogCellDescriptionLabel.SetTextColor(theme.Text.ToNativeColor());
-
-            fadeView.Background = theme.Card.ToTransparentGradient();
+            fadeView.Background = ItemView.Context.GetThemedColor(Resource.Attribute.appCardColor).ToTransparentGradient();
         }
 
         protected override void UpdateView()

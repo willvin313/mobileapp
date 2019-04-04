@@ -58,13 +58,6 @@ namespace Toggl.Giskard.Activities
             }
         }
 
-        protected override void OnThemeChanged(ITheme theme)
-        {
-            base.OnThemeChanged(theme);
-
-            navigationView.SetBackgroundColor(theme.BottomBar.ToNativeColor());
-        }
-
         private Fragment getCachedFragment(int itemId)
         {
             if (fragments.TryGetValue(itemId, out var fragment))

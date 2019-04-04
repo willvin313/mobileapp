@@ -57,6 +57,8 @@ namespace Toggl.Giskard.Fragments
             var view = inflater.Inflate(Resource.Layout.MainFragment, container, false);
 
             InitializeViews(view);
+            runningTimeEntryGradient.Background = view.Context.GetThemedColor(Resource.Attribute.appCellBackgroundColor).ToTransparentGradient();
+
             setupToolbar();
 
             runningEntryCardFrame.Visibility = ViewStates.Invisible;
@@ -214,18 +216,6 @@ namespace Toggl.Giskard.Fragments
             onCreateStopwatch.Stop();
 
             return view;
-        }
-
-        protected override void OnThemeChanged(ITheme currentTheme)
-        {
-            var cellBgColor = currentTheme.CellBackground.ToNativeColor();
-            runningEntryCardFrame.SetBackgroundColor(cellBgColor);
-            topSeparator.SetBackgroundColor(cellBgColor);
-            bottomSeparator.SetBackgroundColor(cellBgColor);
-
-            runningTimeEntryGradient.Background = currentTheme.CellBackground.ToTransparentGradient();
-
-            timeEntryCardDescriptionLabel.SetTextColor(currentTheme.Text.ToNativeColor());
         }
 
         private ISpannable createProjectClientTaskLabel(IThreadSafeTimeEntry te)

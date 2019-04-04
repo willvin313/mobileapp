@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     app:cardUseCompatPadding="true"
+    app:cardBackgroundColor="?attr/appCardColor"
     android:layout_width="wrap_content"
     android:layout_height="64dp">
     <FrameLayout
@@ -16,7 +17,7 @@
                 android:id="@+id/TimeEntriesLogCellDescriptionLabel"
                 android:maxLines="1"
                 android:textSize="15sp"
-                android:textColor="@android:color/black"
+                android:textColor="?attr/appTextColor"
                 tools:text="Exporting assets to Zeplin and organizing"
                 android:layout_marginLeft="12dp"
                 android:layout_width="match_parent"

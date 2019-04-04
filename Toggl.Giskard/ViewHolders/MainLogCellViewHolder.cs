@@ -59,7 +59,7 @@ namespace Toggl.Giskard.ViewHolders
         private View durationFadeGradient;
         private TextView groupCountTextView;
         private View groupExpansionButton;
-        
+
         private ObjectAnimator animator;
 
         public bool IsAnimating => animator?.IsRunning ?? false;
@@ -72,11 +72,14 @@ namespace Toggl.Giskard.ViewHolders
 
         private GroupId groupId;
         private bool isInAGroup;
-        private Color timeEntryInGroupColor = Colors.White;
-        private Color timeEntryNotInGroupColor = Colors.KindaWhite;
+        private Color timeEntryInGroupColor;
+        private Color timeEntryNotInGroupColor;
 
         protected override void InitializeViews()
         {
+            var themeCellBackgroundColor = ItemView.Context.GetThemedColor(Resource.Attribute.appCellBackgroundColor);
+            timeEntryInGroupColor = ItemView.Context.GetThemedColor(Resource.Attribute.appBackgroundColor);
+            timeEntryNotInGroupColor = themeCellBackgroundColor;
             groupItemBackground = ItemView.FindViewById<View>(MainLogGroupBackground);
             groupCountTextView = ItemView.FindViewById<TextView>(TimeEntriesLogCellGroupCount);
             groupCountTextView.SetTextColor(Colors.BrownishGrey.ToNativeColor());
@@ -96,7 +99,7 @@ namespace Toggl.Giskard.ViewHolders
             fadeView = ItemView.FindViewById(TimeEntriesLogCellDurationGradient);
             separator = ItemView.FindViewById(Separator);
             MainLogContentView = ItemView.FindViewById(Resource.Id.MainLogContentView);
-            
+
             durationPadding = ItemView.FindViewById(TimeEntriesLogCellDurationPaddingArea);
             durationFadeGradient = ItemView.FindViewById(TimeEntriesLogCellDurationGradient);
             MainLogContentView = ItemView.FindViewById(Resource.Id.MainLogContentView);
@@ -104,6 +107,7 @@ namespace Toggl.Giskard.ViewHolders
             groupExpansionButton = ItemView.FindViewById(TimeEntriesLogCellToggleExpansionButton);
             timeEntriesLogCellContinueButton.Click += onContinueClick;
             groupExpansionButton.Click += onExpansionClick;
+            fadeView.Background = themeCellBackgroundColor.ToTransparentGradient();
         }
 
         private void onExpansionClick(object sender, EventArgs e)
@@ -151,18 +155,6 @@ namespace Toggl.Giskard.ViewHolders
             var layoutParameters = (ConstraintLayout.LayoutParams)durationPadding.LayoutParameters;
             layoutParameters.Width = whitePaddingWidth.DpToPixels(ItemView.Context);
             return layoutParameters;
-        }
-
-        protected override void UpdateTheme(ITheme theme)
-        {
-            timeEntryInGroupColor = theme.Background;
-            timeEntryNotInGroupColor = theme.CellBackground;
-            setColors();
-
-            separator.SetBackgroundColor(theme.Separator.ToNativeColor());
-            timeEntriesLogCellDescription.SetTextColor(theme.Text.ToNativeColor());
-            MainLogContentView.SetBackgroundColor(theme.CellBackground.ToNativeColor());
-            fadeView.Background = theme.CellBackground.ToTransparentGradient();
         }
 
         protected override void UpdateView()

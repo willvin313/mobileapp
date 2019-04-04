@@ -19,7 +19,7 @@
     
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/MainTabBarBottomNavigationView"
-        android:background="@android:color/white"
+        android:background="?attr/appBottomBarColor"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:elevation="2dp"
