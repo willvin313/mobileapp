@@ -61,11 +61,13 @@
         android:layout_centerVertical="true"
         android:layout_toRightOf="@id/TaskLabel" />
     <View
+        android:id="@+id/FadeView"
         android:background="@drawable/TransparentToWhiteGradient"
         android:layout_width="40dp"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true" />
     <View
+        android:id="@+id/Separator"
         android:background="@color/separator"
         android:layout_height="0.5dp"
         android:layout_width="match_parent"

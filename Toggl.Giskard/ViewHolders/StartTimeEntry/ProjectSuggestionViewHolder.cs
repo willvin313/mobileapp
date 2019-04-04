@@ -7,6 +7,7 @@ using Android.Support.V4.Graphics;
 using Android.Views;
 using Android.Widget;
 using Toggl.Foundation.Autocomplete.Suggestions;
+using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Giskard.Extensions;
 using Toggl.Giskard.Extensions.Reactive;
 using static Toggl.Giskard.Resource.Id;
@@ -18,6 +19,7 @@ namespace Toggl.Giskard.ViewHolders
         private View caret;
         private View toggleTasksButton;
         private View selectedProjectToken;
+        private View taskToggleBackground;
 
         private TextView taskLabel;
         private TextView projectLabel;
@@ -25,7 +27,7 @@ namespace Toggl.Giskard.ViewHolders
         private TextView clientNameLabel;
         private IDisposable toggleTasksDisposable;
         private readonly ISubject<ProjectSuggestion> toggleTasksSubject;
-        
+
         public ProjectSuggestionViewHolder(View itemView, ISubject<ProjectSuggestion> toggleTasksSubject)
             : base(itemView)
         {
@@ -34,6 +36,7 @@ namespace Toggl.Giskard.ViewHolders
 
         protected override void InitializeViews()
         {
+            base.InitializeViews();
             caret = ItemView.FindViewById(Caret);
             taskLabel = ItemView.FindViewById<TextView>(TaskLabel);
             toggleTasksButton = ItemView.FindViewById(ToggleTasksButton);
@@ -41,6 +44,7 @@ namespace Toggl.Giskard.ViewHolders
             taskCountLabel = ItemView.FindViewById<TextView>(TaskCountLabel);
             clientNameLabel = ItemView.FindViewById<TextView>(ClientNameLabel);
             selectedProjectToken = ItemView.FindViewById(ProjectSelectionToken);
+            taskToggleBackground = ItemView.FindViewById(TaskToggleBackground);
 
             toggleTasksDisposable = toggleTasksButton.Rx().Tap()
                 .Select(_ => Suggestion)
@@ -66,7 +70,7 @@ namespace Toggl.Giskard.ViewHolders
 
             if (selectedProjectToken == null)
                 return;
-            
+
             selectedProjectToken.Visibility = Suggestion.Selected.ToVisibility(useGone: false);
             if (Suggestion.Selected && selectedProjectToken.Background is GradientDrawable drawable)
             {
@@ -75,6 +79,12 @@ namespace Toggl.Giskard.ViewHolders
                 drawable.SetColor(argb);
                 drawable.InvalidateSelf();
             }
+        }
+
+        protected override void UpdateTheme(ITheme theme)
+        {
+            base.UpdateTheme(theme);
+            taskToggleBackground.SetBackgroundColor(theme.CellBackground.ToNativeColor());
         }
     }
 }

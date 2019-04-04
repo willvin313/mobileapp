@@ -27,12 +27,13 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical" />
     <View
-        android:id="@+id/StartTimeEntryProjectCellFade"
+        android:id="@+id/FadeView"
         android:background="@drawable/TransparentToWhiteGradient"
         android:layout_width="40dp"
         android:layout_gravity="right"
         android:layout_height="match_parent" />
     <View
+        android:id="@+id/Separator"
         android:background="@color/separator"
         android:layout_height="0.5dp"
         android:layout_gravity="bottom"

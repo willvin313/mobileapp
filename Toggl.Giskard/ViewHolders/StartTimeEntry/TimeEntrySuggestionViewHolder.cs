@@ -2,6 +2,8 @@
 using Android.Views;
 using Android.Widget;
 using Toggl.Foundation.Autocomplete.Suggestions;
+using Toggl.Foundation.MvvmCross.Themes;
+using Toggl.Giskard.Extensions;
 using static Toggl.Giskard.Resource.Id;
 
 namespace Toggl.Giskard.ViewHolders
@@ -20,6 +22,7 @@ namespace Toggl.Giskard.ViewHolders
 
         protected override void InitializeViews()
         {
+            base.InitializeViews();
             taskLabel = ItemView.FindViewById<TextView>(TaskLabel);
             projectLabel = ItemView.FindViewById<TextView>(ProjectLabel);
             clientNameLabel = ItemView.FindViewById<TextView>(ClientNameLabel);

@@ -32,16 +32,17 @@
         android:layout_centerVertical="true"
         android:layout_toRightOf="@+id/ProjectLabel" />
     <View
-        android:id="@+id/Fade"
+        android:id="@+id/FadeView"
         android:background="@drawable/TransparentToWhiteGradient"
         android:layout_width="20dp"
         android:layout_height="match_parent"
         android:layout_toLeftOf="@+id/Caret" />
     <View
+        android:id="@+id/TaskToggleBackground"
         android:background="@android:color/white"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_toRightOf="@+id/Fade" />
+        android:layout_toRightOf="@+id/FadeView" />
     <TextView
         android:id="@+id/TaskCountLabel"
         tools:text="3 tasks"
@@ -66,6 +67,7 @@
         android:layout_height="match_parent"
         android:layout_alignStart="@+id/Caret" />
     <View
+        android:id="@+id/Separator"
         android:background="@color/separator"
         android:layout_height="0.5dp"
         android:layout_width="match_parent"
