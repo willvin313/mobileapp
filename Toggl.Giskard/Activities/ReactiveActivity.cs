@@ -19,6 +19,7 @@ namespace Toggl.Giskard.Activities
         where TViewModel : class, IMvxViewModel
     {
         private IDisposable themeDisposable;
+        private string currenTheme;
 
         public CompositeDisposable DisposeBag { get; private set; } = new CompositeDisposable();
 
@@ -54,6 +55,10 @@ namespace Toggl.Giskard.Activities
 
         protected override void OnCreate(Bundle bundle)
         {
+            var prefs = GetSharedPreferences("TOGGL_APP", FileCreationMode.Private);
+            currenTheme = prefs.GetString("theme", "light");
+            var themeToSet = currenTheme == "light" ? Resource.Style.AppTheme : Resource.Style.AppTheme_Dark;
+            SetTheme(themeToSet);
             base.OnCreate(bundle);
             ViewModel?.ViewCreated();
         }
@@ -96,7 +101,14 @@ namespace Toggl.Giskard.Activities
 
         protected virtual void OnThemeChanged(ITheme theme)
         {
-            Window.DecorView.RootView.SetBackgroundColor(theme.Background.ToNativeColor());
+            var newTheme = theme is LightTheme ? "light" : "dark";
+            if (currenTheme != newTheme)
+            {
+                currenTheme = newTheme;
+                var prefs = GetSharedPreferences("TOGGL_APP", FileCreationMode.Private);
+                prefs.Edit().PutString("theme", currenTheme).Commit();
+                Recreate();
+            }
         }
 
         public void MvxInternalStartActivityForResult(Intent intent, int requestCode)
