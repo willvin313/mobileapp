@@ -47,6 +47,7 @@
         android:layout_gravity="center_vertical|left"
         android:layout_toRightOf="@id/ProjectLabel" />
     <View
+        android:id="@+id/FadeView"
         android:visibility="visible"
         android:background="@drawable/TransparentToWhiteGradient"
         android:layout_width="128dp"
@@ -82,6 +83,7 @@
         android:layout_height="match_parent"
         android:layout_alignStart="@id/TaskCountLabel" />
     <View
+        android:id="@+id/Separator"
         android:background="@color/separator"
         android:layout_height="0.5dp"
         android:layout_gravity="bottom"
