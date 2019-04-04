@@ -210,6 +210,7 @@ namespace Toggl.Foundation.MvvmCross
 
             if (viewModelType == typeof(SelectDateTimeViewModel))
                 return new SelectDateTimeViewModel(
+                    dependencyContainer.RxActionFactory,
                     dependencyContainer.NavigationService);
 
             if (viewModelType == typeof(SelectDefaultWorkspaceViewModel))
