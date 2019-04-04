@@ -48,6 +48,10 @@ namespace Toggl.Giskard.Fragments
             ViewModel.Workflows
                 .Subscribe(adapter.Rx().ReadOnlyItems())
                 .DisposedBy(DisposeBag);
+
+            adapter.ItemTapObservable
+                .Subscribe(ViewModel.Edit.Inputs)
+                .DisposedBy(DisposeBag);
         }
     }
 

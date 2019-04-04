@@ -23,6 +23,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
         private readonly IRxActionFactory rxActionFactory;
 
         public UIAction Close { get; }
+        public InputAction<PomodoroWorkflow> Edit { get; }
 
         private PomodoroConfiguration pomodoroConfig;
 
@@ -48,6 +49,7 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             this.rxActionFactory = rxActionFactory;
 
             Close = rxActionFactory.FromAsync(close);
+            Edit = rxActionFactory.FromAsync<PomodoroWorkflow>(editWorkflow);
 
             Workflows = workflowsSubject
                 .AsDriver(new List<PomodoroWorkflow>(), schedulerProvider);
@@ -60,6 +62,10 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             var configurationXml = pomodoroStorage.GetPomodoroConfigurationXml();
             pomodoroConfig = PomodoroConfiguration.FromXml(configurationXml);
 
+            // Erase this when done with workflow editing
+            // This is here just so that correct workflows are always initialized
+            pomodoroConfig = null;
+
             if (pomodoroConfig == null)
             {
                 pomodoroConfig = PomodoroConfiguration.Default;
@@ -67,6 +73,11 @@ namespace Toggl.Foundation.MvvmCross.ViewModels
             }
 
             workflowsSubject.OnNext(pomodoroConfig.Workflows);
+        }
+
+        private async Task editWorkflow(PomodoroWorkflow workflow)
+        {
+            var updatedWorkflow = await navigationService.Navigate<PomodoroEditWorkflowViewModel, PomodoroWorkflow, PomodoroWorkflow>(workflow);
         }
 
         private Task close() => navigationService.Close(this);
