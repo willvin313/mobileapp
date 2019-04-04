@@ -1,12 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="TextInputLayoutWithHelperText">
-        <attr name="helperText" format="string" />
-        <attr name="helperTextColor" format="color" />
-        <attr name="helperTextSize" format="dimension" />
+        <attr name="helperText" format="string"/>
+        <attr name="helperTextColor" format="color"/>
+        <attr name="helperTextSize" format="dimension"/>
     </declare-styleable>
     <declare-styleable name="WheelDurationInput">
-        <attr name="fadedTextColor" format="color" />
+        <attr name="fadedTextColor" format="color"/>
     </declare-styleable>
-        
+    
+    <declare-styleable name="TogglApplicationTheme">
+        <attr name="appCardColor" format="color"/>
+        <attr name="appBackgroundColor" format="color"/>
+        <attr name="appCellBackgroundColor" format="color"/>
+        <attr name="appTextColor" format="color"/>
+        <attr name="appSeparatorColor" format="color"/>
+        <attr name="appBottomBarColor" format="color"/>
+        <attr name="appErrorColor" format="color"/>
+    </declare-styleable>
 </resources>
+

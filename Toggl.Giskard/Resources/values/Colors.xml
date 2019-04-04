@@ -11,6 +11,7 @@
     <color name="defaultEditText">#5E5B5B</color>
     <color name="defaultFabBackground">#1AD180</color>
     <color name="lightGray">#FFFAFBFC</color>
+    <color name="darkGray">#FF303030</color>
     <color name="transparentLightGray">#66FAFBFC</color>
     <color name="separator">#FFE5E5E5</color>
     <color name="clientName">#FF5E5B5B</color>
