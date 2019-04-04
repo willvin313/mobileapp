@@ -42,6 +42,7 @@ namespace Toggl.Giskard.ViewHolders
         protected override void UpdateTheme(ITheme theme)
         {
             ItemView.SetBackgroundColor(theme.CellBackground.ToNativeColor());
+            textView.SetTextColor(theme.Text.ToNativeColor());
             separator?.SetBackgroundColor(theme.Separator.ToNativeColor());
             if (fadeView == null) return;
             fadeView.Background = theme.CellBackground.ToTransparentGradient();
