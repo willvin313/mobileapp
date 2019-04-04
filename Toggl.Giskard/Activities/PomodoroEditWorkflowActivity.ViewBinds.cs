@@ -12,11 +12,38 @@ namespace Toggl.Giskard.Activities
     {
         private SeekBar durationSeekBar;
         private PomodoroWorkflowView workflowView;
+        private EditText nameEditText;
+
+        private View confirmButton;
+        private View closeButton;
+
+        private TextView workflowDurationTextView;
+        private TextView segmentDurationTextView;
+
+        private View addSegmentButton;
+        private View deleteSegmentButton;
+
+        private View workTypeButton;
+        private View restTypeButton;
 
         protected override void InitializeViews()
         {
             durationSeekBar = FindViewById<SeekBar>(DurationSeekBar);
             workflowView = FindViewById<PomodoroWorkflowView>(WorkflowView);
+
+            nameEditText = FindViewById<EditText>(NameEditText);
+
+            closeButton = FindViewById(CloseButton);
+            confirmButton = FindViewById(ConfirmButton);
+
+            workflowDurationTextView = FindViewById<TextView>(WorkflowDuration);
+            segmentDurationTextView = FindViewById<TextView>(SegmentDuration);
+
+            addSegmentButton = FindViewById(AddSegmentButton);
+            deleteSegmentButton = FindViewById(DeleteSegmentButton);
+
+            workTypeButton = FindViewById(WorkTypeButton);
+            restTypeButton = FindViewById(RestTypeButton);
         }
     }
 }
