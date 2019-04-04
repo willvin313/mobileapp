@@ -116,6 +116,11 @@ namespace Toggl.Giskard.Views.Pomodoro
 
         private void init(Context context)
         {
+            items = new List<PomodoroWorkflowItem>()
+            {
+                new PomodoroWorkflowItem(Work, 30)
+            };
+
             labelFontSize = labelFontSize.SpToPixels(context);
             verticalOffset = verticalOffset.DpToPixels(context);
             requiredTotalPadding = requiredTotalPadding.DpToPixels(context);
