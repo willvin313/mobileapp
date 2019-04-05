@@ -8,6 +8,7 @@ using Android.Support.V7.Widget;
 using Android.Views;
 using MvvmCross.Droid.Support.V4;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
+using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Giskard.Adapters;
 using Toggl.Giskard.Extensions;
@@ -16,21 +17,19 @@ using Toggl.Multivac.Extensions;
 namespace Toggl.Giskard.Fragments
 {
     [MvxDialogFragmentPresentation(AddToBackStack = true)]
-    public sealed partial class SelectDurationFormatFragment : MvxDialogFragment<SelectDurationFormatViewModel>
+    public sealed partial class SelectDurationFormatFragment : ReactiveDialogFragment<SelectDurationFormatViewModel>
     {
         private readonly CompositeDisposable disposeBag  = new CompositeDisposable();
+        private ITheme currentTheme;
 
         public SelectDurationFormatFragment() { }
-
-        public SelectDurationFormatFragment(IntPtr javaReference, JniHandleOwnership transfer)
-            : base (javaReference, transfer) { }
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             base.OnCreateView(inflater, container, savedInstanceState);
             var view = inflater.Inflate(Resource.Layout.SelectDurationFormatFragment, null);
 
-            initializeViews(view);
+            InitializeViews(view);
 
             recyclerView.SetLayoutManager(new LinearLayoutManager(Context));
             selectDurationRecyclerAdapter = new SelectDurationFormatRecyclerAdapter();
@@ -49,6 +48,7 @@ namespace Toggl.Giskard.Fragments
             base.OnResume();
 
             Dialog.Window.SetDefaultDialogLayout(Activity, Context, heightDp: 268);
+            OnThemeChanged(currentTheme);
         }
 
         public override void OnCancel(IDialogInterface dialog)
@@ -61,6 +61,17 @@ namespace Toggl.Giskard.Fragments
             base.Dispose(disposing);
             if (!disposing) return;
             disposeBag.Dispose();
+        }
+
+        protected override void OnThemeChanged(ITheme currentTheme)
+        {
+            base.OnThemeChanged(currentTheme);
+            this.currentTheme = currentTheme;
+
+            if (Activity == null || Activity.IsFinishing || View == null) return;
+
+            View.SetBackgroundColor(currentTheme.Background.ToNativeColor());
+            title?.SetTextColor(currentTheme.Text.ToNativeColor());
         }
     }
 }

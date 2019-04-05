@@ -9,6 +9,7 @@ namespace Toggl.Giskard.Fragments
 {
     public partial class SelectColorFragment
     {
+        private TextView title;
         private HueSaturationPickerView hueSaturationPicker;
         private ValueSlider valueSlider;
         private Button saveButton;
@@ -16,13 +17,14 @@ namespace Toggl.Giskard.Fragments
         private RecyclerView recyclerView;
         private SimpleAdapter<SelectableColorViewModel> selectableColorsAdapter;
 
-        private void initializeViews(View view) 
+        protected override void InitializeViews(View view)
         {
             recyclerView = view.FindViewById<RecyclerView>(Resource.Id.SelectColorRecyclerView);
             saveButton = view.FindViewById<Button>(Resource.Id.SelectColorSave);
             closeButton = view.FindViewById<Button>(Resource.Id.SelectColorClose);
             hueSaturationPicker = view.FindViewById<HueSaturationPickerView>(Resource.Id.SelectColorHueSaturationPicker);
             valueSlider = view.FindViewById<ValueSlider>(Resource.Id.SelectColorValueSlider);
+            title = view.FindViewById<TextView>(Resource.Id.Title);
         }
     }
 }

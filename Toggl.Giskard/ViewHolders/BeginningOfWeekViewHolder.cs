@@ -3,6 +3,7 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using MvvmCross.Plugin.Color.Platforms.Android;
+using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Giskard.Extensions;
 using Toggl.Giskard.Views;
@@ -30,7 +31,7 @@ namespace Toggl.Giskard.ViewHolders
         protected override void InitializeViews()
         {
             beginningOfWeekTextView = ItemView.FindViewById<TextView>(Resource.Id.BeginningOfWeekText);
-            selectedButton = ItemView.FindViewById<RadioButton>(Resource.Id.BeginningOfWeekRadioButton); 
+            selectedButton = ItemView.FindViewById<RadioButton>(Resource.Id.BeginningOfWeekRadioButton);
         }
 
         protected override void UpdateView()
@@ -38,6 +39,12 @@ namespace Toggl.Giskard.ViewHolders
             // How to localize this?
             beginningOfWeekTextView.Text = Item.BeginningOfWeek.ToString();
             selectedButton.Checked = Item.Selected;
+        }
+
+        protected override void UpdateTheme(ITheme theme)
+        {
+            base.UpdateTheme(theme);
+            beginningOfWeekTextView.SetTextColor(theme.Text.ToNativeColor());
         }
     }
 }

@@ -2,8 +2,10 @@ using System;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Foundation.MvvmCross.Transformations;
 using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Giskard.Extensions;
 
 namespace Toggl.Giskard.ViewHolders
 {
@@ -31,6 +33,12 @@ namespace Toggl.Giskard.ViewHolders
         {
             durationFormatTextView.Text = DurationFormatToString.Convert(Item.DurationFormat);
             selectedButton.Checked = Item.Selected;
+        }
+
+        protected override void UpdateTheme(ITheme theme)
+        {
+            base.UpdateTheme(theme);
+            durationFormatTextView.SetTextColor(theme.Text.ToNativeColor());
         }
     }
 }

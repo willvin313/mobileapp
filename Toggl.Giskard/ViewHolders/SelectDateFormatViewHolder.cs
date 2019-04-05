@@ -2,7 +2,9 @@
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Foundation.MvvmCross.ViewModels.Selectable;
+using Toggl.Giskard.Extensions;
 
 namespace Toggl.Giskard.ViewHolders
 {
@@ -29,6 +31,12 @@ namespace Toggl.Giskard.ViewHolders
         {
             dateFormatTextView.Text = Item.DateFormat.Localized;
             selectedButton.Checked = Item.Selected;
+        }
+
+        protected override void UpdateTheme(ITheme theme)
+        {
+            base.UpdateTheme(theme);
+            dateFormatTextView.SetTextColor(theme.Text.ToNativeColor());
         }
     }
 }

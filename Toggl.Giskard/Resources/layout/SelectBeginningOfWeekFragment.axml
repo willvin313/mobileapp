@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <TextView
+        android:id="@+id/Title"
         android:textSize="20sp"
         android:lineSpacingExtra="8sp"
         android:text="@string/BeginningOfWeek"

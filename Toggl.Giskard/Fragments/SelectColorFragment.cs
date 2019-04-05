@@ -12,6 +12,7 @@ using Android.Widget;
 using MvvmCross.Droid.Support.V4;
 using MvvmCross.Platforms.Android.Binding.BindingContext;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
+using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Foundation.MvvmCross.ViewModels;
 using Toggl.Giskard.Adapters;
 using Toggl.Giskard.Extensions;
@@ -23,8 +24,9 @@ using Toggl.Multivac.Extensions;
 namespace Toggl.Giskard.Fragments
 {
     [MvxDialogFragmentPresentation(AddToBackStack = true)]
-    public sealed partial class SelectColorFragment : MvxDialogFragment<SelectColorViewModel>
+    public sealed partial class SelectColorFragment : ReactiveDialogFragment<SelectColorViewModel>
     {
+        private ITheme currentTheme = new LightTheme();
         private const int customColorEnabledHeight = 425;
         private const int customColorDisabledHeight = 270;
 
@@ -32,15 +34,12 @@ namespace Toggl.Giskard.Fragments
 
         public SelectColorFragment() { }
 
-        public SelectColorFragment(IntPtr javaReference, JniHandleOwnership transfer)
-            : base(javaReference, transfer) { }
-
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             base.OnCreateView(inflater, container, savedInstanceState);
             var view = inflater.Inflate(Resource.Layout.SelectColorFragment, null);
 
-            initializeViews(view);
+            InitializeViews(view);
 
             recyclerView.SetLayoutManager(new GridLayoutManager(Context, 5));
 
@@ -117,6 +116,7 @@ namespace Toggl.Giskard.Fragments
             var height = ViewModel.AllowCustomColors ? customColorEnabledHeight : customColorDisabledHeight;
 
             Dialog.Window.SetDefaultDialogLayout(Activity, Context, heightDp: height);
+            OnThemeChanged(currentTheme);
         }
 
         public override void OnCancel(IDialogInterface dialog)
@@ -126,5 +126,16 @@ namespace Toggl.Giskard.Fragments
 
         private float invertedNormalizedProgress(int progress)
             => 1f - (progress / 100f);
+
+        protected override void OnThemeChanged(ITheme currentTheme)
+        {
+            base.OnThemeChanged(currentTheme);
+            this.currentTheme = currentTheme;
+
+            if (Activity == null || Activity.IsFinishing || View == null) return;
+
+            View.SetBackgroundColor(currentTheme.Background.ToNativeColor());
+            title?.SetTextColor(currentTheme.Text.ToNativeColor());
+        }
     }
 }

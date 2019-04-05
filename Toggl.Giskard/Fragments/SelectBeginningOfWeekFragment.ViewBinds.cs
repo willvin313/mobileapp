@@ -10,10 +10,14 @@ namespace Toggl.Giskard.Fragments
     public partial class SelectBeginningOfWeekFragment
     {
         private RecyclerView recyclerView;
-        
-        private void initializeViews(View view)
+        private TextView title;
+        private TextView subTitle;
+
+        protected override void InitializeViews(View view)
         {
             recyclerView = view.FindViewById<RecyclerView>(Resource.Id.DaysListRecyclerView);
+            title = view.FindViewById<TextView>(Resource.Id.Title);
+            subTitle = view.FindViewById<TextView>(Resource.Id.SubTitle);
         }
     }
 }
