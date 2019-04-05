@@ -8,8 +8,10 @@ using Android.OS;
 using Android.Support.V7.Widget;
 using Android.Views;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
+using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Foundation.MvvmCross.ViewModels.Settings;
 using Toggl.Giskard.Adapters;
+using Toggl.Giskard.Extensions;
 using Toggl.Giskard.Extensions.Reactive;
 using Toggl.Multivac.Extensions;
 
@@ -91,6 +93,18 @@ namespace Toggl.Giskard.Activities
             userCalendarsAdapter = new UserCalendarsRecyclerAdapter();
             calendarsRecyclerView.SetAdapter(userCalendarsAdapter);
             calendarsRecyclerView.SetLayoutManager(new LinearLayoutManager(this));
+        }
+
+        protected override void OnThemeChanged(ITheme theme)
+        {
+            base.OnThemeChanged(theme);
+            activityTopSeparator.SetBackgroundColor(theme.Separator.ToNativeColor());
+            activityBottomSeparator.SetBackgroundColor(theme.Separator.ToNativeColor());
+            separator.SetBackgroundColor(theme.Separator.ToNativeColor());
+            linkCalendarsText.SetTextColor(theme.Text.ToNativeColor());
+            linkCalendarsSubText.SetTextColor(theme.Text.ToNativeColor());
+            selectCalendarsTextView.SetTextColor(theme.Text.ToNativeColor());
+            selectCalendarsSubTextView.SetTextColor(theme.Text.ToNativeColor());
         }
     }
 }

@@ -2,7 +2,9 @@
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using Toggl.Foundation.MvvmCross.Themes;
 using Toggl.Foundation.MvvmCross.ViewModels.Selectable;
+using Toggl.Giskard.Extensions;
 
 namespace Toggl.Giskard.ViewHolders
 {
@@ -40,6 +42,12 @@ namespace Toggl.Giskard.ViewHolders
         {
             base.OnItemViewClick(sender, args);
             checkbox.Checked = !checkbox.Checked;
+        }
+
+        protected override void UpdateTheme(ITheme theme)
+        {
+            base.UpdateTheme(theme);
+            calendarName.SetTextColor(theme.Text.ToNativeColor());
         }
     }
 }

@@ -13,6 +13,13 @@ namespace Toggl.Giskard.Activities
         private View calendarsContainer;
         private RecyclerView calendarsRecyclerView;
         private Toolbar toolbar;
+        private TextView selectCalendarsTextView;
+        private TextView selectCalendarsSubTextView;
+        private View separator;
+        private View activityTopSeparator;
+        private View activityBottomSeparator;
+        private TextView linkCalendarsText;
+        private TextView linkCalendarsSubText;
 
         protected override void InitializeViews()
         {
@@ -21,6 +28,13 @@ namespace Toggl.Giskard.Activities
             calendarsContainer = FindViewById(Resource.Id.CalendarsContainer);
             calendarsRecyclerView = FindViewById<RecyclerView>(Resource.Id.CalendarsRecyclerView);
             toolbar = FindViewById<Toolbar>(Resource.Id.Toolbar);
+            selectCalendarsTextView = FindViewById<TextView>(Resource.Id.SelectCalendarsTextView);
+            selectCalendarsSubTextView = FindViewById<TextView>(Resource.Id.SelectCalendarsSubTextView);
+            separator = FindViewById(Resource.Id.Separator);
+            activityTopSeparator = FindViewById(Resource.Id.CalendarActivityTopSeparator);
+            activityBottomSeparator = FindViewById(Resource.Id.CalendarActivityBottomSeparator);
+            linkCalendarsText = FindViewById<TextView>(Resource.Id.LinkCalendarsText);
+            linkCalendarsSubText = FindViewById<TextView>(Resource.Id.LinkCalendarsSubText);
         }
     }
 }
