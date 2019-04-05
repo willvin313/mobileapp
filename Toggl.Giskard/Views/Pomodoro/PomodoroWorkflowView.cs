@@ -50,7 +50,7 @@ namespace Toggl.Giskard.Views.Pomodoro
 
         private BehaviorSubject<int?> selectedSegmentIndexSubject = new BehaviorSubject<int?>(null);
 
-        public IObservable<PomodoroWorkflowItem> ItemTapped { get; private set; }
+        public IObservable<(PomodoroWorkflowItem WorkflowItem, int Index)> SegmentTapped { get; private set; }
 
         #region Constructors
 
@@ -114,15 +114,18 @@ namespace Toggl.Giskard.Views.Pomodoro
 
             var indexChanges = selectedSegmentIndexSubject.DistinctUntilChanged();
 
-            ItemTapped = indexChanges
+            SegmentTapped = indexChanges
                 .Where(index => index != null)
-                .Select(index => items[index.Value]);
+                .Select(index => index.Value)
+                .Select(index => (items[index], index));
 
             indexChanges.Subscribe(_ => Invalidate());
 
             items = new PomodoroWorkflowItem(Work, 30).Yield().ToList();
 
             Update(items);
+
+            selectedSegmentIndexSubject.OnNext(0);
         }
 
         protected override void OnDraw(Canvas canvas)
@@ -192,8 +195,6 @@ namespace Toggl.Giskard.Views.Pomodoro
                  .Select(item => item.Type)
                  .Select(paintForItemType)
                  .ToList();
-
-            selectedSegmentIndexSubject.OnNext(0);
 
             Invalidate();
         }
