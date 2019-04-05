@@ -37,6 +37,9 @@ namespace Toggl.Foundation.Models.Pomodoro
         public PomodoroWorkflow Clone()
             => new PomodoroWorkflow(Id, Type, Name, Items);
 
+        public PomodoroWorkflow CloneWithUpdatedItems(IEnumerable<PomodoroWorkflowItem> newItems)
+            => new PomodoroWorkflow(Id, Type, Name, newItems);
+
         private class ItemsComparer : IEqualityComparer<PomodoroWorkflowItem>
         {
             public bool Equals(PomodoroWorkflowItem itemA, PomodoroWorkflowItem itemB)
