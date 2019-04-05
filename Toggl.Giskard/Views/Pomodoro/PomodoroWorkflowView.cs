@@ -36,7 +36,8 @@ namespace Toggl.Giskard.Views.Pomodoro
 
         private SelectionMode selectionMode;
 
-        private IReadOnlyList<PomodoroWorkflowItem> items;
+        private IReadOnlyList<PomodoroWorkflowItem> items = new List<PomodoroWorkflowItem>();
+
         private List<double> segmentEndCoordinates;
         private List<int> segmentsWidths;
         private List<Paint> segmentsPaints;
@@ -48,9 +49,26 @@ namespace Toggl.Giskard.Views.Pomodoro
         private readonly Paint workflowPaint = new Paint() { Color = new Color(141, 76, 175) };
         private Paint labelPaint;
 
-        private BehaviorSubject<int?> selectedSegmentIndexSubject = new BehaviorSubject<int?>(null);
+        private int selectedIndex;
 
-        public IObservable<(PomodoroWorkflowItem WorkflowItem, int Index)> SegmentTapped { get; private set; }
+        public PomodoroWorkflowItem SelectedWorkflowItem => items[SelectedSegmentIndex];
+
+        public int SelectedSegmentIndex
+        {
+            get => selectedIndex;
+            private set
+            {
+                if (selectedIndex == value)
+                    return;
+
+                selectedIndex = value;
+
+                SelectedSegmentChanged?.Invoke(this, new SelectedSegmentChangedEventArgs(selectedIndex, items[selectedIndex]));
+                Invalidate();
+            }
+        }
+
+        public event EventHandler<SelectedSegmentChangedEventArgs> SelectedSegmentChanged;
 
         #region Constructors
 
@@ -112,20 +130,9 @@ namespace Toggl.Giskard.Views.Pomodoro
             };
             labelPaint.SetTypeface(Typeface.Create(Typeface.Default, TypefaceStyle.Bold));
 
-            var indexChanges = selectedSegmentIndexSubject.DistinctUntilChanged();
-
-            SegmentTapped = indexChanges
-                .Where(index => index != null)
-                .Select(index => index.Value)
-                .Select(index => (items[index], index));
-
-            indexChanges.Subscribe(_ => Invalidate());
-
-            items = new PomodoroWorkflowItem(Work, 30).Yield().ToList();
-
             Update(items);
 
-            selectedSegmentIndexSubject.OnNext(0);
+            SelectedSegmentIndex = 0;
         }
 
         protected override void OnDraw(Canvas canvas)
@@ -135,13 +142,19 @@ namespace Toggl.Giskard.Views.Pomodoro
             if (!isViewWidthKnown)
                 return;
 
+            if (items.Count == 0)
+            {
+                canvas.DrawColor(Color.Gray);
+                return;
+            }
+
             for (int i = 0, offsetX = 0; i < items.Count; i++)
             {
                 var text = items[i].Minutes.ToString();
                 var textBounds = labelPaint.GetTextBounds(text);
 
                 var width = segmentsWidths[i];
-                var height = selectionMode >= SelectionMode.Manual && selectedSegmentIndexSubject.Value != i
+                var height = selectionMode >= SelectionMode.Manual && SelectedSegmentIndex != i
                     ? (int)(canvas.Height * verticalNonSelectedFactor)
                     : canvas.Height;
 
@@ -223,7 +236,11 @@ namespace Toggl.Giskard.Views.Pomodoro
                 var x = e.GetX();
 
                 var index = findTouchedItemIndex(x);
-                selectedSegmentIndexSubject.OnNext(index);
+
+                if (!index.HasValue)
+                    return base.OnTouchEvent(e);
+
+                SelectedSegmentIndex = index.Value;
 
                 return true;
             }
@@ -253,4 +270,17 @@ namespace Toggl.Giskard.Views.Pomodoro
             Update(items);
         }
     }
+
+    public class SelectedSegmentChangedEventArgs : EventArgs
+    {
+        public SelectedSegmentChangedEventArgs(int index, PomodoroWorkflowItem workflowItem)
+        {
+            Index = index;
+            WorkflowItem = workflowItem;
+        }
+
+        public int Index { get; }
+        public PomodoroWorkflowItem WorkflowItem { get; }
+    }
+
 }
