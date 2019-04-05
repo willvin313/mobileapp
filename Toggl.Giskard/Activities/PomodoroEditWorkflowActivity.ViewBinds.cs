@@ -23,8 +23,8 @@ namespace Toggl.Giskard.Activities
         private View addSegmentButton;
         private View deleteSegmentButton;
 
-        private View workTypeButton;
-        private View restTypeButton;
+        private TextView workTypeButton;
+        private TextView restTypeButton;
 
         protected override void InitializeViews()
         {
@@ -42,8 +42,8 @@ namespace Toggl.Giskard.Activities
             addSegmentButton = FindViewById(AddSegmentButton);
             deleteSegmentButton = FindViewById(DeleteSegmentButton);
 
-            workTypeButton = FindViewById(WorkTypeButton);
-            restTypeButton = FindViewById(RestTypeButton);
+            workTypeButton = FindViewById<TextView>(WorkTypeButton);
+            restTypeButton = FindViewById<TextView>(RestTypeButton);
         }
     }
 }
