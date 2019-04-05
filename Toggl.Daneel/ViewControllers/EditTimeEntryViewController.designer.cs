@@ -53,7 +53,7 @@ namespace Toggl.Daneel.ViewControllers
 		UIKit.UIButton DeleteButton { get; set; }
 
 		[Outlet]
-		UIKit.NSLayoutConstraint DeleteButtonBottomConstraint { get; set; }
+		UIKit.NSLayoutConstraint ButtonsContainerBottomConstraint { get; set; }
 
 		[Outlet]
 		Toggl.Daneel.Views.TextViewWithPlaceholder DescriptionTextView { get; set; }
@@ -217,9 +217,9 @@ namespace Toggl.Daneel.ViewControllers
 				DeleteButton = null;
 			}
 
-			if (DeleteButtonBottomConstraint != null) {
-				DeleteButtonBottomConstraint.Dispose ();
-				DeleteButtonBottomConstraint = null;
+			if (ButtonsContainerBottomConstraint != null) {
+				ButtonsContainerBottomConstraint.Dispose ();
+				ButtonsContainerBottomConstraint = null;
 			}
 
 			if (DescriptionTextView != null) {

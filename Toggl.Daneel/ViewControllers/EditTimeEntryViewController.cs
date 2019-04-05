@@ -239,15 +239,6 @@ namespace Toggl.Daneel.ViewControllers
 
             adjustHeight();
 
-            if (TraitCollection.HorizontalSizeClass == UIUserInterfaceSizeClass.Regular)
-            {
-                ConfirmButton.SetTitleColor(Color.EditTimeEntry.TabletConfirmButtonText.ToNativeColor(), UIControlState.Normal);
-            }
-            else
-            {
-                ConfirmButton.SetTitleColor(Color.EditTimeEntry.MobileConfirmButtonText.ToNativeColor(), UIControlState.Normal);
-            }
-
             View.ClipsToBounds |= UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad;
         }
 
@@ -267,10 +258,8 @@ namespace Toggl.Daneel.ViewControllers
                 && UIDevice.CurrentDevice.UserInterfaceIdiom != UIUserInterfaceIdiom.Pad)
             {
                 var bottomSafeAreaInset = UIApplication.SharedApplication.KeyWindow.SafeAreaInsets.Bottom;
-                if (bottomSafeAreaInset >= DeleteButtonBottomConstraint.Constant)
-                    DeleteButtonBottomConstraint.Constant
-                        = ConfirmButtonBottomConstraint.Constant
-                        = 0;
+                if (bottomSafeAreaInset >= ButtonsContainerBottomConstraint.Constant)
+                    ButtonsContainerBottomConstraint.Constant = 0;
             }
 
             DescriptionTextView.TintColor = Color.StartTimeEntry.Cursor.ToNativeColor();
