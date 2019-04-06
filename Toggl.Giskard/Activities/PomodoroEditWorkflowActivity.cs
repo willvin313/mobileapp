@@ -21,6 +21,9 @@ using TimeEntryExtensions = Toggl.Giskard.Extensions.TimeEntryExtensions;
 using TextResources = Toggl.Foundation.Resources;
 using TagsAdapter = Toggl.Giskard.Adapters.SimpleAdapter<string>;
 using static Toggl.Giskard.Resource.String;
+using Toggl.Foundation.Models.Pomodoro;
+using Android.Widget;
+using Android.Graphics;
 
 namespace Toggl.Giskard.Activities
 {
@@ -30,6 +33,11 @@ namespace Toggl.Giskard.Activities
               ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize)]
     public sealed partial class PomodoroEditWorkflowActivity : ReactiveActivity<PomodoroEditWorkflowViewModel>
     {
+        private readonly int inactiveResourceBackground = Resource.Drawable.GrayBorderRoundedRectangleWithWhiteBackground;
+        private readonly int activeResourceBackground = Resource.Drawable.BlueButton;
+        private readonly Color inactiveButtonTextColor = new Color(128, 128, 128);
+        private readonly Color activeButtonTextColor = new Color(255, 255, 255);
+
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
@@ -61,13 +69,80 @@ namespace Toggl.Giskard.Activities
 
         private void setupViews()
         {
+            nameEditText.Text = ViewModel.Workflow.Name;
+
+            updateUI(ViewModel.Workflow.Items.First());
         }
 
         private void setupBindings()
         {
+            workflowView.Rx().SelectedIndex()
+                .Subscribe(ViewModel.SelectItemByIndex.Inputs)
+                .DisposedBy(DisposeBag);
+
             ViewModel.WorkflowItems
                 .Subscribe(workflowView.Update)
                 .DisposedBy(DisposeBag);
+
+            ViewModel.SelectedWorkflowItemIndex
+               .Subscribe(index => workflowView.SelectedWorkflowItemIndex = index)
+               .DisposedBy(DisposeBag);
+
+            ViewModel.SelectedWorkflowItem
+                .WhereNotNull()
+                .Subscribe(updateUI)
+                .DisposedBy(DisposeBag);
+
+            closeButton.Rx()
+                .BindAction(ViewModel.Close)
+                .DisposedBy(DisposeBag);
+
+            durationSeekBar.Rx().Duration()
+                .Subscribe(ViewModel.UpdateDuration.Inputs)
+                .DisposedBy(DisposeBag);
+
+            durationSeekBar.Rx().Duration()
+                .Select(duration => $"{duration} min")
+                .Subscribe(segmentDurationTextView.Rx().TextObserver())
+                .DisposedBy(DisposeBag);
+
+            addSegmentButton.Rx()
+                .BindAction(ViewModel.AddWorkflowItem)
+                .DisposedBy(DisposeBag);
+
+            deleteSegmentButton.Rx()
+                .BindAction(ViewModel.DeleteWorkflowItem)
+                .DisposedBy(DisposeBag);
+
+            workTypeButton.Rx().Tap()
+                .SelectValue(PomodoroWorkflowItemType.Work)
+                .Subscribe(ViewModel.UpdateCurrentWorkflowItemType.Inputs)
+                .DisposedBy(DisposeBag);
+
+            restTypeButton.Rx().Tap()
+                .SelectValue(PomodoroWorkflowItemType.Rest)
+                .Subscribe(ViewModel.UpdateCurrentWorkflowItemType.Inputs)
+                .DisposedBy(DisposeBag);
+        }
+
+        private void updateUI(PomodoroWorkflowItem item)
+        {
+            durationSeekBar.Duration = item.Minutes;
+
+            if (item.Type == PomodoroWorkflowItemType.Work)
+            {
+                workTypeButton.SetBackgroundResource(activeResourceBackground);
+                workTypeButton.SetTextColor(activeButtonTextColor);
+                restTypeButton.SetBackgroundResource(inactiveResourceBackground);
+                restTypeButton.SetBackgroundColor(inactiveButtonTextColor);
+            }
+            else if (item.Type == PomodoroWorkflowItemType.Rest)
+            {
+                restTypeButton.SetBackgroundResource(activeResourceBackground);
+                restTypeButton.SetTextColor(activeButtonTextColor);
+                workTypeButton.SetBackgroundResource(inactiveResourceBackground);
+                workTypeButton.SetBackgroundColor(inactiveButtonTextColor);
+            }
         }
     }
 }

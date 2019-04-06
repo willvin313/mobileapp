@@ -376,6 +376,8 @@
     <Compile Include="Adapters\SelectProjectRecyclerAdapter.cs" />
     <Compile Include="Extensions\CanvasExtensions.cs" />
     <Compile Include="Extensions\FloatingActionButtonExtensions.cs" />
+    <Compile Include="Extensions\Reactive\PomodorowWorkflowViewExtensions.cs" />
+    <Compile Include="Extensions\Reactive\SeekBarExtensions.cs" />
     <Compile Include="Fragments\PomodoroListingFragment.cs" />
     <Compile Include="Fragments\PomodoroListingFragment.ViewBinds.cs">
       <DependentUpon>PomodoroListingFragment.cs</DependentUpon>
@@ -484,7 +486,9 @@
     <Compile Include="Views\EditDuration\Shapes\Wheel.cs" />
     <Compile Include="Views\EditDuration\WheelBackgroundView.cs" />
     <Compile Include="Views\EditDuration\WheelForegroundView.cs" />
+    <Compile Include="Views\Pomodoro\PomodoroDurationSeekbar.cs" />
     <Compile Include="Views\Pomodoro\PomodoroWorkflowView.cs" />
+    <Compile Include="Views\Pomodoro\SelectedWorkflowItemChangedEventArgs.cs" />
     <Compile Include="Views\ReportsCalendarView.cs" />
     <Compile Include="Adapters\MainRecyclerAdapter.cs" />
     <Compile Include="Extensions\LayoutParamsExtensions.cs" />
@@ -683,8 +687,6 @@
     <AndroidResource Include="Resources\layout\SelectBeginningOfWeekFragmentCell.axml" />
     <AndroidResource Include="Resources\layout\SelectDurationFormatFragment.axml" />
     <AndroidResource Include="Resources\layout\SelectDurationFormatFragmentCell.axml" />
-    <AndroidResource Include="Resources\layout\ReportsActivity.axml" />
-    <AndroidResource Include="Resources\layout\ReportsActivityHeader.axml" />
     <AndroidResource Include="Resources\drawable\RoundedRectangle.xml" />
     <AndroidResource Include="Resources\layout\ReportsFragment.axml" />
     <AndroidResource Include="Resources\layout\ReportsFragmentHeader.axml" />
@@ -934,7 +936,6 @@
     <AndroidResource Include="Resources\layout\SelectWorkspaceFragment.axml" />
     <AndroidResource Include="Resources\layout\SelectWorkspaceFragmentCell.axml" />
     <AndroidResource Include="Resources\layout\ReportsFragmentItem.axml" />
-    <AndroidResource Include="Resources\layout\ReportsCalendarFragment.axml" />
     <AndroidResource Include="Resources\layout\ReportsCalendarFragmentDayCell.axml" />
     <AndroidResource Include="Resources\layout\ReportsCalendarFragmentPage.axml" />
     <AndroidResource Include="Resources\layout\ReportsCalendarShortcutCell.axml" />
@@ -1139,7 +1140,6 @@
     <AndroidResource Include="Resources\drawable\ic_stop.xml" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable\GrayBorderRoundedRectangle.xml" />
     <AndroidResource Include="Resources\layout\CalendarFragment.axml" />
     <AndroidResource Include="Resources\drawable\CalendarEntryBackground.xml" />
     <AndroidResource Include="Resources\layout\CalendarEntryCell.axml" />
@@ -1161,6 +1161,15 @@
       <Generator>MSBuild:UpdateGeneratedFiles</Generator>
       <SubType>Designer</SubType>
     </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\GrayBorderRoundedRectangleWithWhiteBackground.xml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\GrayBorderRoundedRectangle.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Import Project="..\packages\NETStandard.Library.2.0.0\build\netstandard2.0\NETStandard.Library.targets" Condition="Exists('..\packages\NETStandard.Library.2.0.0\build\netstandard2.0\NETStandard.Library.targets')" />

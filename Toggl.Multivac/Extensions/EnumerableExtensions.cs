@@ -118,5 +118,17 @@ namespace Toggl.Multivac.Extensions
 
             return self.Count() - 1;
         }
+
+        public static IEnumerable<T> ExceptElementAt<T>(this IEnumerable<T> collection, int index)
+        {
+            int currentIndex = 0;
+            foreach (var item in collection)
+            {
+                if (currentIndex != index)
+                    yield return item;
+
+                currentIndex++;
+            }
+        }
     }
 }

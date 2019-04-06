@@ -10,7 +10,7 @@ namespace Toggl.Giskard.Activities
 {
     public sealed partial class PomodoroEditWorkflowActivity : ReactiveActivity<PomodoroEditWorkflowViewModel>
     {
-        private SeekBar durationSeekBar;
+        private PomodoroDurationSeekbar durationSeekBar;
         private PomodoroWorkflowView workflowView;
         private EditText nameEditText;
 
@@ -28,7 +28,7 @@ namespace Toggl.Giskard.Activities
 
         protected override void InitializeViews()
         {
-            durationSeekBar = FindViewById<SeekBar>(DurationSeekBar);
+            durationSeekBar = FindViewById<PomodoroDurationSeekbar>(DurationSeekBar);
             workflowView = FindViewById<PomodoroWorkflowView>(WorkflowView);
 
             nameEditText = FindViewById<EditText>(NameEditText);

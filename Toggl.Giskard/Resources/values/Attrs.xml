@@ -15,4 +15,7 @@
             <enum name="userInteraction" value="2"/>
         </attr>
     </declare-styleable>
+    <declare-styleable name="PomodoroDurationSeekbar">
+        <attr name="allowedDurations" format="string" />
+    </declare-styleable>
 </resources>

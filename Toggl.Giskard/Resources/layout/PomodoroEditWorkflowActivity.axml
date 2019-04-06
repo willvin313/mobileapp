@@ -98,27 +98,48 @@
         android:layout_marginBottom="16dp"
         android:layout_marginTop="16dp"
         android:layout_width="match_parent"
-        android:layout_height="32dp" />
-    <Button
+        android:layout_height="40dp" />
+    <TextView
         android:id="@+id/AddSegmentButton"
+        android:text="Add Segment"
+        android:textSize="12sp"
+        android:textAllCaps="true"
+        android:letterSpacing="0.04"
+        android:background="@drawable/BlueButton"
+        android:textColor="#FFFFFF"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center_vertical|center"
+        android:layout_marginLeft="16dp"
         local:layout_constraintTop_toBottomOf="@id/WorkflowView"
         local:layout_constraintRight_toRightOf="parent"
-        android:text="Add Segment"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginRight="16dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <Button
+        android:layout_height="32dp" />
+    <TextView
         android:id="@+id/DeleteSegmentButton"
+        android:textSize="12sp"
+        android:textAllCaps="true"
+        android:letterSpacing="0.04"
         android:text="Delete segment"
+        android:background="@drawable/GrayBorderRoundedRectangle"
+        android:textColor="@color/defaultText"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center_vertical|center"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="8dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
         local:layout_constraintTop_toTopOf="@id/AddSegmentButton"
         local:layout_constraintRight_toLeftOf="@id/AddSegmentButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="32dp" />
     <View
         android:id="@+id/DefinitionBottomBorder"
         local:layout_constraintTop_toBottomOf="@id/AddSegmentButton"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:background="#CCC"
         android:layout_width="match_parent"
         android:layout_height="0.5dp" />
@@ -147,8 +168,9 @@
         android:textAllCaps="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
-    <android.support.v7.widget.AppCompatSeekBar
+    <toggl.giskard.views.PomodoroDurationSeekbar
         android:id="@+id/DurationSeekBar"
+		local:allowedDurations="1,2,3,4,5,6,7,8,9,10,15,20,25,30,35,40,45,50,55,60,70,80,90,100,110,120,150,180"
 		style="@style/Widget.AppCompat.SeekBar.Discrete"
         local:layout_constraintTop_toBottomOf="@id/DurationLabel"
         android:layout_marginTop="8dp"
@@ -181,8 +203,8 @@
         android:textAllCaps="true"
         android:letterSpacing="0.04"
         android:text="Work"
-        android:background="@drawable/GrayBorderRoundedRectangle"
-        android:textColor="@color/defaultText"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:textColor="#FFFFFF"
         android:fontFamily="sans-serif-medium"
         local:layout_constraintLeft_toLeftOf="parent"
         local:layout_constraintRight_toLeftOf="@+id/RestTypeButton"
@@ -199,7 +221,7 @@
         android:textAllCaps="true"
         android:letterSpacing="0.04"
         android:text="Rest"
-        android:background="@drawable/GrayBorderRoundedRectangle"
+        android:background="?attr/selectableItemBackgroundBorderless"
         android:textColor="@color/defaultText"
         android:fontFamily="sans-serif-medium"
         local:layout_constraintLeft_toRightOf="@id/WorkTypeButton"

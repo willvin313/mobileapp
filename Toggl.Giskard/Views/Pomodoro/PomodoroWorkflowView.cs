@@ -51,24 +51,25 @@ namespace Toggl.Giskard.Views.Pomodoro
 
         private int selectedIndex;
 
-        public PomodoroWorkflowItem SelectedWorkflowItem => items[SelectedSegmentIndex];
+        public PomodoroWorkflowItem SelectedWorkflowItem => items[SelectedWorkflowItemIndex];
 
-        public int SelectedSegmentIndex
+        public int SelectedWorkflowItemIndex
         {
             get => selectedIndex;
-            private set
+            set
             {
                 if (selectedIndex == value)
                     return;
 
                 selectedIndex = value;
 
-                SelectedSegmentChanged?.Invoke(this, new SelectedSegmentChangedEventArgs(selectedIndex, items[selectedIndex]));
+                var eventArgs = new SelectedWorkflowItemChangedEventArgs(items[selectedIndex], selectedIndex);
+                SelectedWorkflowItemIndexChanged?.Invoke(this, eventArgs);
                 Invalidate();
             }
         }
 
-        public event EventHandler<SelectedSegmentChangedEventArgs> SelectedSegmentChanged;
+        public event EventHandler<SelectedWorkflowItemChangedEventArgs> SelectedWorkflowItemIndexChanged;
 
         #region Constructors
 
@@ -132,7 +133,7 @@ namespace Toggl.Giskard.Views.Pomodoro
 
             Update(items);
 
-            SelectedSegmentIndex = 0;
+            SelectedWorkflowItemIndex = 0;
         }
 
         protected override void OnDraw(Canvas canvas)
@@ -154,7 +155,7 @@ namespace Toggl.Giskard.Views.Pomodoro
                 var textBounds = labelPaint.GetTextBounds(text);
 
                 var width = segmentsWidths[i];
-                var height = selectionMode >= SelectionMode.Manual && SelectedSegmentIndex != i
+                var height = selectionMode >= SelectionMode.Manual && SelectedWorkflowItemIndex != i
                     ? (int)(canvas.Height * verticalNonSelectedFactor)
                     : canvas.Height;
 
@@ -240,7 +241,7 @@ namespace Toggl.Giskard.Views.Pomodoro
                 if (!index.HasValue)
                     return base.OnTouchEvent(e);
 
-                SelectedSegmentIndex = index.Value;
+                SelectedWorkflowItemIndex = index.Value;
 
                 return true;
             }
@@ -270,17 +271,4 @@ namespace Toggl.Giskard.Views.Pomodoro
             Update(items);
         }
     }
-
-    public class SelectedSegmentChangedEventArgs : EventArgs
-    {
-        public SelectedSegmentChangedEventArgs(int index, PomodoroWorkflowItem workflowItem)
-        {
-            Index = index;
-            WorkflowItem = workflowItem;
-        }
-
-        public int Index { get; }
-        public PomodoroWorkflowItem WorkflowItem { get; }
-    }
-
 }

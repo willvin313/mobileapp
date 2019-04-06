@@ -49,5 +49,8 @@ namespace Toggl.Foundation.Extensions
             var signal = otherObservable.StartWith(Unit.Default);
             return observable.CombineLatest(signal, (t1, _) => t1);
         }
+
+        public static IObservable<T> WhereNotNull<T>(this IObservable<T?> observable) where T : struct
+            => observable.Where(item => item.HasValue).Select(item => item.Value);
     }
 }

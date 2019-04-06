@@ -15,12 +15,12 @@ namespace Toggl.Giskard.Extensions.Reactive
     {
         public static IObservable<int> SelectedIndex(this IReactive<PomodoroWorkflowView> reactive)
             => Observable
-            .FromEventPattern<SelectedSegmentChangedEventArgs>(e => reactive.Base.SelectedSegmentChanged += e, e => reactive.Base.SelectedSegmentChanged -= e)
-            .Select(args => ((PomodoroWorkflowView)args.Sender).SelectedSegmentIndex);
+            .FromEventPattern<SelectedWorkflowItemChangedEventArgs>(e => reactive.Base.SelectedWorkflowItemIndexChanged += e, e => reactive.Base.SelectedWorkflowItemIndexChanged -= e)
+            .Select(args => reactive.Base.SelectedWorkflowItemIndex);
 
         public static IObservable<PomodoroWorkflowItem> SelectedWorkflowItem(this IReactive<PomodoroWorkflowView> reactive)
             => Observable
-            .FromEventPattern<SelectedSegmentChangedEventArgs>(e => reactive.Base.SelectedSegmentChanged += e, e => reactive.Base.SelectedSegmentChanged -= e)
-            .Select(args => ((PomodoroWorkflowView)args.Sender).SelectedWorkflowItem);
+            .FromEventPattern<SelectedWorkflowItemChangedEventArgs>(e => reactive.Base.SelectedWorkflowItemIndexChanged += e, e => reactive.Base.SelectedWorkflowItemIndexChanged -= e)
+            .Select(args => reactive.Base.SelectedWorkflowItem);
     }
 }
