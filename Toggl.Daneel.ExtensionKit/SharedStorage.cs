@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using Foundation;
 using Toggl.Daneel.ExtensionKit.Analytics;
@@ -18,7 +18,7 @@ namespace Toggl.Daneel.ExtensionKit
         private SharedStorage()
         {
             var bundleId = NSBundle.MainBundle.BundleIdentifier;
-            if (bundleId.Contains("SiriExtension"))
+            if (bundleId.Contains("SiriExtension") || bundleId.Contains("ShareExtension"))
             {
                 bundleId = bundleId.Substring(0, bundleId.LastIndexOf("."));
             }
