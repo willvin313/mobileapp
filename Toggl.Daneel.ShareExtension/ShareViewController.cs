@@ -7,30 +7,17 @@ namespace Toggl.Daneel.ShareExtension
 {
     public partial class ShareViewController : SLComposeServiceViewController
     {
+        private const int maximumEntryLength = 3000;
         protected ShareViewController(IntPtr handle) : base(handle)
         {
             // Note: this .ctor should not contain any initialization logic.
         }
 
-        public override void DidReceiveMemoryWarning()
-        {
-            // Releases the view if it doesn't have a superview.
-            base.DidReceiveMemoryWarning();
-
-            // Release any cached data, images, etc that aren't in use.
-        }
-
-        public override void ViewDidLoad()
-        {
-            base.ViewDidLoad();
-
-            // Do any additional setup after loading the view.
-        }
-
         public override bool IsContentValid()
         {
-            // Do validation of contentText and/or NSExtensionContext attachments here
-            return true;
+            var remainingCharLength = maximumEntryLength - ContentText.Length;
+            CharactersRemaining = new NSNumber(remainingCharLength);
+            return remainingCharLength > 0;
         }
 
         public override void DidSelectPost()
