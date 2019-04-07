@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using Foundation;
 using Toggl.Daneel.ExtensionKit.Analytics;
@@ -22,7 +22,9 @@ namespace Toggl.Daneel.ExtensionKit
             {
                 bundleId = bundleId.Substring(0, bundleId.LastIndexOf("."));
             }
+            Console.WriteLine($"loading group.{bundleId}.extensions");
             userDefaults = new NSUserDefaults($"group.{bundleId}.extensions", NSUserDefaultsType.SuiteName);
+            Console.WriteLine($"Token {GetApiToken()}");
         }
 
         public static SharedStorage instance => new SharedStorage();
