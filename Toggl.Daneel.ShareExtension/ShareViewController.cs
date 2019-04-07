@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Foundation;
 using Social;
@@ -11,6 +11,12 @@ namespace Toggl.Daneel.ShareExtension
         protected ShareViewController(IntPtr handle) : base(handle)
         {
             // Note: this .ctor should not contain any initialization logic.
+        }
+
+        public override void ViewDidLoad()
+        {
+            base.ViewDidLoad();
+            NavigationController.NavigationBar.TopItem.RightBarButtonItem.Title = "Track";
         }
 
         public override bool IsContentValid()
