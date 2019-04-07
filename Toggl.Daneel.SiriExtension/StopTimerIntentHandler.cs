@@ -1,19 +1,16 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Reactive;
 using System.Reactive.Linq;
-using System.Reactive.Concurrency;
 using Toggl.Ultrawave;
-using Toggl.Ultrawave.Network;
 using Toggl.Daneel.Intents;
 using Foundation;
 using Toggl.Multivac.Models;
-using SiriExtension.Models;
 using SiriExtension.Exceptions;
 using Toggl.Daneel.ExtensionKit;
 using Toggl.Daneel.ExtensionKit.Analytics;
 using Toggl.Daneel.ExtensionKit.Extensions;
+using Toggl.Daneel.ExtensionKit.Models;
 
 namespace SiriExtension
 {
@@ -137,7 +134,7 @@ namespace SiriExtension
         {
             var duration = (long)(DateTime.Now - timeEntry.Start).TotalSeconds;
             return togglAPI.TimeEntries.Update(
-                TimeEntry.from(timeEntry).with(duration)
+                TimeEntry.from(timeEntry).With(duration)
             );
         }
 

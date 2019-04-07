@@ -56,6 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analytics\SiriTrackingEvent.cs" />
+    <Compile Include="Models\TimeEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SharedStorage.cs" />
     <Compile Include="Extensions\UserActivityExtensions.cs" />

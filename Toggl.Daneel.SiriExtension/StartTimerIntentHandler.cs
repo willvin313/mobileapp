@@ -1,12 +1,11 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Reactive.Linq;
 using Foundation;
-using SiriExtension.Models;
 using Toggl.Daneel.ExtensionKit;
 using Toggl.Daneel.ExtensionKit.Analytics;
 using Toggl.Daneel.ExtensionKit.Extensions;
+using Toggl.Daneel.ExtensionKit.Models;
 using Toggl.Daneel.Intents;
 using Toggl.Ultrawave;
 

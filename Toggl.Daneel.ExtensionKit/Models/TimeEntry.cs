@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Toggl.Multivac.Models;
 
-namespace SiriExtension.Models
+namespace Toggl.Daneel.ExtensionKit.Models
 {
-    public class TimeEntry : ITimeEntry
+    public class TimeEntry: ITimeEntry
     {
         public long WorkspaceId { get; }
         public long? ProjectId { get; }
@@ -54,21 +54,21 @@ namespace SiriExtension.Models
             );
         }
 
-        public TimeEntry with(long duration)
+        public TimeEntry With(long duration)
         {
             return new TimeEntry(
-                this.WorkspaceId,
-                this.ProjectId,
-                this.TaskId,
-                this.Billable,
-                this.Start,
+                WorkspaceId,
+                ProjectId,
+                TaskId,
+                Billable,
+                Start,
                 duration,
-                this.Description,
-                this.TagIds,
-                this.UserId,
-                this.Id,
-                this.ServerDeletedAt,
-                this.At
+                Description,
+                TagIds,
+                UserId,
+                Id,
+                ServerDeletedAt,
+                At
             );
         }
     }
