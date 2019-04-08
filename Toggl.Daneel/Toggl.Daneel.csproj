@@ -1807,7 +1807,7 @@
     <Compile Include="Presentation\IScrollableToTop.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Toggl.Foundation.MvvmCross\Toggl.Foundation.UI.csproj">
+    <ProjectReference Include="..\Toggl.Foundation.UI\Toggl.Foundation.UI.csproj">
       <Project>{CB2B0786-217F-455A-9349-0FC69468D3B6}</Project>
       <Name>Toggl.Foundation.UI</Name>
     </ProjectReference>

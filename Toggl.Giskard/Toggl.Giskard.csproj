@@ -1084,7 +1084,7 @@
       <Project>{09D75C0B-3367-4678-97EF-6EADE64AF09C}</Project>
       <Name>Toggl.Foundation</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Toggl.Foundation.MvvmCross\Toggl.Foundation.UI.csproj">
+    <ProjectReference Include="..\Toggl.Foundation.UI\Toggl.Foundation.UI.csproj">
       <Project>{CB2B0786-217F-455A-9349-0FC69468D3B6}</Project>
       <Name>Toggl.Foundation.UI</Name>
     </ProjectReference>
