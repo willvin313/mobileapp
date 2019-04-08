@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.ViewModels;
 using Toggl.Foundation.Tests.TestExtensions;
 using Toggl.Foundation.Tests.Generators;
 using Xunit;

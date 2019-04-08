@@ -2,7 +2,7 @@
 using Toggl.Multivac.Extensions;
 using static Toggl.Foundation.Helper.Constants;
 
-namespace Toggl.Foundation.MvvmCross.Extensions
+namespace Toggl.Foundation.UI.Extensions
 {
     public static class StringExtensions
     {

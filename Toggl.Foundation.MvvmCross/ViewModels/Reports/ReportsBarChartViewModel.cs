@@ -10,7 +10,7 @@ using Toggl.Multivac.Extensions;
 using Toggl.Multivac.Models.Reports;
 using static System.Math;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels.Reports
+namespace Toggl.Foundation.UI.ViewModels.Reports
 {
     public sealed class ReportsBarChartViewModel : MvxViewModel
     {

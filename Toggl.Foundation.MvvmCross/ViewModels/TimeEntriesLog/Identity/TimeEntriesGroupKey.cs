@@ -1,6 +1,6 @@
 using Toggl.Multivac;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog.Identity
+namespace Toggl.Foundation.UI.ViewModels.TimeEntriesLog.Identity
 {
     internal sealed class TimeEntriesGroupKey : IMainLogKey
     {

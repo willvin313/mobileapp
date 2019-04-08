@@ -9,7 +9,7 @@ using Android.Support.V7.Widget;
 using Android.Views;
 using Toggl.Giskard.ViewHolders;
 using Toggl.Multivac.Extensions;
-using Toggl.Foundation.MvvmCross.Interfaces;
+using Toggl.Foundation.UI.Interfaces;
 using Handler = Android.OS.Handler;
 using Toggl.Giskard.Adapters.DiffingStrategies;
 

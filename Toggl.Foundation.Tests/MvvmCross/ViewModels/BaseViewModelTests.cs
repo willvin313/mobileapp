@@ -7,7 +7,7 @@ using NSubstitute;
 using Toggl.Foundation.Autocomplete;
 using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.Login;
-using Toggl.Foundation.MvvmCross.Services;
+using Toggl.Foundation.UI.Services;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Suggestions;
 using Toggl.Foundation.Sync;

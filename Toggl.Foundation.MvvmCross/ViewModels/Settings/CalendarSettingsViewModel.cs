@@ -6,15 +6,15 @@ using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using MvvmCross.Navigation;
 using Toggl.Foundation.Interactors;
-using Toggl.Foundation.MvvmCross.Extensions;
-using Toggl.Foundation.MvvmCross.Services;
-using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
+using Toggl.Foundation.UI.Extensions;
+using Toggl.Foundation.UI.Services;
+using Toggl.Foundation.UI.ViewModels.Calendar;
 using Toggl.Foundation.Services;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels.Settings
+namespace Toggl.Foundation.UI.ViewModels.Settings
 {
     [Preserve(AllMembers = true)]
     public sealed class CalendarSettingsViewModel : SelectUserCalendarsViewModelBase

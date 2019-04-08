@@ -9,7 +9,7 @@ using Toggl.Multivac.Extensions;
 using CalendarItemGroup = System.Collections.Generic.List<(Toggl.Foundation.Calendar.CalendarItem Item, int Index)>;
 using CalendarItemGroups = System.Collections.Generic.List<System.Collections.Generic.List<(Toggl.Foundation.Calendar.CalendarItem Item, int Index)>>;
 
-namespace Toggl.Foundation.MvvmCross.Calendar
+namespace Toggl.Foundation.UI.Calendar
 {
     public sealed class CalendarLayoutCalculator
     {

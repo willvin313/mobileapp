@@ -2,10 +2,10 @@
 using System.Reactive.Linq;
 using MvvmCross.Plugin;
 using MvvmCross.ViewModels;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.ViewModels;
 using Toggl.Multivac;
 
-namespace Toggl.Foundation.MvvmCross
+namespace Toggl.Foundation.UI
 {
     public sealed class App<TFirstViewModelWhenNotLoggedIn> : MvxApplication
         where TFirstViewModelWhenNotLoggedIn : MvxViewModel

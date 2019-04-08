@@ -12,9 +12,9 @@ using NUnit.Framework;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.Exceptions;
 using Toggl.Foundation.Interactors;
-using Toggl.Foundation.MvvmCross;
-using Toggl.Foundation.MvvmCross.Parameters;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI;
+using Toggl.Foundation.UI.Parameters;
+using Toggl.Foundation.UI.ViewModels;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Multivac;
 using Toggl.Multivac.Models;
@@ -22,7 +22,7 @@ using Toggl.PrimeRadiant.Settings;
 using Toggl.Ultrawave.Exceptions;
 using Toggl.Ultrawave.Network;
 using Xunit;
-using static Toggl.Foundation.MvvmCross.ViewModels.SignupViewModel;
+using static Toggl.Foundation.UI.ViewModels.SignupViewModel;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels
 {

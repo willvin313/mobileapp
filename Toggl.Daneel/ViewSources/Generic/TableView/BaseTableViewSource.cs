@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using CoreGraphics;
 using Foundation;
-using Toggl.Foundation.MvvmCross.Collections;
+using Toggl.Foundation.UI.Collections;
 using UIKit;
 
 namespace Toggl.Daneel.ViewSources

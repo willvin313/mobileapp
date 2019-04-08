@@ -1,7 +1,7 @@
-﻿using Toggl.Foundation.MvvmCross.Interfaces;
+﻿using Toggl.Foundation.UI.Interfaces;
 using Toggl.Multivac;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels.Selectable
+namespace Toggl.Foundation.UI.ViewModels.Selectable
 {
     public sealed class SelectableUserCalendarViewModel : IDiffableByIdentifier<SelectableUserCalendarViewModel>
     {

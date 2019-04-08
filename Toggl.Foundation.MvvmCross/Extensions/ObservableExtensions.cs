@@ -5,7 +5,7 @@ using Toggl.Foundation.Exceptions;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 
-namespace Toggl.Foundation.MvvmCross.Extensions
+namespace Toggl.Foundation.UI.Extensions
 {
     public static class ObservableExtensions
     {

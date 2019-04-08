@@ -7,9 +7,9 @@ using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Daneel.ViewSources;
-using Toggl.Foundation.MvvmCross.Extensions;
-using Toggl.Foundation.MvvmCross.ViewModels;
-using Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar;
+using Toggl.Foundation.UI.Extensions;
+using Toggl.Foundation.UI.ViewModels;
+using Toggl.Foundation.UI.ViewModels.ReportsCalendar;
 using Toggl.Multivac.Extensions;
 using UIKit;
 

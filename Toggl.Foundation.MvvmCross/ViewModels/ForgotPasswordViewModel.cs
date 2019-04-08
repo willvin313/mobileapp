@@ -7,13 +7,13 @@ using MvvmCross.ViewModels;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Login;
-using Toggl.Foundation.MvvmCross.Parameters;
+using Toggl.Foundation.UI.Parameters;
 using Toggl.Foundation.Services;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.Ultrawave.Exceptions;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels
+namespace Toggl.Foundation.UI.ViewModels
 {
     [Preserve(AllMembers = true)]
     public sealed class ForgotPasswordViewModel : MvxViewModel<EmailParameter, EmailParameter>

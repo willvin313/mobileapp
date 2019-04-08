@@ -14,7 +14,7 @@ using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels
+namespace Toggl.Foundation.UI.ViewModels
 {
     [Preserve(AllMembers = true)]
     public sealed class NoWorkspaceViewModel : MvxViewModelResult<Unit>

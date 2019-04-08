@@ -16,12 +16,12 @@ using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Models.Interfaces;
-using Toggl.Foundation.MvvmCross.Extensions;
-using Toggl.Foundation.MvvmCross.Helper;
-using Toggl.Foundation.MvvmCross.Parameters;
-using Toggl.Foundation.MvvmCross.Services;
-using Toggl.Foundation.MvvmCross.ViewModels.Hints;
-using Toggl.Foundation.MvvmCross.ViewModels.Reports;
+using Toggl.Foundation.UI.Extensions;
+using Toggl.Foundation.UI.Helper;
+using Toggl.Foundation.UI.Parameters;
+using Toggl.Foundation.UI.Services;
+using Toggl.Foundation.UI.ViewModels.Hints;
+using Toggl.Foundation.UI.ViewModels.Reports;
 using Toggl.Foundation.Reports;
 using Toggl.Foundation.Services;
 using Toggl.Multivac;
@@ -29,11 +29,11 @@ using Toggl.Multivac.Extensions;
 using Toggl.Multivac.Models.Reports;
 using Toggl.Ultrawave.Exceptions;
 using CommonFunctions = Toggl.Multivac.Extensions.CommonFunctions;
-using Color = Toggl.Foundation.MvvmCross.Helper.Color;
+using Color = Toggl.Foundation.UI.Helper.Color;
 
 [assembly: MvxNavigation(typeof(ReportsViewModel), ApplicationUrls.Reports)]
 
-namespace Toggl.Foundation.MvvmCross.ViewModels.Reports
+namespace Toggl.Foundation.UI.ViewModels.Reports
 {
     [Preserve(AllMembers = true)]
     public sealed class ReportsViewModel : MvxViewModel<ReportPeriod>

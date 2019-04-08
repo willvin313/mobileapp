@@ -9,9 +9,9 @@ using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Diagnostics;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Login;
-using Toggl.Foundation.MvvmCross.Services;
-using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
-using Toggl.Foundation.MvvmCross.ViewModels.Reports;
+using Toggl.Foundation.UI.Services;
+using Toggl.Foundation.UI.ViewModels.Calendar;
+using Toggl.Foundation.UI.ViewModels.Reports;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Suggestions;
 using Toggl.Foundation.Sync;
@@ -19,7 +19,7 @@ using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels
+namespace Toggl.Foundation.UI.ViewModels
 {
     [Preserve(AllMembers = true)]
     public sealed class MainTabBarViewModel : MvxViewModel

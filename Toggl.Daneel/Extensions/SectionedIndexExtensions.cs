@@ -1,5 +1,5 @@
 ﻿using Foundation;
-using Toggl.Foundation.MvvmCross.Collections;
+using Toggl.Foundation.UI.Collections;
 
 namespace Toggl.Daneel.Extensions
 {

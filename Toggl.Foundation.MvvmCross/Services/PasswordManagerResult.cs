@@ -1,6 +1,6 @@
 ﻿using Toggl.Multivac;
 
-namespace Toggl.Foundation.MvvmCross.Services
+namespace Toggl.Foundation.UI.Services
 {
     public sealed class PasswordManagerResult
     {

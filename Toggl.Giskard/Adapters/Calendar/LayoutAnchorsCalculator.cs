@@ -5,7 +5,7 @@ using System.Linq;
 using Android.Content;
 using Android.Util;
 using Toggl.Foundation.Calendar;
-using Toggl.Foundation.MvvmCross.Calendar;
+using Toggl.Foundation.UI.Calendar;
 using Toggl.Giskard.Extensions;
 
 namespace Toggl.Giskard.Adapters.Calendar

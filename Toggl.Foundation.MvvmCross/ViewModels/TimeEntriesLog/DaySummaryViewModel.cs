@@ -1,9 +1,9 @@
 ﻿using System;
-using Toggl.Foundation.MvvmCross.Collections;
-using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog.Identity;
+using Toggl.Foundation.UI.Collections;
+using Toggl.Foundation.UI.ViewModels.TimeEntriesLog.Identity;
 using Toggl.Multivac;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog
+namespace Toggl.Foundation.UI.ViewModels.TimeEntriesLog
 {
     public sealed class DaySummaryViewModel : IDiffable<IMainLogKey>
     {

@@ -11,7 +11,7 @@ using Toggl.Multivac.Extensions;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Services;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels
+namespace Toggl.Foundation.UI.ViewModels
 {
     [Preserve(AllMembers = true)]
     public sealed class SelectCountryViewModel : MvxViewModel<long?, long?>

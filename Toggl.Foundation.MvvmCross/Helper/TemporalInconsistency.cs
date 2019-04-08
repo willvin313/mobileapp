@@ -1,4 +1,4 @@
-namespace Toggl.Foundation.MvvmCross.Helper
+namespace Toggl.Foundation.UI.Helper
 {
     public enum TemporalInconsistency
     {

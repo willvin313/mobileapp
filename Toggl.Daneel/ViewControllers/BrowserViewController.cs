@@ -4,8 +4,8 @@ using MvvmCross.Platforms.Ios.Views;
 using MvvmCross.Platforms.Ios.Presenters.Attributes;
 using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Foundation;
-using Toggl.Foundation.MvvmCross.Helper;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.Helper;
+using Toggl.Foundation.UI.ViewModels;
 using UIKit;
 using WebKit;
 

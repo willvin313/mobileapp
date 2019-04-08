@@ -4,8 +4,8 @@ using Android.Graphics.Drawables;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using Toggl.Foundation.MvvmCross.Parameters;
-using Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar.QuickSelectShortcuts;
+using Toggl.Foundation.UI.Parameters;
+using Toggl.Foundation.UI.ViewModels.ReportsCalendar.QuickSelectShortcuts;
 
 namespace Toggl.Giskard.ViewHolders
 {

@@ -9,15 +9,15 @@ using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 using MvvmCross.UI;
 using Toggl.Foundation.Analytics;
-using Toggl.Foundation.MvvmCross.Extensions;
+using Toggl.Foundation.UI.Extensions;
 using Toggl.Foundation.Services;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
 using Math = System.Math;
-using Color = Toggl.Foundation.MvvmCross.Helper.Color;
+using Color = Toggl.Foundation.UI.Helper.Color;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels
+namespace Toggl.Foundation.UI.ViewModels
 {
     [Preserve(AllMembers = true)]
     public sealed class OnboardingViewModel : MvxViewModel

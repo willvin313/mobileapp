@@ -1,7 +1,7 @@
 ﻿using System;
 using Foundation;
 using Toggl.Daneel.Extensions;
-using Toggl.Foundation.MvvmCross.ViewModels.Selectable;
+using Toggl.Foundation.UI.ViewModels.Selectable;
 using UIKit;
 
 namespace Toggl.Daneel.Cells.Calendar

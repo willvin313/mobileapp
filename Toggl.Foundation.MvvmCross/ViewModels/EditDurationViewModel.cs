@@ -7,17 +7,17 @@ using MvvmCross.ViewModels;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Extensions;
-using Toggl.Foundation.MvvmCross.Extensions;
-using Toggl.Foundation.MvvmCross.Helper;
-using Toggl.Foundation.MvvmCross.Parameters;
-using Toggl.Foundation.MvvmCross.Transformations;
+using Toggl.Foundation.UI.Extensions;
+using Toggl.Foundation.UI.Helper;
+using Toggl.Foundation.UI.Parameters;
+using Toggl.Foundation.UI.Transformations;
 using Toggl.Foundation.Services;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using static Toggl.Foundation.Helper.Constants;
-using static Toggl.Foundation.MvvmCross.Helper.TemporalInconsistency;
+using static Toggl.Foundation.UI.Helper.TemporalInconsistency;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels
+namespace Toggl.Foundation.UI.ViewModels
 {
     [Preserve(AllMembers = true)]
     public sealed class EditDurationViewModel : MvxViewModel<EditDurationParameters, DurationParameter>

@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using MvvmCross.UI;
 using NSubstitute;
-using Toggl.Foundation.MvvmCross.Helper;
-using Toggl.Foundation.MvvmCross.Parameters;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.Helper;
+using Toggl.Foundation.UI.Parameters;
+using Toggl.Foundation.UI.ViewModels;
 using Xunit;
 using System.Reactive.Linq;
-using Toggl.Foundation.MvvmCross;
+using Toggl.Foundation.UI;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Tests.Generators;
 

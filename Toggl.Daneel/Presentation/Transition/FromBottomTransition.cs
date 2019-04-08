@@ -2,7 +2,7 @@
 using Foundation;
 using Toggl.Daneel.Extensions;
 using UIKit;
-using static Toggl.Foundation.MvvmCross.Helper.Animation;
+using static Toggl.Foundation.UI.Helper.Animation;
 
 namespace Toggl.Daneel.Presentation.Transition
 {

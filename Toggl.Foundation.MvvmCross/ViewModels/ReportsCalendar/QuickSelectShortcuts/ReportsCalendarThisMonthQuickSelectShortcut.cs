@@ -1,9 +1,9 @@
 ﻿using System;
 using Toggl.Foundation.Analytics;
-using Toggl.Foundation.MvvmCross.Parameters;
+using Toggl.Foundation.UI.Parameters;
 using Toggl.Foundation.Services;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar.QuickSelectShortcuts
+namespace Toggl.Foundation.UI.ViewModels.ReportsCalendar.QuickSelectShortcuts
 {
     public sealed class ReportsCalendarThisMonthQuickSelectShortcut
         : ReportsCalendarBaseQuickSelectShortcut

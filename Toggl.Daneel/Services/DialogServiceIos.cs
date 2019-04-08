@@ -4,7 +4,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Toggl.Foundation;
-using Toggl.Foundation.MvvmCross.Services;
+using Toggl.Foundation.UI.Services;
 using Toggl.Multivac;
 using UIKit;
 

@@ -1,6 +1,6 @@
 ﻿using System;
 using Foundation;
-using Toggl.Foundation.MvvmCross.Services;
+using Toggl.Foundation.UI.Services;
 using UIKit;
 
 namespace Toggl.Daneel.Services

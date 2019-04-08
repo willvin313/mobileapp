@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Toggl.Multivac;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar
+namespace Toggl.Foundation.UI.ViewModels.ReportsCalendar
 {
     public sealed class ReportsCalendarPageViewModel
     {

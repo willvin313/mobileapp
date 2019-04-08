@@ -7,7 +7,7 @@ using Android.Util;
 using Android.Widget;
 using MvvmCross.Plugin.Color.Platforms.Android;
 using Toggl.Giskard.Extensions;
-using static Toggl.Foundation.MvvmCross.Helper.Color;
+using static Toggl.Foundation.UI.Helper.Color;
 
 namespace Toggl.Giskard.Views
 {

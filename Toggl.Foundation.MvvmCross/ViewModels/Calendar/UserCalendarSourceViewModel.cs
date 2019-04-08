@@ -1,7 +1,7 @@
 ﻿using System;
-using Toggl.Foundation.MvvmCross.Interfaces;
+using Toggl.Foundation.UI.Interfaces;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
+namespace Toggl.Foundation.UI.ViewModels.Calendar
 {
     public sealed class UserCalendarSourceViewModel : IDiffableByIdentifier<UserCalendarSourceViewModel>
     {

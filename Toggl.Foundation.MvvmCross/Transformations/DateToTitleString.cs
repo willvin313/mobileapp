@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace Toggl.Foundation.MvvmCross.Transformations
+namespace Toggl.Foundation.UI.Transformations
 {
     public sealed class DateToTitleString
     {

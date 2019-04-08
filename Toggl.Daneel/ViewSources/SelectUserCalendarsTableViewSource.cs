@@ -3,9 +3,9 @@ using System.Collections.Immutable;
 using Foundation;
 using Toggl.Daneel.Cells;
 using Toggl.Daneel.Cells.Calendar;
-using Toggl.Foundation.MvvmCross.Collections;
-using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
-using Toggl.Foundation.MvvmCross.ViewModels.Selectable;
+using Toggl.Foundation.UI.Collections;
+using Toggl.Foundation.UI.ViewModels.Calendar;
+using Toggl.Foundation.UI.ViewModels.Selectable;
 using UIKit;
 
 namespace Toggl.Daneel.ViewSources

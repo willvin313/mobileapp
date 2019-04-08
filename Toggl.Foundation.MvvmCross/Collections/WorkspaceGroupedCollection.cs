@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using MvvmCross.ViewModels;
 using Toggl.Multivac;
 
-namespace Toggl.Foundation.MvvmCross.Collections
+namespace Toggl.Foundation.UI.Collections
 {
     [Preserve(AllMembers = true)]
     [Obsolete("We are moving into using CollectionSection and per platform diffing")]

@@ -4,7 +4,7 @@ using System.Linq;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Multivac;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog
+namespace Toggl.Foundation.UI.ViewModels.TimeEntriesLog
 {
     public sealed class GroupId : IEquatable<GroupId>
     {

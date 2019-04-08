@@ -2,7 +2,7 @@
 using CoreGraphics;
 using Toggl.PrimeRadiant.Onboarding;
 using UIKit;
-using Toggl.Foundation.MvvmCross.Helper;
+using Toggl.Foundation.UI.Helper;
 using Toggl.PrimeRadiant.Settings;
 using Toggl.PrimeRadiant.Extensions;
 using System.Reactive.Linq;

@@ -1,10 +1,10 @@
 using System;
 using System.Reactive.Linq;
 using CoreGraphics;
-using Toggl.Foundation.MvvmCross.Reactive;
+using Toggl.Foundation.UI.Reactive;
 using System.Reactive;
 using System.Reactive.Linq;
-using Toggl.Foundation.MvvmCross.Reactive;
+using Toggl.Foundation.UI.Reactive;
 using Toggl.Multivac.Extensions;
 using UIKit;
 

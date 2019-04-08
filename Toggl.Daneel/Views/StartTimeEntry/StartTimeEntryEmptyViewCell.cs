@@ -3,7 +3,7 @@ using Foundation;
 using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Daneel.Cells;
 using Toggl.Foundation.Autocomplete.Suggestions;
-using Toggl.Foundation.MvvmCross.Helper;
+using Toggl.Foundation.UI.Helper;
 using UIKit;
 
 namespace Toggl.Daneel.Views

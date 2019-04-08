@@ -8,7 +8,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using Toggl.Foundation.MvvmCross.Interfaces;
+using Toggl.Foundation.UI.Interfaces;
 
 namespace Toggl.Giskard.Adapters.DiffingStrategies
 {

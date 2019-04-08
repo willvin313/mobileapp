@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Toggl.Foundation.MvvmCross.Collections.Diffing
+namespace Toggl.Foundation.UI.Collections.Diffing
 {
     public sealed class Diffing<TSection, THeader, TElement, TKey>
         where TKey : IEquatable<TKey>

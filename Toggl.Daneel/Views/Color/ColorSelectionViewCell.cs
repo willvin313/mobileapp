@@ -2,7 +2,7 @@
 using Foundation;
 using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Daneel.Cells;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.ViewModels;
 using UIKit;
 
 namespace Toggl.Daneel.Views

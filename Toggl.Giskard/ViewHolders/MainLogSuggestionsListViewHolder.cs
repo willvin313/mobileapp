@@ -7,7 +7,7 @@ using Android.Runtime;
 using Android.Support.V7.Widget;
 using Android.Views;
 using Android.Widget;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.ViewModels;
 using Toggl.Foundation.Suggestions;
 using Toggl.Giskard.Adapters;
 using Toggl.Giskard.Extensions;

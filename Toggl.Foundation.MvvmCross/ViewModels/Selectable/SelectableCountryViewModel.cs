@@ -1,9 +1,9 @@
 ﻿using System;
-using Toggl.Foundation.MvvmCross.Interfaces;
+using Toggl.Foundation.UI.Interfaces;
 using Toggl.Multivac;
 using Toggl.Multivac.Models;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels
+namespace Toggl.Foundation.UI.ViewModels
 {
     [Preserve(AllMembers = true)]
     public sealed class SelectableCountryViewModel : IDiffableByIdentifier<SelectableCountryViewModel>

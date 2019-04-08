@@ -10,8 +10,8 @@ using Toggl.Foundation.DataSources;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Interactors.UserAccess;
 using Toggl.Foundation.Login;
-using Toggl.Foundation.MvvmCross.Extensions;
-using Toggl.Foundation.MvvmCross.Services;
+using Toggl.Foundation.UI.Extensions;
+using Toggl.Foundation.UI.Services;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Sync;
 using Toggl.Multivac;
@@ -19,7 +19,7 @@ using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
 using Toggl.Ultrawave.Exceptions;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels
+namespace Toggl.Foundation.UI.ViewModels
 {
     [Preserve(AllMembers = true)]
     public sealed class TokenResetViewModel : MvxViewModel

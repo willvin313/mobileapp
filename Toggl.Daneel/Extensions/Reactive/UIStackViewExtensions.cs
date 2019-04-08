@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Toggl.Foundation.MvvmCross.Reactive;
+using Toggl.Foundation.UI.Reactive;
 using Toggl.Multivac.Extensions;
 using UIKit;
 

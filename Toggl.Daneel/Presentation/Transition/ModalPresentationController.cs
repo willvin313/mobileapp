@@ -40,7 +40,7 @@ namespace Toggl.Daneel.Presentation.Transition
 
         private readonly UIView dimmingView = new UIView
         {
-            BackgroundColor = Foundation.MvvmCross.Helper.Color.ModalDialog.BackgroundOverlay.ToNativeColor(),
+            BackgroundColor = Foundation.UI.Helper.Color.ModalDialog.BackgroundOverlay.ToNativeColor(),
             Alpha = 0
         };
 

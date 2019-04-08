@@ -8,7 +8,7 @@ using FluentAssertions;
 using NSubstitute;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.Analytics;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.ViewModels;
 using Toggl.Foundation.Reports;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Foundation.Tests.Mocks;
@@ -16,7 +16,7 @@ using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Xunit;
 using Microsoft.Reactive.Testing;
-using Toggl.Foundation.MvvmCross.ViewModels.Reports;
+using Toggl.Foundation.UI.ViewModels.Reports;
 using Toggl.Foundation.Tests.TestExtensions;
 using Toggl.Foundation.Interactors;
 

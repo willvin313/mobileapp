@@ -4,7 +4,7 @@ using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using EventKit;
 using Foundation;
-using Toggl.Foundation.MvvmCross.Services;
+using Toggl.Foundation.UI.Services;
 using UIKit;
 using UserNotifications;
 

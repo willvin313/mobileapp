@@ -6,7 +6,7 @@ using CoreGraphics;
 using Foundation;
 using MvvmCross.UI;
 using Toggl.Daneel.Views;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.ViewModels;
 using UIKit;
 
 namespace Toggl.Daneel.ViewSources

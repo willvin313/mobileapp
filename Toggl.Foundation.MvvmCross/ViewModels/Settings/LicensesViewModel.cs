@@ -5,7 +5,7 @@ using MvvmCross.ViewModels;
 using Toggl.Foundation.Services;
 using Toggl.Multivac;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels
+namespace Toggl.Foundation.UI.ViewModels
 {
     [Preserve(AllMembers = true)]
     public sealed class LicensesViewModel : MvxViewModel

@@ -3,7 +3,7 @@ using CoreGraphics;
 using Foundation;
 using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Daneel.Extensions;
-using Toggl.Foundation.MvvmCross.ViewModels.Reports;
+using Toggl.Foundation.UI.ViewModels.Reports;
 using UIKit;
 using System.Reactive.Disposables;
 using Toggl.Daneel.Extensions.Reactive;
@@ -19,7 +19,7 @@ using System.Reactive;
 using Toggl.Daneel.Cells;
 using Toggl.Foundation;
 using Toggl.Foundation.Extensions;
-using Color = Toggl.Foundation.MvvmCross.Helper.Color;
+using Color = Toggl.Foundation.UI.Helper.Color;
 
 namespace Toggl.Daneel.Views.Reports
 {
@@ -110,8 +110,8 @@ namespace Toggl.Daneel.Views.Reports
 
             var totalDurationColorObservable = Item.TotalTimeIsZeroObservable
                 .Select(isZero => isZero
-                    ? Foundation.MvvmCross.Helper.Color.Reports.Disabled.ToNativeColor()
-                    : Foundation.MvvmCross.Helper.Color.Reports.TotalTimeActivated.ToNativeColor());
+                    ? Foundation.UI.Helper.Color.Reports.Disabled.ToNativeColor()
+                    : Foundation.UI.Helper.Color.Reports.TotalTimeActivated.ToNativeColor());
 
             totalDurationColorObservable
                 .Subscribe(TotalDurationGraph.Rx().TintColor())

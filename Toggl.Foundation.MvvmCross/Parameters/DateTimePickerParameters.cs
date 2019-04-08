@@ -2,7 +2,7 @@
 using Toggl.Multivac;
 using static Toggl.Foundation.Helper.Constants;
 
-namespace Toggl.Foundation.MvvmCross.Parameters
+namespace Toggl.Foundation.UI.Parameters
 {
     [Preserve(AllMembers = true)]
     public sealed class DateTimePickerParameters

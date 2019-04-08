@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Toggl.Foundation.MvvmCross.Collections
+namespace Toggl.Foundation.UI.Collections
 {
     public class AnimatableSectionModel<THeader, TItem, TKey> : IAnimatableSectionModel<THeader, TItem, TKey>
         where TKey : IEquatable<TKey>

@@ -2,7 +2,7 @@
 using Android.Content;
 using Android.Support.V4.Content;
 using Android.Widget;
-using Toggl.Foundation.MvvmCross.Reactive;
+using Toggl.Foundation.UI.Reactive;
 
 namespace Toggl.Giskard.Extensions.Reactive
 {

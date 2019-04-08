@@ -6,7 +6,7 @@ using FluentAssertions;
 using NSubstitute;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Models;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.ViewModels;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Foundation.Tests.Mocks;
 using Toggl.PrimeRadiant.Models;

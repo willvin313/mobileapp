@@ -5,9 +5,9 @@ using MvvmCross.Platforms.Ios.Presenters.Attributes;
 using MvvmCross.Platforms.Ios.Views;
 using MvvmCross.ViewModels;
 using Toggl.Daneel.Presentation;
-using Toggl.Foundation.MvvmCross.ViewModels;
-using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
-using Toggl.Foundation.MvvmCross.ViewModels.Reports;
+using Toggl.Foundation.UI.ViewModels;
+using Toggl.Foundation.UI.ViewModels.Calendar;
+using Toggl.Foundation.UI.ViewModels.Reports;
 using UIKit;
 
 namespace Toggl.Daneel.ViewControllers

@@ -8,7 +8,7 @@ using Android.OS;
 using Android.Views;
 using MvvmCross.Binding.BindingContext;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.ViewModels;
 using Toggl.Giskard.Extensions.Reactive;
 using Toggl.Multivac.Extensions;
 using Toggl.Ultrawave.Exceptions;

@@ -13,7 +13,7 @@ using Toggl.PrimeRadiant.Settings;
 using Toggl.Foundation.Extensions;
 using Toggl.Foundation.Services;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels
+namespace Toggl.Foundation.UI.ViewModels
 {
     [Preserve(AllMembers = true)]
     public sealed class SuggestionsViewModel : MvxViewModel

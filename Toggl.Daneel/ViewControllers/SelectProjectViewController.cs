@@ -2,8 +2,8 @@
 using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Daneel.ViewSources;
-using Toggl.Foundation.MvvmCross.Helper;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.Helper;
+using Toggl.Foundation.UI.ViewModels;
 using Toggl.Daneel.Extensions.Reactive;
 using UIKit;
 using System;

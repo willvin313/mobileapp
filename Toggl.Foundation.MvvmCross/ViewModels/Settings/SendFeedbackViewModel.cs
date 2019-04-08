@@ -5,13 +5,13 @@ using System.Reactive.Subjects;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 using Toggl.Foundation.Interactors;
-using Toggl.Foundation.MvvmCross.Extensions;
-using Toggl.Foundation.MvvmCross.Services;
+using Toggl.Foundation.UI.Extensions;
+using Toggl.Foundation.UI.Services;
 using Toggl.Foundation.Services;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels
+namespace Toggl.Foundation.UI.ViewModels
 {
     [Preserve(AllMembers = true)]
     public sealed class SendFeedbackViewModel : MvxViewModelResult<bool>

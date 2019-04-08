@@ -3,7 +3,7 @@ using MvvmCross.Navigation;
 using NSubstitute;
 using Toggl.Foundation.Analytics;
 using Toggl.Foundation.DataSources;
-using Toggl.Foundation.MvvmCross.Services;
+using Toggl.Foundation.UI.Services;
 using Toggl.Foundation.Services;
 using Toggl.Foundation.Sync;
 using Toggl.PrimeRadiant;

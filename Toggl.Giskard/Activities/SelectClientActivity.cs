@@ -6,7 +6,7 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Support.V7.Widget;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.ViewModels;
 using Toggl.Giskard.Adapters;
 using Toggl.Giskard.Extensions.Reactive;
 using Toggl.Multivac.Extensions;

@@ -5,8 +5,8 @@ using System.Reactive.Subjects;
 using CoreGraphics;
 using Foundation;
 using Toggl.Daneel.Views.Reports;
-using Toggl.Foundation.MvvmCross.Parameters;
-using Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar.QuickSelectShortcuts;
+using Toggl.Foundation.UI.Parameters;
+using Toggl.Foundation.UI.ViewModels.ReportsCalendar.QuickSelectShortcuts;
 using Toggl.Multivac;
 using UIKit;
 

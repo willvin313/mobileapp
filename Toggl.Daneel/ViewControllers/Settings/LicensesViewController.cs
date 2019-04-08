@@ -3,8 +3,8 @@ using MvvmCross.Platforms.Ios.Views;
 using Toggl.Daneel.Cells.Settings;
 using Toggl.Daneel.ViewSources.Generic.TableView;
 using Toggl.Foundation;
-using Toggl.Foundation.MvvmCross.Collections;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.Collections;
+using Toggl.Foundation.UI.ViewModels;
 using Toggl.Multivac;
 using UIKit;
 

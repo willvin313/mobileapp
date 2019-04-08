@@ -1,7 +1,7 @@
 ﻿using System;
 using MvvmCross.ViewModels;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels.Hints
+namespace Toggl.Foundation.UI.ViewModels.Hints
 {
     public sealed class ToggleReportsCalendarVisibilityHint : MvxPresentationHint
     {

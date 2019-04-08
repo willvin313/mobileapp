@@ -1,6 +1,6 @@
 ﻿using System;
 using Foundation;
-using Toggl.Foundation.MvvmCross.Reactive;
+using Toggl.Foundation.UI.Reactive;
 using UIKit;
 
 namespace Toggl.Daneel.Extensions.Reactive

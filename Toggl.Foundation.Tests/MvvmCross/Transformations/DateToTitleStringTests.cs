@@ -2,7 +2,7 @@
 using System.Globalization;
 using FluentAssertions;
 using FsCheck;
-using Toggl.Foundation.MvvmCross.Transformations;
+using Toggl.Foundation.UI.Transformations;
 using Xunit;
 using FsCheck.Xunit;
 

@@ -8,9 +8,9 @@ using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Daneel.Extensions;
 using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Foundation;
-using Toggl.Foundation.MvvmCross.Extensions;
-using Toggl.Foundation.MvvmCross.Helper;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.Extensions;
+using Toggl.Foundation.UI.Helper;
+using Toggl.Foundation.UI.ViewModels;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using UIKit;
@@ -158,8 +158,8 @@ namespace Toggl.Daneel.ViewControllers
                 => hasError ? UIColor.White : UIColor.Black;
 
             UIColor loginButtonTitleColor(bool enabled) => enabled
-                ? Foundation.MvvmCross.Helper.Color.Login.EnabledButtonColor.ToNativeColor()
-                : Foundation.MvvmCross.Helper.Color.Login.DisabledButtonColor.ToNativeColor();
+                ? Foundation.UI.Helper.Color.Login.EnabledButtonColor.ToNativeColor()
+                : Foundation.UI.Helper.Color.Login.DisabledButtonColor.ToNativeColor();
         }
 
         public override void ViewWillAppear(bool animated)
@@ -226,7 +226,7 @@ namespace Toggl.Daneel.ViewControllers
             NavigationController.NavigationBarHidden = true;
 
             LoginButton.SetTitleColor(
-                Foundation.MvvmCross.Helper.Color.Login.DisabledButtonColor.ToNativeColor(),
+                Foundation.UI.Helper.Color.Login.DisabledButtonColor.ToNativeColor(),
                 UIControlState.Disabled
             );
 
@@ -256,7 +256,7 @@ namespace Toggl.Daneel.ViewControllers
         private void prepareForgotPasswordButton()
         {
             var boldFont = UIFont.SystemFontOfSize(12, UIFontWeight.Medium);
-            var color = Foundation.MvvmCross.Helper.Color.Login.ForgotPassword.ToNativeColor();
+            var color = Foundation.UI.Helper.Color.Login.ForgotPassword.ToNativeColor();
             var text = new NSMutableAttributedString(
                 Resources.LoginForgotPassword, foregroundColor: color);
             var boldText = new NSAttributedString(

@@ -9,8 +9,8 @@ using MvvmCross.Platforms.Android;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
 using MvvmCross.ViewModels;
 using MvvmCross.Views;
-using Toggl.Foundation.MvvmCross.ViewModels;
-using Toggl.Foundation.MvvmCross.ViewModels.Hints;
+using Toggl.Foundation.UI.ViewModels;
+using Toggl.Foundation.UI.ViewModels.Hints;
 using Toggl.Giskard.Activities;
 
 namespace Toggl.Giskard.Presentation

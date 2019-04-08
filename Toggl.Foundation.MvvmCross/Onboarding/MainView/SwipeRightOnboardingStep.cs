@@ -3,7 +3,7 @@ using System.Reactive.Linq;
 using Toggl.Multivac;
 using Toggl.PrimeRadiant.Onboarding;
 
-namespace Toggl.Foundation.MvvmCross.Onboarding.MainView
+namespace Toggl.Foundation.UI.Onboarding.MainView
 {
     public sealed class SwipeRightOnboardingStep : IOnboardingStep
     {

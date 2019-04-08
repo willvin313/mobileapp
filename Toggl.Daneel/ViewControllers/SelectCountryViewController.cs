@@ -1,6 +1,6 @@
 ﻿using System.Reactive;
 using Toggl.Daneel.Presentation.Attributes;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.ViewModels;
 using UIKit;
 using Toggl.Daneel.Extensions;
 using System.Threading.Tasks;
@@ -9,7 +9,7 @@ using Toggl.Daneel.Views.CountrySelection;
 using Toggl.Foundation;
 using Toggl.Multivac.Extensions;
 using Toggl.Daneel.ViewSources.Generic.TableView;
-using Toggl.Foundation.MvvmCross.Collections;
+using Toggl.Foundation.UI.Collections;
 
 namespace Toggl.Daneel.ViewControllers
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 using Foundation;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.ViewModels;
 using UIKit;
 using Toggl.Daneel.Cells;
 

@@ -1,8 +1,8 @@
 ﻿using System;
 using Foundation;
 using Toggl.Daneel.Cells;
-using Toggl.Foundation.MvvmCross.Transformations;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.Transformations;
+using Toggl.Foundation.UI.ViewModels;
 using UIKit;
 
 namespace Toggl.Daneel.Views.Settings

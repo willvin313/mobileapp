@@ -5,8 +5,8 @@ using Foundation;
 using Toggl.Daneel.Views.EntityCreation;
 using Toggl.Daneel.Views.StartTimeEntry;
 using Toggl.Foundation.Autocomplete.Suggestions;
-using Toggl.Foundation.MvvmCross.Collections;
-using Toggl.Foundation.MvvmCross.Helper;
+using Toggl.Foundation.UI.Collections;
+using Toggl.Foundation.UI.Helper;
 using Toggl.Multivac.Extensions;
 using UIKit;
 

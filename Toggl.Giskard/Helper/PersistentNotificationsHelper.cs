@@ -6,7 +6,7 @@ using Java.Lang;
 using Java.Net;
 using Toggl.Foundation;
 using Toggl.Foundation.Models.Interfaces;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.ViewModels;
 using Toggl.Giskard.Activities;
 using Toggl.Giskard.Extensions;
 using Uri = Android.Net.Uri;

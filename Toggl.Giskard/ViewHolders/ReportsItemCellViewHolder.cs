@@ -3,7 +3,7 @@ using Android.Graphics;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using Toggl.Foundation.MvvmCross.Transformations;
+using Toggl.Foundation.UI.Transformations;
 using Toggl.Foundation.Reports;
 
 namespace Toggl.Giskard.ViewHolders

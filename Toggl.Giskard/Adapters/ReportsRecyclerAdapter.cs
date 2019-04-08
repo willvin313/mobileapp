@@ -11,7 +11,7 @@ using Android.Support.Constraints;
 using Android.Support.V7.Widget;
 using Android.Views;
 using MvvmCross.WeakSubscription;
-using Toggl.Foundation.MvvmCross.ViewModels.Reports;
+using Toggl.Foundation.UI.ViewModels.Reports;
 using Toggl.Foundation.Reports;
 using Toggl.Giskard.Views;
 using Toggl.Giskard.Extensions;

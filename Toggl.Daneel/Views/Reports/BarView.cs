@@ -1,6 +1,6 @@
 ﻿using MvvmCross.Plugin.Color.Platforms.Ios;
-using Toggl.Foundation.MvvmCross.Helper;
-using Toggl.Foundation.MvvmCross.ViewModels.Reports;
+using Toggl.Foundation.UI.Helper;
+using Toggl.Foundation.UI.ViewModels.Reports;
 using UIKit;
 using System;
 

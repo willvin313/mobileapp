@@ -1,6 +1,6 @@
 ﻿using System;
 using Android.Views;
-using Toggl.Foundation.MvvmCross.Reactive;
+using Toggl.Foundation.UI.Reactive;
 
 namespace Toggl.Giskard.Extensions.Reactive
 {

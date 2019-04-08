@@ -8,7 +8,7 @@ using FsCheck.Xunit;
 using NSubstitute;
 using Toggl.Foundation;
 using Toggl.Foundation.Analytics;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.ViewModels;
 using Toggl.Foundation.Sync;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Ultrawave.Exceptions;

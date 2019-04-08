@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Reactive;
 using System.Reactive.Linq;
-using Toggl.Foundation.MvvmCross.Helper;
-using Toggl.Foundation.MvvmCross.Reactive;
+using Toggl.Foundation.UI.Helper;
+using Toggl.Foundation.UI.Reactive;
 using Toggl.Multivac.Extensions;
 using UIKit;
 

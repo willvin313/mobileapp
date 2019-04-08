@@ -2,8 +2,8 @@
 using Android.OS;
 using Android.Support.V7.Widget;
 using Android.Views;
-using Toggl.Foundation.MvvmCross.ViewModels.Selectable;
-using Toggl.Foundation.MvvmCross.ViewModels.Settings;
+using Toggl.Foundation.UI.ViewModels.Selectable;
+using Toggl.Foundation.UI.ViewModels.Settings;
 using Toggl.Giskard.Adapters;
 using Toggl.Giskard.Extensions.Reactive;
 using Toggl.Multivac;

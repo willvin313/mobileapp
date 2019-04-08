@@ -4,7 +4,7 @@ using FsCheck.Xunit;
 using MvvmCross.UI;
 using Toggl.Foundation.Calendar;
 using Toggl.Foundation.Helper;
-using Toggl.Foundation.MvvmCross.Extensions;
+using Toggl.Foundation.UI.Extensions;
 using Toggl.Foundation.Tests.Mocks;
 using Toggl.PrimeRadiant;
 using Xunit;

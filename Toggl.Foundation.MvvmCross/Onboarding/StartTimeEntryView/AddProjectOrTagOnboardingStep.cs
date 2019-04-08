@@ -6,7 +6,7 @@ using Toggl.Multivac;
 using Toggl.PrimeRadiant.Onboarding;
 using Toggl.PrimeRadiant.Settings;
 
-namespace Toggl.Foundation.MvvmCross.Onboarding.StartTimeEntryView
+namespace Toggl.Foundation.UI.Onboarding.StartTimeEntryView
 {
     public sealed class AddProjectOrTagOnboardingStep : IOnboardingStep
     {

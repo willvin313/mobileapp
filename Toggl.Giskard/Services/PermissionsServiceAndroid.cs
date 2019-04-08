@@ -11,7 +11,7 @@ using Android.Support.V4.App;
 using Android.Support.V4.Content;
 using MvvmCross;
 using MvvmCross.Platforms.Android;
-using Toggl.Foundation.MvvmCross.Services;
+using Toggl.Foundation.UI.Services;
 using Toggl.Giskard.Helper;
 using Uri = Android.Net.Uri;
 

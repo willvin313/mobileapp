@@ -2,8 +2,8 @@ using System;
 using Android.App;
 using Android.Runtime;
 using MvvmCross.Droid.Support.V7.AppCompat;
-using Toggl.Foundation.MvvmCross;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI;
+using Toggl.Foundation.UI.ViewModels;
 
 namespace Toggl.Giskard
 {

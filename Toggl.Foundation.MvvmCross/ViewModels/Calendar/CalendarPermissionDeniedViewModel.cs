@@ -3,12 +3,12 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
-using Toggl.Foundation.MvvmCross.Services;
+using Toggl.Foundation.UI.Services;
 using Toggl.Foundation.Services;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
+namespace Toggl.Foundation.UI.ViewModels.Calendar
 {
     [Preserve(AllMembers = true)]
     public sealed class CalendarPermissionDeniedViewModel : MvxViewModelResult<Unit>

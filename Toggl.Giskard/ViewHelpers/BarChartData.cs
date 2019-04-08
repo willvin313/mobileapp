@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 using Toggl.Foundation.Conversions;
-using Toggl.Foundation.MvvmCross.ViewModels.Reports;
+using Toggl.Foundation.UI.ViewModels.Reports;
 using Toggl.Multivac;
 
 namespace Toggl.Giskard.ViewHelpers

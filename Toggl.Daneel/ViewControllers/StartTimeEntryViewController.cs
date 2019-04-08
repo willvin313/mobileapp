@@ -17,10 +17,10 @@ using Toggl.Daneel.ViewSources;
 using Toggl.Foundation;
 using Toggl.Foundation.Autocomplete;
 using Toggl.Foundation.Autocomplete.Suggestions;
-using Toggl.Foundation.MvvmCross.Helper;
-using Toggl.Foundation.MvvmCross.Onboarding.CreationView;
-using Toggl.Foundation.MvvmCross.Onboarding.StartTimeEntryView;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.Helper;
+using Toggl.Foundation.UI.Onboarding.CreationView;
+using Toggl.Foundation.UI.Onboarding.StartTimeEntryView;
+using Toggl.Foundation.UI.ViewModels;
 using Toggl.Multivac.Extensions;
 using UIKit;
 

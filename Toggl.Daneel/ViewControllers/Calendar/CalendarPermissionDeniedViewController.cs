@@ -1,11 +1,11 @@
 ﻿using Toggl.Daneel.Extensions;
-using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
+using Toggl.Foundation.UI.ViewModels.Calendar;
 using Toggl.Daneel.Presentation.Attributes;
 using CoreGraphics;
 using UIKit;
 using Toggl.Daneel.Extensions.Reactive;
 using Toggl.Multivac.Extensions;
-using Toggl.Foundation.MvvmCross.Extensions;
+using Toggl.Foundation.UI.Extensions;
 using System.Reactive;
 using Foundation;
 using Toggl.Foundation;

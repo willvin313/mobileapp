@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Android.Views;
-using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
-using Toggl.Foundation.MvvmCross.ViewModels.Selectable;
+using Toggl.Foundation.UI.ViewModels.Calendar;
+using Toggl.Foundation.UI.ViewModels.Selectable;
 using Toggl.Giskard.ViewHolders;
 
 namespace Toggl.Giskard.Adapters

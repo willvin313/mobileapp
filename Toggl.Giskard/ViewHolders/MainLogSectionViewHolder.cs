@@ -5,9 +5,9 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Toggl.Foundation.Extensions;
-using Toggl.Foundation.MvvmCross.Transformations;
-using Toggl.Foundation.MvvmCross.ViewModels;
-using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog;
+using Toggl.Foundation.UI.Transformations;
+using Toggl.Foundation.UI.ViewModels;
+using Toggl.Foundation.UI.ViewModels.TimeEntriesLog;
 using Toggl.Giskard.ViewHelpers;
 using Toggl.Multivac.Extensions;
 

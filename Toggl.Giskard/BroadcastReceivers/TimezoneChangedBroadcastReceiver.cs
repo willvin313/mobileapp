@@ -3,7 +3,7 @@ using Android.App;
 using Android.Content;
 using MvvmCross;
 using Toggl.Foundation;
-using Toggl.Foundation.MvvmCross;
+using Toggl.Foundation.UI;
 
 namespace Toggl.Giskard.BroadcastReceivers
 {

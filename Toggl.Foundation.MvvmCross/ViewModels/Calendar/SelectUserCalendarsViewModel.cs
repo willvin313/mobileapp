@@ -10,7 +10,7 @@ using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels.Calendar
+namespace Toggl.Foundation.UI.ViewModels.Calendar
 {
     [Preserve(AllMembers = true)]
     public sealed class SelectUserCalendarsViewModel : SelectUserCalendarsViewModelBase

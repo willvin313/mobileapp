@@ -2,7 +2,7 @@
 using Toggl.Foundation.Extensions;
 using Toggl.Multivac;
 
-namespace Toggl.Foundation.MvvmCross.Transformations
+namespace Toggl.Foundation.UI.Transformations
 {
     public class DurationAndFormatToString
     {

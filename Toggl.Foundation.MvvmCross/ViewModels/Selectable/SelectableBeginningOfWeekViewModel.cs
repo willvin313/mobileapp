@@ -1,9 +1,9 @@
 ﻿using System;
 using MvvmCross.ViewModels;
-using Toggl.Foundation.MvvmCross.Interfaces;
+using Toggl.Foundation.UI.Interfaces;
 using Toggl.Multivac;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels
+namespace Toggl.Foundation.UI.ViewModels
 {
     [Preserve(AllMembers = true)]
     public sealed class SelectableBeginningOfWeekViewModel : IDiffableByIdentifier<SelectableBeginningOfWeekViewModel>

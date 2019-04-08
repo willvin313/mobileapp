@@ -1,5 +1,5 @@
 ﻿using Foundation;
-using Toggl.Foundation.MvvmCross.Reactive;
+using Toggl.Foundation.UI.Reactive;
 
 namespace Toggl.Daneel.Extensions
 {

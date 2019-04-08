@@ -4,7 +4,7 @@ using System.Reactive.Subjects;
 using CoreAnimation;
 using CoreGraphics;
 using MvvmCross.Plugin.Color.Platforms.Ios;
-using Toggl.Foundation.MvvmCross.Helper;
+using Toggl.Foundation.UI.Helper;
 using Foundation;
 using UIKit;
 using static Toggl.Multivac.Math;

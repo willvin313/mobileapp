@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Foundation;
-using Toggl.Foundation.MvvmCross.Calendar;
+using Toggl.Foundation.UI.Calendar;
 
 namespace Toggl.Daneel.Views.Calendar
 {

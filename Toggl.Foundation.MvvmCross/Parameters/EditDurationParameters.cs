@@ -1,4 +1,4 @@
-﻿namespace Toggl.Foundation.MvvmCross.Parameters
+﻿namespace Toggl.Foundation.UI.Parameters
 {
     public sealed class EditDurationParameters
     {

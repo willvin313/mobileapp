@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using FsCheck;
 using NSubstitute;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.ViewModels;
 using Toggl.Foundation.Tests.Generators;
 using Toggl.Multivac.Models;
 using Xunit;

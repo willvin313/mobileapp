@@ -1,6 +1,6 @@
 ﻿using System;
 using Foundation;
-using Toggl.Foundation.MvvmCross.ViewModels.Calendar;
+using Toggl.Foundation.UI.ViewModels.Calendar;
 using UIKit;
 
 namespace Toggl.Daneel.Cells.Calendar

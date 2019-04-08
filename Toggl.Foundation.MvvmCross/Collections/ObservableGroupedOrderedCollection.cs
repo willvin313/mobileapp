@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using Toggl.Foundation.MvvmCross.Collections.Changes;
+using Toggl.Foundation.UI.Collections.Changes;
 
-namespace Toggl.Foundation.MvvmCross.Collections
+namespace Toggl.Foundation.UI.Collections
 {
     [Obsolete("We are moving into using CollectionSection and per platform diffing")]
     public class ObservableGroupedOrderedCollection<TItem> : IGroupOrderedCollection<TItem>

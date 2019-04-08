@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using FluentAssertions;
 using NSubstitute;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.ViewModels;
 using Toggl.Multivac;
 using Xunit;
 

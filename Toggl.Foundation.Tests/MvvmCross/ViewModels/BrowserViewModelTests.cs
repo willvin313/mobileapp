@@ -1,8 +1,8 @@
 ﻿using System;
 using FluentAssertions;
 using NSubstitute;
-using Toggl.Foundation.MvvmCross.Parameters;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.Parameters;
+using Toggl.Foundation.UI.ViewModels;
 using Toggl.Foundation.Tests.Generators;
 using Xunit;
 

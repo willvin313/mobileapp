@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Toggl.Foundation.MvvmCross.Collections
+namespace Toggl.Foundation.UI.Collections
 {
     [Obsolete("We are moving into using CollectionSection and per platform diffing")]
     public struct SectionedIndex

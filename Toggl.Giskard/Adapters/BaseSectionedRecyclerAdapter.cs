@@ -9,7 +9,7 @@ using Android.Runtime;
 using Android.Support.V7.Util;
 using Android.Support.V7.Widget;
 using Android.Views;
-using Toggl.Foundation.MvvmCross.Collections;
+using Toggl.Foundation.UI.Collections;
 using Toggl.Giskard.ViewHolders;
 using Toggl.Multivac;
 

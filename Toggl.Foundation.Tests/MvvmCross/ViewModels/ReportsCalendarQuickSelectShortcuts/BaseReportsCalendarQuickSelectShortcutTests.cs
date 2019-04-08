@@ -1,7 +1,7 @@
 ﻿using System;
 using FluentAssertions;
 using NSubstitute;
-using Toggl.Foundation.MvvmCross.ViewModels.ReportsCalendar.QuickSelectShortcuts;
+using Toggl.Foundation.UI.ViewModels.ReportsCalendar.QuickSelectShortcuts;
 using Xunit;
 
 namespace Toggl.Foundation.Tests.MvvmCross.ViewModels.ReportsCalendarQuickSelectShortcuts

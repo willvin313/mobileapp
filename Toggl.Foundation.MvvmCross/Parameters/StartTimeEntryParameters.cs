@@ -4,7 +4,7 @@ using Toggl.Foundation;
 using Toggl.Foundation.Analytics;
 using static Toggl.Foundation.Helper.Constants;
 
-namespace Toggl.Foundation.MvvmCross.Parameters
+namespace Toggl.Foundation.UI.Parameters
 {
     public sealed class StartTimeEntryParameters
     {

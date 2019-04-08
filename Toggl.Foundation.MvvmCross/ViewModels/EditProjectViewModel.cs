@@ -14,17 +14,17 @@ using Toggl.Foundation.DTOs;
 using Toggl.Foundation.Helper;
 using Toggl.Foundation.Interactors;
 using Toggl.Foundation.Models.Interfaces;
-using Toggl.Foundation.MvvmCross.Extensions;
-using Toggl.Foundation.MvvmCross.Helper;
-using Toggl.Foundation.MvvmCross.Parameters;
-using Toggl.Foundation.MvvmCross.Services;
+using Toggl.Foundation.UI.Extensions;
+using Toggl.Foundation.UI.Helper;
+using Toggl.Foundation.UI.Parameters;
+using Toggl.Foundation.UI.Services;
 using Toggl.Foundation.Services;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.Multivac.Extensions.Reactive;
 using static Toggl.Foundation.Helper.Color;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels
+namespace Toggl.Foundation.UI.ViewModels
 {
     [Preserve(AllMembers = true)]
     public sealed class EditProjectViewModel : MvxViewModel<string, long?>

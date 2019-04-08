@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reactive.Disposables;
 using CoreGraphics;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.ViewModels;
 using UIKit;
 
 namespace Toggl.Daneel.Views

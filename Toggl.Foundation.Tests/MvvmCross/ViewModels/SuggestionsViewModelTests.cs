@@ -7,7 +7,7 @@ using FluentAssertions;
 using Microsoft.Reactive.Testing;
 using NSubstitute;
 using Toggl.Foundation.Interactors;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.ViewModels;
 using Toggl.Foundation.Suggestions;
 using Toggl.Foundation.Tests.Generators;
 using Xunit;
@@ -15,7 +15,7 @@ using TimeEntry = Toggl.Foundation.Models.TimeEntry;
 using Toggl.Foundation.Models.Interfaces;
 using Toggl.Foundation.DataSources;
 using System.Reactive.Subjects;
-using Toggl.Foundation.MvvmCross.Extensions;
+using Toggl.Foundation.UI.Extensions;
 using Toggl.Multivac.Extensions;
 using Toggl.Foundation.Tests.TestExtensions;
 

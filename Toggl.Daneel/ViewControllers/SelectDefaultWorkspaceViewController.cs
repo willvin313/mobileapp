@@ -4,8 +4,8 @@ using Toggl.Daneel.Cells;
 using Toggl.Daneel.Presentation.Attributes;
 using Toggl.Daneel.ViewSources.Generic.TableView;
 using Toggl.Foundation;
-using Toggl.Foundation.MvvmCross.Collections;
-using Toggl.Foundation.MvvmCross.ViewModels;
+using Toggl.Foundation.UI.Collections;
+using Toggl.Foundation.UI.ViewModels;
 using UIKit;
 
 namespace Toggl.Daneel.ViewControllers

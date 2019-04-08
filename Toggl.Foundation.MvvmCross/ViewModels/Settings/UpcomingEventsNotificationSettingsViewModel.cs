@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 using Toggl.Foundation.Extensions;
-using Toggl.Foundation.MvvmCross.ViewModels.Selectable;
+using Toggl.Foundation.UI.ViewModels.Selectable;
 using Toggl.Foundation.Services;
 using Toggl.Multivac;
 using Toggl.Multivac.Extensions;
 using Toggl.PrimeRadiant.Settings;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels.Settings
+namespace Toggl.Foundation.UI.ViewModels.Settings
 {
     [Preserve(AllMembers = true)]
     public sealed class UpcomingEventsNotificationSettingsViewModel : MvxViewModelResult<Unit>

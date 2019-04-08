@@ -7,10 +7,10 @@ using Foundation;
 using MvvmCross.Plugin.Color.Platforms.Ios;
 using Toggl.Daneel.Views;
 using Toggl.Foundation;
-using Toggl.Foundation.MvvmCross.Collections;
-using Toggl.Foundation.MvvmCross.Extensions;
-using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog;
-using Toggl.Foundation.MvvmCross.ViewModels.TimeEntriesLog.Identity;
+using Toggl.Foundation.UI.Collections;
+using Toggl.Foundation.UI.Extensions;
+using Toggl.Foundation.UI.ViewModels.TimeEntriesLog;
+using Toggl.Foundation.UI.ViewModels.TimeEntriesLog.Identity;
 using Toggl.Multivac.Extensions;
 using UIKit;
 
@@ -140,7 +140,7 @@ namespace Toggl.Daneel.ViewSources
                 UITableViewRowActionStyle.Destructive,
                 Resources.Delete,
                 handleDeleteTableViewRowAction);
-            deleteAction.BackgroundColor = Foundation.MvvmCross.Helper.Color.TimeEntriesLog.DeleteSwipeActionBackground.ToNativeColor();
+            deleteAction.BackgroundColor = Foundation.UI.Helper.Color.TimeEntriesLog.DeleteSwipeActionBackground.ToNativeColor();
             return deleteAction;
         }
 
@@ -168,7 +168,7 @@ namespace Toggl.Daneel.ViewSources
                     completionHandler.Invoke(finished: true);
                 }
             );
-            continueAction.BackgroundColor = Foundation.MvvmCross.Helper.Color.TimeEntriesLog.ContinueSwipeActionBackground.ToNativeColor();
+            continueAction.BackgroundColor = Foundation.UI.Helper.Color.TimeEntriesLog.ContinueSwipeActionBackground.ToNativeColor();
             return continueAction;
         }
 
@@ -183,7 +183,7 @@ namespace Toggl.Daneel.ViewSources
                     completionHandler.Invoke(finished: true);
                 }
             );
-            deleteAction.BackgroundColor = Foundation.MvvmCross.Helper.Color.TimeEntriesLog.DeleteSwipeActionBackground.ToNativeColor();
+            deleteAction.BackgroundColor = Foundation.UI.Helper.Color.TimeEntriesLog.DeleteSwipeActionBackground.ToNativeColor();
             return deleteAction;
         }
     }

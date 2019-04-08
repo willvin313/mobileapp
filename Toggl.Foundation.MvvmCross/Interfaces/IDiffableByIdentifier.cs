@@ -1,6 +1,6 @@
 using System;
 
-namespace Toggl.Foundation.MvvmCross.Interfaces
+namespace Toggl.Foundation.UI.Interfaces
 {
     public interface IDiffableByIdentifier<T> : IEquatable<T>
     {

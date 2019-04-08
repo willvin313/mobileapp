@@ -1,7 +1,7 @@
 ﻿using CoreGraphics;
 using Foundation;
 using MvvmCross.Plugin.Color.Platforms.Ios;
-using Toggl.Foundation.MvvmCross.Helper;
+using Toggl.Foundation.UI.Helper;
 using UIKit;
 
 namespace Toggl.Daneel.Autocomplete

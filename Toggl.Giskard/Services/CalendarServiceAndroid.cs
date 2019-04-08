@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Android.App;
 using Android.Database;
 using Toggl.Foundation.Calendar;
-using Toggl.Foundation.MvvmCross.Services;
+using Toggl.Foundation.UI.Services;
 using Toggl.Multivac;
 using static Android.Provider.CalendarContract;
 using Color = Android.Graphics.Color;

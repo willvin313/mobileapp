@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Toggl.Foundation.MvvmCross.Collections
+namespace Toggl.Foundation.UI.Collections
 {
     [Obsolete("We are moving into using CollectionSection and per platform diffing")]
     public interface IGroupOrderedCollection<TItem> : IReadOnlyList<IReadOnlyList<TItem>>

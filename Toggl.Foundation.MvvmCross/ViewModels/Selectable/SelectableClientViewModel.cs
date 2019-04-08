@@ -1,8 +1,8 @@
 ﻿using System;
-using Toggl.Foundation.MvvmCross.Interfaces;
+using Toggl.Foundation.UI.Interfaces;
 using Toggl.Multivac;
 
-namespace Toggl.Foundation.MvvmCross.ViewModels
+namespace Toggl.Foundation.UI.ViewModels
 {
     public abstract class SelectableClientBaseViewModel : IDiffableByIdentifier<SelectableClientBaseViewModel>
     {

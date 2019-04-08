@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 using Android.Graphics;
 using Android.Graphics.Drawables;
 using Android.Views;
-using Toggl.Foundation.MvvmCross.Reactive;
+using Toggl.Foundation.UI.Reactive;
 using Toggl.Multivac.Extensions;
 using static Android.Views.View;
 
