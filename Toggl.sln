@@ -35,7 +35,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toggl.PrimeRadiant.Tests", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toggl.Foundation", "Toggl.Foundation\Toggl.Foundation.csproj", "{09D75C0B-3367-4678-97EF-6EADE64AF09C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toggl.Foundation.MvvmCross", "Toggl.Foundation.MvvmCross\Toggl.Foundation.MvvmCross.csproj", "{CB2B0786-217F-455A-9349-0FC69468D3B6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toggl.Foundation.UI", "Toggl.Foundation.UI\Toggl.Foundation.UI.csproj", "{CB2B0786-217F-455A-9349-0FC69468D3B6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toggl.Foundation.Tests", "Toggl.Foundation.Tests\Toggl.Foundation.Tests.csproj", "{8E366E3C-7BE5-4962-9E0C-9094AE1FE2F4}"
 EndProject
