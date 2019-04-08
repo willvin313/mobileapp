@@ -1084,9 +1084,9 @@
       <Project>{09D75C0B-3367-4678-97EF-6EADE64AF09C}</Project>
       <Name>Toggl.Foundation</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Toggl.Foundation.MvvmCross\Toggl.Foundation.MvvmCross.csproj">
+    <ProjectReference Include="..\Toggl.Foundation.MvvmCross\Toggl.Foundation.UI.csproj">
       <Project>{CB2B0786-217F-455A-9349-0FC69468D3B6}</Project>
-      <Name>Toggl.Foundation.MvvmCross</Name>
+      <Name>Toggl.Foundation.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\Toggl.Multivac\Toggl.Multivac.csproj">
       <Project>{6AF7BE5E-AF9D-4EA7-AF7F-28D07B8DEF24}</Project>

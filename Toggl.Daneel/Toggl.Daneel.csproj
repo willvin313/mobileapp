@@ -1807,9 +1807,9 @@
     <Compile Include="Presentation\IScrollableToTop.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Toggl.Foundation.MvvmCross\Toggl.Foundation.MvvmCross.csproj">
+    <ProjectReference Include="..\Toggl.Foundation.MvvmCross\Toggl.Foundation.UI.csproj">
       <Project>{CB2B0786-217F-455A-9349-0FC69468D3B6}</Project>
-      <Name>Toggl.Foundation.MvvmCross</Name>
+      <Name>Toggl.Foundation.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\Toggl.Foundation\Toggl.Foundation.csproj">
       <Project>{09D75C0B-3367-4678-97EF-6EADE64AF09C}</Project>
@@ -1851,46 +1851,38 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Resources\Images.xcassets\line.imageset\" />
-    <Folder Include="Resources\Images.xcassets\icLoader.imageset\" />
-    <Folder Include="Resources\Images.xcassets\icAdd.imageset\" />
-    <Folder Include="Resources\Images.xcassets\icProjectDot.imageset\" />
-    <Folder Include="Resources\Images.xcassets\icSearch.imageset\" />
-    <Folder Include="Resources\Images.xcassets\icCheckBoxChecked.imageset\" />
-    <Folder Include="Resources\Images.xcassets\icCheckBoxUnchecked.imageset\" />
-    <Folder Include="Resources\Images.xcassets\search.imageset\" />
-    <Folder Include="Resources\Images.xcassets\icIllustrationTags.imageset\" />
-    <Folder Include="Resources\Images.xcassets\icIllustrationProject.imageset\" />
-    <Folder Include="Resources\Images.xcassets\icErrorSmall.imageset\" />
-    <Folder Include="Resources\Images.xcassets\icIllustrationReports.imageset\" />
-    <Folder Include="Resources\Images.xcassets\icChartEmpty.imageset\" />
-    <Folder Include="Resources\Images.xcassets\icIllustrationTagsSmall.imageset\" />
-    <Folder Include="Resources\Images.xcassets\icIllustrationProjectsSmall.imageset\" />
     <Folder Include="Resources\Images.xcassets\.imageset\" />
     <Folder Include="Resources\Images.xcassets\bike.imageset\" />
-    <Folder Include="Resources\Images.xcassets\togglLogoBig.imageset\" />
-    <Folder Include="Resources\Images.xcassets\icGoogleColored.imageset\" />
-    <Folder Include="Views\Rating\" />
-    <Folder Include="Resources\Images.xcassets\thumbsup.imageset\" />
-    <Folder Include="Resources\Images.xcassets\thumbsdown.imageset\" />
     <Folder Include="Resources\Images.xcassets\confirmation.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icAdd.imageset\" />
     <Folder Include="Resources\Images.xcassets\icBackNoPadding.imageset\" />
-    <Folder Include="Resources\Images.xcassets\paws.imageset\" />
-    <Folder Include="Resources\Images.xcassets\icBackNoPadding.imageset\" />
-    <Folder Include="Resources\Images.xcassets\icWarning.imageset\" />
     <Folder Include="Resources\Images.xcassets\icCalendar.imageset\" />
-    <Folder Include="Resources\Images.xcassets\icIllustrationCalendar.imageset\" />
-    <Folder Include="ViewControllers\Calendar\" />
-    <Folder Include="Resources\Images.xcassets\icIllustrationErrorSpider.imageset\" />
-    <Folder Include="Cells\Calendar\" />
-    <Folder Include="Resources\Images.xcassets\icTime.imageset\" />
-    <Folder Include="Resources\Images.xcassets\icIllustrationErrorWorkspace.imageset\" />
-    <Folder Include="Views\Calendar\" />
-    <Folder Include="ViewControllers\Calendar\" />
-    <Folder Include="Cells\Calendar\" />
     <Folder Include="Resources\Images.xcassets\icCalendarSmall.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icChartEmpty.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icCheckBoxChecked.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icCheckBoxUnchecked.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icErrorSmall.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icGoogleColored.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icIllustrationCalendar.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icIllustrationErrorSpider.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icIllustrationErrorWorkspace.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icIllustrationProject.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icIllustrationProjectsSmall.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icIllustrationReports.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icIllustrationTags.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icIllustrationTagsSmall.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icLoader.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icProjectDot.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icSearch.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icTime.imageset\" />
+    <Folder Include="Resources\Images.xcassets\icWarning.imageset\" />
+    <Folder Include="Resources\Images.xcassets\line.imageset\" />
+    <Folder Include="Resources\Images.xcassets\paws.imageset\" />
+    <Folder Include="Resources\Images.xcassets\search.imageset\" />
     <Folder Include="Resources\Images.xcassets\stripes.imageset\" />
-    <Folder Include="Cells\TimeEntriesLog\" />
+    <Folder Include="Resources\Images.xcassets\thumbsdown.imageset\" />
+    <Folder Include="Resources\Images.xcassets\thumbsup.imageset\" />
+    <Folder Include="Resources\Images.xcassets\togglLogoBig.imageset\" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="GoogleService-Info.plist" />
